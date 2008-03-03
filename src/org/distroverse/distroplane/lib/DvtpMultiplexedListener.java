@@ -17,14 +17,14 @@ import java.nio.charset.*;
  * thread for each active session.
  * @author dreish
  */
-public class DvtpThreadedListener extends DvtpListener
+public class DvtpMultiplexedListener extends DvtpListener
    {
    public static final int DEFAULT_NUM_THREADS = 8;
 
    /**
     * 
     */
-   public DvtpThreadedListener()
+   public DvtpMultiplexedListener()
       {
       mNumThreads = DEFAULT_NUM_THREADS;
       mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
@@ -51,7 +51,7 @@ public class DvtpThreadedListener extends DvtpListener
       {
       public ListenerThread()  {  /* Do nothing. */  }
       @Override
-      public void run()  {  DvtpThreadedListener.this.listen();  }
+      public void run()  {  DvtpMultiplexedListener.this.listen();  }
       }
 
    private void createThread()
