@@ -116,9 +116,9 @@
                 - Create one thread to watch all connections in
                   DvtpMultiplexedListener constructor
                   + NetInQueueWatcher<T>
-                  - DvtpMultiplexedListener cannot be generic on T
+                  + DvtpMultiplexedListener cannot be generic on T
                   - Implement niqw<String> as DvtpInQueueStringWatcher
-                    - Construct with reference to 
+                    - Construct with reference to server
                 - With each new connection opened, add the input queue
                   to the watcher thread and niq.addQueueReader( t )
                 - Need to make sure everything gets deleted when the

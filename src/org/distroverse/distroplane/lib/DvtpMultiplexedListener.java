@@ -19,9 +19,9 @@ import org.distroverse.core.net.*;
  * thread for each active session.
  * @author dreish
  */
-public class DvtpMultiplexedListener< T, 
-                                      P extends ObjectParser< T >,
-                                      S extends ObjectStreamer< T > > 
+public class 
+DvtpMultiplexedListener< P extends ObjectParser< Object >,
+                         S extends ObjectStreamer< Object > > 
 extends DvtpListener
    {
    public static final int DEFAULT_NUM_THREADS = 8;
@@ -36,8 +36,8 @@ extends DvtpListener
       super();
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
-      NetInQueueWatcher< T > watcher_thread =
-         new DvtpInQueueStringWatcher();
+      NetInQueueWatcher< Object > watcher_thread =
+         new DvtpInQueueObjectWatcher();
 //      mNumThreads = DEFAULT_NUM_THREADS;
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
@@ -160,11 +160,11 @@ extends DvtpListener
                                    + e );  }
          return;
          }
-      NetInQueue< T > niqs = new NetInQueue< T >(
+      NetInQueue< Object > niqs = new NetInQueue< Object >(
             parser,   DEFAULT_QUEUE_SIZE, mSelector, client );
-      NetOutQueue< T > noqs = new NetOutQueue< T >(
+      NetOutQueue< Object > noqs = new NetOutQueue< Object >(
             streamer, DEFAULT_QUEUE_SIZE, mSelector, client );
-      new NetSession< T >( niqs, noqs );
+      new NetSession< Object >( niqs, noqs );
       /* activateNetworkReader() creates a SelectionKey and attaches
        * niqs to it, so all three of the above objects survive at least
        * as long as the SelectionKey survives.
@@ -176,7 +176,8 @@ extends DvtpListener
    throws Exception
       {
       @SuppressWarnings( "unchecked" )
-      NetSession< T > session = (NetSession< T >) key.attachment();
+      NetSession< Object > session 
+         = (NetSession< Object >) key.attachment();
       session.getNetInQueue().read();
       // XXX Now no one calls DvtpServer.handleCommand()
       }
