@@ -20,7 +20,18 @@
           > jmetest/effects/water/TestProjectedWater.java
           > Uses com.jme.scene.Text
         + Create TextDisplayBar class
-        - For now, just display a bare line of text with a Text object
+        - For now, just show a bare line of text with a TextDisplayBar
+          + Find an example of flat 3D text
+            > Test3DFlatText, anyone?
+          + Attach it to the root node as in TestStandardGame
+          - Why doesn't it display?
+            - Put all the functionality of Test3DFlatText in
+              ViewerWindow constructor
+            - Change things one-by-one until they match what I'm trying
+              to do with TextDisplayBar
+            - Gradually move pieces out into TextDisplayBar
+          - Figure out how to make it orthographic
+          - Make a separate GUI root node
       - If URL is about:hello, reset the render window and dump a
         predefined set of objects into it (maybe loaded from a file)
         - Implement AboutControllerPipeline()
@@ -31,10 +42,11 @@
         an UTF-8 string
       x For objects, next byte indicates how many bytes that follow
         give the size of the object
-      - For objects, the next bytes that follow are in dvtp.BigInt
+      - For objects, the next bytes that follow are in dvtp.CompactUlong
         format, giving the size of the object
       - If object is Externalizable, use that
-      - First BigInt names the class; the rest is given to readExternal
+      - First CompactUlong names the class; the rest is given to
+        readExternal
       - Otherwise, if object is Serializable, use that
         - Only allow in the ExtraFlexiStreamer and ExtraFlexiParser
           subclasses

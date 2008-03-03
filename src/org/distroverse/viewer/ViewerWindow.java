@@ -1,8 +1,5 @@
 package org.distroverse.viewer;
 
-import org.distroverse.viewer.gui.TextDisplayBar;
-import org.distroverse.viewer.gui.TextInputBar;
-
 import com.jmex.game.StandardGame;
 
 /**
@@ -16,6 +13,7 @@ public class ViewerWindow
       mGame  = new StandardGame( "Distroverse Viewer" );
       mProxy = new ProxyClientConnection();
       mGame.start();
+      mGui   = new ViewerGui();
       }
    
    void setUrl( String url )
@@ -23,7 +21,7 @@ public class ViewerWindow
       if ( mPipeline != null )
          mPipeline.close();
       mProxy.setUrl( url );
-      mLocationBar.setText( url );
+      mGui.getLocationBar().setText( url );
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    
@@ -32,5 +30,5 @@ public class ViewerWindow
    StandardGame          mGame;
    ProxyClientConnection mProxy;
    ControllerPipeline    mPipeline;
-   TextDisplayBar        mLocationBar;
+   ViewerGui             mGui;
    }
