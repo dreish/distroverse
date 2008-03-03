@@ -3,7 +3,7 @@
  * 
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
- * General Public License (GPL) version 3 or later</a>
+ * Lesser General Public License (GPL) version 3 or later</a>
  */
 
 package org.distroverse.core;
