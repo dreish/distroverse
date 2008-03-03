@@ -31,6 +31,8 @@
         an UTF-8 string
       - For objects, next byte indicates how many bytes that follow
         give the size of the object
+      - If object is Externalizable, use that
+      - Otherwise, if object is Serializable, use that
       - For streaming String objects, make sure they don't encode to
         an initial NUL; if they do, use the object method
     - Add to setUrl() ability to handle real URLs
