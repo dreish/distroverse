@@ -68,6 +68,8 @@ public abstract class ShapeFactory implements Factory
                                  index[ 1 - current_row ],
                                  1.01 ) == 1 )
             {
+            // Need to add the next point, then double back to the one
+            // added just above.
             target.add( row[ 1 - current_row ]
                            [ index[1-current_row] ] );
             target.add( row[ current_row ][ index[current_row] ] );
