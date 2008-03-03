@@ -1,8 +1,9 @@
-- To do:
-  > Java 3D examples at:
-    http://java.sun.com/products/java-media/3D/collateral/examples.zip
-  > API documentation at: http://download.java.net/media/java3d/
-    builds/release/1.5.1/java3d-1_5_1-api-docs.zip
+> Java 3D examples at:
+  http://java.sun.com/products/java-media/3D/collateral/examples.zip
+> API documentation at: http://download.java.net/media/java3d/
+  builds/release/1.5.1/java3d-1_5_1-api-docs.zip
+
+- To do for 0.01:
   - Play around with planet-building ideas
     + Create a spheroid polyhedron with N roughly equally-spaced
       points
@@ -29,18 +30,43 @@
       	      perhaps at least a sphere primitive
         + For each consecutive pair of arrays of points, create a row
       	  in the TriangleStripArray
-          + The vertex count is the sum of the number of points in
+          x The vertex count is the sum of the number of points in
             the two rows, plus two because two points are used twice
+            > No way of knowing how many points will be used without
+              tracing through the points
           > It shouldn't matter which side the array starts with
     - Make a simple server that sends the same shape to any client that
       connects to it
+      > HelloServer, the server equivalent to Hello World
+      - DvtpServer base class
+        - Accepts connections on port N -- 808?
+        - Forks a thread for each new connection
+        - Listens for commands and decodes them
+        - Dispatches them to functions that must be implemented by
+          subclass of DvtpServer
+      - HelloServer responds to the following commands:
+        - LOCATION //blah/blah/blah
+          > This is for dvtp:// URLs
+          - To anyone who connects, send the URL of the proxy to DL
+        - GET //blah/blah/blah
+          > This is for WWW-like resource URLs
+        x PROXYOPEN <internal-identifier>
+          > The handshake, not used in HelloServer, closes immediately
+          > Not a good idea to throw an exception or otherwise bail out
+            because of this message; makes the server easy to crash
+      - The proxy doesn't bother trying to connect back to the server,
+        and just sends the client a shape
+        > Normally it would connect to port 808 as well, sending a proxy
+          handshake instead of a client handshake; this server ignores
+          the handshake altogether
     - Make a client that connects to that simple server and renders
       whatever shapes it gets back
       - Implement setUrl()
-        - If already connected to the same server (within that viewer
-          window), send the server a request to change location
+        - Connect to server and request proxy URL
+        - If it is the same as the currently-running proxy, send the
+          proxy a SetUrl object
         - Otherwise, download a new server and start it up with the
-          given location
+          given SetUrl object
         x In either case, get a result back and show the effective URL
           > This will just be a general UrlChange object, async
     - Add rotation
