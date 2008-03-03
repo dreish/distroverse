@@ -9,7 +9,8 @@ package org.distroverse.distroplane.lib;
 public abstract class DvtpListener
    {
    /**
-    * Waits for incoming connections and handles them.  Does not return.
+    * Waits for incoming connections and handles them.  Does not return
+    * unless the server aborts for some reason.
     */
    public abstract void serve();
 

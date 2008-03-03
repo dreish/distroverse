@@ -1,6 +1,9 @@
 package org.distroverse.helloserver;
 
 import org.distroverse.distroplane.lib.*;
+import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 
 /**
  * An ultra-simple server to demonstrate the basic concepts of DVTP.
@@ -18,7 +21,8 @@ public final class HelloServer extends DvtpServer
     * @see org.distroverse.distroplane.lib.DvtpServer#handleGet(java.lang.String)
     */
    @Override
-   public void handleGet( String url )
+   public void handleGet( String url, SocketChannel client,
+                          ByteBuffer buffer )
       {
       // TODO Auto-generated method stub
       
@@ -28,17 +32,22 @@ public final class HelloServer extends DvtpServer
     * @see org.distroverse.distroplane.lib.DvtpServer#handleLocation(java.lang.String)
     */
    @Override
-   public void handleLocation( String location )
+   public void handleLocation( String location, SocketChannel client,
+                               ByteBuffer buffer )
+   throws IOException
       {
-      // TODO Auto-generated method stub
-      
+      String response = "I always respond thusly";
+      buffer.clear();
+      buffer.put( response.getBytes( "UTF-8" ) );
+      client.write( buffer );
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyOpen(java.lang.String)
     */
    @Override
-   public void handleProxyOpen( String token )
+   public void handleProxyOpen( String token, SocketChannel client,
+                                ByteBuffer buffer )
       {
       // TODO Auto-generated method stub
       
@@ -51,9 +60,7 @@ public final class HelloServer extends DvtpServer
       {
       // TODO Auto-generated method stub
       DvtpListener l = new DvtpMultiplexedListener();
-      HelloServer  h = new HelloServer( l );
+      new HelloServer( l );
       l.serve();
       }
-   
-   
    }

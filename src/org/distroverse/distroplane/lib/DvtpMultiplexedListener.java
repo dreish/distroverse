@@ -69,7 +69,7 @@ public class DvtpMultiplexedListener extends DvtpListener
     * 
     * FIXME Handle IOException properly
     */
-   protected void listen()
+   private void listen()
       {
       boolean encountered_fatal_exception = false;
       while ( ! encountered_fatal_exception )
@@ -132,7 +132,7 @@ public class DvtpMultiplexedListener extends DvtpListener
       while ( buffer.hasRemaining() )
          command += buffer.get();
       buffer.clear();
-      mServer.handleCommand( command, buffer );
+      mServer.handleCommand( command, client, buffer );
       }
 
    int                 mNumThreads;

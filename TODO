@@ -21,8 +21,8 @@
         any other number
         > This is actually simple enough: just sin(latitude) *
           (n_circles * 2 - 2)
-      + Make an array of points starting at prime meridian
-        + 0.5*d*(row%2)
+      + Make an array of points starting at prime meridian +
+        0.5*d*(row%2)
       + ShapeFactory.GenerateSurface( Point3d verts[][] )
       	+ Need to flesh out the Shape class for this
       	  > Will every shape be a TriangleStripArray?
@@ -42,7 +42,7 @@
       > Using the chargen server example on p393 of JNP and the number
         server on p273 of Java in a Nutshell
       - DvtpServer base class
-        - Construct with DvtpListener implementation
+        + Construct with DvtpListener implementation
         - DvtpListener interface/base class
         x DvtpThreadedListener
           x Accepts connections on port N -- 808?
@@ -144,4 +144,7 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
-  
+  - Distroplane: object scripting bytecode language
+    - Message passing between objects
+    - previous_object()->owner() and this_person(), just like LPMUD
+

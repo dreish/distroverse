@@ -9,7 +9,9 @@
  */
 package org.distroverse.distroplane.lib;
 
+import java.io.IOException;
 import java.nio.*;
+import java.nio.channels.*;
 
 /**
  * @author dreish
@@ -41,21 +43,23 @@ public abstract class DvtpServer
     * Decodes the command and calls the appropriate handle*() function.
     * @param command
     */
-   public void handleCommand( String command, ByteBuffer output_buffer )
+   public void handleCommand( String command, SocketChannel client,
+                              ByteBuffer buffer )
+   throws IOException
       {
       // This could be done more elegantly in a better language, such
       // as one with lambdas or method references.
-      if      ( stringBeginsIgnoreCase( command, "get" ) )
-         handleGet( command.substring( "get".length() + 1 ),
-                    output_buffer );
-      else if ( stringBeginsIgnoreCase( command, "location" ) )
-         handleLocation( command.substring( "location".length() + 1 ),
-                         output_buffer );
-      else if ( stringBeginsIgnoreCase( command, "proxyopen" ) )
-         handleProxyOpen( command.substring( "proxyopen".length() + 1 ),
-                          output_buffer );
+      if      ( stringBeginsIgnoreCase( command, "get " ) )
+         handleGet( command.substring( "get ".length() ),
+                    client, buffer );
+      else if ( stringBeginsIgnoreCase( command, "location " ) )
+         handleLocation( command.substring( "location ".length() ),
+                         client, buffer );
+      else if ( stringBeginsIgnoreCase( command, "proxyopen " ) )
+         handleProxyOpen( command.substring( "proxyopen ".length() ),
+                          client, buffer );
       else
-         handleUnrecognizedCommand( command, output_buffer );
+         handleUnrecognizedCommand( command, client, buffer );
       }
 
    private boolean stringBeginsIgnoreCase( String full, String prefix )
@@ -73,7 +77,9 @@ public abstract class DvtpServer
     * @param location - an URL
     */
    public abstract void handleLocation( String location,
-                                        ByteBuffer output_buffer );
+                                        SocketChannel client,
+                                        ByteBuffer buffer )
+   throws IOException;
    /**
     * Get an arbitrary resource by URL.  This mimics the GET method of
     * an HTTP server to some extent, but a DVTP server does not ever
@@ -82,7 +88,9 @@ public abstract class DvtpServer
     * @param url - an URL
     */
    public abstract void handleGet( String url,
-                                   ByteBuffer output_buffer );
+                                   SocketChannel client,
+                                   ByteBuffer buffer )
+   throws IOException;
    /**
     * Handles the PROXYOPEN command, which is the handshake that begins
     * a session between proxy and server.  The response, and every
@@ -90,13 +98,17 @@ public abstract class DvtpServer
     * @param token
     */
    public abstract void handleProxyOpen( String token,
-                                         ByteBuffer output_buffer );
+                                         SocketChannel client,
+                                         ByteBuffer buffer )
+   throws IOException;
    /**
     * Handles any unrecognized command by printing an error message.
     * @param token
     */
    public void handleUnrecognizedCommand( String token,
-                                          ByteBuffer output_buffer )
+                                          SocketChannel client,
+                                          ByteBuffer buffer )
+   throws IOException
       {
       
       }
