@@ -37,7 +37,8 @@ extends DvtpListener
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
       NetInQueueWatcher< Object > watcher_thread =
-         new DvtpInQueueObjectWatcher();
+         new DvtpInQueueObjectWatcher( mServer );
+      watcher_thread.run();
 //      mNumThreads = DEFAULT_NUM_THREADS;
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }

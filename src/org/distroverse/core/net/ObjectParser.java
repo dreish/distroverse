@@ -21,9 +21,7 @@ public abstract class ObjectParser< T >
       }
     
    public void setQueue( NetInQueue< T > queue )
-      {
-      mQueue = queue;
-      }
+      {  mQueue = queue;  }
    
    /**
     * Takes input (from the network socket), adds it to the variable-

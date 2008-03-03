@@ -117,8 +117,14 @@
                   DvtpMultiplexedListener constructor
                   + NetInQueueWatcher<T>
                   + DvtpMultiplexedListener cannot be generic on T
-                  - Implement niqw<String> as DvtpInQueueStringWatcher
-                    - Construct with reference to server
+                  - Implement niqw<Object> as DvtpInQueueStringWatcher
+                    + Construct with reference to server
+                    - handleNetInObject() dispatches command with
+                      mServer.handleCommand()
+                      x Where do I get the client and buffer for
+                        handleCommand()?
+                        > I don't
+                      - Change handleCommand() to write to a NetOutQueue
                 - With each new connection opened, add the input queue
                   to the watcher thread and niq.addQueueReader( t )
                 - Need to make sure everything gets deleted when the

@@ -1,9 +1,8 @@
 package org.distroverse.helloserver;
 
+import org.distroverse.core.net.*;
 import org.distroverse.distroplane.lib.*;
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
 
 /**
  * An ultra-simple server to demonstrate the basic concepts of DVTP.
@@ -21,8 +20,7 @@ public final class HelloServer extends DvtpServer
     * @see org.distroverse.distroplane.lib.DvtpServer#handleGet(java.lang.String)
     */
    @Override
-   public void handleGet( String url, SocketChannel client,
-                          ByteBuffer buffer )
+   public void handleGet( String url, NetOutQueue< Object > noq )
       {
       // TODO Auto-generated method stub
       
@@ -32,23 +30,19 @@ public final class HelloServer extends DvtpServer
     * @see org.distroverse.distroplane.lib.DvtpServer#handleLocation(java.lang.String)
     */
    @Override
-   public void handleLocation( String location, SocketChannel client,
-                               ByteBuffer buffer )
+   public void handleLocation( String location, 
+                               NetOutQueue< Object > noq )
    throws IOException
       {
-      String response = "I always respond thusly\r\n";
-      buffer.clear();
-      buffer.put( response.getBytes( "UTF-8" ) );
-      buffer.flip();
-      client.write( buffer );
+      noq.add( "I always respond thusly\r\n" );
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyOpen(java.lang.String)
     */
    @Override
-   public void handleProxyOpen( String token, SocketChannel client,
-                                ByteBuffer buffer )
+   public void handleProxyOpen( String token,
+                                NetOutQueue< Object > noq )
       {
       // TODO Auto-generated method stub
       
@@ -60,7 +54,10 @@ public final class HelloServer extends DvtpServer
    public static void main( String[] args )
       {
       // TODO Auto-generated method stub
-      DvtpListener l = new DvtpMultiplexedListener();
+      DvtpListener l 
+      = new DvtpMultiplexedListener< DvtpFlexiParser, 
+                                     DvtpFlexiStreamer >
+               ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
       new HelloServer( l );
       l.serve();
       }

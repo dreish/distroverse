@@ -85,6 +85,10 @@ public class NetInQueue< T >
       {  return mQueueWatchers.remove( t );  }
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }
+   public NetSession< T > getSession()
+      {  return mNetSession;  }
+   public SocketChannel getClient()
+      {  return mClient;  }
    
    synchronized public void activateQueueWatcher()
       {
