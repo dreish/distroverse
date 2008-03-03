@@ -37,7 +37,16 @@ public class CompactUlong implements DvtpExternalizable
    public void readExternal( ObjectInput in ) throws IOException,
                                              ClassNotFoundException
       {
-      // TODO Auto-generated method stub
+      int shift = 0;
+      mVal = 0;
+      while ( true )
+         {
+         byte b = in.readByte();
+         mVal |= (b << shift);
+         shift += 7;
+         if ( (b & 128) == 128 )
+            return;
+         }
 
       }
 
@@ -50,4 +59,5 @@ public class CompactUlong implements DvtpExternalizable
 
       }
 
+   long mVal;
    }

@@ -3,17 +3,19 @@
  */
 package org.distroverse.dvtp;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.math.BigInteger;
 import java.util.Random;
 
+import org.distroverse.core.Util;
+
 /**
  * This class adds externalization to BigInteger.  The format is very
  * simple: a length/sign byte -- the &128 bit indicates sign, and &127
- * indicates the number of bytes that follow.
+ * indicates the number of bytes that follow.  Unlike CompactUlong, the
+ * first byte is high.
  * @author dreish
  */
 public class BigInt implements DvtpExternalizable,
@@ -42,6 +44,10 @@ public class BigInt implements DvtpExternalizable,
    public BigInt( int bitLength, int certainty, Random rnd )
       {  mVal = new BigInteger( bitLength, certainty, rnd );  }
    
+   // Basic get and set methods.
+   public BigInteger get()  {  return mVal;  }
+   public void set( BigInteger v )  {  mVal = v;  }
+   
    /* Pass-through methods.  I'd love to inherit from MutableBigInteger,
     * but for some reason my Java is broken -- it claims there's no such
     * class.
@@ -56,8 +62,7 @@ public class BigInt implements DvtpExternalizable,
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
     */
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) throws IOException
       {
       int length = in.readByte();
       int sign   = 1;
@@ -84,7 +89,14 @@ public class BigInt implements DvtpExternalizable,
    public void writeExternal( ObjectOutput out ) throws IOException
       {
       // TODO Auto-generated method stub
-
+      byte[] output;
+      if ( mVal.signum() >= 0 )
+         output = mVal.toByteArray();
+      else
+         output = BigInteger.ZERO.subtract( mVal ).toByteArray();
+      
+      out.writeByte( Util.SafeByte( output.length * mVal.signum() ) );
+      out.write( output );
       }
 
    public BigInt getClassNumber()

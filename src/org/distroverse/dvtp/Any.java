@@ -6,12 +6,14 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serializable;
 
 /**
  * This class is actually NOT part of DVTP, the protocol -- just dvtp,
  * the package.  The DvtpFlexiParser and DvtpFlexiStreamer will not send
  * or receive this class, but the ExtraFlexiParser and
- * ExtraFlexiStreamer will.
+ * ExtraFlexiStreamer will.  It packs any Serializable object with
+ * deflate compression.
  * 
  * @author dreish
  */
@@ -54,5 +56,5 @@ public class Any implements DvtpExternalizable
 
       }
 
-   private Object mContents;
+   private Serializable mContents;
    }

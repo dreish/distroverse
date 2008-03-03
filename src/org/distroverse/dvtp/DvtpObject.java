@@ -15,9 +15,11 @@ public abstract class DvtpObject
    {
    static final Class< ? > mClassList[] 
       = { 
-        BigInt.class,     // 0
-        Pair.class,       // 1
-        Str.class,        // 2
+        CompactUlong.class,     // 0
+        Pair.class,             // 1
+        Str.class,              // 2
+        BigInt.class,           // 3
+        
         null
         };
    static final BigInt mSerializedClassNumber 

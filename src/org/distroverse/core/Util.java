@@ -41,6 +41,25 @@ public final class Util
       }
 
    /**
+    * Safely casts a long to a byte, or throws an exception if n is
+    * not within the range of legal values for a byte.  It would be nice
+    * if there were some reasonable way to do this generically.
+    * TODO - see safeInt()
+    * @param n - a long
+    * @return (byte) n, if it is within the range of bytes 
+    */
+   public static byte SafeByte( long n )
+      {
+      if ( n > Byte.MAX_VALUE )
+         throw new IllegalArgumentException( 
+                      "long-to-byte cast overflow" );
+      if ( n < Byte.MIN_VALUE )
+         throw new IllegalArgumentException( 
+                      "long-to-byte cast underflow" );
+      return (byte) n;
+      }
+
+   /**
     * 
     * @author dreish
     *
@@ -180,6 +199,4 @@ public final class Util
                    .compareToIgnoreCase( prefix )
                == 0 );
       }
-   
-
    }
