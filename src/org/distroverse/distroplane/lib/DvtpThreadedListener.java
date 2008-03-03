@@ -4,6 +4,7 @@
 package org.distroverse.distroplane.lib;
 
 import java.io.*;
+import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.nio.charset.*;
@@ -76,6 +77,9 @@ public class DvtpThreadedListener extends DvtpListener
          {
          ByteBuffer read_buffer = new ByteBuffer();
          server = ServerSocketChannel.open();
+         ServerSocket ss = server.socket();
+         ss.bind( new InetSocketAddress( 10 ) );
+         server.configureBlocking( false );
          SocketChannel client = server.accept();
          client.read( read_buffer );
          }
