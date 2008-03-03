@@ -20,7 +20,7 @@
         give the size of the object
       - For streaming String objects, make sure they don't encode to
         an initial NUL; if they do, use the object method
-    - Add to setUrl()
+    - Add to setUrl() ability to handle real URLs
       - Connect to server and request proxy URL
       - If it is the same as the currently-running proxy, send the
         proxy a SetUrl object
@@ -239,7 +239,10 @@
   > Client
     > Figure animations
     > Sound
-    > Inventory system 
+    > Inventory system with remote object browser integration
+  > Server
+    > Darc
+    > OpenID for logins
 
 - Future:
   - Textures must be specifiable as URLs (?) or else they can only be
@@ -270,6 +273,7 @@
   - Client: prompt user if site requests all heads-up UI elements be
     hidden (pointing out that they can be brought back by selecting the
     menu "Interface / (Un)hide all")
+  - Client: any grayed-out menu item must explain why it is disabled
   - iTunes-like interface for managing in-world objects and inventory
     > Ideally, there would be a single interface for both categories,
       but that raises a big question mark about how (and where) to
