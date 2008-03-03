@@ -21,7 +21,7 @@
       - For each consecutive pair of arrays of points, create a row in
         the TriangleStripArray
         - The vertex count is the sum of the number of points in the
-          two rows, plus one because one row is used twice
+          two rows, plus two because two points are used twice
         > It shouldn't matter which side the array starts with
     - Display and rotate
     - Deform the points according to my trig functions and see whether
