@@ -296,6 +296,15 @@
     hidden (pointing out that they can be brought back by selecting the
     menu "Interface / (Un)hide all")
   - Client: any grayed-out menu item must explain why it is disabled
+  - Good idea from SL: explicit affordance, such as highlighting
+    clickable objects in red when the user holds down the alt key
+  - On the server side, "links" should include some metainformation
+    about whom to notify when the link breaks.  This information would
+    not be transmitted to clients; the client would notify the server
+    that the link was broken, and the server would pass that
+    notification along
+    > A DvtpBrokenLinkMessage object, becoming a broken-link Darc
+      message
   - iTunes-like interface for managing in-world objects and inventory
     > Ideally, there would be a single interface for both categories,
       but that raises a big question mark about how (and where) to
