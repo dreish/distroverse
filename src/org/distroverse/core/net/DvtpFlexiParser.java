@@ -3,6 +3,8 @@ package org.distroverse.core.net;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
+import org.distroverse.core.*;
+
 public class DvtpFlexiParser extends ObjectParser< Object >
    {
 
@@ -21,8 +23,8 @@ public class DvtpFlexiParser extends ObjectParser< Object >
       {
       if ( beginsWithNul( baos ) )
          {
-         System.err.println( "DvtpFlexiParser.parseObjects can't yet"
-                             + " handle non-string objects" );
+         Log.p( "DvtpFlexiParser.parseObjects can't yet"
+                + " handle non-string objects", Log.NET, 1 );
          throw new RuntimeException( "unimplemented object format" );
          }
       else
@@ -40,10 +42,12 @@ public class DvtpFlexiParser extends ObjectParser< Object >
                  &&  mNextString.substring( mNextString.length() - 2 ) 
                                 .equals( "\r\n" ) )
                {
-               queue.add( mNextString );
+               queue.add( mNextString
+                          .substring( 0, mNextString.length() - 2 ) );
                mNextString = "";
                }
             }
+         baos.reset();
          }
       }
 

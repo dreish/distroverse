@@ -1,8 +1,11 @@
 package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+
+import org.distroverse.core.*;
 
 /**
  * An ObjectRecognizer attempts to convert a stream of bytes into
@@ -36,6 +39,14 @@ public abstract class ObjectParser< T >
       {
       if ( ! input.hasArray() )
          throw new IllegalArgumentException( "input with no array" );
+      /* FIXME for some reason this is the only way I'm able to
+       * recognize a closed connection.
+       */
+      if ( input.limit() == 0 )
+         {
+         Log.p( "readBytes(): buffer was empty", Log.NET, 1 );
+         throw new IOException( "readable stream empty" );
+         }
       mBaos.write( input.array(), input.arrayOffset(),
                    input.limit() );
       input.clear();

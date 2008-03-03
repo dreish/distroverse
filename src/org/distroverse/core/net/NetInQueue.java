@@ -4,6 +4,8 @@ import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
 
+import org.distroverse.core.*;
+
 // TODO Factor out the copy/paste code from NetOutQueue.
 public class NetInQueue< T >
    {
@@ -63,9 +65,11 @@ public class NetInQueue< T >
 
    synchronized public void stopNetworkReader()
       {
+      Log.p( "stopNetworkReader() called", Log.NET, -50 );
       if ( mReaderKey != null )
-         mReaderKey.cancel();
-      mReaderKey = null;
+         mReaderKey.interestOps( 0 );
+//         mReaderKey.cancel();
+//      mReaderKey = null;
       }
    
    synchronized public void activateNetworkReader()
@@ -77,6 +81,15 @@ public class NetInQueue< T >
                                         SelectionKey.OP_READ );
          mReaderKey.attach( mNetSession );
          }
+      else
+         mReaderKey.interestOps( SelectionKey.OP_READ );
+      }
+
+   public void resetNetworkReader()
+   throws ClosedChannelException
+      {
+      stopNetworkReader();
+      activateNetworkReader();
       }
    
    synchronized public void addQueueWatcher( NetInQueueWatcher< T > t )

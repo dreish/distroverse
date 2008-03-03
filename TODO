@@ -54,11 +54,11 @@
           + Passes commands to the DvtpServer, mServer
         + Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
-      - NetOutQueue
+      + NetOutQueue
         + Constructed with an ObjectStreamer object and max_length
           > The max_length is artificially enforced to prevent the queue
             from growing without bound when a client becomes net-dead
-        - Either ObjectStreamer or NetOutQueue should have a method for
+        + Either ObjectStreamer or NetOutQueue should have a method for
           writing the buffer to the SocketChannel
         x Any time there is an object in the queue, it asks the
           ObjectStreamer for up to N bytes to send
@@ -175,6 +175,7 @@
     - Add rotation
     - Deform the points according to my trig functions and see whether
       it produces decent-looking planets
+  - Add a Log class and stop printing directly to stderr
   - Write a simple Java3D app
     + Create a cube
     - Create methods to set its position, velocity, & acceleration

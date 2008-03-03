@@ -4,6 +4,8 @@ import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
 
+import org.distroverse.core.*;
+
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a
  * network connection. A NetOutQueue tells a network socket, when it has
@@ -54,7 +56,7 @@ public class NetOutQueue< T >
       return mContents.remove();
       }
    
-   // FIXME duplicate with NetInQueue
+   // TODO duplicate with NetInQueue; factor out
    synchronized public int size()
       {
       return mContents.size();
@@ -62,9 +64,16 @@ public class NetOutQueue< T >
    
    synchronized public void stopNetworkWriter()
       {
+      Log.p( "stopNetworkWriter() called", Log.NET, -50 );
       if ( mWriterKey != null )
-         mWriterKey.cancel();
-      mWriterKey = null;
+         mWriterKey.interestOps( 0 );
+//         mWriterKey.cancel();
+//      mWriterKey = null;
+      // FIXME No idea why this is necessary; yuck:
+      try
+         {  mNetSession.getNetInQueue().resetNetworkReader();  }
+      catch ( ClosedChannelException e )
+         {  e.printStackTrace();  }
       }
    
    synchronized private void activateNetworkWriter()
@@ -76,6 +85,8 @@ public class NetOutQueue< T >
                                         SelectionKey.OP_WRITE );
          mWriterKey.attach( mNetSession );
          }
+      else
+         mWriterKey.interestOps( SelectionKey.OP_WRITE );
       }
 
    public void write() throws Exception
@@ -83,7 +94,7 @@ public class NetOutQueue< T >
       mObjectStreamer.write( mClient );
       }
 
-   // FIXME duplicate with NetInQueue
+   // TODO duplicate with NetInQueue; factor out
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }
    public ObjectStreamer< T > getStreamer()

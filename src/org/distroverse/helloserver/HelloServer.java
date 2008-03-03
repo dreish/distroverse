@@ -23,7 +23,7 @@ public final class HelloServer extends DvtpServer
    public void handleGet( String url, NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "What do you expect to find at " + url + "?\r\n" );
+      noq.add( "What do you expect to find at " + url + "?" );
       }
 
    /* (non-Javadoc)
@@ -34,7 +34,7 @@ public final class HelloServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "So, you want to go to " + location + "?\r\n" );
+      noq.add( "So, you want to go to " + location + "?" );
       }
 
    /* (non-Javadoc)
@@ -45,7 +45,7 @@ public final class HelloServer extends DvtpServer
                                 NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "Tell me more about " + token + ".\r\n" );
+      noq.add( "Tell me more about " + token + "." );
       }
 
    /**

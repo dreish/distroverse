@@ -9,6 +9,7 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 // import java.nio.charset.*;
+import org.distroverse.core.Log;
 import org.distroverse.core.net.*;
 
 /**
@@ -63,7 +64,8 @@ extends DvtpListener
       catch ( IOException e )
          {
          // FIXME better exception handling/logging here
-         System.err.println( "Unhandled exception: " + e );
+         Log.p( "Unhandled exception: " + e, 
+                Log.NET | Log.UNHANDLED, 1 );
          // Returns without listening; it is assumed that the socket
          // could not be created.
          }
@@ -92,7 +94,8 @@ extends DvtpListener
          catch ( IOException e )
             {
             // FIXME better exception handling/logging here
-            System.err.println( "Unhandled exception: " + e );
+            Log.p( "Unhandled exception: " + e, 
+                   Log.NET | Log.UNHANDLED, 1 );
             encountered_fatal_exception = true;
             }
          }
@@ -113,12 +116,17 @@ extends DvtpListener
             }
          catch ( Exception e )
             {
+            Log.p( "Canceling an unknown key due to an exception",
+                   Log.NET, -10 );
             key.cancel();
-            e.printStackTrace();
+            Log.p( e, Log.NET, -10 );
             try 
                {  key.channel().close();  }
             catch ( IOException e2 )
-               {  System.err.println( "Unhandled exception: " + e );  }
+               {  
+               Log.p( "Unhandled exception: " + e, 
+                      Log.NET | Log.UNHANDLED, 1 ); 
+               }
             }
          }
       }
@@ -126,7 +134,7 @@ extends DvtpListener
    private void acceptConnection( SelectionKey key )
    throws IOException
       {
-      System.err.println( "acceptConnection called" );
+      Log.p( "acceptConnection called", Log.NET, -50 );
       ServerSocketChannel server = (ServerSocketChannel) key.channel();
       SocketChannel       client = server.accept();
       if ( client == null )  return;
@@ -153,12 +161,14 @@ extends DvtpListener
           * ObjectParser and ObjectStreamer define concrete constructors
           * with one ByteBuffer argument.
           */
-         System.err.println( "Impossible exception: " + e );
+         Log.p( "Impossible exception: " + e, Log.NET, 100 );
          try
             {  key.channel().close();  }
          catch ( IOException e2 )
-            {  System.err.println( "Unhandled impossible exception: "
-                                   + e );  }
+            {  
+            Log.p( "Unhandled impossible exception: " + e,
+                   Log.NET | Log.UNHANDLED, 100 );  
+            }
          return;
          }
       NetInQueue< Object > niqs = new NetInQueue< Object >(
@@ -177,7 +187,7 @@ extends DvtpListener
    private void readConnection( SelectionKey key )
    throws Exception
       {
-      System.err.println( "readConnection called" );
+      Log.p( "readConnection called", Log.NET, -50 );
       @SuppressWarnings( "unchecked" )
       NetSession< Object > session 
          = (NetSession< Object >) key.attachment();
@@ -187,7 +197,7 @@ extends DvtpListener
    private void writeConnection( SelectionKey key )
    throws Exception
       {
-      System.err.println( "writeConnection called" );
+      Log.p( "writeConnection called", Log.NET, -50 );
       @SuppressWarnings( "unchecked" )
       NetSession< Object > session 
          = (NetSession< Object >) key.attachment();

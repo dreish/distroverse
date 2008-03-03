@@ -5,6 +5,8 @@ import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import org.distroverse.core.*;
+
 public abstract class NetInQueueWatcher< T > extends Thread
    {
    public NetInQueueWatcher()
@@ -43,6 +45,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
       {
       // FIXME Is it safe to do this without synchronizing?
       // FIXME Looks like this is better done with an int indexed vector
+      Log.p( "clearAllQueues() called", Log.NET, -50 );
       for ( NetInQueue< T > niq : mWatchedQueues )
          {
          try
@@ -78,7 +81,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
    private void sleepUntilInterrupted()
       {
       try
-         {  Thread.sleep( 120 );  }
+         {  Thread.sleep( 120000 );  }
       catch ( InterruptedException e )
          {  /* Interrupted; work on the queues now. */  }
       }
