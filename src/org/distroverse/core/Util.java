@@ -4,9 +4,7 @@ package org.distroverse.core;
 
 /**
  * Util contains static methods that are bafflingly missing from
- * the standard Java libraries.  For some reason, these functions
- * seem to emphasize what is missing in Java as a language, not just
- * as a library.
+ * the standard Java libraries.
  */
 
 public final class Util
@@ -31,6 +29,8 @@ public final class Util
    public static int max( int first, int... rest )
       {
       int max = first;
+      for ( int i : rest )
+         if ( i > max )  max = i;
       return max;
       }
    }
