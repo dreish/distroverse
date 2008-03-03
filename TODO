@@ -145,6 +145,35 @@
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
   - Distroplane: object scripting bytecode language
+    > Distrocode?
     - Message passing between objects
     - previous_object()->owner() and this_person(), just like LPMUD
+    - Public/private/protected methods:
+      - If a method is defined as public, it has property 'visibility =
+        'public
+      - Default message receiver in class Object does this when called
+        for a message from another object:
+        [method_object getProperty visibility]
+        > Shorthand for (send method_object 'getProperty 'visibility)
+        - If result is 'public, the method is called
+        - If result is 'private, the method is not called
+        - If result is 'protected,
+          - Message receiver then checks whether the sender of the
+            message is owned by the same user as itself; if so, method
+            is called, else not
+  - Configuration of new server:
+    - Menu: World/Create/v1.0
+      - Also have menu: World/Create/Email me version news...
+        - Pops up window saying, "Would you like to be emailed when new
+          versions of Distroplane are available?  Enter the address to
+          which mail should be sent:" along with checkboxes:
+          - Major stable versions (v1.0, v1.2, v2.0, etc.)
+          - Minor stable versions (v1.0.8, v1.0.9, v1.2.0, etc.)
+          - All minor versions (v1.0.8, v1.1.32, v1.1.33, v1.0.9, etc.)
+    - Ask for name of world (should probably be renamable later)
+    - Download Distroplane class, create a directory for it to run in
+    - Start application with current user's public identity info set as
+      Creator
+    - Initially, only allow the Creator to connect
+    - Connect to world; use in-world interface to set it up
 
