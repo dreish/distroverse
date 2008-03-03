@@ -276,7 +276,7 @@
     > Inventory system with remote object browser integration
   > Server
     > Darc
-    > OpenID for logins
+    > OpenID
 
 - Future:
   - Textures must be specifiable as URLs (?) or else they can only be
