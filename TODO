@@ -13,6 +13,14 @@
         anything with it
     - Implement ultra-dumb setUrl()
       - At top level, this sets the URL display in the HUD
+        x Use FengGUI in a GameState for this
+          > Can't use FengGUI; it uses the CDDL license, which is not
+            GPL-compatible
+        + Find an example app that displays text
+          > jmetest/effects/water/TestProjectedWater.java
+          > Uses com.jme.scene.Text
+        + Create TextDisplayBar class
+        - For now, just display a bare line of text with a Text object
       - If URL is about:hello, reset the render window and dump a
         predefined set of objects into it (maybe loaded from a file)
         - Implement AboutControllerPipeline()

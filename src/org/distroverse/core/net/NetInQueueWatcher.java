@@ -35,8 +35,8 @@ public abstract class NetInQueueWatcher< T > extends Thread
          }
       catch ( IOException e )
          {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         Log.p( "NetInQueueWatcher died: " + e, Log.NET, 100 );
+         Log.p( e, Log.NET, 60 );
          }
       }
 

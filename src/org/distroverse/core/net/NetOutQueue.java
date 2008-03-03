@@ -73,7 +73,10 @@ public class NetOutQueue< T >
       try
          {  mNetSession.getNetInQueue().resetNetworkReader();  }
       catch ( ClosedChannelException e )
-         {  e.printStackTrace();  }
+         {
+         Log.p( "In stopNetworkWriter(): " + e, Log.NET, 20 );
+         Log.p( e, Log.NET, 5 );
+         }
       }
    
    synchronized private void activateNetworkWriter()
