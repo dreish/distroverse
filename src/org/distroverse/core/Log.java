@@ -4,6 +4,7 @@ public class Log
    {
    public static final int UNHANDLED = 1;
    public static final int NET       = 2;
+   public static final int DVTP      = 4;
 
    /**
     * Write message to the appropriate log or logs for the given type
