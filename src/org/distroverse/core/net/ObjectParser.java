@@ -1,4 +1,4 @@
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -33,8 +33,7 @@ public abstract class ObjectParser< T >
     * notify()s any wait()ing threads.
     * @param input - a ByteBuffer, all of which is to be copied
     */
-   synchronized public void
-   readBytes( ByteBuffer input )
+   synchronized public void readBytes( ByteBuffer input )
    throws Exception
       {
       if ( ! input.hasArray() )
@@ -44,7 +43,7 @@ public abstract class ObjectParser< T >
       parseObjects( mBaos, mQueue );
       }
 
-   public void read( SocketChannel client )
+   synchronized public void read( SocketChannel client )
    throws Exception
       {
       client.read( mBuffer );

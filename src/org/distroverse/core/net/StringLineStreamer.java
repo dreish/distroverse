@@ -2,7 +2,7 @@
  * Outputs each string given as a line terminated by CR-LF.
  * TODO check that the input string doesn't contain CR-LF
  */
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
 //import java.io.UnsupportedEncodingException;

@@ -1,4 +1,4 @@
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;

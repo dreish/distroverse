@@ -1,4 +1,4 @@
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.util.*;
 import java.nio.*;

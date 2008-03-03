@@ -10,6 +10,11 @@ import java.nio.*;
 import java.nio.channels.*;
 // import java.nio.charset.*;
 import org.distroverse.core.*;
+import org.distroverse.core.net.NetInQueue;
+import org.distroverse.core.net.NetOutQueue;
+import org.distroverse.core.net.NetSession;
+import org.distroverse.core.net.ObjectParser;
+import org.distroverse.core.net.ObjectStreamer;
 
 /**
  * This class implements DvtpListener in a simple, straightforward, and
@@ -30,9 +35,12 @@ extends DvtpListener
    /**
     * 
     */
-   public DvtpMultiplexedListener()
+   public DvtpMultiplexedListener( Class<P> parser_class,
+                                   Class<S> streamer_class )
       {
       super();
+      mParserClass   = parser_class;
+      mStreamerClass = streamer_class;
 //      mNumThreads = DEFAULT_NUM_THREADS;
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
@@ -130,32 +138,40 @@ extends DvtpListener
 
       ByteBuffer parser_buffer   = ByteBuffer.allocate( 1024 );
       ByteBuffer streamer_buffer = ByteBuffer.allocate( 1024 );
-      P parser = null;
-      S streamer= null;
+      P parser;
+      S streamer;
       try
          {
-         @SuppressWarnings( {"unchecked", "null"} )
          Constructor< P > parser_constructor 
-            = (Constructor< P >)
-              parser.getClass().getConstructor( ByteBuffer.class ); 
-         @SuppressWarnings( {"unchecked", "null"} )
+            = mParserClass.getConstructor( ByteBuffer.class ); 
          Constructor< S > streamer_constructor 
-            = (Constructor< S >)
-              streamer.getClass().getConstructor( ByteBuffer.class ); 
+            = mStreamerClass.getConstructor( ByteBuffer.class );
          parser   = parser_constructor  .newInstance( parser_buffer );
          streamer = streamer_constructor.newInstance( streamer_buffer );
          }
       catch ( Exception e )
          {
+         /* This exception should never occur, because the base classes
+          * ObjectParser and ObjectStreamer define concrete constructors
+          * with one ByteBuffer argument.
+          */
+         System.err.println( "Impossible exception: " + e );
+         try
+            {  key.channel().close();  }
+         catch ( IOException e2 )
+            {  System.err.println( "Unhandled impossible exception: "
+                                   + e );  }
          return;
          }
       NetInQueue< T > niqs = new NetInQueue< T >(
-            parser, 
-            DEFAULT_QUEUE_SIZE, mSelector, client );
+            parser,   DEFAULT_QUEUE_SIZE, mSelector, client );
       NetOutQueue< T > noqs = new NetOutQueue< T >(
-            streamer,
-            DEFAULT_QUEUE_SIZE, mSelector, client );
+            streamer, DEFAULT_QUEUE_SIZE, mSelector, client );
       new NetSession< T >( niqs, noqs );
+      /* activateNetworkReader() creates a SelectionKey and attaches
+       * niqs to it, so all three of the above objects survive at least
+       * as long as the SelectionKey survives.
+       */ 
       niqs.activateNetworkReader();
       }
 
@@ -171,4 +187,6 @@ extends DvtpListener
 //   private int                 mNumThreads;
    private ServerSocketChannel mServerChannel;
    private Selector            mSelector;
+   private Class<P>            mParserClass;
+   private Class<S>            mStreamerClass;
    }

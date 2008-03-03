@@ -1,4 +1,4 @@
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.util.*;
 import java.nio.*;
@@ -31,13 +31,15 @@ public class NetInQueue< T >
    synchronized public void add( T o )
       {
       mContents.add( o );
+      if ( mContents.size() == 1 )
+         activateQueueWatcher();
       }
 
    synchronized public T remove()
    throws ClosedChannelException
       {
       if ( mReaderKey == null  
-           &&  mContents.size() <= mMaxLength )
+           &&  mContents.size() < mMaxLength )
          activateNetworkReader();
       return mContents.remove();
       }
@@ -76,23 +78,24 @@ public class NetInQueue< T >
          }
       }
    
-   synchronized public void addQueueReader( Thread t )
-      {  mQueueReaders.add( t );  }
-   synchronized public boolean removeQueueReader( Thread t )
-      {  return mQueueReaders.remove( t );  }
+   synchronized public void addQueueWatcher( NetInQueueWatcher< T > t )
+      {  mQueueWatchers.add( t );  }
+   synchronized public boolean 
+   removeQueueWatcher( NetInQueueWatcher< T > t )
+      {  return mQueueWatchers.remove( t );  }
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }
    
-   synchronized public void activateQueueReader()
+   synchronized public void activateQueueWatcher()
       {
       // TODO actually allow more than one queue reader thread - a pool?
-      if ( mQueueReaders.size() > 0 )
-         mQueueReaders.getFirst().interrupt();
+      if ( mQueueWatchers.size() > 0 )
+         mQueueWatchers.getFirst().interrupt();
       }
 
    private LinkedList< T >      mContents;
-   private LinkedList< Thread > 
-      mQueueReaders;
+   private LinkedList< NetInQueueWatcher< T > > 
+      mQueueWatchers;
    private int                  mMaxLength;
    private ObjectParser< T >    mObjectParser;
    private SelectionKey         mReaderKey;

@@ -1,4 +1,4 @@
-package org.distroverse.core;
+package org.distroverse.core.net;
 
 import java.io.*;
 //import java.net.*;
@@ -70,6 +70,7 @@ public abstract class ObjectStreamer< T >
     * by synchronizing all access to queue, and by being itself
     * synchronized, which is guaranteed to make modification of baos
     * threadsafe.
+    * FIXME Deadlock opportunity?
     * @param baos
     * @param queue
     */
