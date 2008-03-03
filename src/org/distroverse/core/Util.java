@@ -22,10 +22,8 @@ public final class Util
    {
    /**
     * Safely casts a long to an int, or throws an exception if n is
-    * not within the range of legal values for an int.  That there
-    * isn't a reasonable way to write this generically ought to be
-    * a sign to Java programmers that they are in fact Blub
-    * programmers.  Come on, guys, throw me a macro!
+    * not within the range of legal values for an int.  It would be nice
+    * if there were some reasonable way to do this generically.
     * @param n - a long
     * @return (int) n, if it is within the range of integers 
     */
