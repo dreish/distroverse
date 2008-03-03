@@ -34,5 +34,5 @@ public class BallFactory extends ShapeFactory
 
    double mEquatorialRadius;
    double mAspectRatio;
-   
+   long   mNumRows;
    }
