@@ -17,4 +17,10 @@ public class AboutControllerPipeline extends ControllerPipeline
       {
       // TODO Auto-generated constructor stub
       }
+   
+   @Override
+   public void close()
+      {
+      // TODO AboutControllerPipeline.close()
+      }
    }

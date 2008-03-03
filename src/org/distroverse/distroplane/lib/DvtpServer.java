@@ -9,10 +9,11 @@
  */
 package org.distroverse.distroplane.lib;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+
 import org.distroverse.core.*;
 import org.distroverse.core.net.*;
-
-import java.io.IOException;
 
 /**
  * @author dreish
@@ -33,6 +34,43 @@ public abstract class DvtpServer
       }
    
    /**
+    * Performs the routine task of setting up and running a DvtpServer
+    * instance, with a standard set of supporting objects.  Does not
+    * return unless unsuccessful in constructing a server.
+    * @param <S> - Type of server class, inferred from that argument
+    * @param server_class - A subclass of DvtpServer
+    * @param greeting - String to send to clients when they connect
+    */
+   public static <S extends DvtpServer> void
+   createServer( Class<S> server_class, String greeting )
+      {
+      DvtpListener l
+         = new DvtpMultiplexedListener< DvtpFlexiParser, 
+                                        DvtpFlexiStreamer >
+               ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
+      DvtpServer server;
+      try
+         {
+         Constructor< S > server_constructor 
+            = server_class.getConstructor( DvtpListener.class ); 
+         server = server_constructor.newInstance( l );
+         }
+      catch ( Exception e )
+         {
+         Log.p( "Could not construct server of class " + server_class
+                + ": " + e, Log.NET, 100 );
+         Log.p( e, Log.NET, 100 );
+         return;
+         }
+      NetInQueueWatcher< Object > watcher_thread =
+         new DvtpInQueueObjectWatcher( server );
+      watcher_thread.start();
+      l.setWatcher( watcher_thread );
+      l.setGreeting( greeting );
+      l.serve();  // Does not return.
+      }
+   
+   /**
     * Call the listen() method in the DvtpListener implementation.
     */
    public void listen()
@@ -48,8 +86,7 @@ public abstract class DvtpServer
                               NetOutQueue< Object > noq )
    throws IOException
       {
-      // This could be done more elegantly in a better language, such
-      // as one with lambdas or method references.
+      // TODO Add lambdas and/or method references to Java and rewrite
       if      ( Util.stringStartsIgnoreCase( command, "get " ) )
          handleGet( command.substring( "get ".length() ), noq );
       else if ( Util.stringStartsIgnoreCase( command, "location " ) )

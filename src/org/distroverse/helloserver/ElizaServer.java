@@ -53,16 +53,7 @@ public final class ElizaServer extends DvtpServer
     */
    public static void main( String[] args )
       {
-      DvtpListener l
-         = new DvtpMultiplexedListener< DvtpFlexiParser, 
-                                        DvtpFlexiStreamer >
-               ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
-      ElizaServer es = new ElizaServer( l );
-      NetInQueueWatcher< Object > watcher_thread =
-         new DvtpInQueueObjectWatcher( es );
-      watcher_thread.start();
-      l.setWatcher( watcher_thread );
-      l.setGreeting( "DVTP/0.01 ElizaServer 1.0.0" );
-      l.serve();  // Does not return.
+      createServer( ElizaServer.class,
+                    "DVTP/0.01 ElizaServer 1.0.0" );
       }
    }

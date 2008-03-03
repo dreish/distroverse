@@ -14,7 +14,7 @@ import com.jmex.game.StandardGame;
  * 
  * @author dreish
  */
-public class ControllerPipeline
+public abstract class ControllerPipeline
    {
    /**
     * 
@@ -47,8 +47,5 @@ public class ControllerPipeline
     * Stops reading from the proxy, and removes everything written to
     * the game (window).
     */
-   public void close()
-      {
-      // TODO Auto-generated method stub
-      }
+   public abstract void close();
    }
