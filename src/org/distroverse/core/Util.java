@@ -116,7 +116,8 @@ public final class Util
       }
 
    // TODO Perf test max() against max1(), if it ever matters.
-   public static <T extends Comparable<T>> T max1( T... list )
+   @Deprecated public static <T extends Comparable<T>>
+   T max1( T... list )
       {
       T max = null;
       if ( list.length > 0 )
@@ -129,7 +130,8 @@ public final class Util
       return max;
       }
 
-   public static <T extends Comparable<T>> T min1( T... list )
+   @Deprecated public static <T extends Comparable<T>> 
+   T min1( T... list )
       {
       T min = null;
       if ( list.length > 0 )
