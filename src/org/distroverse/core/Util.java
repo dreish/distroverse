@@ -24,6 +24,8 @@ public final class Util
     * Safely casts a long to an int, or throws an exception if n is
     * not within the range of legal values for an int.  It would be nice
     * if there were some reasonable way to do this generically.
+    * TODO - improve Java's Number class hierarchy, or add templates or
+    * macros, and make this generic
     * @param n - a long
     * @return (int) n, if it is within the range of integers 
     */

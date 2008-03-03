@@ -7,19 +7,19 @@ import java.util.*;
  * network connection.
  * @author dreish
  */
-public class NetOutQueue
+public class NetOutQueue<T>
    {
    public NetOutQueue()
       {
-      mContents = new LinkedList< Object >();
+      mContents = new LinkedList<T>();
       }
    
-   public void add( Object o )
+   public void add( T o )
       {
       
       }
    
-   public boolean offer( Object o )
+   public boolean offer( T o )
       {
       
       }
@@ -36,5 +36,5 @@ public class NetOutQueue
     * something that takes a ByteBuffer and fills/flips it)
     */
 
-   LinkedList< Object > mContents;
+   LinkedList<T> mContents;
    }

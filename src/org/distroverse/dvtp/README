@@ -6,3 +6,8 @@ from a client to a program (also through the "proxy").
 The classes in org.distroverse.dvtp, together with their inline
 documentation, constitute the authoritative definition of DVTP.
 
+Unlike all the other Distroverse code, which is licensed under the GPL
+v3.0, everything in org.distroverse.dvop and org.distroverse.dvtp is
+licensed under the LGPL v3.0.
+
+

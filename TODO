@@ -58,6 +58,7 @@
         - Constructed with an ObjectStreamer object
         - Any time there is an object in the queue, it asks the
           ObjectStreamer for up to N bytes to send
+        - NetOutQueue tells the Selector to wake-on-writable
         - The ObjectStreamer can access and delete the head of the queue
         - The ObjectStreamer will keep a pointer to the next chunk to
           feed
@@ -69,6 +70,8 @@
           ObjectRecognizer to go with every ObjectStreamer
         - Reads data until the ObjectRecognizer says there is a complete
           object; the Recognizer returns the object
+        - NetInQueue can either have a callback to handle the received
+          objects synchronously, or it can have BlockingQueue semantics
       - HelloServer responds to the following commands:
         - LOCATION //blah/blah/blah
           > This is for dvtp:// URLs
