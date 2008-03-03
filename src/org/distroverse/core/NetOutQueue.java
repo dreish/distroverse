@@ -1,17 +1,23 @@
 package org.distroverse.core;
 
 import java.util.*;
+import org.distroverse.core.*;
 
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a
- * network connection.
+ * network connection. A NetOutQueue tells a network socket, when it has
+ * data to send, to monitor that network connection for writability
+ * status.
+ * 
  * @author dreish
  */
-public class NetOutQueue<T>
+public class NetOutQueue< T >
    {
-   public NetOutQueue()
+   public NetOutQueue( ObjectStreamer< T > os )
       {
-      mContents = new LinkedList<T>();
+      mContents       = new LinkedList< T >();
+      mObjectStreamer = os;
+      os.setQueue( this );
       }
    
    public void add( T o )
@@ -36,5 +42,6 @@ public class NetOutQueue<T>
     * something that takes a ByteBuffer and fills/flips it)
     */
 
-   LinkedList<T> mContents;
+   LinkedList< T >     mContents;
+   ObjectStreamer< T > mObjectStreamer;
    }

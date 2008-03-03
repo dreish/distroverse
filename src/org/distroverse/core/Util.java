@@ -46,7 +46,7 @@ public final class Util
     * functions taking two arguments of a type and returning one are
     * needed.
     */
-   public static interface FoldingFunction<T>
+   public static interface FoldingFunction< T >
       {  public T call( T a, T b );  }
 
    /**
@@ -69,7 +69,7 @@ public final class Util
     *           A folding function
     * @return folded value
     */
-   public static <T, F extends FoldingFunction<T>>
+   public static < T, F extends FoldingFunction< T > >
                  T foldL( T[] list, F folding_function )
       {
       T folded = null;
@@ -95,7 +95,7 @@ public final class Util
     *           Any list of Ts
     * @return Maximum element of list
     */
-   public static <T extends Comparable<T>> T max( T... list )
+   public static < T extends Comparable< T > > T max( T... list )
       {
       return foldL( list, new FoldingFunction<T> ()
          { public T call( T a, T b )
@@ -115,7 +115,7 @@ public final class Util
     *           Any list of Ts
     * @return Minimum element of list
     */
-   public static <T extends Comparable<T>> T min( T... list )
+   public static < T extends Comparable< T > > T min( T... list )
       {
       return foldL( list, new FoldingFunction<T> ()
          { public T call( T a, T b )
@@ -123,7 +123,7 @@ public final class Util
       }
 
    // TODO Perf test max() against max1(), if it ever matters.
-   @Deprecated public static <T extends Comparable<T>>
+   @Deprecated public static < T extends Comparable< T > >
    T max1( T... list )
       {
       T max = null;
@@ -137,7 +137,7 @@ public final class Util
       return max;
       }
 
-   @Deprecated public static <T extends Comparable<T>> 
+   @Deprecated public static < T extends Comparable< T > > 
    T min1( T... list )
       {
       T min = null;
