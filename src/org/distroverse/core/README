@@ -1,0 +1,5 @@
+org.distroverse.core includes only the classes that define the DVTP and
+DVOP protocols.  In a manner of speaking, the other packages (viewer
+and distroplane) are superfluous, and are just examples of how to use
+the protocol.
+
