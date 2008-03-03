@@ -2,8 +2,8 @@
  * Copyright (c) 2007 Dan Reish.
  * 
  * For license details, see the file COPYING in your distribution,
- * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU Lesser
- * General Public License (LGPL) version 3 or later</a>
+ * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
+ * General Public License (GPL) version 3 or later</a>
  */
 
 package org.distroverse.core;
@@ -57,7 +57,8 @@ public final class Util
     * of 'list', replacing them with the result, until there is only one
     * element left; then returns that one element.  In the spirit of
     * functional programming, does not actually modify list (unless
-    * 'function' modifies its parameters).
+    * 'function' modifies its parameters, which is strongly
+    * discouraged).
     * TODO Look for a way to generalize 'list' to any iterable object.
     * @param <T> - Class of list, generally inferred
     * @param <F> - Class of functor, generally inferred
