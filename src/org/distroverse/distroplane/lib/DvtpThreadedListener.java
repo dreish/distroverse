@@ -74,9 +74,10 @@ public class DvtpThreadedListener extends DvtpListener
       ServerSocketChannel server;
       try
          {
+         ByteBuffer read_buffer = new ByteBuffer();
          server = ServerSocketChannel.open();
          SocketChannel client = server.accept();
-         client.read
+         client.read( read_buffer );
          }
       catch ( IOException e )
          {
