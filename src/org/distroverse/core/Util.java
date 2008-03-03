@@ -158,6 +158,8 @@ public final class Util
    public static boolean stringStartsIgnoreCase( String full, 
                                                  String prefix )
       {
+      if ( prefix.length() > full.length() )
+         return false;
       return ( full.substring( 0, prefix.length() )
                    .compareToIgnoreCase( prefix )
                == 0 );

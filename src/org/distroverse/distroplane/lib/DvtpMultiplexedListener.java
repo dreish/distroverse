@@ -96,7 +96,7 @@ public class DvtpMultiplexedListener extends DvtpListener
             {
             if ( key.isAcceptable() )
                accept_connection( key );
-            else if ( key.isReadable() )
+            if ( key.isReadable() )
                read_connection( key );
             }
          catch ( IOException e )
@@ -115,6 +115,7 @@ public class DvtpMultiplexedListener extends DvtpListener
       {
       ServerSocketChannel server = (ServerSocketChannel) key.channel();
       SocketChannel       client = server.accept();
+      if ( client == null )  return;
       client.configureBlocking( false );
       SelectionKey tmp_key = client.register( mSelector,
                                               SelectionKey.OP_READ );

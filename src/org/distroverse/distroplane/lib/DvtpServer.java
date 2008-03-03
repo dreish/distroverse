@@ -20,7 +20,7 @@ import java.nio.channels.*;
  */
 public abstract class DvtpServer
    {
-   public final static int DEFAULT_PORT = 808;
+   public final static int DEFAULT_PORT = 1808;
 
    /**
     * 
