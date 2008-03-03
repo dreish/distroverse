@@ -1,4 +1,4 @@
-package org.distroverse.distroplane;
+package org.distroverse.distroplane.lib;
 
 interface Factory
    {

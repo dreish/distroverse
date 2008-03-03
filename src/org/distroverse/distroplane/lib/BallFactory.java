@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.distroverse.distroplane;
+package org.distroverse.distroplane.lib;
 
 import org.distroverse.core.*;
 import org.distroverse.dvtp.*;

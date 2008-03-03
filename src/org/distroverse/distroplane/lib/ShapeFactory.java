@@ -1,4 +1,4 @@
-package org.distroverse.distroplane;
+package org.distroverse.distroplane.lib;
 
 import org.distroverse.dvtp.*;
 //import org.distroverse.core.*;
