@@ -136,3 +136,5 @@
     > Maybe the architecture is:
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
+  - Client: master volume control and mute keystroke
+  
