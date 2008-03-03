@@ -65,7 +65,7 @@
         + NetOutQueue tells the Selector to wake-on-writable when it
           goes from empty to non-empty
           > activateNetworkWriter()
-        - ObjectStreamer tells the Selector (through NetOutQueue) to
+        + ObjectStreamer tells the Selector (through NetOutQueue) to
           stop waking-on-writable when it finishes writing the last
           object (there must be only one NetOutQueue in use for a given 
           network connection)
@@ -73,25 +73,35 @@
         + The ObjectStreamer can access and delete the head of the queue
           + Make a StringLineStreamer to illustrate (and to reimplement
             the server)
-        - The ObjectStreamer will keep a pointer to the next chunk to
+        + The ObjectStreamer will keep a pointer to the next chunk to
           feed
-        - An ObjectStreamer could take file objects and feed bytes; it
+        + An ObjectStreamer could take file objects and feed bytes; it
           could serialize large objects to disk and feed out of that; it
           could take strings that are always terminated by \r\n
       - NetInQueue
-        - Constructed with an ObjectRecognizer object; there is an
-          ObjectRecognizer to go with every ObjectStreamer
-        - Reads data until the ObjectRecognizer says there is a complete
-          object; the Recognizer returns the object
-        - NetInQueue can either have a callback to handle the received
+        + Constructed with an ObjectParser object; there is an
+          ObjectParser to go with every ObjectStreamer
+        + Reads data until the ObjectParser says there is a complete
+          object; the Parser returns the object
+        x NetInQueue can either have a callback to handle the received
           objects synchronously, or it can have BlockingQueue semantics
+        + NetInQueue maintains a list of threads that need to be
+          notified when the queue is non-empty
+          x These are QueueReaderThread{}s, with a test-and-set method
+            for determining whether it can be devoted to working on this
+            queue
+          + For simplicity's sake, for now, it will just notify() the
+            first thread in the linked list, and I'll create a thread to
+            watch each in-queue
+        + Implement a StringLineParser as an example
       - HelloServer responds to the following commands:
         - LOCATION //blah/blah/blah
           > This is for dvtp:// URLs
           - To anyone who connects, send the URL of the proxy to DL
-            - Currently sending a random string; test this
+            + Currently sending a random string; test this
+            - Reimplement using new NetInQueue/NetOutQueue classes
         - GET //blah/blah/blah
-          > This is for WWW-like resource URLs
+          > This is for WWW-like resource URLs (dvfp?)
         x PROXYOPEN <internal-identifier>
           > The handshake, not used in HelloServer, closes immediately
           > Not a good idea to throw an exception or otherwise bail out
