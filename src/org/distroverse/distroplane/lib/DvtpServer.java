@@ -15,8 +15,23 @@ public abstract class DvtpServer
     */
    public DvtpServer()
       {
-      // TODO Auto-generated constructor stub
+      mListenPort = 0;
       }
-
    
+   public void listen()
+      {
+      // TODO implement listen()
+      
+      }
+   
+   public void session()
+      {
+      
+      }
+   
+   public abstract void handleLocation( String location );
+   public abstract void handleGet( String url );
+   public abstract void handleProxyOpen( String token );
+
+   int mListenPort;
    }
