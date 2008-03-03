@@ -51,5 +51,10 @@ public class ViewerWindow extends JFrame
       super( arg0, arg1 );
       // TODO Auto-generated constructor stub
       }
+   
+   public void setUrl( String url )
+      {
+      // FIXME Implement setUrl()
+      }
 
    }

@@ -15,6 +15,6 @@ public class Viewer
    public static void main( String[] args )
       {
       ViewerWindow w = new ViewerWindow();
-      
+      w.setUrl( "dvtp://www.distroverse.org/welcome/" );
       }
    }

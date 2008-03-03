@@ -3,8 +3,6 @@
     http://java.sun.com/products/java-media/3D/collateral/examples.zip
   > API documentation at: http://download.java.net/media/java3d/
     builds/release/1.5.1/java3d-1_5_1-api-docs.zip
-  + PointArray class in DVTP
-  + Package up a TriangleStripArray into a Shape class
   - Play around with planet-building ideas
     + Create a spheroid polyhedron with N roughly equally-spaced
       points
@@ -74,4 +72,7 @@
       FoldingFunction)?
       > Doesn't need to be static
     x How does Callable work, and would it be sufficient for this?
+  + PointArray class in DVTP
+  + Package up a TriangleStripArray into a Shape class
+
     

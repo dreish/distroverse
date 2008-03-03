@@ -10,23 +10,28 @@ import javax.vecmath.*;
 
 /**
  * A BallFactory is a Factory that generates roughly spherical Shapes.
- * Fun facts: for SetNumRows(3), the Generate()d shape is a regular
- * octahedron.  For SetNumRows(4), the Generate()d shape is a regular
- * dodecahedron.
- *
+ * <p>
+ * Fun facts: for setNumRows(3), the generate()d shape is a regular
+ * octahedron. For setNumRows(4), the generate()d shape is not exactly a
+ * regular icosahedron, but it could pass for one. (The equatorial band
+ * of triangles is stretched too wide toward the poles.) More party
+ * trivia: I can't help typing "*-hedrom" instead of "*-hedron".
+ * 
  * @author dreish
- *
+ * 
  */
 public class BallFactory extends ShapeFactory
    {
+   public static final int DEFAULT_NUM_ROWS = 16;
+   
    /**
-    * 
+    * Default BallFactory creates reasonably smooth spheres.
     */
    public BallFactory()
       {
       mEquatorialRadius = 1.0;
       mAspectRatio      = 1.0;
-      mNumRows          = 16;
+      mNumRows          = DEFAULT_NUM_ROWS;
       }
    
    public void setEquatorialRadius( double r )
@@ -61,7 +66,7 @@ public class BallFactory extends ShapeFactory
       {
       // 'latitude' in radians south of north pole.
       // TODO Make rows evenly spaced in terms of dist., not lat.
-      double latitude = Math.PI * row / total_rows;
+      double latitude = Math.PI * row / (total_rows - 1);
       double y = Math.cos( latitude ) * mEquatorialRadius
                  * mAspectRatio;
       double circle_radius = Math.sin( latitude )
@@ -70,8 +75,9 @@ public class BallFactory extends ShapeFactory
                Math.round((total_rows * 2 - 2) 
                           * Math.sin( latitude )));
       double circle_divisions = n_points;
-      // Make sure the last point is the same as the first one:
-      if ( n_points > 1 )  ++n_points;
+      // Make sure the last point is the same as the first one.  This
+      // turns out to be the right thing to do even for the poles:
+      ++n_points;
       vertices[ row ] = new Point3d[ n_points ];
       double offset = (row % 2 == 1) ? 0.5 : 0.0;
       for ( int i = 0; i < n_points; ++i )

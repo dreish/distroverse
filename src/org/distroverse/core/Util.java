@@ -48,17 +48,23 @@ public final class Util
       {  public T call( T a, T b );  }
 
    /**
-    * Repeatedly applies 'function' to the first two (Leftmost) elements
-    * of 'list', replacing them with the result, until there is only one
-    * element left; then returns that one element.  In the spirit of
-    * functional programming, does not actually modify list (unless
-    * 'function' modifies its parameters, which is strongly
+    * Repeatedly applies 'folding_function' to the first two (Leftmost)
+    * elements of 'list', replacing them with the result, until there is
+    * only one element left; then returns that one element. In the
+    * spirit of functional programming, does not actually modify list
+    * (unless 'function' modifies its parameters, which is strongly
     * discouraged).
+    * 
     * TODO Look for a way to generalize 'list' to any iterable object.
-    * @param <T> - Class of list, generally inferred
-    * @param <F> - Class of functor, generally inferred
-    * @param list - The array to fold
-    * @param folding_function - A folding function
+    * 
+    * @param <T> -
+    *           Class of list, generally inferred
+    * @param <F> -
+    *           Class of functor, generally inferred
+    * @param list -
+    *           The array to fold
+    * @param folding_function -
+    *           A folding function
     * @return folded value
     */
    public static <T, F extends FoldingFunction<T>>
@@ -76,15 +82,17 @@ public final class Util
 
    /**
     * Returns the maximum element of the given list, according to
-    * compareTo().  Can be called with an array or an argument
-    * list.  Returns null if given an empty list.  In the case
-    * where multiple maximum elements are equivalent, returns the
-    * first such occurrence.
-    * @param <T> - Any Comparable type
-    * @param list - Any list of Ts
+    * compareTo(). Can be called with an array or an argument list.
+    * Returns null if given an empty list. In the case where multiple
+    * maximum elements are equivalent, returns the first such
+    * occurrence.
+    * 
+    * @param <T> -
+    *           Any Comparable type
+    * @param list -
+    *           Any list of Ts
     * @return Maximum element of list
     */
-   @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T max( T... list )
       {
       return foldL( list, new FoldingFunction<T> ()
@@ -94,15 +102,17 @@ public final class Util
 
    /**
     * Returns the minimum element of the given list, according to
-    * compareTo().  Can be called with an array or an argument
-    * list.  Returns null if given an empty list.  In the case
-    * where multiple minimum elements are equivalent, returns the
-    * first such occurrence.
-    * @param <T> - Any Comparable type
-    * @param list - Any list of Ts
+    * compareTo(). Can be called with an array or an argument list.
+    * Returns null if given an empty list. In the case where multiple
+    * minimum elements are equivalent, returns the first such
+    * occurrence.
+    * 
+    * @param <T> -
+    *           Any Comparable type
+    * @param list -
+    *           Any list of Ts
     * @return Minimum element of list
     */
-   @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T min( T... list )
       {
       return foldL( list, new FoldingFunction<T> ()
