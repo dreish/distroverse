@@ -1,0 +1,33 @@
+/**
+ * 
+ */
+package org.distroverse.distroplane;
+
+//import org.distroverse.core.*;
+import org.distroverse.dvtp.*;
+
+/**
+ * A WaveDeformer deforms a Shape according to a finite series
+ * of 3-D sine waves.
+ * 
+ * @author dreish
+ *
+ */
+public class WaveDeformer extends Deformer
+   {
+
+   /**
+    * 
+    */
+   public WaveDeformer()
+      {
+      // TODO Auto-generated constructor stub
+      }
+   
+   @Override
+   public void deform( Shape s )
+      {
+      // TODO Implement Deform().
+      }
+
+   }

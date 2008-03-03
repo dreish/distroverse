@@ -1,0 +1,11 @@
+DVOP, the Distroverse Object Protocol, defines a standard interface for
+transmitting complete objects from one program to another.  A server
+may implement DVOP without necessarily accepting every correctly-formed
+object transmitted to it, but no program should claim to implement DVOP
+if it generates incorrectly-formed objects, such as objects containing
+program code other than Java.
+
+The classes in org.distroverse.dvop, together with their inline
+documentation, constitute the authoritative definition of DVOP.  DVOP
+makes use of DVTP classes.
+
