@@ -69,21 +69,14 @@
           given SetUrl object
         x In either case, get a result back and show the effective URL
           > This will just be a general UrlChange object, async
+      - Listen for, and handle, messages from the proxy
     - Add rotation
     - Deform the points according to my trig functions and see whether
       it produces decent-looking planets
-  - Add textures to Shape class
-    - Specify color of each triangle
   - Write a simple Java3D app
     + Create a cube
     - Create methods to set its position, velocity, & acceleration
     - Create methods to do the same for its orientation
-  - Write a simple "world server" that feeds objects and a client that
-    can display them
-  - Test performance of Java3D and of pushing objects from client to
-    server; compare
-  - Override default serialization in PointArray to guarantee that the
-    protocol doesn't change due to changes in Point3d's serialization
   - core.DataPackage (abstract)
     - Find out whether something like this already exists
       > Presents a simple array of objects
@@ -107,5 +100,24 @@
     x How does Callable work, and would it be sufficient for this?
   + PointArray class in DVTP
   + Package up a TriangleStripArray into a Shape class
+  x Test performance of Java3D and of pushing objects from client to
+    server; compare
+    > No real doubts about the design at this point, unless it turns out
+      to be clearly unusable
 
-    
+- To do for 0.02:
+  - Add textures to Shape class
+    - Specify color of each triangle
+  - Override default serialization in PointArray to guarantee that the
+    protocol doesn't change due to changes in Point3d's serialization
+
+- Future:
+  - Add support for Scheme source code proxy (using SISC)
+  - Switch to a better language targeting the JVM, once something mature
+    emerges
+    > Probably Rhino
+    > Also hyped are Scala, and ... okay, nothing is as hyped as Scala,
+      but maybe that's just because they all got together and ambushed
+      the comments on
+      http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
+

@@ -10,12 +10,16 @@ package org.distroverse.distroplane.lib;
  */
 public abstract class DvtpServer
    {
+   public final static int DEFAULT_MAX_LISTENERS = 8;
+
    /**
     * 
     */
    public DvtpServer()
       {
       mListenPort = 0;
+      mReadyListeners = 0;
+      mMaxListeners = DEFAULT_MAX_LISTENERS;
       }
    
    public void listen()
@@ -34,4 +38,6 @@ public abstract class DvtpServer
    public abstract void handleProxyOpen( String token );
 
    int mListenPort;
+   int mReadyListeners;
+   int mMaxListeners;
    }
