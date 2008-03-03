@@ -30,10 +30,19 @@ public abstract class ShapeFactory extends Factory
       int     n_points_needed   = tsaPointsNeeded( vertices,
                                                    is_closed );
       Point3d triangle_strips[] = new Point3d[ n_points_needed ];
-      
+      int pos = 0;
+      for ( int i = 0; i < vertices.length - 1; ++i )
+         {
+         pos += connectWithTriangles( triangle_strips,
+                                      vertices[ i   ],
+                                      vertices[ i+1 ],
+                                      is_closed );
+         }
       return null;
       }
    
+   // Number of points needed for the TriangleStripArray representing
+   // the given mesh of vertices.
    private static int tsaPointsNeeded( Point3d[][] vertices,
                                        boolean     is_closed )
       {
@@ -42,13 +51,11 @@ public abstract class ShapeFactory extends Factory
          {
          int row_a = vertices[ i   ].length;
          int row_b = vertices[ i+1 ].length;
-         if ( row_a > 1 && is_closed )
-            ++row_a;
-         if ( row_b > 1 && is_closed )
-            ++row_b;
+         if ( row_a > 1 && is_closed )  ++row_a;
+         if ( row_b > 1 && is_closed )  ++row_b;
          ret += Util.max( row_a, row_b ) * 2;
-         if ( row_a == 1  ||  row_b == 1 )
-            --ret;
+         if ( row_a == 1 )  --ret;
+         if ( row_b == 1 )  --ret;
          }
       
       return ret;
@@ -66,7 +73,8 @@ public abstract class ShapeFactory extends Factory
     */
    private static int connectWithTriangles( Point3d[] target,
                                             Point3d[] row_a,
-                                            Point3d[] row_b )
+                                            Point3d[] row_b,
+                                            boolean is_closed )
       {
       int points_added = 0;
       int index_a      = 0;
