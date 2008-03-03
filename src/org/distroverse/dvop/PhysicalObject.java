@@ -1,13 +1,17 @@
 /**
+ * Copyright (c) 2007 Dan Reish
+ * 
  * 
  */
-package org.distroverse.core;
+package org.distroverse.dvop;
 
 import javax.vecmath.*;
+import org.distroverse.dvtp.*;
 
 /**
+ * This class is part of the DVOP protocol.
+ * 
  * @author dreish
- *
  */
 public abstract class PhysicalObject
    {

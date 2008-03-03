@@ -2,5 +2,13 @@ package org.distroverse.distroplane;
 
 public abstract class Factory
    {
-   public abstract Object Generate();
+   /**
+    * This parameterless method returns whatever kind of object
+    * the subclass of this class makes, after any necessary
+    * parameters have been configured through subclass-specific
+    * methods.
+    * @return An object, the type of which is to be determined by
+    * the subclass.
+    */
+   public abstract Object generate();
    }
