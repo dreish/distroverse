@@ -7,14 +7,14 @@ import java.nio.channels.*;
 // TODO Factor out the copy/paste code from NetOutQueue.
 public class NetInQueue< T >
    {
-   public NetInQueue( ObjectRecognizer< T > or,
+   public NetInQueue( ObjectParser< T > op,
                       int max_length,
                       Selector s,
                       SocketChannel client )
       {
       mContents         = new LinkedList< T >();
       mMaxLength        = max_length;
-      mObjectRecognizer = or;
+      mObjectParser = op;
       or.setQueue( this );
       mReaderKey        = null;
       mSelector         = s;
@@ -45,14 +45,14 @@ public class NetInQueue< T >
          {
          mReaderKey = mClient.register( mSelector,
                                         SelectionKey.OP_READ );
-         mReaderKey.attach( mObjectRecognizer );
+         mReaderKey.attach( mObjectParser );
          }
       }
 
-   private LinkedList< T >       mContents;
-   private int                   mMaxLength;
-   private ObjectRecognizer< T > mObjectRecognizer;
-   private SelectionKey          mReaderKey;
-   private Selector              mSelector;
-   private SocketChannel         mClient;
+   private LinkedList< T >   mContents;
+   private int               mMaxLength;
+   private ObjectParser< T > mObjectParser;
+   private SelectionKey      mReaderKey;
+   private Selector          mSelector;
+   private SocketChannel     mClient;
    }

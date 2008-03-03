@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
  *
  * @param <T>
  */
-public abstract class ObjectRecognizer< T >
+public abstract class ObjectParser< T >
    {
    public void setQueue( NetInQueue< T > queue )
       {
