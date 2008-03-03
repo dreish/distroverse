@@ -46,11 +46,10 @@ public final class Util
     * functions taking two arguments of a type and returning one are
     * needed.
     */
-   public static abstract class FoldingFunction
+   public static interface FoldingFunction
       {
-      @SuppressWarnings("unused")
-      public <T> T call( T a, T b )
-         { return null; }
+//      @SuppressWarnings("unused")
+      public <T> T call( T a, T b );
       }
 
    /**
