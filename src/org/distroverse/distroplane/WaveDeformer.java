@@ -21,13 +21,13 @@ public class WaveDeformer extends Deformer
     */
    public WaveDeformer()
       {
-      // TODO Auto-generated constructor stub
+      // FIXME Auto-generated constructor stub
       }
    
    @Override
    public void deform( Shape s )
       {
-      // TODO Implement Deform().
+      // FIXME Implement Deform().
       }
 
    }

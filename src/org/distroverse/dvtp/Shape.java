@@ -15,18 +15,32 @@ import javax.media.j3d.*;
  */
 public class Shape implements Serializable
    {
-   public Shape()
+   /**
+    * No default constructor; there is no default shape.
+    */
+   @SuppressWarnings("unused")
+   private Shape()
       {
-      // TODO Auto-generated constructor stub
+      // Disallowed.
       }
    
+   /**
+    * Constructor from a List of points and an array of vertex counts,
+    * as for a TriangleStripArray.
+    * @param points - One-dimensional list of points
+    * @param vertex_counts - Number of points in each triangle strip
+    */
    public Shape( List<Point3d> points, int[] vertex_counts )
       {
       mPoints = new PointArray( (Point3d[]) points.toArray() );
       mVertexCounts = vertex_counts;
       }
    
-   public TriangleStripArray newTriangleStripArray()
+   /**
+    * Get an actual TriangleStripArray object with this Shape.
+    * @return the shape as a TriangleStripArray
+    */
+   public TriangleStripArray asTriangleStripArray()
       {
       TriangleStripArray ret 
          = new TriangleStripArray( mPoints.p.length,
@@ -36,7 +50,8 @@ public class Shape implements Serializable
       return ret;
       }
 
+   // TODO Add texture fields and methods.
    private PointArray mPoints;
    private int[]      mVertexCounts;
-   static final long serialVersionUID = 1;
+   static final long  serialVersionUID = 1;
    }

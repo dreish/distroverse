@@ -41,8 +41,8 @@ public class PointArray implements Serializable
    public PointArray( Point3d[] ap )
       {  p = ap;  }
    
-   // TODO Implement PointArray.writeObject()
-   // TODO Implement PointArray.readObject()
+   // FIXME Implement PointArray.writeObject()
+   // FIXME Implement PointArray.readObject()
 
    private static final long serialVersionUID = 1;
    }
