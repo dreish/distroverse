@@ -41,23 +41,24 @@
       > HelloServer, the server equivalent to Hello World
       > Using the chargen server example on p393 of JNP and the number
         server on p273 of Java in a Nutshell
-      - DvtpServer base class
+      + DvtpServer base class
         + Construct with DvtpListener implementation
-        - DvtpListener interface/base class
+        + DvtpListener interface/base class
         x DvtpThreadedListener
           x Accepts connections on port N -- 808?
           x Forks a thread for each new connection
           x Listens for commands and passes them to the DvtpServer
-        - DvtpMultiplexedListener
+        + DvtpMultiplexedListener
           + Accepts connections on port mServer.getListenPort()
-          - Uses a selector to serve all connections in a single thread
-          - Passes commands to the DvtpServer, mServer
-        - Dispatches commands to functions that must be implemented by
+          + Uses a selector to serve all connections in a single thread
+          + Passes commands to the DvtpServer, mServer
+        + Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
       - HelloServer responds to the following commands:
         - LOCATION //blah/blah/blah
           > This is for dvtp:// URLs
           - To anyone who connects, send the URL of the proxy to DL
+            - Currently sending a random string; test this
         - GET //blah/blah/blah
           > This is for WWW-like resource URLs
         x PROXYOPEN <internal-identifier>
@@ -144,8 +145,10 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
+  x WibbleConfrobulator class
   - Distroplane: object scripting bytecode language
     > Distrocode?
+    - Objects have properties, some of which can be attached bytecode
     - Message passing between objects
     - previous_object()->owner() and this_person(), just like LPMUD
     - Public/private/protected methods:
@@ -172,8 +175,17 @@
           - All minor versions (v1.0.8, v1.1.32, v1.1.33, v1.0.9, etc.)
     - Ask for name of world (should probably be renamable later)
     - Download Distroplane class, create a directory for it to run in
-    - Start application with current user's public identity info set as
+    - Start Distroplane with current user's public identity info set as
       Creator
     - Initially, only allow the Creator to connect
     - Connect to world; use in-world interface to set it up
+      - An avatar with the Creator bit set can access all protected
+        methods of every object automatically
+      - A Creator connecting to a Distroplane sees the message, "You are
+        the Creator of this world" with a "Renounce" button.  (Help
+        question mark should explain that "renouncing" is temporary
+        only, and that transferring of Creatorhood can be done through
+        the World Configurator object, which is the only object floating
+        in the void in a newly-created Distroplane, and which can be
+        summoned again with World menu >> Summon Configurator)
 
