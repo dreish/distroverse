@@ -1,19 +1,30 @@
+/*
+ * Copyright (c) 2007 Dan Reish.
+ * 
+ * For license details, see the file COPYING in your distribution,
+ * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU Lesser
+ * General Public License (LGPL) version 3 or later</a>
+ */
+
 package org.distroverse.core;
 
-// import java.lang.*;
-import java.lang.reflect.*;
-import org.distroverse.core.FoldingFunction;
+// import java.lang.reflect.*;
 
 /**
  * Util contains static methods that are bafflingly missing from
  * the standard Java libraries.
+ * 
+ * WARNING: Don't start reading here!  You'll ruin the surprise!
  */
 
 public final class Util
    {
    /**
     * Safely casts a long to an int, or throws an exception if n is
-    * not within the range of legal values for an int.
+    * not within the range of legal values for an int.  That there
+    * isn't a reasonable way to write this generically ought to be
+    * a sign to Java programmers that they are in fact Blub
+    * programmers.  Come on, guys, throw me a macro!
     * @param n - a long
     * @return (int) n, if it is within the range of integers 
     */
@@ -28,16 +39,45 @@ public final class Util
       return (int) n;
       }
    
-   public static <T, F extends FoldingFunction>
-                 T foldr( T[] list, Class<F> functor )
+   /**
+    * An anonymous function class taking two values of a type and
+    * returning one value of that type.  For use with foldL, or wherever
+    * functions taking two arguments of a type and returning one are
+    * needed.
+    */
+   public static abstract class FoldingFunction
       {
-      if ( list.length == 0 )
-         return null;
-      T folded = list[ 0 ];
-      for ( int i = 1; i < list.length; ++i )
-         folded = functor.function( folded, list[ i ] );
-      return null;
+      @SuppressWarnings("unused")
+      public <T> T call( T a, T b )
+         { return null; }
       }
+
+   /**
+    * Repeatedly applies 'function' to the first two (Leftmost) elements
+    * of 'list', replacing them with the result, until there is only one
+    * element left; then returns that one element.  In the spirit of
+    * functional programming, does not actually modify list (unless
+    * 'function' modifies its parameters).
+    * TODO Look for a way to generalize 'list' to any iterable object.
+    * @param <T> - Class of list, generally inferred
+    * @param <F> - Class of functor, generally inferred
+    * @param list - The array to fold
+    * @param function - A folding function
+    * @return folded value
+    */
+   public static <T, F extends FoldingFunction>
+                 T foldL( T[] list, F function )
+      {
+      T folded = null;
+      if ( list.length > 0 )
+         {
+         folded = list[ 0 ];
+         for ( int i = 1; i < list.length; ++i )
+            folded = function.call( folded, list[ i ] );
+         }
+      return folded;
+      }
+
    /**
     * Returns the maximum element of the given list, according to
     * compareTo().  Can be called with an array or an argument
@@ -48,17 +88,12 @@ public final class Util
     * @param list - Any list of Ts
     * @return Maximum element of list
     */
+   @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T max( T... list )
       {
-      T max = null;
-      if ( list.length > 0 )
-         {
-         max = list[0];
-         for ( int i = 1; i < list.length; ++i )
-            if ( list[i].compareTo( max ) > 0 ) 
-               max = list[i];
-         }
-      return max;
+      return foldL( list, new FoldingFunction ()
+         { public T function( T a, T b )
+            { return (a.compareTo( b ) > 0 ? a : b); } } );
       }
 
    /**
@@ -71,7 +106,29 @@ public final class Util
     * @param list - Any list of Ts
     * @return Maximum element of list
     */
+   @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T min( T... list )
+      {
+      return foldL( list, new FoldingFunction ()
+         { public T function( T a, T b )
+            { return (a.compareTo( b ) < 0 ? a : b); } } );
+      }
+
+   // TODO Perf test max() against max1(), if it ever matters.
+   public static <T extends Comparable<T>> T max1( T... list )
+      {
+      T max = null;
+      if ( list.length > 0 )
+         {
+         max = list[0];
+         for ( int i = 1; i < list.length; ++i )
+            if ( list[i].compareTo( max ) > 0 ) 
+               max = list[i];
+         }
+      return max;
+      }
+
+   public static <T extends Comparable<T>> T min1( T... list )
       {
       T min = null;
       if ( list.length > 0 )
