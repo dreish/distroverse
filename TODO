@@ -110,6 +110,14 @@
     - Specify color of each triangle
   - Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
+  - Reimplement ball factory with a stack of LazyPolygons
+    - LazyPolygon( origin, top_vector, side_vector, n_sides )
+      - get(n) -> vertex of polygon
+        - where n % n_sides == 0 -> origin + top_vector
+        - where (n % n_sides) * 4 == n_sides -> origin + side_vector
+      - Could make this iterable, no?
+    > This should hopefully simplify generation of sections of a ball,
+      as well as possibly being useful for other things
 
 - Future:
   - Add support for Scheme source code proxy (using SISC)
