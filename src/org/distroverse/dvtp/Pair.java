@@ -32,7 +32,7 @@ public class Pair implements DvtpExternalizable
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public BigInt getClassNumber()
-      {  return (BigInt) BigInteger.ONE;  }
+      {  return new BigInt( 1 );  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
