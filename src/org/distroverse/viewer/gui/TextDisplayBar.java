@@ -19,7 +19,7 @@ public class TextDisplayBar extends Element
       addToParent( parent );
       }
    
-   public TextDisplayBar( Node parent, String init_text )
+   public TextDisplayBar( final Node parent, String init_text )
       {
       super( parent );
       mText = init_text;

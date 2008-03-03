@@ -3,17 +3,13 @@ package org.distroverse.viewer;
 import org.distroverse.viewer.gui.TextDisplayBar;
 
 import com.jme.scene.*;
-import com.jmex.game.state.DebugGameState;
 
 public class ViewerGui
    {
-   public ViewerGui()
+   public ViewerGui( Node root )
       {
-      final DebugGameState debug = new DebugGameState();
-      Node root_node = debug.getRootNode();
-//      mGuiRoot = new Node();
-//      root_node.attachChild( mGuiRoot );
-      mGuiRoot = root_node;
+      mGuiRoot = new Node();
+      root.attachChild( mGuiRoot );
       mLocationBar = new TextDisplayBar( mGuiRoot, "initial-text" );
       }
 
