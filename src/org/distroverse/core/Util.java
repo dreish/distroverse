@@ -148,4 +148,20 @@ public final class Util
          }
       return min;
       }
+   
+   /**
+    * This is like String.StartsWith(), but is case insensitive.
+    * @param full - The string to check
+    * @param prefix - The prefix to look for
+    * @return Whether "full" begins with "prefix"
+    */
+   public static boolean stringStartsIgnoreCase( String full, 
+                                                 String prefix )
+      {
+      return ( full.substring( 0, prefix.length() )
+                   .compareToIgnoreCase( prefix )
+               == 0 );
+      }
+   
+
    }

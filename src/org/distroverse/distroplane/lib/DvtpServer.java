@@ -9,6 +9,7 @@
  */
 package org.distroverse.distroplane.lib;
 
+import org.distroverse.core.*;
 import java.io.IOException;
 import java.nio.*;
 import java.nio.channels.*;
@@ -49,26 +50,19 @@ public abstract class DvtpServer
       {
       // This could be done more elegantly in a better language, such
       // as one with lambdas or method references.
-      if      ( stringBeginsIgnoreCase( command, "get " ) )
+      if      ( Util.stringStartsIgnoreCase( command, "get " ) )
          handleGet( command.substring( "get ".length() ),
                     client, buffer );
-      else if ( stringBeginsIgnoreCase( command, "location " ) )
+      else if ( Util.stringStartsIgnoreCase( command, "location " ) )
          handleLocation( command.substring( "location ".length() ),
                          client, buffer );
-      else if ( stringBeginsIgnoreCase( command, "proxyopen " ) )
+      else if ( Util.stringStartsIgnoreCase( command, "proxyopen " ) )
          handleProxyOpen( command.substring( "proxyopen ".length() ),
                           client, buffer );
       else
          handleUnrecognizedCommand( command, client, buffer );
       }
 
-   private boolean stringBeginsIgnoreCase( String full, String prefix )
-      {
-      return ( full.substring( 0, prefix.length() )
-                   .compareToIgnoreCase( prefix )
-               == 0 );
-      }
-   
    /**
     * Handles the LOCATION command, which tells a client the URL of the
     * server that should be used for that location URL.  It must return
