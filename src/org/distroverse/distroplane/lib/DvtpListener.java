@@ -20,5 +20,5 @@ public abstract class DvtpListener
    public void setServer( DvtpServer server )
       {  mServer = server;  }
 
-   DvtpServer mServer;
+   protected DvtpServer mServer;
    }

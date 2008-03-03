@@ -42,6 +42,6 @@ public class NetOutQueue< T >
     * something that takes a ByteBuffer and fills/flips it)
     */
 
-   LinkedList< T >     mContents;
-   ObjectStreamer< T > mObjectStreamer;
+   private LinkedList< T >     mContents;
+   private ObjectStreamer< T > mObjectStreamer;
    }

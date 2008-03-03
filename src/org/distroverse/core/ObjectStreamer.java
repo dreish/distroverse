@@ -15,4 +15,5 @@ public abstract class ObjectStreamer< T >
       }
    
    private NetOutQueue< T > mQueue;
+   
    }

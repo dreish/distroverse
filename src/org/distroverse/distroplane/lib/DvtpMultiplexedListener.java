@@ -138,8 +138,8 @@ public class DvtpMultiplexedListener extends DvtpListener
       mServer.handleCommand( command, client, buffer );
       }
 
-   int                 mNumThreads;
-   CharsetEncoder      mEncoder;
-   ServerSocketChannel mServerChannel;
-   Selector            mSelector;
+   private int                 mNumThreads;
+   private CharsetEncoder      mEncoder;
+   private ServerSocketChannel mServerChannel;
+   private Selector            mSelector;
    }

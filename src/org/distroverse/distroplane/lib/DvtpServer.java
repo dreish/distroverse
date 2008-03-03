@@ -113,6 +113,6 @@ public abstract class DvtpServer
     */
    public int getListenPort()  {  return mListenPort;  }
 
-   int          mListenPort;
-   DvtpListener mListener;
+   private int          mListenPort;
+   private DvtpListener mListener;
    }
