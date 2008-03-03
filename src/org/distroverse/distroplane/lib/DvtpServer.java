@@ -1,6 +1,11 @@
 /**
  * An abstract base class handling the annoying details of a DVTP
- * server.
+ * server.  Subclass this and implement handleLocation(), handleGet(),
+ * and handleProxyOpen() to define your server.
+ * 
+ * Instantiate it with an instance of a subclass of DvtpListener that
+ * will define how your server handles multiple connections (e.g.,
+ * multiple threads, multiplexing, or a combination).
  */
 package org.distroverse.distroplane.lib;
 
@@ -10,34 +15,30 @@ package org.distroverse.distroplane.lib;
  */
 public abstract class DvtpServer
    {
-   public final static int DEFAULT_MAX_LISTENERS = 8;
+   public final static int DEFAULT_PORT = 808;
 
    /**
     * 
     */
-   public DvtpServer()
+   public DvtpServer( DvtpListener listener )
       {
-      mListenPort = 0;
-      mReadyListeners = 0;
-      mMaxListeners = DEFAULT_MAX_LISTENERS;
+      mListenPort = DEFAULT_PORT;
+      mListener   = listener;
+      mListener.setServer( this );
       }
    
+   /**
+    * Call the listen() method in the DvtpListener implementation.
+    */
    public void listen()
       {
-      // TODO implement listen()
-      
+      mListener.serve();
       }
-   
-   public void session()
-      {
       
-      }
-   
    public abstract void handleLocation( String location );
    public abstract void handleGet( String url );
    public abstract void handleProxyOpen( String token );
 
-   int mListenPort;
-   int mReadyListeners;
-   int mMaxListeners;
+   int          mListenPort;
+   DvtpListener mListener;
    }

@@ -39,10 +39,13 @@
       connects to it
       > HelloServer, the server equivalent to Hello World
       - DvtpServer base class
-        - Accepts connections on port N -- 808?
-        - Forks a thread for each new connection
-        - Listens for commands and decodes them
-        - Dispatches them to functions that must be implemented by
+        - Construct with DvtpListener implementation
+        - DvtpListener interface/base class
+        - DvtpThreadedListener
+          - Accepts connections on port N -- 808?
+          - Forks a thread for each new connection
+          - Listens for commands and passes them to DvtpServer them
+        - Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
       - HelloServer responds to the following commands:
         - LOCATION //blah/blah/blah
@@ -118,6 +121,7 @@
       - Could make this iterable, no?
     > This should hopefully simplify generation of sections of a ball,
       as well as possibly being useful for other things
+  - Add better logging facilities
 
 - Future:
   - Add support for Scheme source code proxy (using SISC)
@@ -132,4 +136,3 @@
     > Maybe the architecture is:
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
-
