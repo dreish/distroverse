@@ -14,7 +14,8 @@ package org.distroverse.core;
  * Util contains static methods that are bafflingly missing from
  * the standard Java libraries.
  * 
- * WARNING: Don't start reading here!  You'll ruin the surprise!
+ * WARNING: Don't start reading here!  You'll ruin the surprise!  Try
+ * the README files in dvop, dvtp, or viewer.
  */
 
 public final class Util
