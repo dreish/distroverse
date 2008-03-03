@@ -26,11 +26,49 @@ public final class Util
       return (int) n;
       }
    
-   public static int max( int first, int... rest )
+   /**
+    * Returns the maximum element of the given list, according to
+    * compareTo().  Can be called with an array or an argument
+    * list.  Returns null if given an empty list.  In the case
+    * where multiple maximum elements are equivalent, returns the
+    * first such occurence.
+    * @param <T> - Any Comparable type
+    * @param list - Any list of Ts
+    * @return Maximum element of list
+    */
+   public static <T extends Comparable<T>> T max( T... list )
       {
-      int max = first;
-      for ( int i : rest )
-         if ( i > max )  max = i;
+      T max = null;
+      if ( list.length > 0 )
+         {
+         max = list[0];
+         for ( int i = 1; i < list.length; ++i )
+            if ( list[i].compareTo( max ) > 0 ) 
+               max = list[i];
+         }
       return max;
+      }
+
+   /**
+    * Returns the maximum element of the given list, according to
+    * compareTo().  Can be called with an array or an argument
+    * list.  Returns null if given an empty list.  In the case
+    * where multiple minimum elements are equivalent, returns the
+    * first such occurence.
+    * @param <T> - Any Comparable type
+    * @param list - Any list of Ts
+    * @return Maximum element of list
+    */
+   public static <T extends Comparable<T>> T min( T... list )
+      {
+      T min = null;
+      if ( list.length > 0 )
+         {
+         min = list[0];
+         for ( int i = 1; i < list.length; ++i )
+            if ( list[i].compareTo( min ) < 0 ) 
+               min = list[i];
+         }
+      return min;
       }
    }
