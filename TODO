@@ -54,6 +54,21 @@
           + Passes commands to the DvtpServer, mServer
         + Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
+      - NetOutQueue
+        - Constructed with an ObjectStreamer object
+        - Any time there is an object in the queue, it asks the
+          ObjectStreamer for up to N bytes to send
+        - The ObjectStreamer can access and delete the head of the queue
+        - The ObjectStreamer will keep a pointer to the next chunk to
+          feed
+        - An ObjectStreamer could take file objects and feed bytes; it
+          could serialize large objects to disk and feed out of that; it
+          could take strings that are always terminated by \r\n
+      - NetInQueue
+        - Constructed with an ObjectRecognizer object; there is an
+          ObjectRecognizer to go with every ObjectStreamer
+        - Reads data until the ObjectRecognizer says there is a complete
+          object; the Recognizer returns the object
       - HelloServer responds to the following commands:
         - LOCATION //blah/blah/blah
           > This is for dvtp:// URLs
