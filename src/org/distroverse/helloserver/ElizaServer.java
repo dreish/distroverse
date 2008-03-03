@@ -9,9 +9,9 @@ import java.io.*;
  * 
  * @author dreish
  */
-public final class HelloServer extends DvtpServer
+public final class ElizaServer extends DvtpServer
    {
-   public HelloServer( DvtpListener l )
+   public ElizaServer( DvtpListener l )
       {
       super( l );
       }
@@ -57,7 +57,7 @@ public final class HelloServer extends DvtpServer
       = new DvtpMultiplexedListener< DvtpFlexiParser, 
                                      DvtpFlexiStreamer >
                ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
-      HelloServer hs = new HelloServer( l );
+      ElizaServer hs = new ElizaServer( l );
       NetInQueueWatcher< Object > watcher_thread =
          new DvtpInQueueObjectWatcher( hs );
       watcher_thread.start();
