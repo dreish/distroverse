@@ -12,9 +12,8 @@ import java.util.Random;
 
 /**
  * This class adds externalization to BigInteger.  The format is very
- * simple: a string of bytes, only the last of which has the high bit
- * (128) set.  The remaining 7 bits per byte make up the value of the
- * integer; the first seven are low.  Negative numbers are not defined.
+ * simple: a length/sign byte -- the &128 bit indicates sign, and &127
+ * indicates the number of bytes that follow.
  * @author dreish
  */
 public class BigInt implements DvtpExternalizable,
@@ -60,19 +59,22 @@ public class BigInt implements DvtpExternalizable,
    public void readExternal( ObjectInput in ) throws IOException,
                                              ClassNotFoundException
       {
-      int shift = 0;
-      BigInteger newval = BigInteger.ZERO;
-      while ( true )
+      int length = in.readByte();
+      int sign   = 1;
+      if ( length == 0 )
          {
-         byte b = in.readByte();
-         BigInteger big_b = BigInteger.valueOf( b );
-         newval = newval.or( big_b.shiftLeft( shift ) );
-         shift += 7;
-         if ( (b & 128) == 128 )
+         mVal = BigInteger.ZERO;
+         }
+      else
+         {
+         if ( length < 0 )
             {
-            mVal = newval;
-            return;
+            length = -length;
+            sign   = -1;
             }
+         byte[] data = new byte[length];
+         in.readFully( data );
+         mVal = new BigInteger( sign, data ); 
          }
       }
 

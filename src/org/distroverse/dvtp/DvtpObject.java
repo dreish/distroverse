@@ -17,7 +17,8 @@ public abstract class DvtpObject
       = { 
         BigInt.class,     // 0
         Pair.class,       // 1
-        Str.class         // 2
+        Str.class,        // 2
+        null
         };
    static final BigInt mSerializedClassNumber 
       = new BigInt( 0xB00BAD );
