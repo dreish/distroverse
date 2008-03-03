@@ -1,6 +1,6 @@
 package org.distroverse.distroplane;
 
-public abstract class Factory
+interface Factory
    {
    /**
     * This parameterless method returns whatever kind of object
