@@ -6,6 +6,7 @@
   - Play around with planet-building ideas
     - Create a spheroid polyhedron with N roughly equally-spaced
       points
+      > BallFactory isa ShapeFactory, Generate() returns a Shape
       > It might be easyish to do this by subclassing LatheShape3D,
         though it would not result in equally-spaced points
       > Otherwise it means using Java3D's GeometryArray
@@ -33,6 +34,17 @@
     can display them
   - Test performance of Java3D and of pushing objects from client to
     server; compare
+  - core.DataPackage (abstract)
+    - Find out whether something like this already exists
+      > Presents a simple array of objects
+      > Serialization produces different results depending on 
+        implementation
+    - core.DataPackagePlain
+      > No compression
+  	- core.DataPackageGzip
+  	  > Gzips entire package to serialize
+  	- core.DataPackageTgz
+  	  > Wraps everything in a 
   + Check everything into SVN
     > Too easy!
   + Set up backups for svn repository
