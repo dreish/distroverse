@@ -63,18 +63,18 @@ public final class Util
     * @param <T> - Class of list, generally inferred
     * @param <F> - Class of functor, generally inferred
     * @param list - The array to fold
-    * @param function - A folding function
+    * @param folding_function - A folding function
     * @return folded value
     */
    public static <T, F extends FoldingFunction>
-                 T foldL( T[] list, F function )
+                 T foldL( T[] list, F folding_function )
       {
       T folded = null;
       if ( list.length > 0 )
          {
          folded = list[ 0 ];
          for ( int i = 1; i < list.length; ++i )
-            folded = function.call( folded, list[ i ] );
+            folded = folding_function.call( folded, list[ i ] );
          }
       return folded;
       }
@@ -93,7 +93,7 @@ public final class Util
    public static <T extends Comparable<T>> T max( T... list )
       {
       return foldL( list, new FoldingFunction ()
-         { public T function( T a, T b )
+         { public T call( T a, T b )
             { return (a.compareTo( b ) > 0 ? a : b); } } );
       }
 
@@ -111,7 +111,7 @@ public final class Util
    public static <T extends Comparable<T>> T min( T... list )
       {
       return foldL( list, new FoldingFunction ()
-         { public T function( T a, T b )
+         { public T call( T a, T b )
             { return (a.compareTo( b ) < 0 ? a : b); } } );
       }
 
