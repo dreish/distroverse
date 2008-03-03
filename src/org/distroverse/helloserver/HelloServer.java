@@ -36,9 +36,10 @@ public final class HelloServer extends DvtpServer
                                ByteBuffer buffer )
    throws IOException
       {
-      String response = "I always respond thusly";
+      String response = "I always respond thusly\r\n";
       buffer.clear();
       buffer.put( response.getBytes( "UTF-8" ) );
+      buffer.flip();
       client.write( buffer );
       }
 

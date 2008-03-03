@@ -77,7 +77,7 @@ public class DvtpMultiplexedListener extends DvtpListener
          try
             {
             mSelector.select();
-            process_io();
+            processIo();
             }
          catch ( IOException e )
             {
@@ -88,16 +88,16 @@ public class DvtpMultiplexedListener extends DvtpListener
          }
       }
    
-   private void process_io()
+   private void processIo()
       {
       for ( SelectionKey key : mSelector.selectedKeys() )
          {
          try
             {
             if ( key.isAcceptable() )
-               accept_connection( key );
+               acceptConnection( key );
             if ( key.isReadable() )
-               read_connection( key );
+               readConnection( key );
             }
          catch ( IOException e )
             {
@@ -110,9 +110,10 @@ public class DvtpMultiplexedListener extends DvtpListener
          }
       }
    
-   void accept_connection( SelectionKey key )
+   private void acceptConnection( SelectionKey key )
    throws IOException
       {
+      System.err.println( "accept_connection called" );
       ServerSocketChannel server = (ServerSocketChannel) key.channel();
       SocketChannel       client = server.accept();
       if ( client == null )  return;
@@ -123,15 +124,16 @@ public class DvtpMultiplexedListener extends DvtpListener
       tmp_key.attach( ByteBuffer.allocate( 1024 ) );
       }
 
-   void read_connection( SelectionKey key )
+   private void readConnection( SelectionKey key )
    throws IOException
       {
       SocketChannel client = (SocketChannel) key.channel();
       ByteBuffer    buffer = (ByteBuffer) key.attachment();
       client.read( buffer );
+      buffer.flip();
       String command = "";
       while ( buffer.hasRemaining() )
-         command += buffer.get();
+         command += (char) buffer.get();
       buffer.clear();
       mServer.handleCommand( command, client, buffer );
       }
