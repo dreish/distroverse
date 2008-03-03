@@ -25,11 +25,24 @@
             > Test3DFlatText, anyone?
           + Attach it to the root node as in TestStandardGame
           - Why doesn't it display?
-            - Put all the functionality of Test3DFlatText in
+            + Put all the functionality of Test3DFlatText in
               ViewerWindow constructor
+              > It works
             - Change things one-by-one until they match what I'm trying
               to do with TextDisplayBar
-            - Gradually move pieces out into TextDisplayBar
+              + Move the whole thing into the TextDisplayBar ctor
+                > It fails
+                + Is the TDB ctor getting called?
+                  > Wrong ctor
+                > It works
+              + Create a child node and add it to that instead
+                > Still works
+              + Use the passed root node instead
+                > Somehow this breaks it, even though it appears to be
+                  the correct root node
+                > It's not really the "root" node; I'm missing the calls
+                  to attach it to the debug game state
+              - Move it into a method
           - Figure out how to make it orthographic
           - Make a separate GUI root node
       - If URL is about:hello, reset the render window and dump a
