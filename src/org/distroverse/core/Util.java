@@ -46,11 +46,8 @@ public final class Util
     * functions taking two arguments of a type and returning one are
     * needed.
     */
-   public static interface FoldingFunction
-      {
-//      @SuppressWarnings("unused")
-      public <T> T call( T a, T b );
-      }
+   public static interface FoldingFunction<T>
+      {  public T call( T a, T b );  }
 
    /**
     * Repeatedly applies 'function' to the first two (Leftmost) elements
@@ -66,7 +63,7 @@ public final class Util
     * @param folding_function - A folding function
     * @return folded value
     */
-   public static <T, F extends FoldingFunction>
+   public static <T, F extends FoldingFunction<T>>
                  T foldL( T[] list, F folding_function )
       {
       T folded = null;
@@ -92,7 +89,7 @@ public final class Util
    @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T max( T... list )
       {
-      return foldL( list, new FoldingFunction ()
+      return foldL( list, new FoldingFunction<T> ()
          { public T call( T a, T b )
             { return (a.compareTo( b ) > 0 ? a : b); } } );
       }
@@ -110,7 +107,7 @@ public final class Util
    @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T min( T... list )
       {
-      return foldL( list, new FoldingFunction ()
+      return foldL( list, new FoldingFunction<T> ()
          { public T call( T a, T b )
             { return (a.compareTo( b ) < 0 ? a : b); } } );
       }
