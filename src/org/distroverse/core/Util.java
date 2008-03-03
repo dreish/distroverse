@@ -1,6 +1,8 @@
 package org.distroverse.core;
 
 // import java.lang.*;
+import java.lang.reflect.*;
+import org.distroverse.core.FoldingFunction;
 
 /**
  * Util contains static methods that are bafflingly missing from
@@ -26,12 +28,22 @@ public final class Util
       return (int) n;
       }
    
+   public static <T, F extends FoldingFunction>
+                 T foldr( T[] list, Class<F> functor )
+      {
+      if ( list.length == 0 )
+         return null;
+      T folded = list[ 0 ];
+      for ( int i = 1; i < list.length; ++i )
+         folded = functor.function( folded, list[ i ] );
+      return null;
+      }
    /**
     * Returns the maximum element of the given list, according to
     * compareTo().  Can be called with an array or an argument
     * list.  Returns null if given an empty list.  In the case
     * where multiple maximum elements are equivalent, returns the
-    * first such occurence.
+    * first such occurrence.
     * @param <T> - Any Comparable type
     * @param list - Any list of Ts
     * @return Maximum element of list
@@ -54,7 +66,7 @@ public final class Util
     * compareTo().  Can be called with an array or an argument
     * list.  Returns null if given an empty list.  In the case
     * where multiple minimum elements are equivalent, returns the
-    * first such occurence.
+    * first such occurrence.
     * @param <T> - Any Comparable type
     * @param list - Any list of Ts
     * @return Maximum element of list
