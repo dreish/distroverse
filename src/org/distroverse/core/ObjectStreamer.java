@@ -7,7 +7,7 @@ import java.nio.*;
 //import java.nio.charset.*;
 
 /**
- * An ObjectStreamer works on a queue of objects of class T, and
+ * An ObjectStreamer works on a NetOutQueue of objects of class T, and
  * converts that queue into a stream of bytes.
  * @author dreish
  *
@@ -51,15 +51,14 @@ public abstract class ObjectStreamer< T >
          streamNextObject( mBaos, mQueue );
          }
 
-      byte[] baos_contents = mBaos.toByteArray();
-      int bytes_to_write = 0;
-      bytes_to_write = mBaos.size() - mPosition;
+      int bytes_to_write = mBaos.size() - mPosition;
       if ( bytes_to_write > bytes_requested )
          bytes_to_write = bytes_requested;
       if ( bytes_to_write > 0 )
-         output.put( baos_contents, mPosition, bytes_to_write );
+         output.put( mBaos.toByteArray(), mPosition, bytes_to_write );
       else
          mQueue.stopNetworkWriter();
+      mPosition += bytes_to_write;
       
       return bytes_to_write;
       }

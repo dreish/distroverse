@@ -4,8 +4,6 @@ import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
 
-import org.distroverse.core.*;
-
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a
  * network connection. A NetOutQueue tells a network socket, when it has

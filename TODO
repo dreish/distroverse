@@ -163,7 +163,15 @@
   - Add better logging facilities
 
 - Future:
+  - Textures must be specifiable as URLs (?) or else they can only be
+    loaded from the DVTP server, because that's all the proxy can
+    connect to
   - Add support for Scheme source code proxy (using SISC)
+  - Need a test that exposes that a server is not threadsafe
+    - Tests can run with N threads; good values of N to test would be 1,
+      2, 10, 100, maximum that will fit in memory
+    - Test that a sequence of objects inserted into a NetOutQueue are
+      all received at the other end
   - Switch to a better language targeting the JVM, once something mature
     emerges
     > Probably Rhino
@@ -176,7 +184,14 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
+  - Standardize Autofill EARLY
   x WibbleConfrobulator class
+  - When graying out a menu item, give a reason for doing so; hovering
+    over (or selecting) the menu item shows the reason
+  - URLs should have spaces and other illegal chars removed in the
+    address part, not converted to %XX
+  - Distroversity!  The name is too good not to use
+    > a.k.a. DVU (but this also refers to a far-right party in Germany)
   - Distroplane: object scripting bytecode language
     > Distrocode?
     - Objects have properties, some of which can be attached bytecode
