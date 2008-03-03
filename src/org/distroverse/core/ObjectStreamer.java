@@ -89,8 +89,8 @@ public abstract class ObjectStreamer< T >
       return ( mBaos.size() == 0 || mBaos.size() == mPosition );
       }
    
-   private NetOutQueue< T > mQueue;
-   private int mPosition;
+   private NetOutQueue< T >      mQueue;
+   private int                   mPosition;
    private ByteArrayOutputStream mBaos;
-   private ByteBuffer mBuffer;
+   private ByteBuffer            mBuffer;
    }
