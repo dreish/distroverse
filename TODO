@@ -268,24 +268,37 @@
     address part, not converted to %XX
   - Distroversity!  The name is too good not to use
     > a.k.a. DVU (but this also refers to a far-right party in Germany)
-  - Distroplane: object scripting bytecode language
+    - Darc tutorials:
+      - For people who have never programmed before
+      - For people with limited programming experience in one language
+        - Visual Basic (see "never programmed before")
+        - Java
+        - Perl
+        - Python
+      - For people with extensive programming experience in various
+        languages, but no Lisp (for shame!)
+      - For Lisp hackers who have never tried Arc
+      - For Arc hackers
+        - The shortest and easiest one to write; do this first
+  x Distroplane: object scripting bytecode language
     > Distrocode?
-    - Objects have properties, some of which can be attached bytecode
-    - Message passing between objects
-    - previous_object()->owner() and this_person(), just like LPMUD
-    - Public/private/protected methods:
-      - If a method is defined as public, it has property 'visibility =
+    x Objects have properties, some of which can be attached bytecode
+    x Message passing between objects
+    x previous_object()->owner() and this_person(), just like LPMUD
+    x Public/private/protected methods:
+      x If a method is defined as public, it has property 'visibility =
         'public
-      - Default message receiver in class Object does this when called
+      x Default message receiver in class Object does this when called
         for a message from another object:
         [method_object getProperty visibility]
         > Shorthand for (send method_object 'getProperty 'visibility)
-        - If result is 'public, the method is called
-        - If result is 'private, the method is not called
-        - If result is 'protected,
-          - Message receiver then checks whether the sender of the
+        x If result is 'public, the method is called
+        x If result is 'private, the method is not called
+        x If result is 'protected,
+          x Message receiver then checks whether the sender of the
             message is owned by the same user as itself; if so, method
             is called, else not
+    > This idea has changed significantly; see notes
   - Configuration of new server:
     - Menu: World/Create/v1.0
       - Also have menu: World/Create/Email me version news...
@@ -312,4 +325,3 @@
         summoned again with World menu >> Summon Configurator)
   - Auto-compress groups of queue objects when the output queue gets
     full
-
