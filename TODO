@@ -109,9 +109,25 @@
               + The NIQ and NOQ classes must contain references to their
                 sessions
               + Each SelectionKey will have the session attached to it
-              - handleCommand takes a NetSession
+              + Nobody calls activateQueueWatcher()
+              - Need to create a thread to watch the input queue and add
+                responses to the output queue
+                - handleCommand takes a NetSession
+                - Create one thread to watch all connections in
+                  DvtpMultiplexedListener constructor
+                - With each new connection opened, add the input queue
+                  to the watcher thread and niq.addQueueReader( t )
+                  - NetInQueueWatcher<T>
+                  - Implement niqw<String> as niqws
+                - Need to make sure everything gets deleted when the
+                  connection is closed
+                  > This should just be a matter of removing the queue
+                    from the queue watcher thread
+                  > Might want to add a special close-connection object
+                    to the output queue?  null?  Or add a close-queue
+                    method to avoid losing generality?
         - GET //blah/blah/blah
-          > This is for WWW-like resource URLs (dvfp?)
+          > This is for WWW-like resource URLs (dvrp?)
           - Result is a single length-prefixed object (as in DVTP),
             which may be an error object, such as resource not found
           - After this, the connection reverts back to line-by-line
