@@ -57,4 +57,5 @@ public class ViewerWindow extends JFrame
       // FIXME Implement setUrl()
       }
 
+   static final long serialVersionUID = 1;
    }
