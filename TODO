@@ -402,3 +402,7 @@
         summoned again with World menu >> Summon Configurator)
   - Auto-compress groups of queue objects when the output queue gets
     full
+  - (import object) or (import /path/object):
+    - Calls something on object to get a list of functions to import
+    - Defines each of them as /object/each
+
