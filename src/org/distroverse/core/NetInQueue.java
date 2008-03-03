@@ -15,7 +15,7 @@ public class NetInQueue< T >
       mContents         = new LinkedList< T >();
       mMaxLength        = max_length;
       mObjectParser = op;
-      or.setQueue( this );
+      op.setQueue( this );
       mReaderKey        = null;
       mSelector         = s;
       mClient           = client;
