@@ -235,6 +235,12 @@
       as well as possibly being useful for other things
   - Add better logging facilities
 
+> Required for 1.0:
+  > Client
+    > Figure animations
+    > Sound
+    > Inventory system 
+
 - Future:
   - Textures must be specifiable as URLs (?) or else they can only be
     loaded from the DVTP server, because that's all the proxy can
@@ -257,6 +263,13 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
+  - Client: prompt user if site requests resize; one option should
+    defeat malicious sites that flood the user with resize requests and
+    make the client unusable without killing/restarting (i.e., "Never
+    for this site")
+  - Client: prompt user if site requests all heads-up UI elements be
+    hidden (pointing out that they can be brought back by selecting the
+    menu "Interface / (Un)hide all")
   - iTunes-like interface for managing in-world objects and inventory
     > Ideally, there would be a single interface for both categories,
       but that raises a big question mark about how (and where) to
