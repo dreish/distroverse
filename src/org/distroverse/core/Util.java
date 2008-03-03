@@ -98,14 +98,14 @@ public final class Util
       }
 
    /**
-    * Returns the maximum element of the given list, according to
+    * Returns the minimum element of the given list, according to
     * compareTo().  Can be called with an array or an argument
     * list.  Returns null if given an empty list.  In the case
     * where multiple minimum elements are equivalent, returns the
     * first such occurrence.
     * @param <T> - Any Comparable type
     * @param list - Any list of Ts
-    * @return Maximum element of list
+    * @return Minimum element of list
     */
    @SuppressWarnings("unused")
    public static <T extends Comparable<T>> T min( T... list )
