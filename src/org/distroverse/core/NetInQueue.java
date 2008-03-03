@@ -52,6 +52,11 @@ public class NetInQueue< T >
       {
       mObjectParser.readBytes( b );
       }
+   
+   synchronized public void read() throws Exception
+      {
+      mObjectParser.read( mClient );
+      }
 
    synchronized public void stopNetworkReader()
       {
@@ -67,7 +72,7 @@ public class NetInQueue< T >
          {
          mReaderKey = mClient.register( mSelector,
                                         SelectionKey.OP_READ );
-         mReaderKey.attach( mObjectParser );
+         mReaderKey.attach( mNetSession );
          }
       }
    
@@ -75,6 +80,8 @@ public class NetInQueue< T >
       {  mQueueReaders.add( t );  }
    synchronized public boolean removeQueueReader( Thread t )
       {  return mQueueReaders.remove( t );  }
+   public void setSession( NetSession< T > ns )
+      {  mNetSession = ns;  }
    
    synchronized public void activateQueueReader()
       {
@@ -91,4 +98,5 @@ public class NetInQueue< T >
    private SelectionKey         mReaderKey;
    private Selector             mSelector;
    private SocketChannel        mClient;
+   private NetSession< T >      mNetSession;
    }

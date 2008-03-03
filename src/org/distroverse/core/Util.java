@@ -39,6 +39,20 @@ public final class Util
                       "long-to-int cast underflow" );
       return (int) n;
       }
+
+   /**
+    * 
+    * @author dreish
+    *
+    * @param <A>
+    * @param <B>
+    */
+   public static class Pair< A, B >
+      {
+      public Pair( A init_a, B init_b )  { a = init_a; b = init_b; }
+      public A a;
+      public B b;
+      }
    
    /**
     * An anonymous function class taking two values of a type and

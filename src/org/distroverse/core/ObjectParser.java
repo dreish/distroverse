@@ -2,6 +2,7 @@ package org.distroverse.core;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
  * An ObjectRecognizer attempts to convert a stream of bytes into
@@ -18,11 +19,10 @@ public abstract class ObjectParser< T >
       mBuffer = b;
       mBaos = new ByteArrayOutputStream();
       }
- 
+    
    public void setQueue( NetInQueue< T > queue )
       {
       mQueue = queue;
-      mPosition = 0;
       }
    
    /**
@@ -43,6 +43,15 @@ public abstract class ObjectParser< T >
                    input.capacity() );
       parseObjects( mBaos, mQueue );
       }
+
+   public void read( SocketChannel client )
+   throws Exception
+      {
+      client.read( mBuffer );
+      mBuffer.flip();
+      readBytes( mBuffer );
+      mBuffer.clear();
+      }
    
    abstract protected void
    parseObjects( ByteArrayOutputStream baos,
@@ -50,7 +59,7 @@ public abstract class ObjectParser< T >
    throws Exception;
 
    private NetInQueue< T >       mQueue;
-   private int                   mPosition;
+//   private int                   mPosition;
    private ByteArrayOutputStream mBaos;
    private ByteBuffer            mBuffer;
    }

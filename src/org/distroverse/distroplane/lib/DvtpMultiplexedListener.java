@@ -4,10 +4,12 @@
 package org.distroverse.distroplane.lib;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
-import java.nio.charset.*;
+// import java.nio.charset.*;
+import org.distroverse.core.*;
 
 /**
  * This class implements DvtpListener in a simple, straightforward, and
@@ -17,17 +19,22 @@ import java.nio.charset.*;
  * thread for each active session.
  * @author dreish
  */
-public class DvtpMultiplexedListener extends DvtpListener
+public class DvtpMultiplexedListener< T, 
+                                      P extends ObjectParser< T >,
+                                      S extends ObjectStreamer< T > > 
+extends DvtpListener
    {
    public static final int DEFAULT_NUM_THREADS = 8;
+   public static final int DEFAULT_QUEUE_SIZE  = 10;
 
    /**
     * 
     */
    public DvtpMultiplexedListener()
       {
-      mNumThreads = DEFAULT_NUM_THREADS;
-      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
+      super();
+//      mNumThreads = DEFAULT_NUM_THREADS;
+//      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
 
    /* (non-Javadoc)
@@ -99,7 +106,7 @@ public class DvtpMultiplexedListener extends DvtpListener
             if ( key.isReadable() )
                readConnection( key );
             }
-         catch ( IOException e )
+         catch ( Exception e )
             {
             key.cancel();
             try 
@@ -118,28 +125,50 @@ public class DvtpMultiplexedListener extends DvtpListener
       SocketChannel       client = server.accept();
       if ( client == null )  return;
       client.configureBlocking( false );
-      SelectionKey tmp_key = client.register( mSelector,
-                                              SelectionKey.OP_READ );
-      // XXX The design imposes an unreasonable limit on request length
-      tmp_key.attach( ByteBuffer.allocate( 1024 ) );
+//      SelectionKey tmp_key = client.register( mSelector,
+//                                              SelectionKey.OP_READ );
+
+      ByteBuffer parser_buffer   = ByteBuffer.allocate( 1024 );
+      ByteBuffer streamer_buffer = ByteBuffer.allocate( 1024 );
+      P parser = null;
+      S streamer= null;
+      try
+         {
+         @SuppressWarnings( {"unchecked", "null"} )
+         Constructor< P > parser_constructor 
+            = (Constructor< P >)
+              parser.getClass().getConstructor( ByteBuffer.class ); 
+         @SuppressWarnings( {"unchecked", "null"} )
+         Constructor< S > streamer_constructor 
+            = (Constructor< S >)
+              streamer.getClass().getConstructor( ByteBuffer.class ); 
+         parser   = parser_constructor  .newInstance( parser_buffer );
+         streamer = streamer_constructor.newInstance( streamer_buffer );
+         }
+      catch ( Exception e )
+         {
+         return;
+         }
+      NetInQueue< T > niqs = new NetInQueue< T >(
+            parser, 
+            DEFAULT_QUEUE_SIZE, mSelector, client );
+      NetOutQueue< T > noqs = new NetOutQueue< T >(
+            streamer,
+            DEFAULT_QUEUE_SIZE, mSelector, client );
+      new NetSession< T >( niqs, noqs );
+      niqs.activateNetworkReader();
       }
 
    private void readConnection( SelectionKey key )
-   throws IOException
+   throws Exception
       {
-      SocketChannel client = (SocketChannel) key.channel();
-      ByteBuffer    buffer = (ByteBuffer) key.attachment();
-      client.read( buffer );
-      buffer.flip();
-      String command = "";
-      while ( buffer.hasRemaining() )
-         command += (char) buffer.get();
-      buffer.clear();
-      mServer.handleCommand( command, client, buffer );
+      @SuppressWarnings( "unchecked" )
+      NetSession< T > session = (NetSession< T >) key.attachment();
+      session.getNetInQueue().read();
+      // XXX Now no one calls handleCommand()
       }
 
-   private int                 mNumThreads;
-   private CharsetEncoder      mEncoder;
+//   private int                 mNumThreads;
    private ServerSocketChannel mServerChannel;
    private Selector            mSelector;
    }

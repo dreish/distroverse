@@ -54,6 +54,7 @@ public class NetOutQueue< T >
       return mContents.remove();
       }
    
+   // FIXME duplicate with NetInQueue
    synchronized public int size()
       {
       return mContents.size();
@@ -73,10 +74,16 @@ public class NetOutQueue< T >
          {
          mWriterKey = mClient.register( mSelector,
                                         SelectionKey.OP_WRITE );
-         mWriterKey.attach( mObjectStreamer );
+         mWriterKey.attach( mNetSession );
          }
       }
-   
+
+   // FIXME duplicate with NetInQueue
+   public void setSession( NetSession< T > ns )
+      {  mNetSession = ns;  }
+   public ObjectStreamer< T > getStreamer()
+      {  return mObjectStreamer;  }
+
    /* Plan:
     * - This object should have a reference to the network connection,
     * and should turn on and off the waiting-for-readability status
@@ -90,4 +97,5 @@ public class NetOutQueue< T >
    private SelectionKey        mWriterKey;
    private Selector            mSelector;
    private SocketChannel       mClient;
+   private NetSession< T >     mNetSession;
    }
