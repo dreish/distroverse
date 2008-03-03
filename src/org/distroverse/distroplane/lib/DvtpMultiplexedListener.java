@@ -9,12 +9,7 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 // import java.nio.charset.*;
-import org.distroverse.core.*;
-import org.distroverse.core.net.NetInQueue;
-import org.distroverse.core.net.NetOutQueue;
-import org.distroverse.core.net.NetSession;
-import org.distroverse.core.net.ObjectParser;
-import org.distroverse.core.net.ObjectStreamer;
+import org.distroverse.core.net.*;
 
 /**
  * This class implements DvtpListener in a simple, straightforward, and
@@ -35,12 +30,14 @@ extends DvtpListener
    /**
     * 
     */
-   public DvtpMultiplexedListener( Class<P> parser_class,
-                                   Class<S> streamer_class )
+   public DvtpMultiplexedListener( Class< P > parser_class,
+                                   Class< S > streamer_class )
       {
       super();
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
+      NetInQueueWatcher< T > watcher_thread =
+         new DvtpInQueueStringWatcher();
 //      mNumThreads = DEFAULT_NUM_THREADS;
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
@@ -181,12 +178,12 @@ extends DvtpListener
       @SuppressWarnings( "unchecked" )
       NetSession< T > session = (NetSession< T >) key.attachment();
       session.getNetInQueue().read();
-      // XXX Now no one calls handleCommand()
+      // XXX Now no one calls DvtpServer.handleCommand()
       }
 
 //   private int                 mNumThreads;
-   private ServerSocketChannel mServerChannel;
-   private Selector            mSelector;
-   private Class<P>            mParserClass;
-   private Class<S>            mStreamerClass;
+   private ServerSocketChannel    mServerChannel;
+   private Selector               mSelector;
+   private Class<P>               mParserClass;
+   private Class<S>               mStreamerClass;
    }

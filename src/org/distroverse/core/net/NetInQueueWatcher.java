@@ -17,14 +17,21 @@ public abstract class NetInQueueWatcher< T > extends Thread
    @Override
    public void run()
       {
-      while ( true )
+      try
          {
-         clearAllQueues();
-         sleepUntilInterrupted();
+         while ( true )
+            {
+            clearAllQueues();
+            sleepUntilInterrupted();
+            }
+         }
+      catch ( ClosedChannelException e )
+         {
+         // Finished; let the thread end now.
          }
       }
 
-   private void clearAllQueues()
+   private void clearAllQueues() throws ClosedChannelException
       {
       // FIXME Is it safe to do this without synchronizing?
       // FIXME Looks like this is better done with an int indexed vector
@@ -43,6 +50,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
                {
                // FIXME Is it safe to do this while iterating?
                mWatchedQueues.remove( niq );
+               throw e;
                }
             }
          }
@@ -60,6 +68,11 @@ public abstract class NetInQueueWatcher< T > extends Thread
          {  Thread.sleep( 120 );  }
       catch ( InterruptedException e )
          {  /* Interrupted; work on the queues now. */  }
+      }
+   
+   public void addQueue( NetInQueue< T > niq )
+      {
+      mWatchedQueues.add( niq );
       }
 
    private LinkedList< NetInQueue< T > > mWatchedQueues;

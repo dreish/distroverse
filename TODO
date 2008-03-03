@@ -115,10 +115,12 @@
                 - handleCommand takes a NetSession
                 - Create one thread to watch all connections in
                   DvtpMultiplexedListener constructor
+                  + NetInQueueWatcher<T>
+                  - DvtpMultiplexedListener cannot be generic on T
+                  - Implement niqw<String> as DvtpInQueueStringWatcher
+                    - Construct with reference to 
                 - With each new connection opened, add the input queue
                   to the watcher thread and niq.addQueueReader( t )
-                  - NetInQueueWatcher<T>
-                  - Implement niqw<String> as niqws
                 - Need to make sure everything gets deleted when the
                   connection is closed
                   > This should just be a matter of removing the queue
