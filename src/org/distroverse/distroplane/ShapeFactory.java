@@ -26,7 +26,6 @@ public abstract class ShapeFactory extends Factory
    protected static Shape generateSurface( Point3d[][] vertices,
                                            boolean     is_closed )
       {
-      // TODO Implement GenerateSurface()
       int     n_points_needed   = tsaPointsNeeded( vertices,
                                                    is_closed );
       Point3d triangle_strips[] = new Point3d[ n_points_needed ];
@@ -38,6 +37,7 @@ public abstract class ShapeFactory extends Factory
                                       vertices[ i+1 ],
                                       is_closed );
          }
+      // TODO Implement GenerateSurface()
       return null;
       }
    

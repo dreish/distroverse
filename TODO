@@ -28,6 +28,7 @@
       - ShapeFactory.GenerateSurface( Point3d verts[][] )
       	- Need to flesh out the Shape class for this
       	  > Will every shape be a TriangleStripArray?
+      	    > Yes, apparently so
         - For each consecutive pair of arrays of points, create a row
       	  in the TriangleStripArray
           - The vertex count is the sum of the number of points in
