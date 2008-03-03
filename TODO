@@ -1,0 +1,40 @@
+- To do:
+  > Java 3D examples at:
+    http://java.sun.com/products/java-media/3D/collateral/examples.zip
+  > API documentation at: http://download.java.net/media/java3d/
+    builds/release/1.5.1/java3d-1_5_1-api-docs.zip
+  - Play around with planet-building ideas
+    - Create a spheroid polyhedron with N roughly equally-spaced
+      points
+      > It might be easyish to do this by subclassing LatheShape3D,
+        though it would not result in equally-spaced points
+      > Otherwise it means using Java3D's GeometryArray
+        > Specifically TriangleStripArray
+      - Divide sphere into N equally spaced circles of latitude
+      - Calculate distance between those circles, 'd'
+      - For each circle, find M: the number of evenly-spaced points
+        such that the distance between them is closer to 'd' than for
+        any other number
+      - Make an array of points starting at prime meridian
+        + 0.5*d*(row%2) 
+      - For each consecutive pair of arrays of points, create a row in
+        the TriangleStripArray
+        - The vertex count is the sum of the number of points in the
+          two rows, plus one because one row is used twice
+        > It shouldn't matter which side the array starts with
+    - Display and rotate
+    - Deform the points according to my trig functions and see whether
+      it produces decent-looking planets
+  - Write a simple Java3D app
+    + Create a cube
+    - Create methods to set its position, velocity, & acceleration
+    - Create methods to do the same for its orientation
+  - Write a simple "world server" that feeds objects and a client that
+    can display them
+  - Test performance of Java3D and of pushing objects from client to
+    server; compare
+  + Check everything into SVN
+    > Too easy!
+  + Set up backups for svn repository
+    > In case things get corrupted
+    + 2 daily and 5 weekly
