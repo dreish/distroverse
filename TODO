@@ -323,6 +323,8 @@
     > That is, if there's any ablity to fill out forms with things like
       name, address, etc., standardize the field names and implement an
       auto-fill method early on
+  - Use PGP (or something similar) for authentication?  What's the legal
+    status of that?
   - Switch to JMonkeyEngine
   x WibbleConfrobulator class
   - When graying out a menu item, give a reason for doing so; hovering
