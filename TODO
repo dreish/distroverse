@@ -34,7 +34,7 @@
       x In either case, get a result back and show the effective URL
         > This will just be a general UrlChange object, async
     - Listen for, and handle, messages from the proxy
-  - Add rotation
+  - Add movement objects
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app
