@@ -6,7 +6,7 @@
   + PointArray class in DVTP
   + Package up a TriangleStripArray into a Shape class
   - Play around with planet-building ideas
-    - Create a spheroid polyhedron with N roughly equally-spaced
+    + Create a spheroid polyhedron with N roughly equally-spaced
       points
       > BallFactory isa ShapeFactory, Generate() returns a Shape
       > It might be easyish to do this by subclassing LatheShape3D,
@@ -23,16 +23,22 @@
           (n_circles * 2 - 2)
       + Make an array of points starting at prime meridian
         + 0.5*d*(row%2)
-      - ShapeFactory.GenerateSurface( Point3d verts[][] )
-      	- Need to flesh out the Shape class for this
+      + ShapeFactory.GenerateSurface( Point3d verts[][] )
+      	+ Need to flesh out the Shape class for this
       	  > Will every shape be a TriangleStripArray?
       	    > Yes, apparently so
-        - For each consecutive pair of arrays of points, create a row
+      	    > I might want some way to specify smoothed forms, or
+      	      perhaps at least a sphere primitive
+        + For each consecutive pair of arrays of points, create a row
       	  in the TriangleStripArray
-          - The vertex count is the sum of the number of points in
+          + The vertex count is the sum of the number of points in
             the two rows, plus two because two points are used twice
           > It shouldn't matter which side the array starts with
-    - Display and rotate
+    - Make a simple server that sends the same shape to any client that
+      connects to it
+    - Make a client that connects to that simple server and renders
+      whatever shapes it gets back
+    - Add rotation
     - Deform the points according to my trig functions and see whether
       it produces decent-looking planets
   - Add textures to Shape class
