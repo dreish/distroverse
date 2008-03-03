@@ -11,18 +11,24 @@
         though it would not result in equally-spaced points
       > Otherwise it means using Java3D's GeometryArray
         > Specifically TriangleStripArray
-      - Divide sphere into N equally spaced circles of latitude
-      - Calculate distance between those circles, 'd'
-      - For each circle, find M: the number of evenly-spaced points
+      + Divide sphere into N equally spaced circles of latitude
+      	> They're only equally-spaced for mAspectRatio = 1.0, now
+      x Calculate distance between those circles, 'd'
+      + For each circle, find M: the number of evenly-spaced points
         such that the distance between them is closer to 'd' than for
         any other number
-      - Make an array of points starting at prime meridian
-        + 0.5*d*(row%2) 
-      - For each consecutive pair of arrays of points, create a row in
-        the TriangleStripArray
-        - The vertex count is the sum of the number of points in the
-          two rows, plus two because two points are used twice
-        > It shouldn't matter which side the array starts with
+        > This is actually simple enough: just sin(latitude) *
+          (n_circles * 2 - 2)
+      + Make an array of points starting at prime meridian
+        + 0.5*d*(row%2)
+      - ShapeFactory.GenerateSurface( Point3d verts[][] )
+      	- Need to flesh out the Shape class for this
+      	  > Will every shape be a TriangleStripArray?
+        - For each consecutive pair of arrays of points, create a row
+      	  in the TriangleStripArray
+          - The vertex count is the sum of the number of points in
+            the two rows, plus two because two points are used twice
+          > It shouldn't matter which side the array starts with
     - Display and rotate
     - Deform the points according to my trig functions and see whether
       it produces decent-looking planets
