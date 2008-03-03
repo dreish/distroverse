@@ -2,6 +2,7 @@
   http://java.sun.com/products/java-media/3D/collateral/examples.zip
 > API documentation at: http://download.java.net/media/java3d/
   builds/release/1.5.1/java3d-1_5_1-api-docs.zip
+> M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
   - Play around with planet-building ideas
@@ -38,13 +39,19 @@
     - Make a simple server that sends the same shape to any client that
       connects to it
       > HelloServer, the server equivalent to Hello World
+      > Using the chargen server example on p393 of JNP and the number
+        server on p273 of Java in a Nutshell
       - DvtpServer base class
         - Construct with DvtpListener implementation
         - DvtpListener interface/base class
-        - DvtpThreadedListener
-          - Accepts connections on port N -- 808?
-          - Forks a thread for each new connection
-          - Listens for commands and passes them to DvtpServer them
+        x DvtpThreadedListener
+          x Accepts connections on port N -- 808?
+          x Forks a thread for each new connection
+          x Listens for commands and passes them to the DvtpServer
+        - DvtpMultiplexedListener
+          + Accepts connections on port mServer.getListenPort()
+          - Uses a selector to serve all connections in a single thread
+          - Passes commands to the DvtpServer, mServer
         - Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
       - HelloServer responds to the following commands:
