@@ -135,8 +135,10 @@
                     to the output queue?  null?  Or add a close-queue
                     method to avoid losing generality?
           - Debug
-            - baos is 1024 bytes long, even though the packet sent was
+            + baos is 1024 bytes long, even though the packet sent was
               only 9 bytes long
+            - mQueueWatchers is empty when activateQueueWatcher() gets
+              called
         - GET //blah/blah/blah
           > This is for WWW-like resource URLs (dvrp?)
           - Result is a single length-prefixed object (as in DVTP),

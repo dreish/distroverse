@@ -78,6 +78,11 @@ public class NetOutQueue< T >
          }
       }
 
+   public void write() throws Exception
+      {
+      mObjectStreamer.write( mClient );
+      }
+
    // FIXME duplicate with NetInQueue
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }

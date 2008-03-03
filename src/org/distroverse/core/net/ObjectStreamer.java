@@ -5,6 +5,7 @@ import java.io.*;
 import java.nio.*;
 //import java.nio.channels.*;
 //import java.nio.charset.*;
+import java.nio.channels.SocketChannel;
 
 /**
  * An ObjectStreamer works on a NetOutQueue of objects of class T, and
@@ -61,6 +62,15 @@ public abstract class ObjectStreamer< T >
       mPosition += bytes_to_write;
       
       return bytes_to_write;
+      }
+   
+   synchronized public void write( SocketChannel client )
+   throws Exception
+      {
+      mBuffer.clear();
+      writeBytes( mBuffer, mBuffer.capacity() );
+      mBuffer.flip();
+      client.write( mBuffer );
       }
    
    /**

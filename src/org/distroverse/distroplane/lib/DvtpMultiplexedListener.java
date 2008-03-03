@@ -108,6 +108,8 @@ extends DvtpListener
                acceptConnection( key );
             if ( key.isReadable() )
                readConnection( key );
+            if ( key.isWritable() )
+               writeConnection( key );
             }
          catch ( Exception e )
             {
@@ -124,7 +126,7 @@ extends DvtpListener
    private void acceptConnection( SelectionKey key )
    throws IOException
       {
-      System.err.println( "accept_connection called" );
+      System.err.println( "acceptConnection called" );
       ServerSocketChannel server = (ServerSocketChannel) key.channel();
       SocketChannel       client = server.accept();
       if ( client == null )  return;
@@ -164,6 +166,7 @@ extends DvtpListener
       NetOutQueue< Object > noqs = new NetOutQueue< Object >(
             streamer, DEFAULT_QUEUE_SIZE, mSelector, client );
       new NetSession< Object >( niqs, noqs );
+      mWatcher.addQueue( niqs );
       /* activateNetworkReader() creates a SelectionKey and attaches
        * niqs to it, so all three of the above objects survive at least
        * as long as the SelectionKey survives.
@@ -174,16 +177,26 @@ extends DvtpListener
    private void readConnection( SelectionKey key )
    throws Exception
       {
+      System.err.println( "readConnection called" );
       @SuppressWarnings( "unchecked" )
       NetSession< Object > session 
          = (NetSession< Object >) key.attachment();
       session.getNetInQueue().read();
-      // XXX Now no one calls DvtpServer.handleCommand()
+      }
+
+   private void writeConnection( SelectionKey key )
+   throws Exception
+      {
+      System.err.println( "writeConnection called" );
+      @SuppressWarnings( "unchecked" )
+      NetSession< Object > session 
+         = (NetSession< Object >) key.attachment();
+      session.getNetOutQueue().write();
       }
 
 //   private int                 mNumThreads;
    private ServerSocketChannel    mServerChannel;
    private Selector               mSelector;
-   private Class<P>               mParserClass;
-   private Class<S>               mStreamerClass;
+   private Class< P >             mParserClass;
+   private Class< S >             mStreamerClass;
    }

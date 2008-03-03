@@ -53,15 +53,15 @@ public final class HelloServer extends DvtpServer
     */
    public static void main( String[] args )
       {
-      // TODO Auto-generated method stub
       DvtpListener l 
       = new DvtpMultiplexedListener< DvtpFlexiParser, 
                                      DvtpFlexiStreamer >
                ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
       HelloServer hs = new HelloServer( l );
-      l.serve();
       NetInQueueWatcher< Object > watcher_thread =
          new DvtpInQueueObjectWatcher( hs );
-      watcher_thread.run();
+      watcher_thread.start();
+      l.setWatcher( watcher_thread );
+      l.serve();  // Does not return.
       }
    }

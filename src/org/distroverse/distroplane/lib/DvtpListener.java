@@ -3,6 +3,8 @@
  */
 package org.distroverse.distroplane.lib;
 
+import org.distroverse.core.net.NetInQueueWatcher;
+
 /**
  * @author dreish
  */
@@ -20,5 +22,11 @@ public abstract class DvtpListener
    public void setServer( DvtpServer server )
       {  mServer = server;  }
 
-   protected DvtpServer mServer;
+   public void setWatcher( NetInQueueWatcher< Object > watcher_thread )
+      {
+      mWatcher = watcher_thread;
+      }
+
+   protected DvtpServer                  mServer;
+   protected NetInQueueWatcher< Object > mWatcher;
    }

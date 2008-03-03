@@ -37,7 +37,8 @@ public abstract class ObjectParser< T >
       if ( ! input.hasArray() )
          throw new IllegalArgumentException( "input with no array" );
       mBaos.write( input.array(), input.arrayOffset(),
-                   input.capacity() );
+                   input.limit() );
+      input.clear();
       parseObjects( mBaos, mQueue );
       }
 
