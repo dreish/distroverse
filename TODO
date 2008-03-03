@@ -184,6 +184,10 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
+  - iTunes-like interface for managing in-world objects and inventory
+    > Ideally, there would be a single interface for both categories,
+      but that raises a big question mark about how (and where) to
+      implement such a thing
   - Standardize Autofill EARLY
   x WibbleConfrobulator class
   - When graying out a menu item, give a reason for doing so; hovering
