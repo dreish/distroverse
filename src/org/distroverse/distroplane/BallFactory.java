@@ -43,7 +43,7 @@ public class BallFactory extends ShapeFactory
    public Shape generate()
       {
       Point3d vertices[][] = generateVertices();
-      return generateSurface( vertices, true );
+      return generateSurface( vertices );
       }
    
    private Point3d[][] generateVertices()
@@ -69,11 +69,15 @@ public class BallFactory extends ShapeFactory
       int n_points = Util.safeInt( 
                Math.round((total_rows * 2 - 2) 
                           * Math.sin( latitude )));
+      double circle_divisions = n_points;
+      // Make sure the last point is the same as the first one:
+      if ( n_points > 1 )  ++n_points;
       vertices[ row ] = new Point3d[ n_points ];
       double offset = (row % 2 == 1) ? 0.5 : 0.0;
       for ( int i = 0; i < n_points; ++i )
          {
-         double longitude = Math.PI * (i + offset) / n_points;
+         double longitude = 2.0 * Math.PI * (i + offset) 
+                            / circle_divisions;
          double x = Math.sin( longitude ) * circle_radius;
          double z = Math.cos( longitude ) * circle_radius;
          vertices[ row ][ i ] = new Point3d( x, y, z );

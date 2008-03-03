@@ -16,15 +16,11 @@ public abstract class ShapeFactory implements Factory
     * Point3ds.  Useful in a variety of subclasses.
     * @param vertices - A two-dimensional array of points to
     * be knitted together into a surface
-    * @param is_closed - Does each row represent a closed curve?
-    * (N.B.: to close the ends, make the first and last row
-    * the same)
     * @return An org.distoverse.core.Shape connecting the given
     * points with triangles that are as close to equilateral as
     * possible
     */
-   protected static Shape generateSurface( Point3d[][] vertices,
-                                           boolean     is_closed )
+   protected static Shape generateSurface( Point3d[][] vertices )
       {
       List<Point3d> triangle_strips = new ArrayList<Point3d>();
       for ( int i = 0; i < vertices.length - 1; ++i )
@@ -49,14 +45,11 @@ public abstract class ShapeFactory implements Factory
     * @param target - An existing vertex array to which to append
     * @param row_0 - One row of points
     * @param row_1 - The other row of points
-    * @param is_closed - Whether or not the first point in each row
-    * should be reused at the end of that row
     * @return The number of vertices added for this strip
     */
    private static void connectWithTriangles( List<Point3d> target,
                                              Point3d[] row_0,
-                                             Point3d[] row_1,
-                                             boolean is_closed )
+                                             Point3d[] row_1 )
       {
       int index[]      = { 0, 0 };
       Point3d[][]row   = { row_0, row_1 };
