@@ -17,8 +17,17 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
                                     NetOutQueue< Object > queue )
    throws Exception
       {
-      // TODO Auto-generated method stub
-
+      Object next_object = queue.remove();
+      if ( next_object instanceof String )
+         {
+         baos.write( ((String) next_object).getBytes( "UTF-8" ) );
+         }
+      else
+         {
+         System.err.println( "DvtpFlexiParser.streamObjects can't yet"
+                             + " handle non-string objects" );
+         throw new RuntimeException( "unimplemented object type" );
+         }
       }
 
    }

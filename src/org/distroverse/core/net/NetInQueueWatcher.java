@@ -10,6 +10,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
    public NetInQueueWatcher()
       {
       super();
+      mWatchedQueues = new LinkedList< NetInQueue< T > >();
       }
    
    /* (non-Javadoc)

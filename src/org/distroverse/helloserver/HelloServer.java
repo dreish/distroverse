@@ -21,9 +21,9 @@ public final class HelloServer extends DvtpServer
     */
    @Override
    public void handleGet( String url, NetOutQueue< Object > noq )
+   throws IOException
       {
-      // TODO Auto-generated method stub
-      
+      noq.add( "What do you expect to find at " + url + "?\r\n" );
       }
 
    /* (non-Javadoc)
@@ -34,7 +34,7 @@ public final class HelloServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "I always respond thusly\r\n" );
+      noq.add( "So, you want to go to " + location + "?\r\n" );
       }
 
    /* (non-Javadoc)
@@ -43,9 +43,9 @@ public final class HelloServer extends DvtpServer
    @Override
    public void handleProxyOpen( String token,
                                 NetOutQueue< Object > noq )
+   throws IOException
       {
-      // TODO Auto-generated method stub
-      
+      noq.add( "Tell me more about " + token + ".\r\n" );
       }
 
    /**
@@ -58,7 +58,10 @@ public final class HelloServer extends DvtpServer
       = new DvtpMultiplexedListener< DvtpFlexiParser, 
                                      DvtpFlexiStreamer >
                ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
-      new HelloServer( l );
+      HelloServer hs = new HelloServer( l );
       l.serve();
+      NetInQueueWatcher< Object > watcher_thread =
+         new DvtpInQueueObjectWatcher( hs );
+      watcher_thread.run();
       }
    }

@@ -72,6 +72,7 @@ public abstract class DvtpServer
    public abstract void handleLocation( String location,
                                         NetOutQueue< Object > noq )
    throws IOException;
+   
    /**
     * Get an arbitrary resource by URL.  This mimics the GET method of
     * an HTTP server to some extent, but a DVTP server does not ever
@@ -82,6 +83,7 @@ public abstract class DvtpServer
    public abstract void handleGet( String url,
                                    NetOutQueue< Object > noq )
    throws IOException;
+   
    /**
     * Handles the PROXYOPEN command, which is the handshake that begins
     * a session between proxy and server.  The response, and every
@@ -91,6 +93,7 @@ public abstract class DvtpServer
    public abstract void handleProxyOpen( String token,
                                          NetOutQueue< Object > noq )
    throws IOException;
+   
    /**
     * Handles any unrecognized command by printing an error message.
     * @param token

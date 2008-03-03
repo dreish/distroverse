@@ -117,14 +117,14 @@
                   DvtpMultiplexedListener constructor
                   + NetInQueueWatcher<T>
                   + DvtpMultiplexedListener cannot be generic on T
-                  - Implement niqw<Object> as DvtpInQueueStringWatcher
+                  + Implement niqw<Object> as DvtpInQueueStringWatcher
                     + Construct with reference to server
-                    - handleNetInObject() dispatches command with
+                    + handleNetInObject() dispatches command with
                       mServer.handleCommand()
                       x Where do I get the client and buffer for
                         handleCommand()?
                         > I don't
-                      - Change handleCommand() to write to a NetOutQueue
+                      + Change handleCommand() to write to a NetOutQueue
                 - With each new connection opened, add the input queue
                   to the watcher thread and niq.addQueueReader( t )
                 - Need to make sure everything gets deleted when the
@@ -134,6 +134,9 @@
                   > Might want to add a special close-connection object
                     to the output queue?  null?  Or add a close-queue
                     method to avoid losing generality?
+          - Debug
+            - baos is 1024 bytes long, even though the packet sent was
+              only 9 bytes long
         - GET //blah/blah/blah
           > This is for WWW-like resource URLs (dvrp?)
           - Result is a single length-prefixed object (as in DVTP),

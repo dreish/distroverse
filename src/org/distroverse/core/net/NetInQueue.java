@@ -13,6 +13,7 @@ public class NetInQueue< T >
                       SocketChannel client )
       {
       mContents         = new LinkedList< T >();
+      mQueueWatchers    = new LinkedList< NetInQueueWatcher< T > >();
       mMaxLength        = max_length;
       mObjectParser = op;
       op.setQueue( this );

@@ -36,9 +36,6 @@ extends DvtpListener
       super();
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
-      NetInQueueWatcher< Object > watcher_thread =
-         new DvtpInQueueObjectWatcher( mServer );
-      watcher_thread.run();
 //      mNumThreads = DEFAULT_NUM_THREADS;
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
@@ -115,6 +112,7 @@ extends DvtpListener
          catch ( Exception e )
             {
             key.cancel();
+            e.printStackTrace();
             try 
                {  key.channel().close();  }
             catch ( IOException e2 )
