@@ -55,11 +55,24 @@
         + Dispatches commands to functions that must be implemented by
           subclass of DvtpServer
       - NetOutQueue
-        - Constructed with an ObjectStreamer object
-        - Any time there is an object in the queue, it asks the
+        + Constructed with an ObjectStreamer object and max_length
+          > The max_length is artificially enforced to prevent the queue
+            from growing without bound when a client becomes net-dead
+        - Either ObjectStreamer or NetOutQueue should have a method for
+          writing the buffer to the SocketChannel
+        x Any time there is an object in the queue, it asks the
           ObjectStreamer for up to N bytes to send
-        - NetOutQueue tells the Selector to wake-on-writable
-        - The ObjectStreamer can access and delete the head of the queue
+        + NetOutQueue tells the Selector to wake-on-writable when it
+          goes from empty to non-empty
+          > activateNetworkWriter()
+        - ObjectStreamer tells the Selector (through NetOutQueue) to
+          stop waking-on-writable when it finishes writing the last
+          object (there must be only one NetOutQueue in use for a given 
+          network connection)
+          > stopNetworkWriter()
+        + The ObjectStreamer can access and delete the head of the queue
+          + Make a StringLineStreamer to illustrate (and to reimplement
+            the server)
         - The ObjectStreamer will keep a pointer to the next chunk to
           feed
         - An ObjectStreamer could take file objects and feed bytes; it
@@ -125,7 +138,7 @@
   + <T> T foldr( T[], folder )
     + Why can't I have a public abstract static method (in
       FoldingFunction)?
-      > Doesn't need to be static
+      > Doesn't need to be static, does need to be abstract
     x How does Callable work, and would it be sufficient for this?
   + PointArray class in DVTP
   + Package up a TriangleStripArray into a Shape class

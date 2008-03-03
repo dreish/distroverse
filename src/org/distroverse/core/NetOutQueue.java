@@ -1,38 +1,82 @@
 package org.distroverse.core;
 
 import java.util.*;
+import java.nio.*;
+import java.nio.channels.*;
+
 import org.distroverse.core.*;
 
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a
  * network connection. A NetOutQueue tells a network socket, when it has
  * data to send, to monitor that network connection for writability
- * status.
+ * status.  A NetOutQueue is constructed with an ObjectStreamer subclass
+ * that determines how add()ed objects are encoded.  It is expected that
+ * multiple threads will need to add and remove from the queue, so all
+ * methods are synchronized.
  * 
  * @author dreish
  */
 public class NetOutQueue< T >
    {
-   public NetOutQueue( ObjectStreamer< T > os )
+   public NetOutQueue( ObjectStreamer< T > os,
+                       int max_length,
+                       Selector s,
+                       SocketChannel client )
       {
       mContents       = new LinkedList< T >();
+      mMaxLength      = max_length;
       mObjectStreamer = os;
       os.setQueue( this );
+      mWriterKey      = null;
+      mSelector       = s;
+      mClient         = client;
       }
    
    public void add( T o )
+   throws ClosedChannelException
       {
-      
+      if ( ! offer( o ) )
+         throw new BufferOverflowException();
       }
    
-   public boolean offer( T o )
+   synchronized public boolean offer( T o )
+   throws ClosedChannelException
       {
-      
+      if ( mContents.size() >= mMaxLength )
+         return false;
+      mContents.add( o );
+      if ( mContents.size() == 1 )
+         activateNetworkWriter();
+      return true;
       }
    
-   public int size()
+   synchronized public T remove()
+      {
+      return mContents.remove();
+      }
+   
+   synchronized public int size()
       {
       return mContents.size();
+      }
+   
+   synchronized public void stopNetworkWriter()
+      {
+      if ( mWriterKey != null )
+         mWriterKey.cancel();
+      mWriterKey = null;
+      }
+   
+   synchronized private void activateNetworkWriter()
+   throws ClosedChannelException
+      {
+      if ( mWriterKey == null )
+         {
+         mWriterKey = mClient.register( mSelector,
+                                        SelectionKey.OP_WRITE );
+         mWriterKey.attach( mObjectStreamer );
+         }
       }
    
    /* Plan:
@@ -43,5 +87,9 @@ public class NetOutQueue< T >
     */
 
    private LinkedList< T >     mContents;
+   private int                 mMaxLength;
    private ObjectStreamer< T > mObjectStreamer;
+   private SelectionKey        mWriterKey;
+   private Selector            mSelector;
+   private SocketChannel       mClient;
    }

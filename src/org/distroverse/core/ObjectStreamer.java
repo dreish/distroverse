@@ -15,30 +15,40 @@ import java.nio.*;
  */
 public abstract class ObjectStreamer< T >
    {
+   public ObjectStreamer( ByteBuffer b )
+      {
+      super();
+      mBuffer = b;
+      mBaos = new ByteArrayOutputStream();
+      }
+
    public void setQueue( NetOutQueue< T > queue )
       {
       mQueue = queue;
       mPosition = 0;
-      mBaos = new ByteArrayOutputStream();
       }
    
    /**
     * If there is data remaining to be written from the queue, this
     * method writes at least 1 and at most bytes_requested bytes to
     * output, returning the number of bytes written.  Otherwise it
-    * clears output.
-    * and returns 0.
+    * clears output, stops the Selector (via the queue), and returns 0.
     * @param output
     * @param bytes_requested
     * @return
     */
-   public int getBytes( ByteBuffer output, int bytes_requested )
+   synchronized public int 
+   writeBytes( ByteBuffer output, int bytes_requested )
+   throws Exception
       {
+      if ( bytes_requested == 0 )
+         return 0;
+
       if ( empty() )
          {
          mBaos.reset();
          mPosition = 0;
-         getNextObject( mBaos, mQueue );
+         streamNextObject( mBaos, mQueue );
          }
 
       byte[] baos_contents = mBaos.toByteArray();
@@ -46,12 +56,34 @@ public abstract class ObjectStreamer< T >
       bytes_to_write = mBaos.size() - mPosition;
       if ( bytes_to_write > bytes_requested )
          bytes_to_write = bytes_requested;
-      output.put( baos_contents, mPosition, bytes_to_write );
+      if ( bytes_to_write > 0 )
+         output.put( baos_contents, mPosition, bytes_to_write );
+      else
+         mQueue.stopNetworkWriter();
+      
       return bytes_to_write;
       }
    
+   /**
+    * Subclasses must implement this method: take the head object in the
+    * queue, write it to baos, and remove it from the queue.  It must do
+    * nothing when the queue is empty.  The method must be threadsafe,
+    * by synchronizing all access to queue, and by being itself
+    * synchronized, which is guaranteed to make modification of baos
+    * threadsafe.
+    * @param baos
+    * @param queue
+    */
    abstract protected void 
-   getNextObject( ByteArrayOutputStream baos, NetOutQueue< T > queue );
+   streamNextObject( ByteArrayOutputStream baos,
+                     NetOutQueue< T > queue )
+   throws Exception;
+   
+   protected void setByteBuffer( ByteBuffer b )
+      {  mBuffer = b;  }
+
+   public ByteBuffer getByteBuffer()
+      {  return mBuffer;  }
    
    private boolean empty()
       {
@@ -60,5 +92,6 @@ public abstract class ObjectStreamer< T >
    
    private NetOutQueue< T > mQueue;
    private int mPosition;
-   private ByteArrayOutputStream mBaos; 
+   private ByteArrayOutputStream mBaos;
+   private ByteBuffer mBuffer;
    }
