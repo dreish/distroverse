@@ -31,35 +31,34 @@ public class DvtpMultiplexedListener extends DvtpListener
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.distroplane.lib.DvtpListener#listen()
+    * @see org.distroverse.distroplane.lib.DvtpListener#serve()
     */
    @Override
    public void serve()
       {
-      for ( int i = 1; i < mNumThreads; ++i )
-         createThread();
-      // Each of the N-1 threads created above calls listen().  This
-      // thread will now do the same:
-      listen();
+      // Set up the sockets
+      try
+         {
+         mServerChannel  = ServerSocketChannel.open();
+         mSelector       = Selector.open();
+         // Bind the socket to the DvtpServer's port number
+         ServerSocket ss = mServerChannel.socket();
+         ss.bind( new InetSocketAddress( mServer.getListenPort() ) );
+         mServerChannel.configureBlocking( false );
+         // SocketChannel client = server_channel.accept();
+         mServerChannel.register( mSelector, SelectionKey.OP_ACCEPT );
+
+         listen();
+         }
+      catch ( IOException e )
+         {
+         // FIXME better exception handling/logging here
+         System.err.println( "Unhandled exception: " + e );
+         // Returns without listening; it is assumed that the socket
+         // could not be created.
+         }
       }
    
-   /**
-    * Simple inner class to call listen() in a thread.
-    * @author dreish
-    */
-   private class ListenerThread extends Thread
-      {
-      public ListenerThread()  {  /* Do nothing. */  }
-      @Override
-      public void run()  {  DvtpMultiplexedListener.this.listen();  }
-      }
-
-   private void createThread()
-      {
-      ListenerThread t = new ListenerThread();
-      t.start();
-      }
-
    /**
     * This function does not return.  When it receives a connection, it
     * creates a new listener thread to take over the job of listening
@@ -68,27 +67,76 @@ public class DvtpMultiplexedListener extends DvtpListener
     * 
     * Exceptions are ignored.
     * 
-    * XXX Handle IOException properly
+    * FIXME Handle IOException properly
     */
    protected void listen()
       {
-      ServerSocketChannel server;
-      try
+      boolean encountered_fatal_exception = false;
+      while ( ! encountered_fatal_exception )
          {
-         ByteBuffer read_buffer = new ByteBuffer();
-         server = ServerSocketChannel.open();
-         ServerSocket ss = server.socket();
-         ss.bind( new InetSocketAddress( 10 ) );
-         server.configureBlocking( false );
-         SocketChannel client = server.accept();
-         client.read( read_buffer );
-         }
-      catch ( IOException e )
-         {
-         System.err.println( "Unhandled exception: " + e );
+         try
+            {
+            mSelector.select();
+            process_io();
+            }
+         catch ( IOException e )
+            {
+            // FIXME better exception handling/logging here
+            System.err.println( "Unhandled exception: " + e );
+            encountered_fatal_exception = true;
+            }
          }
       }
    
-   int mNumThreads;
-   CharsetEncoder mEncoder;
+   private void process_io()
+      {
+      for ( SelectionKey key : mSelector.selectedKeys() )
+         {
+         try
+            {
+            if ( key.isAcceptable() )
+               accept_connection( key );
+            else if ( key.isReadable() )
+               read_connection( key );
+            }
+         catch ( IOException e )
+            {
+            key.cancel();
+            try 
+               {  key.channel().close();  }
+            catch ( IOException e2 )
+               {  System.err.println( "Unhandled exception: " + e );  }
+            }
+         }
+      }
+   
+   void accept_connection( SelectionKey key )
+   throws IOException
+      {
+      ServerSocketChannel server = (ServerSocketChannel) key.channel();
+      SocketChannel       client = server.accept();
+      client.configureBlocking( false );
+      SelectionKey tmp_key = client.register( mSelector,
+                                              SelectionKey.OP_READ );
+      // XXX The design imposes an unreasonable limit on request length
+      tmp_key.attach( ByteBuffer.allocate( 1024 ) );
+      }
+
+   void read_connection( SelectionKey key )
+   throws IOException
+      {
+      SocketChannel client = (SocketChannel) key.channel();
+      ByteBuffer    buffer = (ByteBuffer) key.attachment();
+      client.read( buffer );
+      String command = "";
+      while ( buffer.hasRemaining() )
+         command += buffer.get();
+      buffer.clear();
+      mServer.handleCommand( command, buffer );
+      }
+
+   int                 mNumThreads;
+   CharsetEncoder      mEncoder;
+   ServerSocketChannel mServerChannel;
+   Selector            mSelector;
    }
