@@ -1,7 +1,7 @@
 package org.distroverse.distroplane;
 
 import org.distroverse.dvtp.*;
-import org.distroverse.core.*;
+//import org.distroverse.core.*;
 import javax.vecmath.*;
 import java.util.*;
 
@@ -29,8 +29,7 @@ public abstract class ShapeFactory implements Factory
               || vertices[ i+1 ].length > 1 )
             connectWithTriangles( triangle_strips,
                                   vertices[ i   ],
-                                  vertices[ i+1 ],
-                                  is_closed );
+                                  vertices[ i+1 ] );
          }
       // TODO Implement generateSurface()
       return null;
@@ -56,10 +55,29 @@ public abstract class ShapeFactory implements Factory
       int current_row  = longerDiagonal( row[0], row[1], 
                                          index[0], index[1], 1.0 );
       
-      while ( index[0] < row[0].length
-              ||  index[1] < row[1].length )
+      assert( index[ current_row ] < row[ current_row ].length - 1 );
+      while (    index[0] < row[0].length
+              || index[1] < row[1].length )
          {
-         
+         target.add( row[ current_row ][ index[current_row] ] );
+         if ( (   index[0] < row[0].length - 1
+               || index[1] < row[1].length - 1)
+              && longerDiagonal( row[ current_row ],
+                                 row[ 1 - current_row ],
+                                 index[ current_row ],
+                                 index[ 1 - current_row ],
+                                 1.01 ) == 1 )
+            {
+            target.add( row[ 1 - current_row ]
+                           [ index[1-current_row] ] );
+            target.add( row[ current_row ][ index[current_row] ] );
+            ++index[ 1 - current_row ];
+            }
+         else
+            {
+            ++index[ current_row ];
+            current_row = 1 - current_row;
+            }
          }
       }
    
