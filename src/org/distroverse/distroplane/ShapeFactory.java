@@ -5,8 +5,6 @@ import org.distroverse.dvtp.*;
 import javax.vecmath.*;
 import java.util.*;
 
-// import org.distroverse.core.*;
-
 public abstract class ShapeFactory implements Factory
    {
    abstract public Shape generate();
@@ -22,7 +20,11 @@ public abstract class ShapeFactory implements Factory
     */
    protected static Shape generateSurface( Point3d[][] vertices )
       {
+      if ( vertices.length < 2 )
+         throw new IllegalArgumentException( "A surface must have" 
+                       + "at least two rows of points" );
       List<Point3d> triangle_strips = new ArrayList<Point3d>();
+      int vertex_counts[] = new int[ vertices.length - 1 ];
       for ( int i = 0; i < vertices.length - 1; ++i )
          {
          if (    vertices[ i   ].length > 1 
@@ -31,8 +33,7 @@ public abstract class ShapeFactory implements Factory
                                   vertices[ i   ],
                                   vertices[ i+1 ] );
          }
-      // TODO Implement generateSurface()
-      return null;
+      return new Shape( triangle_strips, vertex_counts );
       }
 
    /**
@@ -73,6 +74,11 @@ public abstract class ShapeFactory implements Factory
             target.add( row[ 1 - current_row ]
                            [ index[1-current_row] ] );
             target.add( row[ current_row ][ index[current_row] ] );
+            /* This advances the "other" row (row 1 in the
+             * longerDiagonal call above), so I am claiming that that
+             * row cannot be at its last point here, because if row 1
+             * were at its end, longerDiagonal would have returned 0.
+             */
             ++index[ 1 - current_row ];
             }
          else

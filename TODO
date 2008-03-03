@@ -3,8 +3,8 @@
     http://java.sun.com/products/java-media/3D/collateral/examples.zip
   > API documentation at: http://download.java.net/media/java3d/
     builds/release/1.5.1/java3d-1_5_1-api-docs.zip
-  - PointArray class in DVTP
-    - Custom serialization to guarantee standardization of protocol
+  + PointArray class in DVTP
+  + Package up a TriangleStripArray into a Shape class
   - Play around with planet-building ideas
     - Create a spheroid polyhedron with N roughly equally-spaced
       points
@@ -35,6 +35,8 @@
     - Display and rotate
     - Deform the points according to my trig functions and see whether
       it produces decent-looking planets
+  - Add textures to Shape class
+    - Specify color of each triangle
   - Write a simple Java3D app
     + Create a cube
     - Create methods to set its position, velocity, & acceleration
@@ -43,6 +45,8 @@
     can display them
   - Test performance of Java3D and of pushing objects from client to
     server; compare
+  - Override default serialization in PointArray to guarantee that the
+    protocol doesn't change due to changes in Point3d's serialization
   - core.DataPackage (abstract)
     - Find out whether something like this already exists
       > Presents a simple array of objects
@@ -53,7 +57,7 @@
   	- core.DataPackageGzip
   	  > Gzips entire package to serialize
   	- core.DataPackageTgz
-  	  > Wraps everything in a 
+  	  > Wraps everything in a gzipped tarball
   + Check everything into SVN
     > Too easy!
   + Set up backups for svn repository
