@@ -6,12 +6,17 @@
 
 - To do for 0.01:
   - Make a client that only understands the about:hello URL
-    - Obviously need some sort of rendering window thingy
+    + Obviously need some sort of rendering window thingy
       + Download jME
-      - Get an example app; see how they do it
+      + Get an example app; see how they do it
+      + Get the client running s.t. it produces a window but doesn't do
+        anything with it
     - Implement ultra-dumb setUrl()
+      - At top level, this sets the URL display in the HUD
       - If URL is about:hello, reset the render window and dump a
         predefined set of objects into it (maybe loaded from a file)
+        - Implement AboutControllerPipeline()
+          - Does my TriangleStripArray-based approach translate to jME?
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise

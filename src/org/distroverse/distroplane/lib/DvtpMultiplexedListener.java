@@ -58,14 +58,15 @@ extends DvtpListener
          mServerChannel.configureBlocking( false );
          // SocketChannel client = server_channel.accept();
          mServerChannel.register( mSelector, SelectionKey.OP_ACCEPT );
+         Log.p( "Listening for connections", Log.NET, -40 );
 
          listen();
          }
       catch ( IOException e )
          {
-         // FIXME better exception handling/logging here
          Log.p( "Unhandled exception: " + e, 
                 Log.NET | Log.UNHANDLED, 1 );
+         Log.p( e, Log.NET | Log.UNHANDLED, 1 );
          // Returns without listening; it is assumed that the socket
          // could not be created.
          }
@@ -93,9 +94,9 @@ extends DvtpListener
             }
          catch ( IOException e )
             {
-            // FIXME better exception handling/logging here
             Log.p( "Unhandled exception: " + e, 
                    Log.NET | Log.UNHANDLED, 1 );
+            Log.p( e, Log.NET | Log.UNHANDLED, 1 );
             encountered_fatal_exception = true;
             }
          }
@@ -182,6 +183,8 @@ extends DvtpListener
        * as long as the SelectionKey survives.
        */ 
       niqs.activateNetworkReader();
+      if ( mGreeting != null )
+         noqs.add( mGreeting );
       }
 
    private void readConnection( SelectionKey key )

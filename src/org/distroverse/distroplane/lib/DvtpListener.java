@@ -23,10 +23,12 @@ public abstract class DvtpListener
       {  mServer = server;  }
 
    public void setWatcher( NetInQueueWatcher< Object > watcher_thread )
-      {
-      mWatcher = watcher_thread;
-      }
+      {  mWatcher = watcher_thread;  }
+
+   public void setGreeting( String greeting )
+      {  mGreeting = greeting;  }
 
    protected DvtpServer                  mServer;
    protected NetInQueueWatcher< Object > mWatcher;
+   protected String                      mGreeting;
    }
