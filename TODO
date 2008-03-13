@@ -364,6 +364,12 @@
   - Distroversity!  The name is too good not to use
     > a.k.a. DVU (but this also refers to a far-right party in Germany)
     - Darc tutorials:
+      > Will need to address objections to Lisp
+        > Lack of syntax (explain that this may look confusing at first,
+          but is quickly learned, and is related to many powerful
+          abilities that other languages don't have)
+        > Symbols seem like retarded strings (they are more like
+          variable names -- don't think of them as strings)
       - For people who have never programmed before
       - For people with limited programming experience in one language
         - Visual Basic (see "never programmed before")
@@ -375,6 +381,10 @@
       - For Lisp hackers who have never tried Arc
       - For Arc hackers
         - The shortest and easiest one to write; do this first
+  - Darc editor: paren/bracket coloring
+    - Could do this strictly in the proxy, by updating html
+    - Or perhaps bind ( to commands color/insert/send/color
+  - Use bittorrent for downloading proxies?
   x Distroplane: object scripting bytecode language
     > Distrocode?
     x Objects have properties, some of which can be attached bytecode
