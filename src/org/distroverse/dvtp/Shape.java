@@ -63,7 +63,7 @@ public class Shape implements Serializable
       return new TriMesh( "DvtpShape", 
                           mPoints.asFloatBuffer(),
                           null, null, null,
-                          new IntBuffer( mVertexCounts ) );
+                          IntBuffer.wrap( mVertexCounts ) );
       }
 
    // TODO Add texture fields and methods.
