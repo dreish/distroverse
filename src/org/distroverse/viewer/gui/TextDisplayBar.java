@@ -54,7 +54,7 @@ public class TextDisplayBar extends Element
                              0.001f, true, true, true );
             Text3D text = font.createText( getText(), 50.0f, 0 );
             setTextObject( text );
-            text.setLocalScale( new Vector3f( 5.0f, 5.0f, 0.01f ) );
+            text.setLocalScale( new Vector3f( 50.0f, 50.0f, 0.01f ) );
             parent.attachChild( text );
             return null;
             }

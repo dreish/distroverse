@@ -24,11 +24,11 @@
           + Find an example of flat 3D text
             > Test3DFlatText, anyone?
           + Attach it to the root node as in TestStandardGame
-          - Why doesn't it display?
+          + Why doesn't it display?
             + Put all the functionality of Test3DFlatText in
               ViewerWindow constructor
               > It works
-            - Change things one-by-one until they match what I'm trying
+            + Change things one-by-one until they match what I'm trying
               to do with TextDisplayBar
               + Move the whole thing into the TextDisplayBar ctor
                 > It fails
@@ -42,9 +42,11 @@
                   the correct root node
                 > It's not really the "root" node; I'm missing the calls
                   to attach it to the debug game state
-              - Move it into a method
-          - Figure out how to make it orthographic
-          - Make a separate GUI root node
+              + Move it into a method
+          + Figure out how to make it orthographic
+            > For some reason it still disappears from the display
+              sometimes
+          + Make a separate GUI root node
       - If URL is about:hello, reset the render window and dump a
         predefined set of objects into it (maybe loaded from a file)
         - Implement AboutControllerPipeline()
