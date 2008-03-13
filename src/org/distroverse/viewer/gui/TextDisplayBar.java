@@ -16,14 +16,22 @@ public class TextDisplayBar extends Element
       {
       super( parent );
       mText = "";
-      addToParent( parent );
+      addToParent( parent, 0, 0 );
       }
    
    public TextDisplayBar( final Node parent, String init_text )
       {
       super( parent );
       mText = init_text;
-      addToParent( parent );
+      addToParent( parent, 0, 0 );
+      }
+
+   public TextDisplayBar( final Node parent, float x, float y,
+                          String init_text )
+      {
+      super( parent );
+      mText = init_text;
+      addToParent( parent, x, y );
       }
 
    /**
@@ -42,7 +50,8 @@ public class TextDisplayBar extends Element
    public void setTextObject( JmeText text_object )
       {  mTextObject = text_object;  }
    
-   private void addToParent( final Node parent )
+   private void addToParent( final Node parent, 
+                             final float x, final float y )
       {
       GameTaskQueueManager.getManager()
                           .update( new Callable< Object >()
@@ -50,11 +59,12 @@ public class TextDisplayBar extends Element
          public Object call() throws Exception
             {
             Font3D font 
-               = new Font3D( new Font( "Arial", Font.PLAIN, 24 ),
+               = new Font3D( new Font( "Helvetica", Font.PLAIN, 24 ),
                              0.001f, true, true, true );
             Text3D text = font.createText( getText(), 50.0f, 0 );
             setTextObject( text );
             text.setLocalScale( new Vector3f( 50.0f, 50.0f, 0.01f ) );
+            text.setLocalTranslation( new Vector3f( x, y, 0 ) );
             parent.attachChild( text );
             return null;
             }

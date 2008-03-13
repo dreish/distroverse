@@ -47,6 +47,7 @@
             > For some reason it still disappears from the display
               sometimes
           + Make a separate GUI root node
+          - Position the line at the top of the window
       - If URL is about:hello, reset the render window and dump a
         predefined set of objects into it (maybe loaded from a file)
         - Implement AboutControllerPipeline()
