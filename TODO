@@ -385,6 +385,8 @@
     - Could do this strictly in the proxy, by updating html
     - Or perhaps bind ( to commands color/insert/send/color
   - Use bittorrent for downloading proxies?
+    > Comes with default file to check for updates
+    > User can add/remove index files of course
   x Distroplane: object scripting bytecode language
     > Distrocode?
     x Objects have properties, some of which can be attached bytecode
