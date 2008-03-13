@@ -3,6 +3,8 @@
  */
 package org.distroverse.viewer;
 
+import org.distroverse.dvtp.Shape;
+
 import com.jmex.game.StandardGame;
 
 /**
@@ -15,7 +17,7 @@ public class AboutControllerPipeline extends ControllerPipeline
    public AboutControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window )
       {
-      // TODO Auto-generated constructor stub
+      window.getWorld().addShape( new Shape() );
       }
    
    @Override

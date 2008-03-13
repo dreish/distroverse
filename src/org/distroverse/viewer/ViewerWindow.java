@@ -20,6 +20,7 @@ public class ViewerWindow
       debug.setActive( true );
       Node root_node = debug.getRootNode();
       mGui   = new ViewerGui( root_node );
+      mWorld = new WorldGraph( root_node );
       }
    
    void setUrl( String url )
@@ -31,10 +32,11 @@ public class ViewerWindow
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    
-   // TODO UI elements will be drawn in ViewerWindow itself
+   WorldGraph getWorld()  {  return mWorld;  }
    
-   StandardGame          mGame;
-   ProxyClientConnection mProxy;
-   ControllerPipeline    mPipeline;
-   ViewerGui             mGui;
+   private StandardGame          mGame;
+   private ProxyClientConnection mProxy;
+   private ControllerPipeline    mPipeline;
+   private ViewerGui             mGui;
+   private WorldGraph            mWorld;
    }

@@ -64,7 +64,7 @@ public class TextDisplayBar extends Element
             Text3D text = font.createText( getText(), 50.0f, 0 );
             setTextObject( text );
             text.setLocalScale( new Vector3f( 50.0f, 50.0f, 0.01f ) );
-            text.setLocalTranslation( new Vector3f( x, y, 0 ) );
+            text.setLocalTranslation( new Vector3f( x, y, 1 ) );
             parent.attachChild( text );
             return null;
             }

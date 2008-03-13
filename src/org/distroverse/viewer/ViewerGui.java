@@ -12,7 +12,7 @@ public class ViewerGui
       mGuiRoot = new Node( "GUI-root" );
       mGuiRoot.setRenderQueueMode( Renderer.QUEUE_ORTHO );
       root.attachChild( mGuiRoot );
-      mLocationBar = new TextDisplayBar( mGuiRoot, 0, 50,
+      mLocationBar = new TextDisplayBar( mGuiRoot, 0, 420,
                                          "initial-text" );
       }
 
