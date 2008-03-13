@@ -5,53 +5,10 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Make a client that only understands the about:hello URL
-    + Obviously need some sort of rendering window thingy
-      + Download jME
-      + Get an example app; see how they do it
-      + Get the client running s.t. it produces a window but doesn't do
-        anything with it
-    - Implement ultra-dumb setUrl()
-      - At top level, this sets the URL display in the HUD
-        x Use FengGUI in a GameState for this
-          > Can't use FengGUI; it uses the CDDL license, which is not
-            GPL-compatible
-        + Find an example app that displays text
-          > jmetest/effects/water/TestProjectedWater.java
-          > Uses com.jme.scene.Text
-        + Create TextDisplayBar class
-        - For now, just show a bare line of text with a TextDisplayBar
-          + Find an example of flat 3D text
-            > Test3DFlatText, anyone?
-          + Attach it to the root node as in TestStandardGame
-          + Why doesn't it display?
-            + Put all the functionality of Test3DFlatText in
-              ViewerWindow constructor
-              > It works
-            + Change things one-by-one until they match what I'm trying
-              to do with TextDisplayBar
-              + Move the whole thing into the TextDisplayBar ctor
-                > It fails
-                + Is the TDB ctor getting called?
-                  > Wrong ctor
-                > It works
-              + Create a child node and add it to that instead
-                > Still works
-              + Use the passed root node instead
-                > Somehow this breaks it, even though it appears to be
-                  the correct root node
-                > It's not really the "root" node; I'm missing the calls
-                  to attach it to the debug game state
-              + Move it into a method
-          + Figure out how to make it orthographic
-            > For some reason it still disappears from the display
-              sometimes
-          + Make a separate GUI root node
-          - Position the line at the top of the window
-      - If URL is about:hello, reset the render window and dump a
-        predefined set of objects into it (maybe loaded from a file)
-        - Implement AboutControllerPipeline()
-          - Does my TriangleStripArray-based approach translate to jME?
+  - Implement AboutControllerPipeline()
+    - Clear the WorldGraph
+    - Dump a predefined set of objects into the WorldGraph
+      - Does my TriangleStripArray-based approach translate to jME?
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
@@ -269,6 +226,50 @@
     x Does anything need to be made volatile?
       > Worry about this later
   + Add a Log class and stop printing directly to stderr
+  + Make a client that only understands the about:hello URL
+    + Obviously need some sort of rendering window thingy
+      + Download jME
+      + Get an example app; see how they do it
+      + Get the client running s.t. it produces a window but doesn't do
+        anything with it
+    + Implement ultra-dumb setUrl()
+      + At top level, this sets the URL display in the HUD
+        x Use FengGUI in a GameState for this
+          > Can't use FengGUI; it uses the CDDL license, which is not
+            GPL-compatible
+        + Find an example app that displays text
+          > jmetest/effects/water/TestProjectedWater.java
+          > Uses com.jme.scene.Text
+        + Create TextDisplayBar class
+        + For now, just show a bare line of text with a TextDisplayBar
+          + Find an example of flat 3D text
+            > Test3DFlatText, anyone?
+          + Attach it to the root node as in TestStandardGame
+          + Why doesn't it display?
+            + Put all the functionality of Test3DFlatText in
+              ViewerWindow constructor
+              > It works
+            + Change things one-by-one until they match what I'm trying
+              to do with TextDisplayBar
+              + Move the whole thing into the TextDisplayBar ctor
+                > It fails
+                + Is the TDB ctor getting called?
+                  > Wrong ctor
+                > It works
+              + Create a child node and add it to that instead
+                > Still works
+              + Use the passed root node instead
+                > Somehow this breaks it, even though it appears to be
+                  the correct root node
+                > It's not really the "root" node; I'm missing the calls
+                  to attach it to the debug game state
+              + Move it into a method
+          + Figure out how to make it orthographic
+            > For some reason it still disappears from the display
+              sometimes
+          + Make a separate GUI root node
+          + Position the line at the top of the window
+      + If URL is about:hello, use an AboutControllerPipeline
 
 - To do for 0.02:
   - Add textures to Shape class
