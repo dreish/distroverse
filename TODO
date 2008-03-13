@@ -315,6 +315,7 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
+  - Swap brackets and parens (so '[' key sends '(', etc.)
   - Client: prompt user if site requests resize; one option should
     defeat malicious sites that flood the user with resize requests and
     make the client unusable without killing/restarting (i.e., "Never
