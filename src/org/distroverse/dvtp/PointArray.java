@@ -8,6 +8,8 @@
 package org.distroverse.dvtp;
 
 import java.io.Serializable;
+import java.nio.FloatBuffer;
+
 import javax.vecmath.Point3d;
 
 /**
@@ -49,4 +51,10 @@ public class PointArray implements Serializable
    // FIXME Implement PointArray.readObject()
 
    private static final long serialVersionUID = 1;
+
+   public FloatBuffer asFloatBuffer()
+      {
+      // TODO Auto-generated method stub
+      return null;
+      }
    }

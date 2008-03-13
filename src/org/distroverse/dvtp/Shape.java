@@ -8,9 +8,12 @@
 package org.distroverse.dvtp;
 
 import java.io.*;
+import java.nio.IntBuffer;
 import java.util.*;
 import javax.vecmath.*;
 import javax.media.j3d.*;
+
+import com.jme.scene.TriMesh;
 
 /**
  * This class is part of the DVTP protocol.  It defines how shapes
@@ -49,12 +52,18 @@ public class Shape implements Serializable
     */
    public TriangleStripArray asTriangleStripArray()
       {
-      TriangleStripArray ret 
-         = new TriangleStripArray( mPoints.p.length,
-                                   GeometryArray.COORDINATES 
-                                   | GeometryArray.BY_REFERENCE,
-                                   mVertexCounts );
-      return ret;
+      return new TriangleStripArray( mPoints.p.length,
+                                     GeometryArray.COORDINATES 
+                                     | GeometryArray.BY_REFERENCE,
+                                     mVertexCounts );
+      }
+   
+   public TriMesh asTriMesh()
+      {
+      return new TriMesh( "DvtpShape", 
+                          mPoints.asFloatBuffer(),
+                          null, null, null,
+                          new IntBuffer( mVertexCounts ) );
       }
 
    // TODO Add texture fields and methods.
