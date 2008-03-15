@@ -46,17 +46,17 @@ public class Shape implements Serializable
       mVertexCounts = vertex_counts;
       }
    
-   /**
-    * Get an actual TriangleStripArray object with this Shape.
-    * @return the shape as a TriangleStripArray
-    */
-   public TriangleStripArray asTriangleStripArray()
-      {
-      return new TriangleStripArray( mPoints.p.length,
-                                     GeometryArray.COORDINATES 
-                                     | GeometryArray.BY_REFERENCE,
-                                     mVertexCounts );
-      }
+//   /**
+//    * Get an actual TriangleStripArray object with this Shape.
+//    * @return the shape as a TriangleStripArray
+//    */
+//   public TriangleStripArray asTriangleStripArray()
+//      {
+//      return new TriangleStripArray( mPoints.p.length,
+//                                     GeometryArray.COORDINATES 
+//                                     | GeometryArray.BY_REFERENCE,
+//                                     mVertexCounts );
+//      }
    
    public TriMesh asTriMesh()
       {

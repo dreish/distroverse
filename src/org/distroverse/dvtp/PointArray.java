@@ -50,6 +50,5 @@ public class PointArray implements Serializable
    public FloatBuffer asFloatBuffer()
       {
       // TODO Auto-generated method stub
-      return null;
       }
    }
