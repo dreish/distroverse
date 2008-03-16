@@ -18,29 +18,33 @@ import javax.vecmath.Point3d;
 public class PointArray implements Serializable
    {
    /**
-    * The exposed array of Point3ds.
+    * The float buffer.
     */
-   private Point3d[] p;
-
-   /**
-    * Default constructor, setting p to null.
-    */
-   public PointArray()
-      {  p = null;  }
+   private FloatBuffer fb;
    
    /**
-    * Constructor with the size of the array.
-    * @param n
+    * Constructor with the size of the array, in points (not floats).
+    * @param n - capacity in number of (x,y,z) tuples
     */
    public PointArray( int n )
-      {  p = new Point3d[ n ];  }
+      {  
+      fb = FloatBuffer.allocate( n * 3 );  
+      }
    
    /**
     * Constructor with an existing array of Point3ds.
     * @param ap
     */
    public PointArray( Point3d[] ap )
-      {  p = ap;  }
+      {
+      fb = FloatBuffer.allocate( ap.length * 3 );
+      for ( Point3d point : ap )
+         {
+         fb.put( (float) point.x );
+         fb.put( (float) point.y );
+         fb.put( (float) point.z );
+         }
+      }
    
    // FIXME Implement PointArray.writeObject()
    // FIXME Implement PointArray.readObject()
@@ -49,6 +53,6 @@ public class PointArray implements Serializable
 
    public FloatBuffer asFloatBuffer()
       {
-      // TODO Auto-generated method stub
+      return fb;
       }
    }

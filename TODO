@@ -226,6 +226,7 @@
     x Does anything need to be made volatile?
       > Worry about this later
   + Add a Log class and stop printing directly to stderr
+  + Switch to JMonkeyEngine
   + Make a client that only understands the about:hello URL
     + Obviously need some sort of rendering window thingy
       + Download jME
@@ -355,7 +356,6 @@
       auto-fill method early on
   - Use PGP (or something similar) for authentication?  What's the legal
     status of that?
-  - Switch to JMonkeyEngine
   x WibbleConfrobulator class
   - When graying out a menu item, give a reason for doing so; hovering
     over (or selecting) the menu item shows the reason
@@ -376,6 +376,7 @@
         - Java
         - Perl
         - Python
+        - Lisp?
       - For people with extensive programming experience in various
         languages, but no Lisp (for shame!)
       - For Lisp hackers who have never tried Arc
@@ -387,6 +388,8 @@
   - Use bittorrent for downloading proxies?
     > Comes with default file to check for updates
     > User can add/remove index files of course
+  - 2D mode, in which only GUI objects are valid (others ignored), for
+    efficiency and to allow browser-like behavior
   x Distroplane: object scripting bytecode language
     > Distrocode?
     x Objects have properties, some of which can be attached bytecode

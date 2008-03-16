@@ -11,8 +11,6 @@ import java.io.*;
 import java.nio.IntBuffer;
 import java.util.*;
 import javax.vecmath.*;
-import javax.media.j3d.*;
-
 import com.jme.scene.TriMesh;
 
 /**
