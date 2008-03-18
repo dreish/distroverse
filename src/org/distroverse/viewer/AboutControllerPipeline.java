@@ -3,8 +3,11 @@
  */
 package org.distroverse.viewer;
 
+import org.distroverse.distroplane.lib.BallFactory;
 import org.distroverse.dvtp.Shape;
 
+import com.jme.math.Quaternion;
+import com.jme.math.Vector3f;
 import com.jmex.game.StandardGame;
 
 /**
@@ -17,7 +20,14 @@ public class AboutControllerPipeline extends ControllerPipeline
    public AboutControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window )
       {
-      window.getWorld().addShape( new Shape() );
+      WorldGraph wg = window.getWorld();
+      wg.clear();
+      // TODO: load from a file instead of using distroplane.lib.
+      BallFactory bf = new BallFactory();
+      bf.setNumRows( 3 );
+      wg.addShape( bf.generate(), "octey", null, 
+                   new Vector3f( 0, 0, 0 ), 
+                   new Quaternion( 1, 0, 0, 0 ) );
       }
    
    @Override

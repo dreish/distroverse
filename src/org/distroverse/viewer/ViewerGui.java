@@ -12,6 +12,8 @@ public class ViewerGui
       mGuiRoot = new Node( "GUI-root" );
       mGuiRoot.setRenderQueueMode( Renderer.QUEUE_ORTHO );
       root.attachChild( mGuiRoot );
+      mGuiRoot.setCullMode( SceneElement.CULL_NEVER );
+      // FIXME for some reason, the GUI still disappears
       mLocationBar = new TextDisplayBar( mGuiRoot, 0, 420,
                                          "initial-text" );
       }

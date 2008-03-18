@@ -6,9 +6,11 @@
 
 - To do for 0.01:
   - Implement AboutControllerPipeline()
-    - Clear the WorldGraph
+    + Clear the WorldGraph
     - Dump a predefined set of objects into the WorldGraph
-      - Does my TriangleStripArray-based approach translate to jME?
+      + Does my TriangleStripArray-based approach translate to jME?
+        > Yes, with slight modifications
+      - Implement WorldGraph.addShape() -- with position/orientation?
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
