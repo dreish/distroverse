@@ -19,10 +19,10 @@ public class WorldGraph
    public void addShape( Shape s, String id, String parent_id,
                          Vector3f position, Quaternion rotation )
       {
-      // XXX do this
       Node object_node = new Node();
       Node parent_node = getNode( parent_id );
       mIdMap.put( id, new WorldGraphObject( object_node, parent_id ) );
+      // XXX Is this really all I need?  A TriMesh?
       object_node.attachChild( s.asTriMesh() );
       object_node.setLocalTranslation( position );
       object_node.setLocalRotation( rotation );

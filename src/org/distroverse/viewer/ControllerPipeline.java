@@ -38,7 +38,7 @@ public abstract class ControllerPipeline
    getNew( String url, ProxyClientConnection proxy, StandardGame game,
            ViewerWindow window )
       {
-      if ( url.matches( "(?i)about:" ) )
+      if ( url.matches( "(?i)about:.*" ) )
          return new AboutControllerPipeline( url, game, window );
       return null;
       }

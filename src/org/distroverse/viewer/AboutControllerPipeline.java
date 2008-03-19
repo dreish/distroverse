@@ -4,7 +4,6 @@
 package org.distroverse.viewer;
 
 import org.distroverse.distroplane.lib.BallFactory;
-import org.distroverse.dvtp.Shape;
 
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;

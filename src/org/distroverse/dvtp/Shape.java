@@ -40,7 +40,13 @@ public class Shape implements Serializable
     */
    public Shape( List<Point3d> points, int[] vertex_counts )
       {
-      mPoints = new PointArray( (Point3d[]) points.toArray() );
+      Object[] points_objarr = points.toArray();
+      // FIXME For some reason this causes an exception:
+//      Point3d[] points_pointarr = (Point3d[]) points_objarr;
+      Point3d[] points_pointarr = new Point3d[ points_objarr.length ];
+      for ( int i = 0; i < points_objarr.length; ++i )
+         points_pointarr[ i ] = (Point3d) points_objarr[ i ];
+      mPoints = new PointArray( points_pointarr );
       mVertexCounts = vertex_counts;
       }
    
