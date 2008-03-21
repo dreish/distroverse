@@ -25,6 +25,7 @@ public abstract class ShapeFactory implements Factory
                        + "at least two rows of points" );
       List<Point3d> triangle_strips = new ArrayList<Point3d>();
       int vertex_counts[] = new int[ vertices.length - 1 ];
+      int prev_triangle_strips_size = 0;
       for ( int i = 0; i < vertices.length - 1; ++i )
          {
          if (    vertices[ i   ].length > 1 
@@ -32,6 +33,9 @@ public abstract class ShapeFactory implements Factory
             connectWithTriangles( triangle_strips,
                                   vertices[ i   ],
                                   vertices[ i+1 ] );
+         vertex_counts[ i ] = triangle_strips.size() 
+                              - prev_triangle_strips_size;
+         prev_triangle_strips_size = triangle_strips.size();
          }
       return new Shape( triangle_strips, vertex_counts );
       }

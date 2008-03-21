@@ -8,6 +8,7 @@
 package org.distroverse.dvtp;
 
 import java.io.*;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 import javax.vecmath.*;
@@ -64,10 +65,11 @@ public class Shape implements Serializable
    
    public TriMesh asTriMesh()
       {
-      return new TriMesh( "DvtpShape", 
-                          mPoints.asFloatBuffer(),
-                          null, null, null,
-                          IntBuffer.wrap( mVertexCounts ) );
+      IntBuffer   vc = IntBuffer.wrap( mVertexCounts );
+      FloatBuffer p  = mPoints.asFloatBuffer();
+      
+      return new TriMesh( "DvtpShape",
+                          p, null, null, null, vc );
       }
 
    // TODO Add texture fields and methods.

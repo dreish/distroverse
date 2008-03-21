@@ -82,8 +82,12 @@ public class BallFactory extends ShapeFactory
       double offset = (row % 2 == 1) ? 0.5 : 0.0;
       for ( int i = 0; i < n_points; ++i )
          {
-         double longitude = 2.0 * Math.PI * (i + offset) 
-                            / circle_divisions;
+         double longitude;
+         if ( n_points == 1 )
+            longitude = 0;
+         else
+            longitude = 2.0 * Math.PI * (i + offset) 
+                        / circle_divisions;
          double x = Math.sin( longitude ) * circle_radius;
          double z = Math.cos( longitude ) * circle_radius;
          vertices[ row ][ i ] = new Point3d( x, y, z );

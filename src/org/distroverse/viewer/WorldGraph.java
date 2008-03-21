@@ -14,6 +14,9 @@ public class WorldGraph
    public WorldGraph( Node parent )
       {
       mParent = parent;
+      mWorldHead = new Node( "WorldHead" );
+      mParent.attachChild( mWorldHead );
+      mIdMap  = new HashMap< String, WorldGraphObject >();
       }
    
    public void addShape( Shape s, String id, String parent_id,
@@ -21,6 +24,8 @@ public class WorldGraph
       {
       Node object_node = new Node();
       Node parent_node = getNode( parent_id );
+      if ( parent_node == null )
+         parent_node = mWorldHead;
       mIdMap.put( id, new WorldGraphObject( object_node, parent_id ) );
       // XXX Is this really all I need?  A TriMesh?
       object_node.attachChild( s.asTriMesh() );
@@ -31,7 +36,7 @@ public class WorldGraph
    
    public void clear()
       {
-      mParent.detachAllChildren();
+      mWorldHead.detachAllChildren();
       }
 
    private final class WorldGraphObject
@@ -49,9 +54,13 @@ public class WorldGraph
    
    private Node getNode( String id )
       {
-      return mIdMap.get( id ).getNode();
+      WorldGraphObject wgo = mIdMap.get( id );
+      if ( wgo != null )
+         return wgo.getNode();
+      return null;
       }
 
    private Node mParent;
+   private Node mWorldHead;
    private HashMap< String, WorldGraphObject > mIdMap;
    }

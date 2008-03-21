@@ -10,7 +10,13 @@
     - Dump a predefined set of objects into the WorldGraph
       + Does my TriangleStripArray-based approach translate to jME?
         > Yes, with slight modifications
-      - Implement WorldGraph.addShape() -- with position/orientation?
+      + Implement WorldGraph.addShape() -- with position/orientation?
+      - Test
+        - It keeps crashing on what appears to be the vertex buffer,
+          even though it looks fine
+          - Try adding a breakpoint in the last line of code I have
+            source for that gets executed before the exception, then run
+            a working demo and compare that code's TriMesh to my own
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
