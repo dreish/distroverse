@@ -34,12 +34,12 @@ public class BallFactory extends ShapeFactory
       mNumRows          = DEFAULT_NUM_ROWS;
       }
    
-   public void setEquatorialRadius( double r )
-      { mEquatorialRadius = r; }
-   public void setAspectRatio( double a )
-      { mAspectRatio = a; }
-   public void setNumRows( long r )
-      { mNumRows = r; }
+   public BallFactory setEquatorialRadius( double r )
+      { mEquatorialRadius = r;  return this; }
+   public BallFactory setAspectRatio( double a )
+      { mAspectRatio = a;  return this; }
+   public BallFactory setNumRows( long r )
+      { mNumRows = r;  return this; }
 
    /* (non-Javadoc)
     * @see org.distroverse.core.ShapeFactory#Generate()

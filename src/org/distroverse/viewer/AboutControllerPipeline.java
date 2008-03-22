@@ -22,10 +22,11 @@ public class AboutControllerPipeline extends ControllerPipeline
       WorldGraph wg = window.getWorld();
       wg.clear();
       // TODO: load from a file instead of using distroplane.lib.
-      BallFactory bf = new BallFactory();
-      bf.setNumRows( 3 );
+      BallFactory bf = new BallFactory()
+                           .setNumRows( 3 )
+                           .setEquatorialRadius( 50 );
       wg.addShape( bf.generate(), "octey", null, 
-                   new Vector3f( 0, 0, 0 ), 
+                   new Vector3f( 0, 0, 100 ), 
                    new Quaternion( 1, 0, 0, 0 ) );
       }
    

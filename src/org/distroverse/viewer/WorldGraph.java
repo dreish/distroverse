@@ -22,7 +22,7 @@ public class WorldGraph
    public void addShape( Shape s, String id, String parent_id,
                          Vector3f position, Quaternion rotation )
       {
-      Node object_node = new Node();
+      Node object_node = new Node( id );
       Node parent_node = getNode( parent_id );
       if ( parent_node == null )
          parent_node = mWorldHead;
@@ -31,6 +31,8 @@ public class WorldGraph
       object_node.attachChild( s.asTriMesh() );
       object_node.setLocalTranslation( position );
       object_node.setLocalRotation( rotation );
+      object_node.setLocalScale( 30 );
+      System.out.println( object_node.getLocalScale() );
       parent_node.attachChild( object_node );
       }
    

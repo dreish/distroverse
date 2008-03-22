@@ -41,12 +41,12 @@ public class Shape implements Serializable
     */
    public Shape( List<Point3d> points, int[] vertex_counts )
       {
-      Object[] points_objarr = points.toArray();
-      // FIXME For some reason this causes an exception:
-//      Point3d[] points_pointarr = (Point3d[]) points_objarr;
-      Point3d[] points_pointarr = new Point3d[ points_objarr.length ];
-      for ( int i = 0; i < points_objarr.length; ++i )
-         points_pointarr[ i ] = (Point3d) points_objarr[ i ];
+//      Object[] points_objarr = points.toArray();
+      Point3d[] points_pointarr 
+         = points.toArray( new Point3d[ points.size() ] );
+//      Point3d[] points_pointarr = new Point3d[ points_objarr.length ];
+//      for ( int i = 0; i < points_objarr.length; ++i )
+//         points_pointarr[ i ] = (Point3d) points_objarr[ i ];
       mPoints = new PointArray( points_pointarr );
       mVertexCounts = vertex_counts;
       }
@@ -65,9 +65,9 @@ public class Shape implements Serializable
    
    public TriMesh asTriMesh()
       {
+      // XXX This is completely broken:
       IntBuffer   vc = IntBuffer.wrap( mVertexCounts );
       FloatBuffer p  = mPoints.asFloatBuffer();
-      
       return new TriMesh( "DvtpShape",
                           p, null, null, null, vc );
       }

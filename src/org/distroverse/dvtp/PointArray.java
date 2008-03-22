@@ -8,6 +8,7 @@
 package org.distroverse.dvtp;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.vecmath.Point3d;
@@ -27,8 +28,8 @@ public class PointArray implements Serializable
     * @param n - capacity in number of (x,y,z) tuples
     */
    public PointArray( int n )
-      {  
-      fb = FloatBuffer.allocate( n * 3 );  
+      {
+      allocate( n );
       }
    
    /**
@@ -37,13 +38,19 @@ public class PointArray implements Serializable
     */
    public PointArray( Point3d[] ap )
       {
-      fb = FloatBuffer.allocate( ap.length * 3 );
+      allocate( ap.length );
       for ( Point3d point : ap )
          {
          fb.put( (float) point.x );
          fb.put( (float) point.y );
          fb.put( (float) point.z );
          }
+      }
+   
+   private void allocate( int n_points )
+      {
+      fb = ByteBuffer.allocateDirect( (n_points * 3) * 4 )
+                     .asFloatBuffer();  
       }
    
    // FIXME Implement PointArray.writeObject()

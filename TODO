@@ -12,11 +12,22 @@
         > Yes, with slight modifications
       + Implement WorldGraph.addShape() -- with position/orientation?
       - Test
-        - It keeps crashing on what appears to be the vertex buffer,
+        + It keeps crashing on what appears to be the vertex buffer,
           even though it looks fine
-          - Try adding a breakpoint in the last line of code I have
+          x Try adding a breakpoint in the last line of code I have
             source for that gets executed before the exception, then run
             a working demo and compare that code's TriMesh to my own
+          + Error is: FloatBuffer is not direct
+            + Allocate a direct buffer
+        - My shape doesn't appear at all
+          x Make sure it is placed appropriately and is not too small
+            > Tried various changes; no effect
+          + Look for a working example program that uses a TriMesh
+            > Several, e.g. jmetest.TutorialGuide.HelloTriMesh
+            > I'm way off on Shape.asTriMesh()
+          - The IntBuffer must spell out each triangle as indices into
+            the FloatBuffer, one dimension at a time
+          - I may need to set colors as well
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
