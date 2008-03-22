@@ -41,12 +41,8 @@ public class Shape implements Serializable
     */
    public Shape( List<Point3d> points, int[] vertex_counts )
       {
-//      Object[] points_objarr = points.toArray();
       Point3d[] points_pointarr 
          = points.toArray( new Point3d[ points.size() ] );
-//      Point3d[] points_pointarr = new Point3d[ points_objarr.length ];
-//      for ( int i = 0; i < points_objarr.length; ++i )
-//         points_pointarr[ i ] = (Point3d) points_objarr[ i ];
       mPoints = new PointArray( points_pointarr );
       mVertexCounts = vertex_counts;
       }
@@ -65,11 +61,38 @@ public class Shape implements Serializable
    
    public TriMesh asTriMesh()
       {
-      // XXX This is completely broken:
-      IntBuffer   vc = IntBuffer.wrap( mVertexCounts );
       FloatBuffer p  = mPoints.asFloatBuffer();
+      IntBuffer   vi = vertexIndices();
+      
       return new TriMesh( "DvtpShape",
-                          p, null, null, null, vc );
+                          p, null, null, null, vi );
+      }
+   
+   private IntBuffer vertexIndices()
+      {
+      IntBuffer ret = IntBuffer.allocate( numVertexIndices() );
+      
+      int pos = 0;
+      for ( int vertex_count : mVertexCounts )
+         {
+         for ( int i = 0; i < vertex_count - 2; ++i )
+            {
+            ret.put( i + pos );
+            ret.put( i + pos + 1 );
+            ret.put( i + pos + 2 );
+            }
+         pos += vertex_count;
+         }
+      
+      return ret;
+      }
+   
+   private int numVertexIndices()
+      {
+      int ret = 0;
+      for ( int vertex_count : mVertexCounts )
+         ret += (vertex_count - 2) * 3;
+      return ret;
       }
 
    // TODO Add texture fields and methods.

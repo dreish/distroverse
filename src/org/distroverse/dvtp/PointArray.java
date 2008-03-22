@@ -59,7 +59,8 @@ public class PointArray implements Serializable
    private static final long serialVersionUID = 1;
 
    public FloatBuffer asFloatBuffer()
-      {
-      return fb;
-      }
+      {  return fb;  }
+
+   public int length()
+      {  return fb.limit();  }
    }
