@@ -19,15 +19,18 @@
             a working demo and compare that code's TriMesh to my own
           + Error is: FloatBuffer is not direct
             + Allocate a direct buffer
-        - My shape doesn't appear at all
+        + My shape doesn't appear at all
           x Make sure it is placed appropriately and is not too small
             > Tried various changes; no effect
           + Look for a working example program that uses a TriMesh
             > Several, e.g. jmetest.TutorialGuide.HelloTriMesh
             > I'm way off on Shape.asTriMesh()
-          - The IntBuffer must spell out each triangle as indices into
+          + The IntBuffer must spell out each triangle as indices into
             the FloatBuffer, one dimension at a time
-          - I may need to set colors as well
+          > I may need to set colors as well, and possibly normals
+          > Got it to show up, in a weird, warped form
+        - Get it to look like it is supposed to
+          - Add random colors to vertices or faces
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
@@ -348,6 +351,7 @@
   - Client: any grayed-out menu item must explain why it is disabled
   - Good idea from SL: explicit affordance, such as highlighting
     clickable objects in red when the user holds down the alt key
+    > Even better: auto label them with the name of the action
   - On the server side, "links" should include some metainformation
     about whom to notify when the link breaks.  This information would
     not be transmitted to clients; the client would notify the server

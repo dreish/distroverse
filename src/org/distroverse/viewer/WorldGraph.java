@@ -7,6 +7,7 @@ import org.distroverse.dvtp.Shape;
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 import com.jme.scene.Node;
+import com.jme.scene.TriMesh;
 
 
 public class WorldGraph
@@ -31,11 +32,28 @@ public class WorldGraph
       object_node.attachChild( s.asTriMesh() );
       object_node.setLocalTranslation( position );
       object_node.setLocalRotation( rotation );
-      object_node.setLocalScale( 30 );
+      object_node.setLocalScale( 10 );
       System.out.println( object_node.getLocalScale() );
       parent_node.attachChild( object_node );
       }
-   
+
+   public void tmpAddTM( TriMesh tm, String id, String parent_id,
+                         Vector3f position, Quaternion rotation )
+      {
+      Node object_node = new Node( id );
+      Node parent_node = getNode( parent_id );
+      if ( parent_node == null )
+         parent_node = mWorldHead;
+      mIdMap.put( id, new WorldGraphObject( object_node, parent_id ) );
+      // XXX Is this really all I need?  A TriMesh?
+      object_node.attachChild( tm );
+      object_node.setLocalTranslation( position );
+      object_node.setLocalRotation( rotation );
+      object_node.setLocalScale( 10 );
+      System.out.println( object_node.getLocalScale() );
+      parent_node.attachChild( object_node );
+      }
+
    public void clear()
       {
       mWorldHead.detachAllChildren();
