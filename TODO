@@ -30,6 +30,10 @@
           > I may need to set colors as well, and possibly normals
           > Got it to show up, in a weird, warped form
         - Get it to look like it is supposed to
+          - Debug the Shape->TriMesh conversion
+            - There appear to be too many vertices in the second and
+              fourth rows -- more than the third row
+            - Try manually creating a shape with just one triangle
           - Add random colors to vertices or faces
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser

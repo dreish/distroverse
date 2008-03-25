@@ -77,9 +77,8 @@ public class Shape implements Serializable
          {
          for ( int i = 0; i < vertex_count - 2; ++i )
             {
-            ret.put( i + pos );
-            ret.put( i + pos + 1 );
-            ret.put( i + pos + 2 );
+            int tuple_begin = (i + pos) * 3;
+            addThreeTuples( ret, tuple_begin );
             }
          pos += vertex_count;
          }
@@ -87,11 +86,17 @@ public class Shape implements Serializable
       return ret;
       }
    
+   private void addThreeTuples( IntBuffer ib, int n )
+      {
+      for ( int i = 0; i < 9; ++i )
+         ib.put( n + i );
+      }
+   
    private int numVertexIndices()
       {
       int ret = 0;
       for ( int vertex_count : mVertexCounts )
-         ret += (vertex_count - 2) * 3;
+         ret += (vertex_count - 2) * 9;
       return ret;
       }
 

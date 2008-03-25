@@ -45,6 +45,7 @@ public class PointArray implements Serializable
          fb.put( (float) point.y );
          fb.put( (float) point.z );
          }
+      fb.rewind();
       }
    
    private void allocate( int n_points )
