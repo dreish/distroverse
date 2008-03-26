@@ -31,9 +31,20 @@
           > Got it to show up, in a weird, warped form
         - Get it to look like it is supposed to
           - Debug the Shape->TriMesh conversion
-            - There appear to be too many vertices in the second and
+            > There appear to be too many vertices in the second and
               fourth rows -- more than the third row
-            - Try manually creating a shape with just one triangle
+              > This might be easier to troubleshoot once I can actually
+                see my shapes
+            + Try manually creating a shape with just one triangle,
+              similar in size and position to the HelloTriMesh
+              > Does not display, so the problem must be either normals,
+                colors, texture coords, or the lack of a bounding box
+            + Try the easiest next thing: a bounding box
+              > This makes a big difference; now the about:hello text
+                isn't flaky, and the triangle, though not visible, shows
+                up in the debug mesh/vert/tri counts
+            - Try adding colors
+            - I think my index "fix" was wrong
           - Add random colors to vertices or faces
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser

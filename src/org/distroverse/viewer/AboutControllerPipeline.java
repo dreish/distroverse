@@ -3,6 +3,10 @@
  */
 package org.distroverse.viewer;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Point3d;
+
 import org.distroverse.distroplane.lib.BallFactory;
 import org.distroverse.dvtp.Shape;
 
@@ -28,17 +32,32 @@ public class AboutControllerPipeline extends ControllerPipeline
       WorldGraph wg = window.getWorld();
       wg.clear();
       // TODO: load from a file instead of using distroplane.lib.
-      Shape s = new BallFactory()
-                    .setNumRows( 6 )
-                    .setEquatorialRadius( 40 )
-                    .generate();
-      wg.addShape( s, "octey", null, 
+//      Shape s = new BallFactory()
+//                    .setNumRows( 6 )
+//                    .setEquatorialRadius( 40 )
+//                    .generate();
+//      wg.addShape( s, "octey", null, 
+//                   new Vector3f( 0, 0, -100 ), 
+//                   new Quaternion( 1, 0, 0, 0 ) );
+//      TriMesh shady_square = squareInit();
+//      wg.tmpAddTM( shady_square, "shady_square", null,
+//                   new Vector3f( 0, 0, -100 ),
+//                   new Quaternion( 1, 0, 0, 0 ) );
+      Shape simple = simpleShape();
+      wg.addShape( simple, "simple", null, 
                    new Vector3f( 0, 0, -100 ), 
                    new Quaternion( 1, 0, 0, 0 ) );
-      TriMesh shady_square = squareInit();
-      wg.tmpAddTM( shady_square, "shady_square", null,
-                   new Vector3f( 0, 0, -100 ),
-                   new Quaternion( 1, 0, 0, 0 ) );
+      }
+
+   private Shape simpleShape()
+      {
+      ArrayList< Point3d > alp = new ArrayList< Point3d >();
+      alp.add( new Point3d( 0, 0, 0 ) );
+      alp.add( new Point3d( 1, 0, 0 ) );
+      alp.add( new Point3d( 0, 1, 0 ) );
+      int[] vc = { 3 };
+      
+      return new Shape( alp, vc );
       }
    
    // This code was yanked from HelloTriMesh.java, which is why it's so

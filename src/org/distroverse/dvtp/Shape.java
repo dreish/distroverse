@@ -12,6 +12,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 import javax.vecmath.*;
+
+import com.jme.bounding.BoundingBox;
 import com.jme.scene.TriMesh;
 
 /**
@@ -64,8 +66,12 @@ public class Shape implements Serializable
       FloatBuffer p  = mPoints.asFloatBuffer();
       IntBuffer   vi = vertexIndices();
       
-      return new TriMesh( "DvtpShape",
-                          p, null, null, null, vi );
+      TriMesh tm = new TriMesh( "DvtpShape",
+                                p, null, null, null, vi );
+      tm.setModelBound(new BoundingBox());
+      tm.updateModelBound();
+      
+      return tm;
       }
    
    private IntBuffer vertexIndices()
