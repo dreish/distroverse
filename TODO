@@ -44,8 +44,14 @@
                 isn't flaky, and the triangle, though not visible, shows
                 up in the debug mesh/vert/tri counts
             - Try adding colors
-            - I think my index "fix" was wrong
-          - Add random colors to vertices or faces
+            - Add normal vectors, automatically pointing away from the
+              origin
+            - I think my index "fix" to vertexIndices() was wrong
+              > The buffer is indexed as if it were an array of triples,
+                not of floats, and there's only one index per point, not
+                three
+                > This means the vertex indices actually do save space
+                  in a mesh
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
@@ -476,4 +482,11 @@
   - (import object) or (import /path/object):
     - Calls something on object to get a list of functions to import
     - Defines each of them as /object/each
+  - Check for /Volumes/USB Drive/Distroverse/my_identity.txt
+    > So people can visit Internet cafes and plug in their little USB
+      pen drives instead of typing a password.  Could even have some
+      standardized way of generating one-time keys -- a button you press
+      on the pendrive that generates a new key
+      > Might not be so valuable, though -- most people would probably
+        tend to avoid sketchy Inet cafes
 
