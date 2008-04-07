@@ -14,7 +14,9 @@ import java.util.*;
 import javax.vecmath.*;
 
 import com.jme.bounding.BoundingBox;
+import com.jme.renderer.ColorRGBA;
 import com.jme.scene.TriMesh;
+import com.jme.util.geom.BufferUtils;
 
 /**
  * This class is part of the DVTP protocol.  It defines how shapes
@@ -65,12 +67,16 @@ public class Shape implements Serializable
       {
       FloatBuffer p  = mPoints.asFloatBuffer();
       IntBuffer   vi = vertexIndices();
-      
+
+      ColorRGBA[] colors = new ColorRGBA[ numVertexIndices() ];
+
       TriMesh tm = new TriMesh( "DvtpShape",
-                                p, null, null, null, vi );
-      tm.setModelBound(new BoundingBox());
+                                p, p, 
+                                BufferUtils.createFloatBuffer( colors ),
+                                p, vi );
+      tm.setModelBound( new BoundingBox() );
       tm.updateModelBound();
-      
+            
       return tm;
       }
    
@@ -83,8 +89,8 @@ public class Shape implements Serializable
          {
          for ( int i = 0; i < vertex_count - 2; ++i )
             {
-            int tuple_begin = (i + pos) * 3;
-            addThreeTuples( ret, tuple_begin );
+            int tuple_begin = i + pos;
+            addTriangleIndices( ret, tuple_begin );
             }
          pos += vertex_count;
          }
@@ -92,9 +98,9 @@ public class Shape implements Serializable
       return ret;
       }
    
-   private void addThreeTuples( IntBuffer ib, int n )
+   private void addTriangleIndices( IntBuffer ib, int n )
       {
-      for ( int i = 0; i < 9; ++i )
+      for ( int i = 0; i < 3; ++i )
          ib.put( n + i );
       }
    
@@ -102,7 +108,7 @@ public class Shape implements Serializable
       {
       int ret = 0;
       for ( int vertex_count : mVertexCounts )
-         ret += (vertex_count - 2) * 9;
+         ret += (vertex_count - 2) * 3;
       return ret;
       }
 

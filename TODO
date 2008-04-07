@@ -43,15 +43,27 @@
               > This makes a big difference; now the about:hello text
                 isn't flaky, and the triangle, though not visible, shows
                 up in the debug mesh/vert/tri counts
-            - Try adding colors
-            - Add normal vectors, automatically pointing away from the
+            + Try adding colors
+              + Shape defaults to set color to 50% gray, 50% alpha
+              > Still not visible
+            + Add normal vectors, automatically pointing away from the
               origin
+              > Still not visible
             - I think my index "fix" to vertexIndices() was wrong
               > The buffer is indexed as if it were an array of triples,
                 not of floats, and there's only one index per point, not
                 three
                 > This means the vertex indices actually do save space
                   in a mesh
+              - I should see indices == { 0, 1, 2 }; debug and see
+            - Try from the other end: remove/change features in
+              shady_square until it breaks
+              + Use a TriMesh constructor with all the parameters
+                instead of TriMesh.reconstruct()
+                > Still looks fine 
+              - Write down exactly what I'm feeding the TriMesh in my
+                Shape constructor, and change shady_square bit by bit to
+                match
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise

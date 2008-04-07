@@ -39,22 +39,23 @@ public class AboutControllerPipeline extends ControllerPipeline
 //      wg.addShape( s, "octey", null, 
 //                   new Vector3f( 0, 0, -100 ), 
 //                   new Quaternion( 1, 0, 0, 0 ) );
-//      TriMesh shady_square = squareInit();
-//      wg.tmpAddTM( shady_square, "shady_square", null,
-//                   new Vector3f( 0, 0, -100 ),
-//                   new Quaternion( 1, 0, 0, 0 ) );
-      Shape simple = simpleShape();
-      wg.addShape( simple, "simple", null, 
-                   new Vector3f( 0, 0, -100 ), 
+      TriMesh shady_square = squareInit();
+      wg.tmpAddTM( shady_square, "shady_square", null,
+                   new Vector3f( 0, 0, 0 ),
                    new Quaternion( 1, 0, 0, 0 ) );
+//      Shape simple = simpleShape();
+//      wg.addShape( simple, "simple", null, 
+//                   new Vector3f( 0, 0, 0 ), 
+//                   new Quaternion( 1, 0, 0, 0 ) );
       }
 
+   // Returns a single right triangle, for testing.
    private Shape simpleShape()
       {
       ArrayList< Point3d > alp = new ArrayList< Point3d >();
-      alp.add( new Point3d( 0, 0, 0 ) );
-      alp.add( new Point3d( 1, 0, 0 ) );
-      alp.add( new Point3d( 0, 1, 0 ) );
+      alp.add( new Point3d( 0, 0, -1 ) );
+      alp.add( new Point3d( 1, 0, -1 ) );
+      alp.add( new Point3d( 0, 1, -1 ) );
       int[] vc = { 3 };
       
       return new Shape( alp, vc );
@@ -64,31 +65,28 @@ public class AboutControllerPipeline extends ControllerPipeline
    // hideous.
    private TriMesh squareInit()
       {
-      // TriMesh is what most of what is drawn in jME actually is
-      TriMesh m=new TriMesh("My Mesh");
-
       // Vertex positions for the mesh
       Vector3f[] vertexes={
-          new Vector3f(0,0,0),
-          new Vector3f(1,0,0),
-          new Vector3f(0,1,0),
-          new Vector3f(1,1,0)
+          new Vector3f(0,0,1),
+          new Vector3f(1,0,1),
+          new Vector3f(0,1,1),
+          new Vector3f(1,1,1)
       };
 
       // Normal directions for each vertex position
       Vector3f[] normals={
           new Vector3f(0,0,1),
-          new Vector3f(0,0,1),
-          new Vector3f(0,0,1),
-          new Vector3f(0,0,1)
+          new Vector3f(1,0,1),
+          new Vector3f(0,1,1),
+          new Vector3f(1,1,1)
       };
 
       // Color for each vertex position
       ColorRGBA[] colors={
-          new ColorRGBA(1,0,0,1),
-          new ColorRGBA(1,0,0,1),
-          new ColorRGBA(0,1,0,1),
-          new ColorRGBA(0,1,0,1)
+          new ColorRGBA(0.5f,0.5f,0.5f,0.5f),
+          new ColorRGBA(0.5f,0.5f,0.5f,0.5f),
+          new ColorRGBA(0.5f,0.5f,0.5f,0.5f),
+          new ColorRGBA(0.5f,0.5f,0.5f,0.5f),
       };
 
       // Texture Coordinates for each position
@@ -101,12 +99,17 @@ public class AboutControllerPipeline extends ControllerPipeline
 
       // The indexes of Vertex/Normal/Color/TexCoord sets.  Every 3 makes a triangle.
       int[] indexes={
-          0,1,2,1,2,3
+          0,1,2 //,1,2,3
       };
 
-      // Feed the information to the TriMesh
-      m.reconstruct(BufferUtils.createFloatBuffer(vertexes), BufferUtils.createFloatBuffer(normals),
-              BufferUtils.createFloatBuffer(colors), BufferUtils.createFloatBuffer(texCoords), BufferUtils.createIntBuffer(indexes));
+      // TriMesh is what most of what is drawn in jME actually is
+      TriMesh m=new TriMesh("My Mesh",
+                    BufferUtils.createFloatBuffer(vertexes),
+                    BufferUtils.createFloatBuffer(normals),
+                    BufferUtils.createFloatBuffer(colors), 
+//                    BufferUtils.createFloatBuffer(texCoords), 
+                    BufferUtils.createFloatBuffer(vertexes),
+                    BufferUtils.createIntBuffer(indexes));
 
       // Create a bounds
       m.setModelBound(new BoundingBox());
