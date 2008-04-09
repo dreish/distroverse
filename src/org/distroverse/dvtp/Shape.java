@@ -69,6 +69,8 @@ public class Shape implements Serializable
       IntBuffer   vi = vertexIndices();
 
       ColorRGBA[] colors = new ColorRGBA[ numVertexIndices() ];
+      for ( int i = 0; i < colors.length; ++i )
+         colors[ i ] = new ColorRGBA( 0.5f,0.5f,0.5f,0.5f );
 
       TriMesh tm = new TriMesh( "DvtpShape",
                                 p, p, 

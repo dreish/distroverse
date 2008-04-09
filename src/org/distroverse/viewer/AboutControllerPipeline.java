@@ -53,9 +53,9 @@ public class AboutControllerPipeline extends ControllerPipeline
    private Shape simpleShape()
       {
       ArrayList< Point3d > alp = new ArrayList< Point3d >();
-      alp.add( new Point3d( 0, 0, -1 ) );
-      alp.add( new Point3d( 1, 0, -1 ) );
-      alp.add( new Point3d( 0, 1, -1 ) );
+      alp.add( new Point3d( 0, 0, 1 ) );
+      alp.add( new Point3d( 1, 0, 1 ) );
+      alp.add( new Point3d( 0, 1, 1 ) );
       int[] vc = { 3 };
       
       return new Shape( alp, vc );
@@ -72,6 +72,12 @@ public class AboutControllerPipeline extends ControllerPipeline
           new Vector3f(0,1,1),
           new Vector3f(1,1,1)
       };
+
+      Vector3f[] one_tri={
+                           new Vector3f(0,0,1),
+                           new Vector3f(1,0,1),
+                           new Vector3f(0,1,1),
+                       };
 
       // Normal directions for each vertex position
       Vector3f[] normals={
@@ -103,13 +109,20 @@ public class AboutControllerPipeline extends ControllerPipeline
       };
 
       // TriMesh is what most of what is drawn in jME actually is
-      TriMesh m=new TriMesh("My Mesh",
-                    BufferUtils.createFloatBuffer(vertexes),
-                    BufferUtils.createFloatBuffer(normals),
-                    BufferUtils.createFloatBuffer(colors), 
-//                    BufferUtils.createFloatBuffer(texCoords), 
-                    BufferUtils.createFloatBuffer(vertexes),
-                    BufferUtils.createIntBuffer(indexes));
+//      TriMesh m = new TriMesh("My Mesh",
+//                    BufferUtils.createFloatBuffer(vertexes),
+//                    BufferUtils.createFloatBuffer(normals),
+//                    BufferUtils.createFloatBuffer(colors), 
+////                    BufferUtils.createFloatBuffer(texCoords), 
+//                    BufferUtils.createFloatBuffer(vertexes),
+//                    BufferUtils.createIntBuffer(indexes));
+      TriMesh m = new TriMesh("My Mesh",
+                              BufferUtils.createFloatBuffer(one_tri),
+                              BufferUtils.createFloatBuffer(one_tri),
+                              BufferUtils.createFloatBuffer(colors), 
+//                              BufferUtils.createFloatBuffer(texCoords), 
+                              BufferUtils.createFloatBuffer(one_tri),
+                              BufferUtils.createIntBuffer(indexes));
 
       // Create a bounds
       m.setModelBound(new BoundingBox());

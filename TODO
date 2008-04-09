@@ -61,9 +61,15 @@
               + Use a TriMesh constructor with all the parameters
                 instead of TriMesh.reconstruct()
                 > Still looks fine 
-              - Write down exactly what I'm feeding the TriMesh in my
+              + Write down exactly what I'm feeding the TriMesh in my
                 Shape constructor, and change shady_square bit by bit to
                 match
+                > Changed all parameters to match exactly; still only
+                  works in AboutControllerPipeline.squareInit(), and not
+                  in Shape.asTriMesh()
+              - Change the one remaining difference I can see: use
+                BufferUtils.createFloatBuffer() to create all the
+                FloatBuffers
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
