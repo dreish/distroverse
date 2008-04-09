@@ -67,9 +67,10 @@
                 > Changed all parameters to match exactly; still only
                   works in AboutControllerPipeline.squareInit(), and not
                   in Shape.asTriMesh()
-              - Change the one remaining difference I can see: use
+              + Change the one remaining difference I can see: use
                 BufferUtils.createFloatBuffer() to create all the
                 FloatBuffers
+                > That does it!
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise

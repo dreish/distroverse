@@ -13,6 +13,9 @@ import java.nio.FloatBuffer;
 
 import javax.vecmath.Point3d;
 
+import com.jme.math.Vector3f;
+import com.jme.util.geom.BufferUtils;
+
 /**
  * @author dreish
  */
@@ -38,14 +41,20 @@ public class PointArray implements Serializable
     */
    public PointArray( Point3d[] ap )
       {
-      allocate( ap.length );
-      for ( Point3d point : ap )
-         {
-         fb.put( (float) point.x );
-         fb.put( (float) point.y );
-         fb.put( (float) point.z );
-         }
-      fb.rewind();
+      Vector3f[] ap_f = new Vector3f[ ap.length ];
+      for ( int i = 0; i < ap.length; ++i )
+         ap_f[ i ] = new Vector3f( (float)ap[i].x, 
+                                   (float)ap[i].y, 
+                                   (float)ap[i].z );
+      fb = BufferUtils.createFloatBuffer( ap_f );
+//      allocate( ap.length );
+//      for ( Point3d point : ap )
+//         {
+//         fb.put( (float) point.x );
+//         fb.put( (float) point.y );
+//         fb.put( (float) point.z );
+//         }
+//      fb.rewind();
       }
    
    private void allocate( int n_points )

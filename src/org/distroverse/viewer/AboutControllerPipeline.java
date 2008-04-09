@@ -39,14 +39,14 @@ public class AboutControllerPipeline extends ControllerPipeline
 //      wg.addShape( s, "octey", null, 
 //                   new Vector3f( 0, 0, -100 ), 
 //                   new Quaternion( 1, 0, 0, 0 ) );
-      TriMesh shady_square = squareInit();
-      wg.tmpAddTM( shady_square, "shady_square", null,
-                   new Vector3f( 0, 0, 0 ),
-                   new Quaternion( 1, 0, 0, 0 ) );
-//      Shape simple = simpleShape();
-//      wg.addShape( simple, "simple", null, 
-//                   new Vector3f( 0, 0, 0 ), 
+//      TriMesh shady_square = squareInit();
+//      wg.tmpAddTM( shady_square, "shady_square", null,
+//                   new Vector3f( 0, 0, 0 ),
 //                   new Quaternion( 1, 0, 0, 0 ) );
+      Shape simple = simpleShape();
+      wg.addShape( simple, "simple", null, 
+                   new Vector3f( 0, 0, 0 ), 
+                   new Quaternion( 1, 0, 0, 0 ) );
       }
 
    // Returns a single right triangle, for testing.
