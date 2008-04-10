@@ -68,9 +68,14 @@ public class Shape implements Serializable
       FloatBuffer p  = mPoints.asFloatBuffer();
       IntBuffer   vi = vertexIndices();
 
+      // XXX Obviously need to take colors as a parameter, and provide
+      // a way to set all vertices to the same color
       ColorRGBA[] colors = new ColorRGBA[ numVertexIndices() ];
       for ( int i = 0; i < colors.length; ++i )
-         colors[ i ] = new ColorRGBA( 0.5f,0.5f,0.5f,0.5f );
+         colors[ i ] = new ColorRGBA( (float) Math.random(),
+                                      (float) Math.random(),
+                                      (float) Math.random(),
+                                      1 );
 
       TriMesh tm = new TriMesh( "DvtpShape",
                                 p, p, 

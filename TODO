@@ -30,7 +30,7 @@
           > I may need to set colors as well, and possibly normals
           > Got it to show up, in a weird, warped form
         - Get it to look like it is supposed to
-          - Debug the Shape->TriMesh conversion
+          + Debug the Shape->TriMesh conversion
             > There appear to be too many vertices in the second and
               fourth rows -- more than the third row
               > This might be easier to troubleshoot once I can actually
@@ -49,14 +49,14 @@
             + Add normal vectors, automatically pointing away from the
               origin
               > Still not visible
-            - I think my index "fix" to vertexIndices() was wrong
+            + I think my index "fix" to vertexIndices() was wrong
               > The buffer is indexed as if it were an array of triples,
                 not of floats, and there's only one index per point, not
                 three
                 > This means the vertex indices actually do save space
                   in a mesh
-              - I should see indices == { 0, 1, 2 }; debug and see
-            - Try from the other end: remove/change features in
+              + I should see indices == { 0, 1, 2 }; debug and see
+            + Try from the other end: remove/change features in
               shady_square until it breaks
               + Use a TriMesh constructor with all the parameters
                 instead of TriMesh.reconstruct()
@@ -71,6 +71,12 @@
                 BufferUtils.createFloatBuffer() to create all the
                 FloatBuffers
                 > That does it!
+          + Clean up and go back to what it's supposed to look like
+            > Was drawing a polyhedron made with a BallFactory()
+          + Set the vertices to random colors to make the shape easier
+            to see
+          - The faces are being drawn in the wrong order, and some of
+            them are missing
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
