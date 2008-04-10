@@ -5,78 +5,6 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Implement AboutControllerPipeline()
-    + Clear the WorldGraph
-    - Dump a predefined set of objects into the WorldGraph
-      + Does my TriangleStripArray-based approach translate to jME?
-        > Yes, with slight modifications
-      + Implement WorldGraph.addShape() -- with position/orientation?
-      - Test
-        + It keeps crashing on what appears to be the vertex buffer,
-          even though it looks fine
-          x Try adding a breakpoint in the last line of code I have
-            source for that gets executed before the exception, then run
-            a working demo and compare that code's TriMesh to my own
-          + Error is: FloatBuffer is not direct
-            + Allocate a direct buffer
-        + My shape doesn't appear at all
-          x Make sure it is placed appropriately and is not too small
-            > Tried various changes; no effect
-          + Look for a working example program that uses a TriMesh
-            > Several, e.g. jmetest.TutorialGuide.HelloTriMesh
-            > I'm way off on Shape.asTriMesh()
-          + The IntBuffer must spell out each triangle as indices into
-            the FloatBuffer, one dimension at a time
-          > I may need to set colors as well, and possibly normals
-          > Got it to show up, in a weird, warped form
-        - Get it to look like it is supposed to
-          + Debug the Shape->TriMesh conversion
-            > There appear to be too many vertices in the second and
-              fourth rows -- more than the third row
-              > This might be easier to troubleshoot once I can actually
-                see my shapes
-            + Try manually creating a shape with just one triangle,
-              similar in size and position to the HelloTriMesh
-              > Does not display, so the problem must be either normals,
-                colors, texture coords, or the lack of a bounding box
-            + Try the easiest next thing: a bounding box
-              > This makes a big difference; now the about:hello text
-                isn't flaky, and the triangle, though not visible, shows
-                up in the debug mesh/vert/tri counts
-            + Try adding colors
-              + Shape defaults to set color to 50% gray, 50% alpha
-              > Still not visible
-            + Add normal vectors, automatically pointing away from the
-              origin
-              > Still not visible
-            + I think my index "fix" to vertexIndices() was wrong
-              > The buffer is indexed as if it were an array of triples,
-                not of floats, and there's only one index per point, not
-                three
-                > This means the vertex indices actually do save space
-                  in a mesh
-              + I should see indices == { 0, 1, 2 }; debug and see
-            + Try from the other end: remove/change features in
-              shady_square until it breaks
-              + Use a TriMesh constructor with all the parameters
-                instead of TriMesh.reconstruct()
-                > Still looks fine 
-              + Write down exactly what I'm feeding the TriMesh in my
-                Shape constructor, and change shady_square bit by bit to
-                match
-                > Changed all parameters to match exactly; still only
-                  works in AboutControllerPipeline.squareInit(), and not
-                  in Shape.asTriMesh()
-              + Change the one remaining difference I can see: use
-                BufferUtils.createFloatBuffer() to create all the
-                FloatBuffers
-                > That does it!
-          + Clean up and go back to what it's supposed to look like
-            > Was drawing a polyhedron made with a BallFactory()
-          + Set the vertices to random colors to make the shape easier
-            to see
-          - The faces are being drawn in the wrong order, and some of
-            them are missing
   - Add the ability to connect to a remote server and get a proxy
     - Implement full DvtpFlexiStreamer and DvtpFlexiParser
       - Anything that starts with a 0 byte is an object; otherwise
@@ -339,6 +267,80 @@
           + Make a separate GUI root node
           + Position the line at the top of the window
       + If URL is about:hello, use an AboutControllerPipeline
+  + Implement AboutControllerPipeline()
+    + Clear the WorldGraph
+    + Dump a predefined set of objects into the WorldGraph
+      + Does my TriangleStripArray-based approach translate to jME?
+        > Yes, with slight modifications
+      + Implement WorldGraph.addShape() -- with position/orientation?
+      + Test
+        + It keeps crashing on what appears to be the vertex buffer,
+          even though it looks fine
+          x Try adding a breakpoint in the last line of code I have
+            source for that gets executed before the exception, then run
+            a working demo and compare that code's TriMesh to my own
+          + Error is: FloatBuffer is not direct
+            + Allocate a direct buffer
+        + My shape doesn't appear at all
+          x Make sure it is placed appropriately and is not too small
+            > Tried various changes; no effect
+          + Look for a working example program that uses a TriMesh
+            > Several, e.g. jmetest.TutorialGuide.HelloTriMesh
+            > I'm way off on Shape.asTriMesh()
+          + The IntBuffer must spell out each triangle as indices into
+            the FloatBuffer, one dimension at a time
+          > I may need to set colors as well, and possibly normals
+          > Got it to show up, in a weird, warped form
+        + Get it to look like it is supposed to
+          + Debug the Shape->TriMesh conversion
+            > There appear to be too many vertices in the second and
+              fourth rows -- more than the third row
+              > This might be easier to troubleshoot once I can actually
+                see my shapes
+            + Try manually creating a shape with just one triangle,
+              similar in size and position to the HelloTriMesh
+              > Does not display, so the problem must be either normals,
+                colors, texture coords, or the lack of a bounding box
+            + Try the easiest next thing: a bounding box
+              > This makes a big difference; now the about:hello text
+                isn't flaky, and the triangle, though not visible, shows
+                up in the debug mesh/vert/tri counts
+            + Try adding colors
+              + Shape defaults to set color to 50% gray, 50% alpha
+              > Still not visible
+            + Add normal vectors, automatically pointing away from the
+              origin
+              > Still not visible
+            + I think my index "fix" to vertexIndices() was wrong
+              > The buffer is indexed as if it were an array of triples,
+                not of floats, and there's only one index per point, not
+                three
+                > This means the vertex indices actually do save space
+                  in a mesh
+              + I should see indices == { 0, 1, 2 }; debug and see
+            + Try from the other end: remove/change features in
+              shady_square until it breaks
+              + Use a TriMesh constructor with all the parameters
+                instead of TriMesh.reconstruct()
+                > Still looks fine 
+              + Write down exactly what I'm feeding the TriMesh in my
+                Shape constructor, and change shady_square bit by bit to
+                match
+                > Changed all parameters to match exactly; still only
+                  works in AboutControllerPipeline.squareInit(), and not
+                  in Shape.asTriMesh()
+              + Change the one remaining difference I can see: use
+                BufferUtils.createFloatBuffer() to create all the
+                FloatBuffers
+                > That does it!
+          + Clean up and go back to what it's supposed to look like
+            > Was drawing a polyhedron made with a BallFactory()
+          + Set the vertices to random colors to make the shape easier
+            to see
+          x The faces are being drawn in the wrong order, and some of
+            them are missing
+            > Punting on this; I'm sure lots of people could figure it
+              out faster than I can
 
 - To do for 0.02:
   - Add textures to Shape class
@@ -386,7 +388,7 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
   - Client: master volume control and mute keystroke
-  - Swap brackets and parens (so '[' key sends '(', etc.)
+  - Option to swap brackets and parens (so '[' key sends '(', etc.)
   - Client: prompt user if site requests resize; one option should
     defeat malicious sites that flood the user with resize requests and
     make the client unusable without killing/restarting (i.e., "Never
