@@ -78,7 +78,7 @@ public class Shape implements Serializable
                                       1 );
 
       TriMesh tm = new TriMesh( "DvtpShape",
-                                p, p, 
+                                p, null, 
                                 BufferUtils.createFloatBuffer( colors ),
                                 p, vi );
       tm.setModelBound( new BoundingBox() );
