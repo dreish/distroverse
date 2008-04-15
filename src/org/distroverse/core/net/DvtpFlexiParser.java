@@ -21,42 +21,52 @@ public class DvtpFlexiParser extends ObjectParser< Object >
                                 NetInQueue< Object > queue )
    throws Exception
       {
-      if ( beginsWithNul( baos ) )
+      // FIXME This is a grossly suboptimal implementation
+      mNextObject.write( baos.toByteArray() );
+      byte[] next_object = mNextObject.toByteArray();
+      
+      if ( beginsWithNul( next_object ) )
          {
-         Log.p( "DvtpFlexiParser.parseObjects can't yet"
-                + " handle non-string objects", Log.NET, 1 );
-         throw new RuntimeException( "unimplemented object format" );
+         // This is an arbitrary DvtpExternalizable object.  Find the
+         // length and find out whether we have the whole thing yet.
+         int ob_len = objectLength( next_object );
+         if ( ob_len > 0  &&  ob_len <= next_object.length )
+            {
+            // XXX Convert and add to the queue.
+            
+            // XXX Delete parsed object from mNextObject.
+            }
          }
       else
          {
-         /* This is especially bad for assuming that whatever comes
-          * after the string will also be a string, but doing otherwise
-          * turns out to be tricky enough that I don't want to bother
-          * with it now.
-          */
-         final String to_add = baos.toString( "UTF-8" ); 
-         for ( int i = 0; i < to_add.length(); ++i )
-            {
-            mNextString += to_add.charAt( i );
-            if ( mNextString.length() > 1
-                 &&  mNextString.substring( mNextString.length() - 2 ) 
-                                .equals( "\r\n" ) )
+         // This is a raw string.  Find out whether we have the newline
+         // terminator yet.
+         for ( int i = 0; i < next_object.length - 1; ++i )
+            if (    next_object[ i   ] == '\r' 
+               && next_object[ i+1 ] == '\n' )
                {
-               queue.add( mNextString
-                          .substring( 0, mNextString.length() - 2 ) );
-               mNextString = "";
+               // Yes.
+               byte[] string_part = new byte[ i ];
+               System.arraycopy( next_object, 0, string_part, 0, i );
+               ByteArrayOutputStream string_baos
+                  = new ByteArrayOutputStream();
+               string_baos.write( string_part );
+               queue.add( string_baos.toString( "UTF-8" ) );
+               
+               byte[] remainder = new byte[ next_object.length
+                                            - i - 2 ];
+               System.arraycopy( next_object, i + 2, remainder, 0,
+                                 next_object.length - i - 2 );
+               baos.reset();
+               baos.write( remainder );
                }
-            }
-         baos.reset();
          }
       }
 
-   private boolean beginsWithNul( ByteArrayOutputStream baos )
+   private boolean beginsWithNul( byte[] ba )
       {
-      byte[] baos_contents = baos.toByteArray();
-      return  baos_contents.length > 0
-              &&  baos_contents[ 0 ] == '\0';
+      return  ba.length > 0  &&  ba[ 0 ] == '\0';
       }
 
-   String mNextString;
+   ByteArrayOutputStream mNextObject;
    }
