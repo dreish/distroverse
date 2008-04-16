@@ -41,6 +41,17 @@ public class Log
          }
       }
 
+   
+   /**
+    * Write the exception stack trace to the appropriate log or logs for
+    * the given type and level.  Higher numbers indicate increasingly
+    * important messages, with positive numbers requiring writing to
+    * some sort of permanent log file.  (Most messages should have a
+    * negative level.)
+    * @param e - Any Exception object
+    * @param type - A bitmask of the general category(ies) of the log
+    * @param level - The importance of the log message
+    */
    @SuppressWarnings( "unused" )
    public static void p( Exception e, int type, int level )
       {

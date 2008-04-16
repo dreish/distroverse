@@ -1,9 +1,11 @@
 package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.distroverse.core.*;
+import org.distroverse.dvtp.CompactUlong;
 
 public class DvtpFlexiParser extends ObjectParser< Object >
    {
@@ -11,7 +13,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
    public DvtpFlexiParser( ByteBuffer b )
       {
       super( b );
-      mNextString = "";
+      mNextObject = new ByteArrayOutputStream( 1024 );
       }
 
    @Override
@@ -21,7 +23,8 @@ public class DvtpFlexiParser extends ObjectParser< Object >
                                 NetInQueue< Object > queue )
    throws Exception
       {
-      // FIXME This is a grossly suboptimal implementation
+      // FIXME This is a grossly suboptimal implementation, and
+      // FIXME (second opinion) it's ugly too
       mNextObject.write( baos.toByteArray() );
       byte[] next_object = mNextObject.toByteArray();
       
@@ -43,7 +46,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
          // terminator yet.
          for ( int i = 0; i < next_object.length - 1; ++i )
             if (    next_object[ i   ] == '\r' 
-               && next_object[ i+1 ] == '\n' )
+                 && next_object[ i+1 ] == '\n' )
                {
                // Yes.
                byte[] string_part = new byte[ i ];
@@ -66,6 +69,24 @@ public class DvtpFlexiParser extends ObjectParser< Object >
    private boolean beginsWithNul( byte[] ba )
       {
       return  ba.length > 0  &&  ba[ 0 ] == '\0';
+      }
+   
+   /* Reminder: length will include the initial NUL, and the length
+    * number itself.  Returns -1 if not enough has been ready to even
+    * compute the length.
+    */
+   private int objectLength( byte[] object )
+      {
+      try
+         {
+         long len = CompactUlong.externalAsLong( 
+                       Util.baToObjectInput( object ) );
+         return Util.safeInt( len );
+         }
+      catch ( IOException e )
+         {
+         return -1;
+         }
       }
 
    ByteArrayOutputStream mNextObject;

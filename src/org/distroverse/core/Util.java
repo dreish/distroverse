@@ -8,6 +8,11 @@
 
 package org.distroverse.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+
 // import java.lang.reflect.*;
 
 /**
@@ -198,5 +203,28 @@ public final class Util
       return ( full.substring( 0, prefix.length() )
                    .compareToIgnoreCase( prefix )
                == 0 );
+      }
+
+   /**
+    * Wraps a byte array in a ByteArrayInputStream, and than that in an
+    * ObjectInputStream.  Expects exceptions would be impossible, so it
+    * re-throws them as application exceptions.
+    * @param object
+    * @return
+    */
+   public static ObjectInput baToObjectInput( byte[] object )
+      {
+      try
+         {
+         return new ObjectInputStream( 
+                       new ByteArrayInputStream( object ) );
+         }
+      catch ( IOException e )
+         {
+         // TODO Auto-generated catch block
+         Log.p( "Unlikely exception, not handled", Log.UNHANDLED, 100 );
+         Log.p( e, Log.UNHANDLED, 100 );
+         throw new RuntimeException( "Unlikely exception" );
+         }
       }
    }
