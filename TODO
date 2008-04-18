@@ -11,11 +11,13 @@
         an UTF-8 string
       x For objects, next byte indicates how many bytes that follow
         give the size of the object
-      - For objects, the next bytes that follow are in dvtp.CompactUlong
+      + For objects, the next bytes that follow are in dvtp.CompactUlong
         format, giving the size of the object
-      - If object is Externalizable, use that
       - First CompactUlong names the class; the rest is given to
         readExternal
+        - DvtpObject.parseObject( byte[] )
+          - Read object number
+          - DvtpObject.parseObject( byte[], int object_number )
       - Otherwise, if object is Serializable, use that
         - Only allow in the ExtraFlexiStreamer and ExtraFlexiParser
           subclasses

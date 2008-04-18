@@ -7,7 +7,10 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.ObjectInput;
+
 import org.distroverse.core.Log;
+import org.distroverse.core.Util;
 
 /**
  * This class collects routines used in externalizing DVTP objects,
@@ -17,7 +20,7 @@ import org.distroverse.core.Log;
  */
 public abstract class DvtpObject
    {
-   static final Class< ? > mClassList[] 
+   public static final Class< ? > mClassList[] 
       = { 
         CompactUlong.class,     // 0
         Pair.class,             // 1
@@ -26,7 +29,7 @@ public abstract class DvtpObject
         
         null
         };
-   static final BigInt mSerializedClassNumber 
+   public static final BigInt mSerializedClassNumber 
       = new BigInt( 0xB00BAD );
    
    /**
@@ -36,7 +39,7 @@ public abstract class DvtpObject
     * @return
     */
    @SuppressWarnings("unchecked")
-   static DvtpExternalizable getNew( BigInt class_number )
+   public static DvtpExternalizable getNew( BigInt class_number )
       {
       if ( class_number.compareTo(
                            new BigInt( mClassList.length ) ) < 0
@@ -63,6 +66,19 @@ public abstract class DvtpObject
       return null;
       }
    
-   static BigInt getSerializedClassNumber()
+   public static BigInt getSerializedClassNumber()
       {  return mSerializedClassNumber;  }
+   
+   public static DvtpExternalizable parseObject( ObjectInput in )
+      {
+      int class_number 
+         = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      return parseObject( in, class_number );
+      }
+   
+   public static DvtpExternalizable parseObject( ObjectInput in,
+                                                 int class_number )
+      {
+      
+      }
    }

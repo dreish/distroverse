@@ -88,7 +88,10 @@ public class DvtpFlexiParser extends ObjectParser< Object >
       {
       try
          {
-         // FIXME Probably don't want to use a CompactUlong here
+         /* FIXME Probably don't want to use a CompactUlong here, since
+          * this is a local protocol; space is less important than
+          * speed.
+          */
          long len = CompactUlong.externalAsLong( 
                        Util.baToObjectInput( object ) );
          return Util.safeInt( len );
