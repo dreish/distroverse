@@ -30,10 +30,9 @@ public class CompactUlong implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
-   public BigInt getClassNumber()
+   public int getClassNumber()
       {
-      // TODO Auto-generated method stub
-      return null;
+      return 0;
       }
    
    public static long externalAsLong( ObjectInput in )

@@ -103,8 +103,8 @@ public class BigInt implements DvtpExternalizable,
       out.write( output );
       }
 
-   public BigInt getClassNumber()
-      {  return new BigInt( 0 );  }
+   public int getClassNumber()
+      {  return 0;  }
 
    BigInteger mVal;
    }

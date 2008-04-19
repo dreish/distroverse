@@ -32,9 +32,6 @@ public class Str implements DvtpExternalizable
 
    String mVal;
 
-   public BigInt getClassNumber()
-      {
-      // TODO Auto-generated method stub
-      return null;
-      }
+   public int getClassNumber()
+      {  return 2;  }
    }

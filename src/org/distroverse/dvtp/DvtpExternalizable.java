@@ -15,5 +15,5 @@ import java.io.Externalizable;
  */
 public interface DvtpExternalizable extends Externalizable
    {
-   public abstract BigInt getClassNumber();
+   public abstract int getClassNumber();
    }

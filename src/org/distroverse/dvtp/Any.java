@@ -35,7 +35,7 @@ public class Any implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
-   public BigInt getClassNumber()
+   public int getClassNumber()
       {
       // TODO Auto-generated method stub
       return DvtpObject.getSerializedClassNumber();

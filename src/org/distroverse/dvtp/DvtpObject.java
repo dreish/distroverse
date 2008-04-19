@@ -7,6 +7,7 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
 import java.io.ObjectInput;
 
 import org.distroverse.core.Log;
@@ -29,8 +30,7 @@ public abstract class DvtpObject
         
         null
         };
-   public static final BigInt mSerializedClassNumber 
-      = new BigInt( 0xB00BAD );
+   public static final int mSerializedClassNumber = 0xB00BAD;
    
    /**
     * Returns a new object (constructed with the default constructor) of
@@ -39,15 +39,14 @@ public abstract class DvtpObject
     * @return
     */
    @SuppressWarnings("unchecked")
-   public static DvtpExternalizable getNew( BigInt class_number )
+   public static DvtpExternalizable getNew( int class_number )
       {
-      if ( class_number.compareTo(
-                           new BigInt( mClassList.length ) ) < 0
-           &&  class_number.compareTo( BigInt.ZERO ) >= 0 )
+      if ( class_number < mClassList.length
+           &&  class_number >= 0 )
          {
          Class< ? extends DvtpExternalizable > newclass
             = (Class< ? extends DvtpExternalizable >) 
-              mClassList[ class_number.intValue() ];
+              mClassList[ class_number ];
          DvtpExternalizable ret;
          try  {  ret = newclass.newInstance();  }
          catch ( Exception e )
@@ -61,24 +60,44 @@ public abstract class DvtpObject
          assert( ret.getClassNumber() == class_number );
          return ret;
          }
-      else if ( class_number.equals( mSerializedClassNumber ) )
+      else if ( class_number == mSerializedClassNumber )
          return new Any();
       return null;
       }
    
-   public static BigInt getSerializedClassNumber()
+   public static int getSerializedClassNumber()
       {  return mSerializedClassNumber;  }
    
-   public static DvtpExternalizable parseObject( ObjectInput in )
+   public static DvtpExternalizable parseObject( ObjectInput in ) 
+   throws IOException
       {
       int class_number 
          = Util.safeInt( CompactUlong.externalAsLong( in ) );
       return parseObject( in, class_number );
       }
    
+   /**
+    * 
+    * @param in
+    * @param class_number
+    * @return
+    */
    public static DvtpExternalizable parseObject( ObjectInput in,
                                                  int class_number )
+   throws IOException
       {
-      
+      DvtpExternalizable ob = getNew( class_number );
+      try
+         {
+         if ( ob != null )
+            ob.readExternal( in );
+         }
+      catch ( ClassNotFoundException e )
+         {
+         Log.p( "Impossible exception: " + e, Log.DVTP | Log.UNHANDLED,
+                100 );
+         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+         }
+      return ob;
       }
    }
