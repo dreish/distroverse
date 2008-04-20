@@ -2,14 +2,16 @@ package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.nio.ByteBuffer;
 
 import org.distroverse.core.*;
 import org.distroverse.dvtp.CompactUlong;
+import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.DvtpObject;
 
 public class DvtpFlexiParser extends ObjectParser< Object >
    {
-
    public DvtpFlexiParser( ByteBuffer b )
       {
       super( b );
@@ -17,30 +19,54 @@ public class DvtpFlexiParser extends ObjectParser< Object >
       }
 
    @Override
-   // TODO don't forget to remove this after implementing both sides
-   @SuppressWarnings("all")
    protected void parseObjects( ByteArrayOutputStream baos,
                                 NetInQueue< Object > queue )
    throws Exception
       {
-      // FIXME This is a grossly suboptimal implementation, and
-      // FIXME (second opinion) it's ugly too
+      // FIXME This whole method is ugly.
       boolean cont = true;
       while ( cont )
          {
          mNextObject.write( baos.toByteArray() );
          byte[] next_object = mNextObject.toByteArray();
-      
+         
          if ( beginsWithNul( next_object ) )
             {
             // This is an arbitrary DvtpExternalizable object.  Find the
             // length and find out whether we have the whole thing yet.
-            int ob_len = objectLength( next_object );
-            if ( ob_len > 0  &&  ob_len <= next_object.length )
-               {
-               // XXX Convert and add to the queue.
+            ObjectInput in = Util.baToObjectInput( next_object );
+            int ob_len = objectLength( in );
+            boolean writeback = false;
             
-               // XXX Delete parsed object from mNextObject.
+            if ( ob_len == 0 )
+               {
+               // FIXME I'm allowing (ignoring) null objects, but why?
+               writeback = true;
+               }
+            else if ( ob_len <= in.available() )
+               {
+               // Convert and add to the queue.
+               writeback = true;
+               int before_length = in.available();
+               DvtpExternalizable o = DvtpObject.parseObject( in );
+               int after_length  = in.available();
+               int actual_ob_len = before_length - after_length;
+               if ( actual_ob_len != ob_len )
+                  Log.p( "DVTP object length not as promised: was "
+                         + actual_ob_len + ". not " + ob_len,
+                         Log.DVTP, 5 );
+               queue.add( o );
+               }
+
+            if ( writeback )
+               {
+               /* Delete parsed object from mNextObject by writing
+                * whatever is left in 'in' back to mNextObject. 
+                */
+               byte[] in_buffer = new byte[ in.available() ];
+               in.read( in_buffer );
+               mNextObject.reset();
+               mNextObject.write( in_buffer );
                }
             }
          else
@@ -84,7 +110,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
     * number itself.  Returns -1 if not enough has been ready to even
     * compute the length.
     */
-   private int objectLength( byte[] object )
+   private int objectLength( ObjectInput in )
       {
       try
          {
@@ -92,8 +118,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
           * this is a local protocol; space is less important than
           * speed.
           */
-         long len = CompactUlong.externalAsLong( 
-                       Util.baToObjectInput( object ) );
+         long len = CompactUlong.externalAsLong( in );
          return Util.safeInt( len );
          }
       catch ( IOException e )

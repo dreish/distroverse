@@ -18,13 +18,21 @@ import java.io.ObjectOutput;
  */
 public class CompactUlong implements DvtpExternalizable
    {
-
    /**
-    * 
+    * Default constructor: value is zero.
     */
    public CompactUlong()
       {
-      // TODO Auto-generated constructor stub
+      mVal = 0;
+      }
+   
+   /**
+    * Constructor with initial value.
+    * @param val - initial value
+    */
+   public CompactUlong( long val )
+      {
+      mVal = val;
       }
 
    /* (non-Javadoc)
