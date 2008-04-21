@@ -38,6 +38,7 @@
         proxy a SetUrl object
       - Otherwise, download a new server and start it up with the
         given SetUrl object
+        - Use a URLClassLoader; URL might be a local file
       x In either case, get a result back and show the effective URL
         > This will just be a general UrlChange object, async
     - Listen for, and handle, messages from the proxy

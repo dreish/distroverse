@@ -32,6 +32,9 @@ public class CompactUlong implements DvtpExternalizable
     */
    public CompactUlong( long val )
       {
+      if ( val < 0 )
+         throw new IllegalArgumentException( 
+                           "CompactUlong must be nonnegative" );
       mVal = val;
       }
 
@@ -42,19 +45,43 @@ public class CompactUlong implements DvtpExternalizable
       {
       return 0;
       }
-   
+
    public static long externalAsLong( ObjectInput in )
    throws IOException
       {
       int shift = 0;
       long ret = 0;
+      
       while ( true )
          {
          byte b = in.readByte();
          ret |= (b << shift);
-         shift += 7;
          if ( (b & 128) == 128 )
             return ret;
+         shift += 7;
+         if ( shift == 63 )
+            throw new IOException( "Malformed CompactUlong in input" );
+         }
+      }
+   
+   public static void longAsExternal( ObjectOutput out, long l )
+   throws IOException
+      {
+      long val = l;
+      int shift = 0;
+      long mask = 0x7F;
+
+      if ( val < 0 )
+         throw new IllegalArgumentException( 
+                           "CompactUlong must be nonnegative" );
+      while ( val != 0 )
+         {
+         long bits = val & mask;
+         byte b = (byte) (bits >> shift);
+         val ^= bits;
+         if ( val == 0 )
+            b |= 0x80;
+         out.write( b );
          }
       }
 
@@ -71,8 +98,7 @@ public class CompactUlong implements DvtpExternalizable
     */
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      longAsExternal( out, mVal );
       }
 
    long mVal;

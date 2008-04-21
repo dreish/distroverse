@@ -7,24 +7,33 @@
  */
 package org.distroverse.dvtp;
 
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.vecmath.Point3d;
 
+import org.distroverse.core.Util;
+
 import com.jme.math.Vector3f;
 import com.jme.util.geom.BufferUtils;
 
 /**
+ * The external format begins with the number of tuples, followed by
+ * those tuples of double-precision IEEE 754 numbers.  This
+ * implementation discards precision, storing the points as three
+ * floats, rather than three double, because jMonkeyEngine only uses
+ * floats.
  * @author dreish
  */
-public class PointArray implements Serializable
+public class PointArray implements DvtpExternalizable
    {
    /**
     * The float buffer.
     */
-   private FloatBuffer fb;
+   private FloatBuffer mFb;
    
    /**
     * Constructor with the size of the array, in points (not floats).
@@ -46,31 +55,45 @@ public class PointArray implements Serializable
          ap_f[ i ] = new Vector3f( (float)ap[i].x, 
                                    (float)ap[i].y, 
                                    (float)ap[i].z );
-      fb = BufferUtils.createFloatBuffer( ap_f );
-//      allocate( ap.length );
-//      for ( Point3d point : ap )
-//         {
-//         fb.put( (float) point.x );
-//         fb.put( (float) point.y );
-//         fb.put( (float) point.z );
-//         }
-//      fb.rewind();
+      mFb = BufferUtils.createFloatBuffer( ap_f );
       }
    
    private void allocate( int n_points )
       {
-      fb = ByteBuffer.allocateDirect( (n_points * 3) * 4 )
+      mFb = ByteBuffer.allocateDirect( (n_points * 3) * 4 )
                      .asFloatBuffer();  
       }
    
-   // FIXME Implement PointArray.writeObject()
-   // FIXME Implement PointArray.readObject()
-
    private static final long serialVersionUID = 1;
 
    public FloatBuffer asFloatBuffer()
-      {  return fb;  }
+      {  return mFb;  }
 
+   /**
+    * @return - the number of points
+    */
    public int length()
-      {  return fb.limit();  }
+      {  return mFb.limit() / 3;  }
+
+   public int getClassNumber()
+      {  return 4;  }
+
+   public void readExternal( ObjectInput in ) throws IOException
+      {
+      int len = Util.safeInt( CompactUlong.externalAsLong( in ) * 3 );
+      Vector3f[] ap_f = new Vector3f[ len ];
+      for ( int i = 0; i < len * 3; ++i )
+         ap_f[ i ] = new Vector3f( (float) in.readDouble(),
+                                   (float) in.readDouble(),
+                                   (float) in.readDouble() );
+      mFb = BufferUtils.createFloatBuffer( ap_f );
+      }
+
+   public void writeExternal( ObjectOutput out ) throws IOException
+      {
+      CompactUlong.longAsExternal( out, length() );
+      float[] fa = mFb.array();
+      for ( float f : fa )
+         out.writeDouble( f );
+      }
    }

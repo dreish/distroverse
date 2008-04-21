@@ -7,27 +7,54 @@
  */
 package org.distroverse.dvtp;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
+import org.distroverse.core.Util;
+
+/**
+ * A Str is prefixed with the length of the UTF-8 encoded version of the
+ * string in bytes, not the length in characters of the string.
+ * @author dreish
+ */
 public class Str implements DvtpExternalizable
    {
    public Str( String s )
       {  mVal = s;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public static String externalAsString( ObjectInput in )
+   throws IOException
       {
-      // TODO Auto-generated method stub
+      int    len = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      byte[] buf = new byte[ len ];
+      in.readFully( buf );
+      return Charset.forName( "UTF-8" )
+                    .decode( ByteBuffer.wrap( buf ) )
+                    .toString();
+      }
+   
+   public static void stringAsExternal( ObjectOutput out, String val )
+   throws IOException
+      {
+      ByteBuffer bb = Charset.forName( "UTF-8" )
+                             .encode( CharBuffer.wrap( val ) );
+      CompactUlong.longAsExternal( out, bb.limit() );
+      out.write( bb.array() );
+      return;
+      }
 
+   public void readExternal( ObjectInput in ) throws IOException
+      {
+      mVal = externalAsString( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      stringAsExternal( out, mVal );
       }
 
    String mVal;

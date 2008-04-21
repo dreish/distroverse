@@ -27,6 +27,7 @@ public abstract class DvtpObject
         Pair.class,             // 1
         Str.class,              // 2
         BigInt.class,           // 3
+        PointArray.class,       // 4
         
         null
         };
