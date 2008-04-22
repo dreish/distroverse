@@ -17,14 +17,6 @@ import com.jmex.game.StandardGame;
 public abstract class ControllerPipeline
    {
    /**
-    * 
-    */
-   protected ControllerPipeline()
-      {
-      // TODO Auto-generated constructor stub
-      }
-
-   /**
     * Returns a new subclass of ControllerPipeline, appropriate for the
     * given URL, targeting the given game engine and window, and
     * possibly interacting with the given proxy connection.
@@ -40,6 +32,8 @@ public abstract class ControllerPipeline
       {
       if ( url.matches( "(?i)about:.*" ) )
          return new AboutControllerPipeline( url, game, window );
+      if ( url.matches( "(?i)dvtp:.*" ) )
+         return new ProxyControllerPipeline( url, game, window, proxy );
       return null;
       }
 

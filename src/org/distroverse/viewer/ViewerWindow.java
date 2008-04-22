@@ -23,7 +23,7 @@ public class ViewerWindow
       mWorld = new WorldGraph( root_node );
       }
    
-   void setUrl( String url )
+   public void setUrl( String url )
       {
       if ( mPipeline != null )
          mPipeline.close();
@@ -32,7 +32,7 @@ public class ViewerWindow
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    
-   WorldGraph getWorld()  {  return mWorld;  }
+   public WorldGraph getWorld()  {  return mWorld;  }
    
    private StandardGame          mGame;
    private ProxyClientConnection mProxy;
