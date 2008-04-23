@@ -25,10 +25,19 @@ public class ViewerWindow
    
    public void setUrl( String url )
       {
+      if ( mPipeline == null  ||  ! mPipeline.handlesUrl( url ) )
+         newPipelineUrl( url );
+      else
+         mPipeline.setUrl( url );
+      
+      mGui.getLocationBar().setText( url );
+      }
+   
+   private void newPipelineUrl( String url )
+      {
       if ( mPipeline != null )
          mPipeline.close();
       mProxy.setUrl( url );
-      mGui.getLocationBar().setText( url );
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    

@@ -42,4 +42,27 @@ public abstract class ControllerPipeline
     * the game (window).
     */
    public abstract void close();
+
+   /**
+    * A typical implementation would send a SetUrl object to its proxy.
+    * @param url
+    */
+   public void setUrl( String url )
+      {
+      throw new RuntimeException( "This controller pipeline does not"
+                    + " handle setUrl objects" );
+      }
+
+   /**
+    * Return true if this ControllerPipeline handles, or is attached to
+    * an object that handles, the given URL.  Any class that overrides
+    * this method with one that can return true for a given URL should
+    * also handle setUrl() calls with such a URL.
+    * @param url - URL to handle
+    * @return
+    */
+   public boolean handlesUrl( String url )
+      {
+      return false;
+      }
    }
