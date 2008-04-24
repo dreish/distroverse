@@ -13,7 +13,6 @@ public class ViewerWindow
    public ViewerWindow()
       {
       mGame  = new StandardGame( "Distroverse Viewer" );
-      mProxy = new ProxyClientConnection();
       mGame.start();
       final DebugGameState debug = new DebugGameState();
       GameStateManager.getInstance().attachChild( debug );
@@ -37,7 +36,9 @@ public class ViewerWindow
       {
       if ( mPipeline != null )
          mPipeline.close();
-      mProxy.setUrl( url );
+      if ( mProxy != null )
+         mProxy.close();
+      mProxy = new ProxyClientConnection( url );
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    

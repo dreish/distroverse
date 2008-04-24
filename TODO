@@ -33,7 +33,8 @@
       + Then, first CompactUlong names the class; the rest comes from
         writeExternal
     - Add to setUrl() ability to handle real URLs
-      - Connect to server and request proxy URL
+      - Connect to server and request proxy URL in ProxyClientConnection
+        constructor
       - If it is the same as the currently-running proxy, send the
         proxy a SetUrl object
       - Otherwise, download a new server and start it up with the

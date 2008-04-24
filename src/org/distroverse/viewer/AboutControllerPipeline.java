@@ -55,6 +55,6 @@ public class AboutControllerPipeline extends ControllerPipeline
    @Override
    public void close()
       {
-      // TODO AboutControllerPipeline.close()
+      // Don't need to do anything; there's no state to save.
       }
    }
