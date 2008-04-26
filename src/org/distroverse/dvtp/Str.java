@@ -25,6 +25,10 @@ public class Str implements DvtpExternalizable
    {
    public Str( String s )
       {  mVal = s;  }
+   
+   @Override
+   public String toString()
+      {  return mVal;  }
 
    public static String externalAsString( ObjectInput in )
    throws IOException

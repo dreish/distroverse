@@ -1,7 +1,11 @@
 package org.distroverse.viewer;
 
+import java.io.IOException;
+import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.distroverse.dvtp.Str;
 
 import com.jmex.game.StandardGame;
 
@@ -16,21 +20,30 @@ public class ProxyControllerPipeline extends ControllerPipeline
     * @param window - the ViewerWindow on which to display
     * @param proxy - the already-running proxy, if any
     * @throws URISyntaxException 
+    * @throws IOException 
     */
    public ProxyControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window,
                                    ProxyClientConnection proxy ) 
-   throws URISyntaxException
+   throws URISyntaxException, IOException
       {
       String proxy_url = GetProxyUrl( url );
       }
 
-   private String GetProxyUrl( String url ) throws URISyntaxException
+   public static String GetProxyUrl( String url ) 
+   throws URISyntaxException, IOException
       {
+      URI place_uri = new URI( url );
       DvtpServerConnection dvtp_server
-         = new DvtpServerConnection( new URI( url ) );
+         = new DvtpServerConnection( place_uri );
+      Object response = dvtp_server.location( place_uri );
+      if ( response instanceof Str )
+         response = response.toString();
+      if ( response instanceof String )
+         return (String) response;
       
-      return null;
+      throw new ProtocolException( "Server did not return a string "
+                    + "in response to a LOCATION query" );
       }
 
    @Override
