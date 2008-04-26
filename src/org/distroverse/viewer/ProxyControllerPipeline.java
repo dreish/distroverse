@@ -1,5 +1,8 @@
 package org.distroverse.viewer;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import com.jmex.game.StandardGame;
 
 public class ProxyControllerPipeline extends ControllerPipeline
@@ -12,12 +15,22 @@ public class ProxyControllerPipeline extends ControllerPipeline
     * @param game - the jME StandardGame
     * @param window - the ViewerWindow on which to display
     * @param proxy - the already-running proxy, if any
+    * @throws URISyntaxException 
     */
    public ProxyControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window,
-                                   ProxyClientConnection proxy )
+                                   ProxyClientConnection proxy ) 
+   throws URISyntaxException
       {
-      // TODO Auto-generated constructor stub
+      String proxy_url = GetProxyUrl( url );
+      }
+
+   private String GetProxyUrl( String url ) throws URISyntaxException
+      {
+      DvtpServerConnection dvtp_server
+         = new DvtpServerConnection( new URI( url ) );
+      
+      return null;
       }
 
    @Override
