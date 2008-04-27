@@ -3,6 +3,9 @@
  */
 package org.distroverse.viewer;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import com.jmex.game.StandardGame;
 
 /**
@@ -25,10 +28,13 @@ public abstract class ControllerPipeline
     * @param game
     * @param window
     * @return
+    * @throws IOException 
+    * @throws URISyntaxException 
     */
    public static ControllerPipeline
    getNew( String url, ProxyClientConnection proxy, StandardGame game,
-           ViewerWindow window )
+           ViewerWindow window ) 
+   throws URISyntaxException, IOException
       {
       if ( url.matches( "(?i)about:.*" ) )
          return new AboutControllerPipeline( url, game, window );
@@ -44,10 +50,16 @@ public abstract class ControllerPipeline
    public abstract void close();
 
    /**
-    * A typical implementation would send a SetUrl object to its proxy.
+    * A typical implementation would find out whether it needs a new
+    * proxy, and either send a SetUrl object to its proxy or get a new
+    * one.
     * @param url
+    * @throws IOException 
+    * @throws URISyntaxException 
     */
+   @SuppressWarnings("unused")
    public void setUrl( String url )
+   throws URISyntaxException, IOException
       {
       throw new RuntimeException( "This controller pipeline does not"
                     + " handle setUrl objects" );

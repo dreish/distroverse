@@ -77,7 +77,7 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
          }
       }
 
-   private boolean safelyStreamableString( String s )
+   public static boolean safelyStreamableString( String s )
       {
       if ( s.charAt( 0 ) == '\0'
            ||  s.indexOf( "\r\n" ) != -1 )

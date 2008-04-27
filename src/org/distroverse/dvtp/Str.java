@@ -17,8 +17,8 @@ import java.nio.charset.Charset;
 import org.distroverse.core.Util;
 
 /**
- * A Str is prefixed with the length of the UTF-8 encoded version of the
- * string in bytes, not the length in characters of the string.
+ * N.B.: A Str is prefixed with the length of the UTF-8 encoded version
+ * of the string in bytes, not the number of characters in the string.
  * @author dreish
  */
 public class Str implements DvtpExternalizable

@@ -27,7 +27,8 @@ public class ProxyControllerPipeline extends ControllerPipeline
                                    ProxyClientConnection proxy ) 
    throws URISyntaxException, IOException
       {
-      String proxy_url = GetProxyUrl( url );
+      mProxy = proxy;
+      setUrl( url );
       }
 
    public static String GetProxyUrl( String url ) 
@@ -37,13 +38,14 @@ public class ProxyControllerPipeline extends ControllerPipeline
       DvtpServerConnection dvtp_server
          = new DvtpServerConnection( place_uri );
       Object response = dvtp_server.location( place_uri );
+      dvtp_server.close();
       if ( response instanceof Str )
          response = response.toString();
       if ( response instanceof String )
          return (String) response;
       
       throw new ProtocolException( "Server did not return a string "
-                    + "in response to a LOCATION query" );
+                         + "in response to a LOCATION query" );
       }
 
    @Override
@@ -51,6 +53,21 @@ public class ProxyControllerPipeline extends ControllerPipeline
       {
       // TODO Auto-generated method stub
 
+      }
+   
+   @Override
+   public void setUrl( String url )
+   throws URISyntaxException, IOException
+      {
+      String proxy_url = GetProxyUrl( url );
+      if ( mProxy != null
+           &&  proxy_url == mProxy.getProxyUrl() )
+         mProxy.setUrl( url );
+      else
+         {
+         mProxy.close();
+         mProxy = new ProxyClientConnection( url, proxy_url );
+         }
       }
 
    private ProxyClientConnection mProxy;

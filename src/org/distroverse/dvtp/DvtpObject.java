@@ -7,8 +7,11 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util;
@@ -100,5 +103,31 @@ public abstract class DvtpObject
          Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
          }
       return ob;
+      }
+
+   /**
+    * Writes a complete NUL/length/type-prefixed DVTP object to the
+    * given ObjectOutput.
+    * @param oo - Output to which to write 'de'
+    * @param de - Object to write
+    * @throws IOException
+    */
+   public static void writeObject( ObjectOutput oo, 
+                                   DvtpExternalizable de )
+   throws IOException
+      {
+      ByteArrayOutputStream rawob = new ByteArrayOutputStream();
+      ObjectOutput rawob_oo = new ObjectOutputStream( rawob );
+      CompactUlong type = new CompactUlong( de.getClassNumber() );
+      type.writeExternal( rawob_oo );
+      de.writeExternal( rawob_oo );
+      
+      // NUL,
+      oo.write( 0 );
+      // length,
+      CompactUlong length = new CompactUlong( rawob.size() );
+      length.writeExternal( oo );
+      // type, and the object itself
+      oo.write( rawob.toByteArray() );
       }
    }

@@ -9,7 +9,12 @@ package org.distroverse.viewer;
  */
 public class ProxyClientConnection
    {
-   public ProxyClientConnection( String url )
+   /**
+    * Loads a proxy and creates a connection to it.
+    * @param url - The Location URL
+    * @param proxy_url - The Proxy resource URL
+    */
+   public ProxyClientConnection( String url, String proxy_url )
       {
       // TODO Probably want to create a thread here. 
       }
@@ -24,4 +29,11 @@ public class ProxyClientConnection
       // TODO Auto-generated method stub
       
       }
+
+   public String getProxyUrl()
+      {
+      return mUrl;
+      }
+   
+   private String mUrl;
    }
