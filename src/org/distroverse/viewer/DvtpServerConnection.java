@@ -1,6 +1,9 @@
 package org.distroverse.viewer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -66,8 +69,7 @@ public class DvtpServerConnection
    public Object query( String q ) throws IOException
       {
       safeSend( q );
-      // TODO this
-      return null;
+      return getResponse();
       }
 
    /**
@@ -86,6 +88,47 @@ public class DvtpServerConnection
             = new ObjectOutputStream( mSock.getOutputStream() );
          DvtpObject.writeObject( oo, new Str( q ) );
          }
+      }
+
+   private Object getResponse() throws IOException
+      {
+      InputStream sis = mSock.getInputStream();
+      ObjectInputStream osis = new ObjectInputStream( sis );
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      int first_byte = sis.read();
+      if ( first_byte == 0 )
+         return DvtpObject.parseObject( osis );
+
+      baos.write( first_byte );
+      return getString( baos, sis );
+      }
+
+   /**
+    * Reads a CRLF-terminated string from the given sis, using the baos
+    * (and whatever it already contains) as a buffer.
+    * @param baos - A ByteArrayOutputStream to use as a buffer
+    * @param is - An InputStream from which to read a string
+    * @return
+    * @throws IOException
+    */
+   private String getString( ByteArrayOutputStream baos,
+                             InputStream is )
+   throws IOException
+      {
+      while ( ! endsWithNewline( baos ) )
+         baos.write( is.read() );
+      
+      byte[] ba = baos.toByteArray();
+      return new String( ba, 0, ba.length - 2, "UTF-8" );
+      }
+
+   private boolean endsWithNewline( ByteArrayOutputStream baos )
+      {
+      if ( baos.size() < 2 )
+         return false;
+      byte[] ba = baos.toByteArray();
+      return  ba[ ba.length - 2 ] == '\r'
+              && ba[ ba.length - 1 ] == '\n';
       }
 
    private String mHostname;

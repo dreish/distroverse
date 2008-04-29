@@ -36,13 +36,16 @@
       + Connect to server and request proxy URL in
         ProxyControllerPipeline
         x in ProxyClientConnection constructor
-      - If it is the same as the currently-running proxy, send the
+      + Get response
+      + If it is the same as the currently-running proxy, send the
         proxy a SetUrl object
       - Otherwise, download a new server and start it up with the
         given SetUrl object
+        > This happens in the ProxyClientConnection constructor
         - Use a URLClassLoader; URL might be a local file
       x In either case, get a result back and show the effective URL
         > This will just be a general UrlChange object, async
+      - Implement ProxyClientConnection.setUrl()
     - Listen for, and handle, messages from the proxy
   - Add movement objects
   x Deform the points according to my trig functions and see whether

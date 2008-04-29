@@ -23,6 +23,11 @@ public class ProxyClientConnection
       {
       // TODO No real proxies yet, so nothing to do here.
       }
+   
+   public boolean handlesUrl( String url )
+      {
+      
+      }
 
    public void close()
       {

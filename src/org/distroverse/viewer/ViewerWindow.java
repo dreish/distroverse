@@ -1,5 +1,10 @@
 package org.distroverse.viewer;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import org.distroverse.core.Log;
+
 import com.jme.scene.Node;
 import com.jmex.game.StandardGame;
 import com.jmex.game.state.DebugGameState;
@@ -22,23 +27,45 @@ public class ViewerWindow
       mWorld = new WorldGraph( root_node );
       }
    
-   public void setUrl( String url )
+   /**
+    * Sets the URL viewed by this window.  Can be called in response to
+    * a user action, or a SetUrl object from the proxy.
+    * @param url - the DVTP URL to go to
+    * @throws URISyntaxException
+    * @throws IOException
+    */
+   public void setUrl( String url ) 
+   throws URISyntaxException, IOException
       {
       if ( mPipeline == null  ||  ! mPipeline.handlesUrl( url ) )
          newPipelineUrl( url );
       else
-         mPipeline.setUrl( url );
-      
-      mGui.getLocationBar().setText( url );
+         try
+            {
+            mPipeline.setUrl( url );
+            mGui.getLocationBar().setText( url );
+            }
+         catch ( URISyntaxException e )
+            {
+            Log.p( "Bad URI syntax: " + url, Log.CLIENT, 0 );
+            Log.p( e, Log.CLIENT, 0 );
+            }
+         catch ( IOException e )
+            {
+            Log.p( "I/O error from: " + url, Log.NET, 5 );
+            Log.p( e, Log.NET, 5 );
+            }
       }
    
-   private void newPipelineUrl( String url )
+   private void newPipelineUrl( String url ) 
+   throws URISyntaxException, IOException
       {
       if ( mPipeline != null )
          mPipeline.close();
       if ( mProxy != null )
          mProxy.close();
-      mProxy = new ProxyClientConnection( url );
+      mProxy = new ProxyClientConnection( url,
+                        ProxyControllerPipeline.getProxyUrl( url ) );
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    

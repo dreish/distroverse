@@ -31,7 +31,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
       setUrl( url );
       }
 
-   public static String GetProxyUrl( String url ) 
+   public static String getProxyUrl( String url ) 
    throws URISyntaxException, IOException
       {
       URI place_uri = new URI( url );
@@ -40,7 +40,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
       Object response = dvtp_server.location( place_uri );
       dvtp_server.close();
       if ( response instanceof Str )
-         response = response.toString();
+         return response.toString();
       if ( response instanceof String )
          return (String) response;
       
@@ -59,7 +59,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
    public void setUrl( String url )
    throws URISyntaxException, IOException
       {
-      String proxy_url = GetProxyUrl( url );
+      String proxy_url = getProxyUrl( url );
       if ( mProxy != null
            &&  proxy_url == mProxy.getProxyUrl() )
          mProxy.setUrl( url );

@@ -57,6 +57,8 @@ public class DvtpFlexiParser extends ObjectParser< Object >
                          Log.DVTP, 5 );
                queue.add( o );
                }
+            else
+               cont = false;
 
             if ( writeback )
                {
