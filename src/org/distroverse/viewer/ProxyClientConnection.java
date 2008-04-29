@@ -16,7 +16,9 @@ public class ProxyClientConnection
     */
    public ProxyClientConnection( String url, String proxy_url )
       {
-      // TODO Probably want to create a thread here. 
+      
+      // TODO Probably want to create a thread here or something.
+      // And a flag!  And a constant!  And a variable!
       }
    
    public void setUrl( String url )
@@ -24,9 +26,17 @@ public class ProxyClientConnection
       // TODO No real proxies yet, so nothing to do here.
       }
    
+   /**
+    * Checks the given URL against the regexp returned by the server
+    * when this proxy URL was specified.
+    * @param url
+    * @return
+    */
    public boolean handlesUrl( String url )
       {
-      
+      if ( mHandledUrlRegexp == null )
+         return false;
+      return url.matches( mHandledUrlRegexp );
       }
 
    public void close()
@@ -41,4 +51,5 @@ public class ProxyClientConnection
       }
    
    private String mUrl;
+   private String mHandledUrlRegexp;
    }
