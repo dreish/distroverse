@@ -10,11 +10,11 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.math.BigInteger;
 
 /**
  * A pair of DvtpExternalizable objects.  They get externalized
- * together.
+ * together.  No provision is made for skipping a pair without parsing
+ * both objects.
  * @author dreish
  */
 public class Pair implements DvtpExternalizable
@@ -41,11 +41,11 @@ public class Pair implements DvtpExternalizable
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
     */
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) 
+   throws IOException, ClassNotFoundException
       {
-      // TODO Auto-generated method stub
-
+      mFirst  = DvtpObject.parseObject( in );
+      mSecond = DvtpObject.parseObject( in );
       }
 
    /* (non-Javadoc)
@@ -53,8 +53,8 @@ public class Pair implements DvtpExternalizable
     */
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      DvtpObject.writeObject( out, mFirst );
+      DvtpObject.writeObject( out, mSecond );
       }
 
    private DvtpExternalizable mFirst;

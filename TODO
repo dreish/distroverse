@@ -42,6 +42,8 @@
       - Response to LOCATION should be a pair; one proxy URL and one
         regexp defining the URLs handled by that proxy; otherwise no
         URLs are handled(?)
+        + Implement Pair
+        - Require a Pair of Strs in response, not a single string
       - Otherwise, download a new server and start it up with the
         given SetUrl object
         > This happens in the ProxyClientConnection constructor

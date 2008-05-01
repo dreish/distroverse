@@ -41,9 +41,11 @@ public abstract class DvtpObject
     * the given class number.
     * @param class_number
     * @return
+    * @throws ClassNotFoundException 
     */
    @SuppressWarnings("unchecked")
-   public static DvtpExternalizable getNew( int class_number )
+   public static DvtpExternalizable getNew( int class_number ) 
+   throws ClassNotFoundException
       {
       if ( class_number < mClassList.length
            &&  class_number >= 0 )
@@ -66,14 +68,16 @@ public abstract class DvtpObject
          }
       else if ( class_number == mSerializedClassNumber )
          return new Any();
-      return null;
+      else 
+         throw new ClassNotFoundException( "No such"
+             + " DvtpExternalizable class number: " + class_number );
       }
    
    public static int getSerializedClassNumber()
       {  return mSerializedClassNumber;  }
    
    public static DvtpExternalizable parseObject( ObjectInput in ) 
-   throws IOException
+   throws IOException, ClassNotFoundException
       {
       int class_number 
          = Util.safeInt( CompactUlong.externalAsLong( in ) );
@@ -85,10 +89,11 @@ public abstract class DvtpObject
     * @param in
     * @param class_number
     * @return
+    * @throws ClassNotFoundException 
     */
    public static DvtpExternalizable parseObject( ObjectInput in,
                                                  int class_number )
-   throws IOException
+   throws IOException, ClassNotFoundException
       {
       DvtpExternalizable ob = getNew( class_number );
       try
