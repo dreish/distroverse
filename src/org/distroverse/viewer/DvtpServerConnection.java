@@ -14,6 +14,12 @@ import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.Str;
 
+
+/**
+ * A connection to a remote DVTP server, with methods for simple,
+ * synchronous I/O.
+ * @author dreish
+ */
 public class DvtpServerConnection
    {
    /**
@@ -39,19 +45,24 @@ public class DvtpServerConnection
       mSock = null;
       }
 
-   public Object get( URI u ) throws IOException
+   public Object get( URI u )
+   throws IOException, ClassNotFoundException
       {  return query( "get", u );  }
    
-   public Object get( String resource_name ) throws IOException
+   public Object get( String resource_name )
+   throws IOException, ClassNotFoundException
       {  return query( "get " + resource_name );  }
 
-   public Object location( URI u ) throws IOException
+   public Object location( URI u )
+   throws IOException, ClassNotFoundException
       {  return query( "location", u );  }
    
-   public Object location( String resource_name ) throws IOException
+   public Object location( String resource_name ) 
+   throws IOException, ClassNotFoundException
       {  return query( "location " + resource_name );  }
 
-   public Object query( String type, URI u ) throws IOException
+   public Object query( String type, URI u )
+   throws IOException, ClassNotFoundException
       {
       if ( u.getHost() != mHostname )
          throw new RuntimeException( "Attempted to get URI with host "
@@ -66,7 +77,8 @@ public class DvtpServerConnection
                      + " at port " + mPort );
       }
    
-   public Object query( String q ) throws IOException
+   public Object query( String q ) 
+   throws IOException, ClassNotFoundException
       {
       safeSend( q );
       return getResponse();
@@ -90,7 +102,8 @@ public class DvtpServerConnection
          }
       }
 
-   private Object getResponse() throws IOException
+   private Object getResponse() 
+   throws IOException, ClassNotFoundException
       {
       InputStream sis = mSock.getInputStream();
       ObjectInputStream osis = new ObjectInputStream( sis );

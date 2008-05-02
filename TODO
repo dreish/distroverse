@@ -44,6 +44,10 @@
         URLs are handled(?)
         + Implement Pair
         - Require a Pair of Strs in response, not a single string
+        - Error if the regexp doesn't match the requested URL?
+          - Note it with a TODO as a possibility, but mention that it
+            should not be implemented unless it seems to solve a real
+            problem
       - Otherwise, download a new server and start it up with the
         given SetUrl object
         > This happens in the ProxyClientConnection constructor

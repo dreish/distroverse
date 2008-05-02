@@ -37,7 +37,16 @@ public class ProxyControllerPipeline extends ControllerPipeline
       URI place_uri = new URI( url );
       DvtpServerConnection dvtp_server
          = new DvtpServerConnection( place_uri );
-      Object response = dvtp_server.location( place_uri );
+      
+      Object response = null;
+      try
+         {  response = dvtp_server.location( place_uri );  }
+      catch ( ClassNotFoundException e )
+         {
+         /* Let it fall through and throw it as a protocol exception,
+          * the same as if it returns something other than a string.
+          */
+         }
       dvtp_server.close();
       if ( response instanceof Str )
          return response.toString();
