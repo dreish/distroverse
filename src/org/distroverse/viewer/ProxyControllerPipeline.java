@@ -5,6 +5,8 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.distroverse.core.Util;
+import org.distroverse.dvtp.Pair;
 import org.distroverse.dvtp.Str;
 
 import com.jmex.game.StandardGame;
@@ -31,7 +33,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
       setUrl( url );
       }
 
-   public static String getProxyUrl( String url ) 
+   public static Util.Pair< String, String > getProxyUrl( String url ) 
    throws URISyntaxException, IOException
       {
       URI place_uri = new URI( url );
@@ -44,17 +46,27 @@ public class ProxyControllerPipeline extends ControllerPipeline
       catch ( ClassNotFoundException e )
          {
          /* Let it fall through and throw it as a protocol exception,
-          * the same as if it returns something other than a string.
+          * the same as if it returns something other than a Pair of
+          * Strs.
           */
          }
       dvtp_server.close();
-      if ( response instanceof Str )
-         return response.toString();
-      if ( response instanceof String )
-         return (String) response;
+      if ( response instanceof Pair )
+         {
+         Pair response_pair = (Pair) response;
+         if ( response_pair.getFirst() instanceof Str
+              &&  response_pair.getSecond() instanceof Str )
+            {
+            // I'll bet this is what he meant by "halfway to Lisp":
+            return new Util.Pair< String, String >
+                     (((Str) response_pair.getFirst()).toString(),
+                      ((Str) response_pair.getSecond()).toString());
+            // I want my money back.
+            }
+         }
       
-      throw new ProtocolException( "Server did not return a string "
-                         + "in response to a LOCATION query" );
+      throw new ProtocolException( "Server did not return a pair of"
+                        + " strings in response to a LOCATION query" );
       }
 
    @Override
@@ -65,17 +77,21 @@ public class ProxyControllerPipeline extends ControllerPipeline
       }
    
    @Override
-   public void setUrl( String url )
+   public void setUrl( String location_url )
    throws URISyntaxException, IOException
       {
-      String proxy_url = getProxyUrl( url );
+      Util.Pair< String, String > proxy_info =
+         getProxyUrl( location_url );
+      String proxy_url       = proxy_info.a;
+      String location_regexp = proxy_info.b;
       if ( mProxy != null
            &&  proxy_url == mProxy.getProxyUrl() )
-         mProxy.setUrl( url );
+         mProxy.setUrl( location_url );
       else
          {
          mProxy.close();
-         mProxy = new ProxyClientConnection( url, proxy_url );
+         mProxy = new ProxyClientConnection( location_url, proxy_url,
+                                             location_regexp );
          }
       }
 

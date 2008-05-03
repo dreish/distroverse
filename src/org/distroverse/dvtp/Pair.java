@@ -20,7 +20,8 @@ import java.io.ObjectOutput;
 public class Pair implements DvtpExternalizable
    {
    /**
-    * 
+    * This default constructor is pretty much only useful in conjunction
+    * with readExternal().
     */
    public Pair()
       {  mFirst = mSecond = null;  }
@@ -31,6 +32,11 @@ public class Pair implements DvtpExternalizable
       mFirst = first;
       mSecond = second;
       }
+
+   public Object getFirst()
+      {  return mFirst;  }
+   public Object getSecond()
+      {  return mSecond;  }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
