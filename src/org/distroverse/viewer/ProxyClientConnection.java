@@ -15,22 +15,45 @@ public class ProxyClientConnection
     * Loads a proxy and creates a connection to it.
     * @param url - The Location URL
     * @param proxy_url - The Proxy resource URL
-    * @param location_regexp 
+    * @param location_regexp - Matches what Locations the proxy handles
     */
    public ProxyClientConnection( String url, String proxy_url, 
                                  String location_regexp )
       {
-      // TODO Call out some common init function to be shared with the
-      // other constructor
+      init( url, proxy_url, location_regexp );
       }
    
+   /**
+    * Loads a proxy and creates a connection to it
+    * @param url - The Location URL
+    * @param proxy_info - a (proxy_url, location_regexp) Pair
+    */
    public ProxyClientConnection( String url,
                                  Pair< String, String > proxy_info )
       {
-      // TODO
+      init( url, proxy_info.a, proxy_info.b );
+      }
+   
+   private void init( String url, String proxy_url,
+                      String location_regexp )
+      {
+      mLocationRegexp = location_regexp;
+      mUrl = url;
+      getProxy( proxy_url );
       }
 
-   public void setUrl( String url )
+   private void getProxy( String proxy_url )
+      {
+      // TODO Auto-generated method stub
+      
+      }
+
+   /**
+    * Tells the proxy to change URLs.
+    * @param url - New location URL
+    * @param location_regexp - New regexp, or null to leave unchanged
+    */
+   public void setUrl( String url, String location_regexp )
       {
       // TODO No real proxies yet, so nothing to do here.
       }

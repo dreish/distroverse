@@ -57,6 +57,8 @@ public class ProxyControllerPipeline extends ControllerPipeline
          if ( response_pair.getFirst() instanceof Str
               &&  response_pair.getSecond() instanceof Str )
             {
+            // TODO possibly throw an exception if the regexp doesn't
+            // match 'url', but only if it solves a real problem.
             // I'll bet this is what he meant by "halfway to Lisp":
             return new Util.Pair< String, String >
                      (((Str) response_pair.getFirst()).toString(),
@@ -86,7 +88,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
       String location_regexp = proxy_info.b;
       if ( mProxy != null
            &&  proxy_url == mProxy.getProxyUrl() )
-         mProxy.setUrl( location_url );
+         mProxy.setUrl( location_url, location_regexp );
       else
          {
          mProxy.close();

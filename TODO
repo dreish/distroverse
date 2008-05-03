@@ -37,17 +37,17 @@
         ProxyControllerPipeline
         x in ProxyClientConnection constructor
       + Get response
-      + If it is the same as the currently-running proxy, send the
-        proxy a SetUrl object
-      - Response to LOCATION should be a pair; one proxy URL and one
+      + Response to LOCATION should be a pair; one proxy URL and one
         regexp defining the URLs handled by that proxy; otherwise no
         URLs are handled(?)
         + Implement Pair
-        - Require a Pair of Strs in response, not a single string
-        - Error if the regexp doesn't match the requested URL?
-          - Note it with a TODO as a possibility, but mention that it
+        + Require a Pair of Strs in response, not a single string
+        x Error if the regexp doesn't match the requested URL?
+          + Note it with a TODO as a possibility, but mention that it
             should not be implemented unless it seems to solve a real
             problem
+      + If it is the same as the currently-running proxy, send the
+        proxy a SetUrl object
       - Otherwise, download a new server and start it up with the
         given SetUrl object
         > This happens in the ProxyClientConnection constructor
