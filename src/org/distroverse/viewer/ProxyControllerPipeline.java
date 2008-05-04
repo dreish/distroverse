@@ -1,13 +1,10 @@
 package org.distroverse.viewer;
 
 import java.io.IOException;
-import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.distroverse.core.Util;
-import org.distroverse.dvtp.Pair;
-import org.distroverse.dvtp.Str;
 
 import com.jmex.game.StandardGame;
 
@@ -23,11 +20,12 @@ public class ProxyControllerPipeline extends ControllerPipeline
     * @param proxy - the already-running proxy, if any
     * @throws URISyntaxException 
     * @throws IOException 
+    * @throws ClassNotFoundException 
     */
    public ProxyControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window,
                                    ProxyClientConnection proxy ) 
-   throws URISyntaxException, IOException
+   throws URISyntaxException, IOException, ClassNotFoundException
       {
       mProxy = proxy;
       setUrl( url );
@@ -39,48 +37,18 @@ public class ProxyControllerPipeline extends ControllerPipeline
       URI place_uri = new URI( url );
       DvtpServerConnection dvtp_server
          = new DvtpServerConnection( place_uri );
-      
-      Object response = null;
-      try
-         {  response = dvtp_server.location( place_uri );  }
-      catch ( ClassNotFoundException e )
-         {
-         /* Let it fall through and throw it as a protocol exception,
-          * the same as if it returns something other than a Pair of
-          * Strs.
-          */
-         }
-      dvtp_server.close();
-      if ( response instanceof Pair )
-         {
-         Pair response_pair = (Pair) response;
-         if ( response_pair.getFirst() instanceof Str
-              &&  response_pair.getSecond() instanceof Str )
-            {
-            // TODO possibly throw an exception if the regexp doesn't
-            // match 'url', but only if it solves a real problem.
-            // I'll bet this is what he meant by "halfway to Lisp":
-            return new Util.Pair< String, String >
-                     (((Str) response_pair.getFirst()).toString(),
-                      ((Str) response_pair.getSecond()).toString());
-            // I want my money back.
-            }
-         }
-      
-      throw new ProtocolException( "Server did not return a pair of"
-                        + " strings in response to a LOCATION query" );
+      return dvtp_server.location( place_uri );
       }
 
    @Override
    public void close()
       {
-      // TODO Auto-generated method stub
-
+      mProxy.close();
       }
    
    @Override
    public void setUrl( String location_url )
-   throws URISyntaxException, IOException
+   throws URISyntaxException, IOException, ClassNotFoundException
       {
       Util.Pair< String, String > proxy_info =
          getProxyUrl( location_url );

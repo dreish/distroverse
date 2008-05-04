@@ -6,9 +6,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.URI;
 
+import org.distroverse.core.Util;
+import org.distroverse.dvtp.Pair;
 import org.distroverse.core.net.DvtpFlexiStreamer;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.dvtp.DvtpObject;
@@ -53,13 +56,33 @@ public class DvtpServerConnection
    throws IOException, ClassNotFoundException
       {  return query( "get " + resource_name );  }
 
-   public Object location( URI u )
-   throws IOException, ClassNotFoundException
-      {  return query( "location", u );  }
+   public Util.Pair< String, String > location( URI u )
+   throws IOException, ProtocolException
+      { 
+      try
+         {
+         return receiveLocation( query( "location", u ) );
+         }
+      catch ( ClassNotFoundException e )
+         {
+         throw new ProtocolException( "Server did not return a pair of"
+                        + " strings in response to a LOCATION query" );
+         }  
+      }
    
-   public Object location( String resource_name ) 
-   throws IOException, ClassNotFoundException
-      {  return query( "location " + resource_name );  }
+   public Util.Pair< String, String > location( String resource_name ) 
+   throws IOException, ProtocolException
+      {  
+      try
+         {
+         return receiveLocation( query( "location " + resource_name ) );
+         }
+      catch ( ClassNotFoundException e )
+         {
+         throw new ProtocolException( "Server did not return a pair of"
+                        + " strings in response to a LOCATION query" );
+         }  
+      }
 
    public Object query( String type, URI u )
    throws IOException, ClassNotFoundException
@@ -100,6 +123,29 @@ public class DvtpServerConnection
             = new ObjectOutputStream( mSock.getOutputStream() );
          DvtpObject.writeObject( oo, new Str( q ) );
          }
+      }
+
+   private Util.Pair< String, String > 
+   receiveLocation( Object response ) throws ProtocolException
+      {
+      if ( response instanceof Pair )
+         {
+         Pair response_pair = (Pair) response;
+         if ( response_pair.getFirst() instanceof Str
+              &&  response_pair.getSecond() instanceof Str )
+            {
+            // TODO possibly throw an exception if the regexp doesn't
+            // match 'url', but only if it solves a real problem.
+            // I'll bet this is what he meant by "halfway to Lisp":
+            return new Util.Pair< String, String >
+                     (((Str) response_pair.getFirst()).toString(),
+                      ((Str) response_pair.getSecond()).toString());
+            // I want my money back.
+            }
+         }
+
+      throw new ProtocolException( "Server did not return a pair of"
+                        + " strings in response to a LOCATION query" );
       }
 
    private Object getResponse() 

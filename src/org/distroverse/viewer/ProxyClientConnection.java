@@ -3,6 +3,10 @@
  */
 package org.distroverse.viewer;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+
 import org.distroverse.core.Util.Pair;
 
 /**
@@ -16,9 +20,12 @@ public class ProxyClientConnection
     * @param url - The Location URL
     * @param proxy_url - The Proxy resource URL
     * @param location_regexp - Matches what Locations the proxy handles
+    * @throws MalformedURLException 
+    * @throws ClassNotFoundException 
     */
    public ProxyClientConnection( String url, String proxy_url, 
                                  String location_regexp )
+   throws MalformedURLException, ClassNotFoundException
       {
       init( url, proxy_url, location_regexp );
       }
@@ -27,15 +34,19 @@ public class ProxyClientConnection
     * Loads a proxy and creates a connection to it
     * @param url - The Location URL
     * @param proxy_info - a (proxy_url, location_regexp) Pair
+    * @throws MalformedURLException 
+    * @throws ClassNotFoundException 
     */
    public ProxyClientConnection( String url,
                                  Pair< String, String > proxy_info )
+   throws MalformedURLException, ClassNotFoundException
       {
       init( url, proxy_info.a, proxy_info.b );
       }
    
    private void init( String url, String proxy_url,
                       String location_regexp )
+   throws MalformedURLException, ClassNotFoundException
       {
       mLocationRegexp = location_regexp;
       mUrl = url;
@@ -43,9 +54,15 @@ public class ProxyClientConnection
       }
 
    private void getProxy( String proxy_url )
+   throws MalformedURLException, ClassNotFoundException
       {
-      // TODO Auto-generated method stub
-      
+      String cache_url
+         = ResourceCache.internalizeResourceUrl( proxy_url );
+      URL[] urls = { new URL( cache_url ) };
+      URLClassLoader loader = new URLClassLoader( urls );
+      // XXX I have a feeling this will only work once:
+      Class< ? > proxy = loader.loadClass( "Proxy" );
+      // XXX Now how do I run it in a sandbox?
       }
 
    /**
