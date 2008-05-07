@@ -540,4 +540,18 @@
       on the pendrive that generates a new key
       > Might not be so valuable, though -- most people would probably
         tend to avoid sketchy Inet cafes
-
+  - .dvapp format
+    - Standalone application that runs on the local machine and can
+      access arbitrary remote hosts and ports; communicates with client
+      using DVTP
+    - Perhaps some sort of sandbox; pop up a warning dialog:
+      - This application wants to connect to: *.foo.com
+      - This application was (not) signed (by foo.com)
+    - Also, give it a directory to play in, and don't allow it to go
+      outside it
+    - Except for generic file-open/save dialogs in the client
+    - Extensions would be bound to the DV client, and it would have its
+      own registry of extensions to .dvapps
+      > This is unfortunate, but
+      > They couldn't be bound to the .dvapp if that were itself a
+        document type handled by the DV client

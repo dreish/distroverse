@@ -31,34 +31,41 @@ public class ViewerWindow
     * Sets the URL viewed by this window.  Can be called in response to
     * a user action, or a SetUrl object from the proxy.
     * @param url - the DVTP URL to go to
-    * @throws URISyntaxException
-    * @throws IOException
+    * @throws URISyntaxException - goes without saying
+    * @throws IOException - general I/O problems, typically network
+    * @throws ClassNotFoundException - if the proxy cannot be loaded
     */
    public void setUrl( String url ) 
-   throws URISyntaxException, IOException
       {
-      if ( mPipeline == null  ||  ! mPipeline.handlesUrl( url ) )
-         newPipelineUrl( url );
-      else
-         try
+      try
+         {
+         if ( mPipeline == null  ||  ! mPipeline.handlesUrl( url ) )
+            newPipelineUrl( url );
+         else
             {
             mPipeline.setUrl( url );
             mGui.getLocationBar().setText( url );
             }
-         catch ( URISyntaxException e )
-            {
-            Log.p( "Bad URI syntax: " + url, Log.CLIENT, 0 );
-            Log.p( e, Log.CLIENT, 0 );
-            }
-         catch ( IOException e )
-            {
-            Log.p( "I/O error from: " + url, Log.NET, 5 );
-            Log.p( e, Log.NET, 5 );
-            }
+         }
+      catch ( URISyntaxException e )
+         {
+         Log.p( "Bad URI syntax: " + url, Log.CLIENT, 0 );
+         Log.p( e, Log.CLIENT, 0 );
+         }
+      catch ( IOException e )
+         {
+         Log.p( "I/O error from: " + url, Log.NET, 10 );
+         Log.p( e, Log.NET, 10 );
+         }
+      catch ( ClassNotFoundException e )
+         {
+         Log.p( "Unloadable proxy from: " + url, Log.DVTP, 5 );
+         Log.p( e, Log.DVTP, 5 );
+         }
       }
    
    private void newPipelineUrl( String url ) 
-   throws URISyntaxException, IOException
+   throws URISyntaxException, IOException, ClassNotFoundException
       {
       if ( mPipeline != null )
          mPipeline.close();

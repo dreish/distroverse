@@ -128,24 +128,22 @@ public class DvtpServerConnection
    private Util.Pair< String, String > 
    receiveLocation( Object response ) throws ProtocolException
       {
-      if ( response instanceof Pair )
+      try
          {
+         // TODO possibly throw an exception if the regexp doesn't
+         // match 'url', but only if it solves a real problem.
+         // I'll bet this is what he meant by "halfway to Lisp":
          Pair response_pair = (Pair) response;
-         if ( response_pair.getFirst() instanceof Str
-              &&  response_pair.getSecond() instanceof Str )
-            {
-            // TODO possibly throw an exception if the regexp doesn't
-            // match 'url', but only if it solves a real problem.
-            // I'll bet this is what he meant by "halfway to Lisp":
-            return new Util.Pair< String, String >
-                     (((Str) response_pair.getFirst()).toString(),
-                      ((Str) response_pair.getSecond()).toString());
-            // I want my money back.
-            }
+         return new Util.Pair< String, String >
+            (((Str) response_pair.getFirst()).toString(),
+             ((Str) response_pair.getSecond()).toString());
+         // I want my money back.
          }
-
-      throw new ProtocolException( "Server did not return a pair of"
+      catch ( ClassCastException e )
+         {
+         throw new ProtocolException( "Server did not return a pair of"
                         + " strings in response to a LOCATION query" );
+         }
       }
 
    private Object getResponse() 
