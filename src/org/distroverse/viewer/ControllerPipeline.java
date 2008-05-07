@@ -35,7 +35,8 @@ public abstract class ControllerPipeline
    public static ControllerPipeline
    getNew( String url, ProxyClientConnection proxy, StandardGame game,
            ViewerWindow window ) 
-   throws URISyntaxException, IOException, ClassNotFoundException
+   throws URISyntaxException, IOException, ClassNotFoundException,
+          Exception
       {
       if ( url.matches( "(?i)about:.*" ) )
          return new AboutControllerPipeline( url, game, window );
@@ -57,11 +58,12 @@ public abstract class ControllerPipeline
     * @param url
     * @throws IOException 
     * @throws URISyntaxException 
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
+    * @throws Exception
     */
    @SuppressWarnings("unused")
    public void setUrl( String url )
-   throws URISyntaxException, IOException, ClassNotFoundException
+   throws URISyntaxException, IOException, ClassNotFoundException, Exception
       {
       throw new RuntimeException( "This controller pipeline does not"
                     + " handle setUrl objects" );

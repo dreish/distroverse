@@ -25,7 +25,8 @@ public class ProxyControllerPipeline extends ControllerPipeline
    public ProxyControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window,
                                    ProxyClientConnection proxy ) 
-   throws URISyntaxException, IOException, ClassNotFoundException
+   throws URISyntaxException, IOException, ClassNotFoundException,
+          Exception
       {
       mProxy = proxy;
       setUrl( url );
@@ -48,7 +49,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
    
    @Override
    public void setUrl( String location_url )
-   throws URISyntaxException, IOException, ClassNotFoundException
+   throws Exception
       {
       Util.Pair< String, String > proxy_info =
          getProxyUrl( location_url );

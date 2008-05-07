@@ -3,6 +3,7 @@
  */
 package org.distroverse.viewer;
 
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -25,7 +26,7 @@ public class ProxyClientConnection
     */
    public ProxyClientConnection( String url, String proxy_url, 
                                  String location_regexp )
-   throws MalformedURLException, ClassNotFoundException
+   throws Exception
       {
       init( url, proxy_url, location_regexp );
       }
@@ -35,26 +36,26 @@ public class ProxyClientConnection
     * @param url - The Location URL
     * @param proxy_info - a (proxy_url, location_regexp) Pair
     * @throws MalformedURLException 
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
     */
    public ProxyClientConnection( String url,
                                  Pair< String, String > proxy_info )
-   throws MalformedURLException, ClassNotFoundException
+   throws Exception
       {
       init( url, proxy_info.a, proxy_info.b );
       }
    
    private void init( String url, String proxy_url,
                       String location_regexp )
-   throws MalformedURLException, ClassNotFoundException
+   throws Exception
       {
       mLocationRegexp = location_regexp;
       mUrl = url;
-      getProxy( proxy_url );
+      runProxy( proxy_url );
       }
 
-   private void getProxy( String proxy_url )
-   throws MalformedURLException, ClassNotFoundException
+   private void runProxy( String proxy_url )
+   throws Exception
       {
       String cache_url
          = ResourceCache.internalizeResourceUrl( proxy_url );
@@ -62,7 +63,11 @@ public class ProxyClientConnection
       URLClassLoader loader = new URLClassLoader( urls );
       // XXX I have a feeling this will only work once:
       Class< ? > proxy = loader.loadClass( "Proxy" );
-      // XXX Now how do I run it in a sandbox?
+      // FIXME Add a SecurityManager to prevent proxy from doing stuff
+      Object proxy_instance = proxy.newInstance();
+      Method m = proxy.getMethod( "runMe" );
+      String ret = (String) m.invoke( proxy_instance );
+
       }
 
    /**

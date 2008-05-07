@@ -57,7 +57,7 @@ public class ViewerWindow
          Log.p( "I/O error from: " + url, Log.NET, 10 );
          Log.p( e, Log.NET, 10 );
          }
-      catch ( ClassNotFoundException e )
+      catch ( Exception e )
          {
          Log.p( "Unloadable proxy from: " + url, Log.DVTP, 5 );
          Log.p( e, Log.DVTP, 5 );
@@ -65,7 +65,7 @@ public class ViewerWindow
       }
    
    private void newPipelineUrl( String url ) 
-   throws URISyntaxException, IOException, ClassNotFoundException
+   throws Exception
       {
       if ( mPipeline != null )
          mPipeline.close();
