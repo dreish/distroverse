@@ -7,8 +7,12 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.distroverse.core.Util.Pair;
+import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.DvtpProxy;
 
 /**
  * @author dreish
@@ -51,6 +55,7 @@ public class ProxyClientConnection
       {
       mLocationRegexp = location_regexp;
       mUrl = url;
+      mQueue = new LinkedBlockingQueue< DvtpExternalizable >();
       runProxy( proxy_url );
       }
 
@@ -64,10 +69,13 @@ public class ProxyClientConnection
       // XXX I have a feeling this will only work once:
       Class< ? > proxy = loader.loadClass( "Proxy" );
       // FIXME Add a SecurityManager to prevent proxy from doing stuff
-      Object proxy_instance = proxy.newInstance();
-      Method m = proxy.getMethod( "runMe" );
-      String ret = (String) m.invoke( proxy_instance );
-
+      final DvtpProxy proxy_instance = (DvtpProxy) proxy.newInstance();
+      proxy_instance.setQueue( mQueue );
+      Thread t = new Thread( new Runnable()
+         {
+         public void run() { proxy_instance.run(); }
+         } );
+      t.start();
       }
 
    /**
@@ -106,4 +114,5 @@ public class ProxyClientConnection
    
    private String mUrl;
    private String mLocationRegexp;
+   private Queue< DvtpExternalizable > mQueue;
    }
