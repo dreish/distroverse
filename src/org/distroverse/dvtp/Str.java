@@ -51,6 +51,11 @@ public class Str implements DvtpExternalizable
       return;
       }
 
+   public int getClassNumber()
+      {  return 2;  }
+   public boolean isSendableByProxy()  
+      {  return false;  }
+
    public void readExternal( ObjectInput in ) throws IOException
       {
       mVal = externalAsString( in );
@@ -62,7 +67,4 @@ public class Str implements DvtpExternalizable
       }
 
    String mVal;
-
-   public int getClassNumber()
-      {  return 2;  }
    }

@@ -42,9 +42,9 @@ public class CompactUlong implements DvtpExternalizable
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {
-      return 0;
-      }
+      {  return 0;  }
+   public boolean isSendableByProxy()  
+      {  return false;  }
 
    public static long externalAsLong( ObjectInput in )
    throws IOException

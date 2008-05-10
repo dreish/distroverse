@@ -37,9 +37,9 @@ public class Any implements DvtpExternalizable
     */
    public int getClassNumber()
       {
-      // TODO Auto-generated method stub
       return DvtpObject.getSerializedClassNumber();
       }
+   public boolean isSendableByProxy()  {  return false;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)

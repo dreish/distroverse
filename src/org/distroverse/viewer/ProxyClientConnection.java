@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.distroverse.core.Util.Pair;
@@ -18,7 +19,7 @@ import org.distroverse.dvtp.DvtpProxy;
  * @author dreish
  *
  */
-public class ProxyClientConnection
+public class ProxyClientConnection implements Runnable
    {
    /**
     * Loads a proxy and creates a connection to it.
@@ -57,6 +58,34 @@ public class ProxyClientConnection
       mUrl = url;
       mQueue = new LinkedBlockingQueue< DvtpExternalizable >();
       runProxy( proxy_url );
+      mListener = newListener();
+      }
+   
+   private Thread newListener()
+      {
+      Thread ret = new Thread( this );
+      ret.start();
+      return ret;
+      }
+   
+   /**
+    * Running a ProxyClientConnection causes it to listen to its queue
+    * for objects, and to act on them.  run() does not return unless
+    * interrupted.
+    */
+   public void run()
+      {
+      try
+         {
+         while ( true )
+            {
+            DvtpExternalizable o = mQueue.take();
+            if ( o.isSendableByProxy() )
+               // XXX - Dispatch the object
+            }
+         }
+      catch ( InterruptedException e )
+         {  /* Fall through. */  }
       }
 
    private void runProxy( String proxy_url )
@@ -103,8 +132,7 @@ public class ProxyClientConnection
 
    public void close()
       {
-      // TODO Auto-generated method stub
-      
+      mListener.interrupt();
       }
 
    public String getProxyUrl()
@@ -114,5 +142,6 @@ public class ProxyClientConnection
    
    private String mUrl;
    private String mLocationRegexp;
-   private Queue< DvtpExternalizable > mQueue;
+   private BlockingQueue< DvtpExternalizable > mQueue;
+   private Thread mListener;
    }

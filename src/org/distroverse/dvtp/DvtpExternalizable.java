@@ -16,4 +16,5 @@ import java.io.Externalizable;
 public interface DvtpExternalizable extends Externalizable
    {
    public abstract int getClassNumber();
+   public abstract boolean isSendableByProxy();
    }

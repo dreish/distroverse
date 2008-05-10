@@ -77,6 +77,8 @@ public class PointArray implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 4;  }
+   public boolean isSendableByProxy()  
+      {  return false;  }
 
    public void readExternal( ObjectInput in ) throws IOException
       {
