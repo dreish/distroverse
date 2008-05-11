@@ -22,7 +22,7 @@ import org.distroverse.core.Util;
  * from this class.
  * @author dreish
  */
-public abstract class DvtpObject
+public final class DvtpObject
    {
    public static final Class< ? > mClassList[] 
       = { 
@@ -31,6 +31,10 @@ public abstract class DvtpObject
         Str.class,              // 2
         BigInt.class,           // 3
         PointArray.class,       // 4
+        False.class,            // 5
+        True.class,             // 6
+        ProxySpec.class,        // 7
+        ProxyDefer.class,       // 8
         
         null
         };
@@ -135,4 +139,10 @@ public abstract class DvtpObject
       // type, and the object itself
       oo.write( rawob.toByteArray() );
       }
+
+   /**
+    * This class cannot be constructed.  It is just a collection of
+    * static methods.
+    */
+   private DvtpObject() { /* Nothing */ }
    }

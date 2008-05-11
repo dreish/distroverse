@@ -227,4 +227,10 @@ public final class Util
          throw new RuntimeException( "Unlikely exception" );
          }
       }
+
+   /**
+    * This class cannot be constructed.  It is just a collection of
+    * static methods.
+    */
+   private Util() { /* Nothing */ }
    }

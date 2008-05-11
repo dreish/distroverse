@@ -25,7 +25,9 @@ public class Str implements DvtpExternalizable
    {
    public Str( String s )
       {  mVal = s;  }
-   
+   public Str()
+      {  mVal = null;  }
+
    @Override
    public String toString()
       {  return mVal;  }
@@ -66,5 +68,5 @@ public class Str implements DvtpExternalizable
       stringAsExternal( out, mVal );
       }
 
-   String mVal;
+   private String mVal;
    }
