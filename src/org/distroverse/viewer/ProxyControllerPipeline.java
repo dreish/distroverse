@@ -29,6 +29,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
           Exception
       {
       mProxy = proxy;
+      mWindow = window;
       setUrl( url );
       }
 
@@ -62,9 +63,10 @@ public class ProxyControllerPipeline extends ControllerPipeline
          {
          mProxy.close();
          mProxy = new ProxyClientConnection( location_url, proxy_url,
-                                             location_regexp );
+                                             location_regexp, mWindow );
          }
       }
 
    private ProxyClientConnection mProxy;
+   private ViewerWindow mWindow;
    }

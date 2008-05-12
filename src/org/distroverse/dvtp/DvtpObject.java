@@ -24,6 +24,10 @@ import org.distroverse.core.Util;
  */
 public final class DvtpObject
    {
+   /**
+    * Maps integer to class.  To go the other way, call
+    * getClassNumber().
+    */
    public static final Class< ? > mClassList[] 
       = { 
         CompactUlong.class,     // 0
@@ -35,6 +39,7 @@ public final class DvtpObject
         True.class,             // 6
         ProxySpec.class,        // 7
         ProxyDefer.class,       // 8
+        SetUrl.class,           // 9
         
         null
         };
@@ -80,6 +85,14 @@ public final class DvtpObject
    public static int getSerializedClassNumber()
       {  return mSerializedClassNumber;  }
    
+   /**
+    * This class parses everything except an initial NUL and length:
+    * class number followed by the object itself.
+    * @param in
+    * @return
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
    public static DvtpExternalizable parseObject( ObjectInput in ) 
    throws IOException, ClassNotFoundException
       {
@@ -89,10 +102,10 @@ public final class DvtpObject
       }
    
    /**
-    * 
-    * @param in
-    * @param class_number
-    * @return
+    * This class parses an object of a known class.
+    * @param in - an ObjectInput stream
+    * @param class_number - the class number of the object to parse
+    * @return - an object of the requested class
     * @throws ClassNotFoundException 
     */
    public static DvtpExternalizable parseObject( ObjectInput in,
@@ -127,9 +140,7 @@ public final class DvtpObject
       {
       ByteArrayOutputStream rawob = new ByteArrayOutputStream();
       ObjectOutput rawob_oo = new ObjectOutputStream( rawob );
-      CompactUlong type = new CompactUlong( de.getClassNumber() );
-      type.writeExternal( rawob_oo );
-      de.writeExternal( rawob_oo );
+      DvtpObject.writeInnerObject( rawob_oo, de );
       
       // NUL,
       oo.write( 0 );
@@ -138,6 +149,21 @@ public final class DvtpObject
       length.writeExternal( oo );
       // type, and the object itself
       oo.write( rawob.toByteArray() );
+      }
+
+   /**
+    * Writes a type-prefixed DVTP object to the given ObjectOutput.
+    * @param oo - Output to which to write 'de'
+    * @param de - Object to write
+    * @throws IOException
+    */
+   public static void writeInnerObject( ObjectOutput oo, 
+                                        DvtpExternalizable de )
+   throws IOException
+      {
+      CompactUlong type = new CompactUlong( de.getClassNumber() );
+      type.writeExternal( oo );
+      de.writeExternal( oo );
       }
 
    /**

@@ -72,7 +72,8 @@ public class ViewerWindow
       if ( mProxy != null )
          mProxy.close();
       mProxy = new ProxyClientConnection( url,
-                        ProxyControllerPipeline.getProxyUrl( url ) );
+                        ProxyControllerPipeline.getProxyUrl( url ),
+                        this );
       mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
       }
    

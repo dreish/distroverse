@@ -74,7 +74,7 @@ public class ProxySpec implements DvtpExternalizable
    public void writeExternal( ObjectOutput out ) throws IOException
       {
       mProxyUrl.writeExternal( out );
-      DvtpObject.writeObject( out, mCoversSubdomains );
+      DvtpObject.writeInnerObject( out, mCoversSubdomains );
       mResourceRegexp.writeExternal( out );
       }
    

@@ -3,17 +3,18 @@
  */
 package org.distroverse.viewer;
 
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.distroverse.core.Log;
 import org.distroverse.core.Util.Pair;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.DvtpProxy;
+import org.distroverse.dvtp.SetUrl;
 
 /**
  * @author dreish
@@ -30,10 +31,11 @@ public class ProxyClientConnection implements Runnable
     * @throws ClassNotFoundException 
     */
    public ProxyClientConnection( String url, String proxy_url, 
-                                 String location_regexp )
+                                 String location_regexp,
+                                 ViewerWindow window )
    throws Exception
       {
-      init( url, proxy_url, location_regexp );
+      init( url, proxy_url, location_regexp, window );
       }
    
    /**
@@ -44,14 +46,15 @@ public class ProxyClientConnection implements Runnable
     * @throws ClassNotFoundException
     */
    public ProxyClientConnection( String url,
-                                 Pair< String, String > proxy_info )
+                                 Pair< String, String > proxy_info,
+                                 ViewerWindow window )
    throws Exception
       {
-      init( url, proxy_info.a, proxy_info.b );
+      init( url, proxy_info.a, proxy_info.b, window );
       }
    
    private void init( String url, String proxy_url,
-                      String location_regexp )
+                      String location_regexp, ViewerWindow window )
    throws Exception
       {
       mLocationRegexp = location_regexp;
@@ -59,6 +62,7 @@ public class ProxyClientConnection implements Runnable
       mQueue = new LinkedBlockingQueue< DvtpExternalizable >();
       runProxy( proxy_url );
       mListener = newListener();
+      mDispatcher = new ViewerDispatcher( window );
       }
    
    private Thread newListener()
@@ -81,7 +85,22 @@ public class ProxyClientConnection implements Runnable
             {
             DvtpExternalizable o = mQueue.take();
             if ( o.isSendableByProxy() )
-               // XXX - Dispatch the object
+               {
+               try
+                  {
+                  mDispatcher.dispatchObject( o );
+                  }
+               catch ( ProtocolException e )
+                  {
+                  Log.p( "Proxy violated DVTP protocol:", 0, 0 );
+                  Log.p( e, 0, 0 );
+                  }
+               }
+            else
+               {
+               Log.p( "Proxy sent non-proxy object of class "
+                      + o.getClass().getCanonicalName(), 0, 0 );
+               }
             }
          }
       catch ( InterruptedException e )
@@ -99,6 +118,7 @@ public class ProxyClientConnection implements Runnable
       Class< ? > proxy = loader.loadClass( "Proxy" );
       // FIXME Add a SecurityManager to prevent proxy from doing stuff
       final DvtpProxy proxy_instance = (DvtpProxy) proxy.newInstance();
+      mProxyInstance = proxy_instance;
       proxy_instance.setQueue( mQueue );
       Thread t = new Thread( new Runnable()
          {
@@ -114,7 +134,12 @@ public class ProxyClientConnection implements Runnable
     */
    public void setUrl( String url, String location_regexp )
       {
-      // TODO No real proxies yet, so nothing to do here.
+      mProxyInstance.offer( new SetUrl( url ) );
+      /* XXX This doesn't make any sense.  I've decided that the client
+       * may only ask the proxy to go to a specific URL, so I can't
+       * change mLocationRegexp here until I know that the proxy went
+       * ahead with the change.
+       */  
       }
    
    /**
@@ -144,4 +169,6 @@ public class ProxyClientConnection implements Runnable
    private String mLocationRegexp;
    private BlockingQueue< DvtpExternalizable > mQueue;
    private Thread mListener;
+   private ViewerDispatcher mDispatcher;
+   private DvtpProxy mProxyInstance;
    }

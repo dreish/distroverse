@@ -22,4 +22,10 @@ public class ProxyDefer extends Str
    @Override
    public int getClassNumber()
       {  return 8;  }
+
+   /**
+    * @return - the name of the server to query instead of this one
+    */
+   public String getHostname()
+      {  return toString();  }
    }
