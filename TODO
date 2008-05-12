@@ -5,67 +5,8 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Add the ability to connect to a remote server and get a proxy
-    + Implement full DvtpFlexiParser
-      + Anything that starts with a 0 byte is an object; otherwise
-        an UTF-8 string
-      x For objects, next byte indicates how many bytes that follow
-        give the size of the object
-      + For objects, the next bytes that follow are in dvtp.CompactUlong
-        format, giving the size of the object
-      + Then, first CompactUlong names the class; the rest is given to
-        readExternal
-        + DvtpObject.parseObject( byte[] )
-          + Read object number
-          + DvtpObject.parseObject( byte[], int object_number )
-      x Otherwise, if object is Serializable, use that
-        > Only allow in the ExtraFlexiStreamer and ExtraFlexiParser
-          subclasses; can implement these later if I actually want them
-        > Type 0xB00BAD is a serialized object
-    + Implement full DvtpFlexiStreamer
-      + For streaming String objects, make sure they don't encode to
-        an initial NUL or contain CRLF pairs; if they do, use the object
-        method
-      + Anything that starts with a 0 byte is an object; otherwise a
-        UTF-8 string
-      + For objects, the next bytes that follow are in dvtp.CompactUlong
-        format, giving the size of the object
-      + Then, first CompactUlong names the class; the rest comes from
-        writeExternal
-    - Add to setUrl() ability to handle real URLs
-      + Connect to server and request proxy URL in
-        ProxyControllerPipeline
-        x in ProxyClientConnection constructor
-      + Get response
-      + Response to LOCATION should be a pair; one proxy URL and one
-        regexp defining the URLs handled by that proxy; otherwise no
-        URLs are handled(?)
-        + Implement Pair
-        + Require a Pair of Strs in response, not a single string
-        x Error if the regexp doesn't match the requested URL?
-          + Note it with a TODO as a possibility, but mention that it
-            should not be implemented unless it seems to solve a real
-            problem
-      + If it is the same as the currently-running proxy, send the
-        proxy a SetUrl object
-      + Otherwise, download a new server and start it up with the
-        given SetUrl object
-        > This happens in the ProxyClientConnection constructor
-        + Use a URLClassLoader; URL might be a local file
-        + Proxy will have a method to set the queue into which to feed
-          DvtpExternalizable objects to the client
-        + And a method to start it running
-        + The current Viewer implementation will call these directly,
-          but another one might spawn an external process with a class
-          that loads the proxy, calls these functions, and passes back
-          results over a socket or through a pipe
-      - Need to have a thread always calling take() on the queue and
-        acting on each message from the proxy
-      x In either case, get a result back and show the effective URL
-        > This will just be a general UrlChange object, async
-      - Implement ProxyClientConnection.setUrl()
-    - Listen for, and handle, messages from the proxy
-  - Add movement objects
+  - Add AddObject message
+  - Add MoveObject message
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app
@@ -374,6 +315,87 @@
             them are missing
             > Punting on this; I'm sure lots of people could figure it
               out faster than I can
+  + Add the ability to connect to a remote server and get a proxy
+    + Implement full DvtpFlexiParser
+      + Anything that starts with a 0 byte is an object; otherwise
+        an UTF-8 string
+      x For objects, next byte indicates how many bytes that follow
+        give the size of the object
+      + For objects, the next bytes that follow are in dvtp.CompactUlong
+        format, giving the size of the object
+      + Then, first CompactUlong names the class; the rest is given to
+        readExternal
+        + DvtpObject.parseObject( byte[] )
+          + Read object number
+          + DvtpObject.parseObject( byte[], int object_number )
+      x Otherwise, if object is Serializable, use that
+        > Only allow in the ExtraFlexiStreamer and ExtraFlexiParser
+          subclasses; can implement these later if I actually want them
+        > Type 0xB00BAD is a serialized object
+    + Implement full DvtpFlexiStreamer
+      + For streaming String objects, make sure they don't encode to
+        an initial NUL or contain CRLF pairs; if they do, use the object
+        method
+      + Anything that starts with a 0 byte is an object; otherwise a
+        UTF-8 string
+      + For objects, the next bytes that follow are in dvtp.CompactUlong
+        format, giving the size of the object
+      + Then, first CompactUlong names the class; the rest comes from
+        writeExternal
+    + Add to ViewerWindow.setUrl() ability to handle real URLs
+      + Connect to server and request proxy URL in
+        ProxyControllerPipeline
+        x in ProxyClientConnection constructor
+      + Get response
+      + Response to LOCATION should be a pair; one proxy URL and one
+        regexp defining the URLs handled by that proxy; otherwise no
+        URLs are handled(?)
+        + Implement Pair
+        + Require a Pair of Strs in response, not a single string
+        x Error if the regexp doesn't match the requested URL?
+          + Note it with a TODO as a possibility, but mention that it
+            should not be implemented unless it seems to solve a real
+            problem
+      + If it is the same as the currently-running proxy, send the
+        proxy a SetUrl object
+      + Otherwise, download a new server and start it up with the
+        given SetUrl object
+        > This happens in the ProxyClientConnection constructor
+        + Use a URLClassLoader; URL might be a local file
+        + Proxy will have a method to set the queue into which to feed
+          DvtpExternalizable objects to the client
+        + And a method to start it running
+        + The current Viewer implementation will call these directly,
+          but another one might spawn an external process with a class
+          that loads the proxy, calls these functions, and passes back
+          results over a socket or through a pipe
+      + Need to have a thread always calling take() on the queue and
+        acting on each message from the proxy
+      x In either case, get a result back and show the effective URL
+        > This will just be a general UrlChange object, async
+      + Implement ProxyClientConnection.setUrl()
+      + As written, a call to ViewerWindow.setUrl() will set off an
+        infinite loop of the client telling the proxy to setUrl, and the
+        proxy echoing it back to the client, which responds by sending
+        it back to the proxy again, ad infinitum; separate the notions
+        of requesting a URL and setting the displayed URL
+        + The user requests a URL, which goes to the ControllerPipeline,
+          typically to send a setUrl object, but does not update the
+          displayed URL
+          > requestUrl()
+          + If the request requires a new proxy, update the display with
+            "dvtp://hostname/ (... /foo/bar)"
+        + The proxy actually sets the displayed URL
+          > setDisplayedUrl()
+        + Split this into three classes
+          + SetUrl (9) - the user requests a URL
+            + Sent to the proxy, possibly after loading a new one
+            + Proxy will hopefully respond with a DisplayUrl
+          + DisplayUrl (10) - the proxy changes the client's URL display
+            + URL must match the range of URLs the proxy handles
+          + RedirectUrl (11) - the proxy sends the client to another
+            world
+            + URL must NOT match the range of URLs the proxy handles
 
 - To do for 0.02:
   - Add textures to Shape class
