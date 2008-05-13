@@ -18,7 +18,7 @@ public class Viewer
       ViewerWindow w = new ViewerWindow();
       try
          {
-         w.setUrl( "about:hello" );
+         w.requestUrl( "about:hello" );
          }
       catch ( Exception e )
          {

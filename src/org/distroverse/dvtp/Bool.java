@@ -25,6 +25,8 @@ public abstract class Bool implements DvtpExternalizable
 
    public boolean isSendableByProxy()
       {  return false;  }
+   public boolean isSendableByClient()
+      {  return false;  }
 
    public void readExternal( @SuppressWarnings("unused")
                              ObjectInput in )

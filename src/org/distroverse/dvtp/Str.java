@@ -57,6 +57,8 @@ public class Str implements DvtpExternalizable
       {  return 2;  }
    public boolean isSendableByProxy()  
       {  return false;  }
+   public boolean isSendableByClient()
+      {  return false;  }
 
    public void readExternal( ObjectInput in ) throws IOException
       {

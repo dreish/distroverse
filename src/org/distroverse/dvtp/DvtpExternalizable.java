@@ -17,4 +17,5 @@ public interface DvtpExternalizable extends Externalizable
    {
    public abstract int getClassNumber();
    public abstract boolean isSendableByProxy();
+   public abstract boolean isSendableByClient();
    }

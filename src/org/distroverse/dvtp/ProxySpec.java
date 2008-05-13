@@ -58,6 +58,12 @@ public class ProxySpec implements DvtpExternalizable
       {  return false;  }
 
    /* (non-Javadoc)
+    * @see org.distroverse.dvtp.DvtpExternalizable#isSendableByClient()
+    */
+   public boolean isSendableByClient()  
+      {  return false;  }
+
+   /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
     */
    public void readExternal( ObjectInput in ) 

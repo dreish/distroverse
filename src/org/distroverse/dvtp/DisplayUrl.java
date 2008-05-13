@@ -1,19 +1,18 @@
 package org.distroverse.dvtp;
 
 /**
- * Sent by a client to a proxy to request that it switch to a
- * different URL.  If the proxy agrees, it will send back a DisplayUrl
- * object with the same URL, which will be what actually causes the
- * client to show a different URL.
+ * Sent by a proxy to a client to tell it to show a different URL in the
+ * location widget.  The URL contained in this object must be part of
+ * the site whose proxy sent the object.
  * 
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public class SetUrl extends Str
+public class DisplayUrl extends Str
    {
-   public SetUrl()
+   public DisplayUrl()
       {  super();  }
-   public SetUrl( String url )
+   public DisplayUrl( String url )
       {  super( url );  }
 
    /* (non-Javadoc)
@@ -21,13 +20,13 @@ public class SetUrl extends Str
     */
    @Override
    public int getClassNumber()
-      {  return 9;  }
+      {  return 10;  }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.Str#isSendableByClient()
+    * @see org.distroverse.dvtp.Str#isSendableByProxy()
     */
    @Override
-   public boolean isSendableByClient()
+   public boolean isSendableByProxy()
       {  return true;  }
    
    /**

@@ -92,12 +92,21 @@ public class ProxyClientConnection implements Runnable
                   }
                catch ( ProtocolException e )
                   {
-                  Log.p( "Proxy violated DVTP protocol:", 0, 0 );
-                  Log.p( e, 0, 0 );
+                  // TODO probably want to tell the user graphically
+                  Log.p( "Proxy violated DVTP protocol:", Log.DVTP, 0 );
+                  Log.p( e, Log.DVTP, 0 );
+                  }
+               catch ( ProxyErrorException e )
+                  {
+                  // TODO probably want to tell the user graphically
+                  Log.p( "Proxy did something erroneous:", 
+                         Log.PROXY, 0 );
+                  Log.p( e, Log.PROXY, 0 );
                   }
                }
             else
                {
+               // TODO probably want to tell the user graphically
                Log.p( "Proxy sent non-proxy object of class "
                       + o.getClass().getCanonicalName(), 0, 0 );
                }
@@ -128,18 +137,23 @@ public class ProxyClientConnection implements Runnable
       }
 
    /**
-    * Tells the proxy to change URLs.
+    * Tells the proxy to change URLs.  This is used in response to a
+    * RedirectUrl message when the site being redirected to is handled
+    * by the same proxy, and is also called as part of a client-side
+    * requestUrl().
     * @param url - New location URL
     * @param location_regexp - New regexp, or null to leave unchanged
     */
    public void setUrl( String url, String location_regexp )
       {
-      mProxyInstance.offer( new SetUrl( url ) );
-      /* XXX This doesn't make any sense.  I've decided that the client
-       * may only ask the proxy to go to a specific URL, so I can't
-       * change mLocationRegexp here until I know that the proxy went
-       * ahead with the change.
-       */  
+      offer( new SetUrl( url ) );
+      if ( location_regexp != null )
+         mLocationRegexp = location_regexp;
+      }
+
+   public void offer( DvtpExternalizable o )
+      {
+      mProxyInstance.offer( o );
       }
    
    /**

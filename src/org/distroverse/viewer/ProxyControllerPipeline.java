@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.distroverse.core.Util;
+import org.distroverse.dvtp.SetUrl;
 
 import com.jmex.game.StandardGame;
 
@@ -30,7 +31,7 @@ public class ProxyControllerPipeline extends ControllerPipeline
       {
       mProxy = proxy;
       mWindow = window;
-      setUrl( url );
+      requestUrl( url );
       }
 
    public static Util.Pair< String, String > getProxyUrl( String url ) 
@@ -49,7 +50,16 @@ public class ProxyControllerPipeline extends ControllerPipeline
       }
    
    @Override
-   public void setUrl( String location_url )
+   public void requestUrl( String location_url )
+   throws Exception
+      {
+      if ( mProxy.handlesUrl( location_url ) )
+         mProxy.offer( new SetUrl( location_url ) );
+      else
+         redirectUrl( location_url );
+      }
+
+   private void redirectUrl( String location_url )
    throws Exception
       {
       Util.Pair< String, String > proxy_info =

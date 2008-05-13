@@ -5,6 +5,8 @@ package org.distroverse.dvtp;
 
 import java.net.ProtocolException;
 
+import org.distroverse.viewer.ProxyErrorException;
+
 /**
  * Subclasses of this class handle incoming DVTP objects from a proxy
  * for a particular client.
@@ -13,12 +15,15 @@ import java.net.ProtocolException;
 public abstract class ClientDispatcher
    {
    public void dispatchObject( DvtpExternalizable o ) 
-   throws ProtocolException
+   throws ProtocolException, ProxyErrorException
       {
       switch ( o.getClassNumber() )
          {
-         case 9:
-            dispatchSetUrl( (SetUrl) o );
+         case 10:
+            dispatchDisplayUrl( (DisplayUrl) o );
+            break;
+         case 11:
+            dispatchRedirectUrl( (RedirectUrl) o );
             break;
          default:
             if ( o.isSendableByProxy() )
@@ -31,5 +36,8 @@ public abstract class ClientDispatcher
          }
       }
    
-   protected abstract void dispatchSetUrl( SetUrl o );
+   protected abstract void dispatchDisplayUrl( DisplayUrl o )
+   throws ProxyErrorException;
+   protected abstract void dispatchRedirectUrl( RedirectUrl o )
+   throws ProxyErrorException;
    }

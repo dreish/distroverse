@@ -28,24 +28,21 @@ public class ViewerWindow
       }
    
    /**
-    * Sets the URL viewed by this window.  Can be called in response to
-    * a user action, or a SetUrl object from the proxy.
+    * Requests that this viewer go to a given URL by either getting a
+    * new proxy, or sending a SetUrl object to the existing proxy.
     * @param url - the DVTP URL to go to
     * @throws URISyntaxException - goes without saying
     * @throws IOException - general I/O problems, typically network
     * @throws ClassNotFoundException - if the proxy cannot be loaded
     */
-   public void setUrl( String url ) 
+   public void requestUrl( String url ) 
       {
       try
          {
          if ( mPipeline == null  ||  ! mPipeline.handlesUrl( url ) )
             newPipelineUrl( url );
          else
-            {
-            mPipeline.setUrl( url );
-            mGui.getLocationBar().setText( url );
-            }
+            mPipeline.requestUrl( url );
          }
       catch ( URISyntaxException e )
          {
@@ -62,6 +59,11 @@ public class ViewerWindow
          Log.p( "Unloadable proxy from: " + url, Log.DVTP, 5 );
          Log.p( e, Log.DVTP, 5 );
          }
+      }
+   
+   public void setDisplayedUrl( String url )
+      {
+      mGui.getLocationBar().setText( url );
       }
    
    private void newPipelineUrl( String url ) 

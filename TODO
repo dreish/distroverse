@@ -14,16 +14,16 @@
     > Nevermind Java3D; using jME
     x Create methods to set its position, velocity, & acceleration
     x Create methods to do the same for its orientation
-  - core.DataPackage (abstract)
+  x core.DataPackage (abstract)
     - Find out whether something like this already exists
       > Presents a simple array of objects
       > Serialization produces different results depending on 
         implementation
-    - core.DataPackagePlain
+    x core.DataPackagePlain
       > No compression
-  	- core.DataPackageGzip
+  	x core.DataPackageGzip
   	  > Gzips entire package to serialize
-  	- core.DataPackageTgz
+  	x core.DataPackageTgz
   	  > Wraps everything in a gzipped tarball
   + Check everything into SVN
     > Too easy!
@@ -468,6 +468,11 @@
       implement such a thing
       > With a protocol for passing object directories around; it has to
         be done
+  - History tree(s), as suggested by
+    > http://www.jacobsheehy.com/technology/browsing-the-web-with-a-tree
+    - Each RedirectUrl creates a branch
+    - A SetUrl starts a new tree, but with a dotted line to where the
+      user was; can connect as a branch
   - Editor with syntax highlighting
     - Proxy sends client a bunch of HTML
       - <noedit></noedit>?  Is there a standard way to do that?

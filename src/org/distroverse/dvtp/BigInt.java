@@ -107,6 +107,8 @@ public class BigInt implements DvtpExternalizable,
       {  return 0;  }
    public boolean isSendableByProxy()  
       {  return false;  }
+   public boolean isSendableByClient()  
+      {  return false;  }
 
    BigInteger mVal;
    }

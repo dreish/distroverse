@@ -1,7 +1,9 @@
 package org.distroverse.viewer;
 
+import org.distroverse.core.Log;
 import org.distroverse.dvtp.ClientDispatcher;
-import org.distroverse.dvtp.SetUrl;
+import org.distroverse.dvtp.DisplayUrl;
+import org.distroverse.dvtp.RedirectUrl;
 
 public class ViewerDispatcher extends ClientDispatcher
    {
@@ -12,10 +14,41 @@ public class ViewerDispatcher extends ClientDispatcher
       }
    
    @Override
-   protected void dispatchSetUrl( SetUrl o )
+   protected void dispatchDisplayUrl( DisplayUrl o ) 
+   throws ProxyErrorException
       {
-      mWindow.setUrl( o.getUrl() );
+      String url = o.getUrl();
+
+      if ( mProxy.handlesUrl( url ) )
+         mWindow.setDisplayedUrl( url );
+      else
+         throw new ProxyErrorException( "Proxy tried to display a URL"
+                           + " that does not belong to it: " + url );
+      }
+
+   @Override
+   protected void dispatchRedirectUrl( RedirectUrl o )
+   throws ProxyErrorException
+      {
+      // TODO Auto-generated method stub
+      String url = o.getUrl();
+
+      if ( mProxy.handlesUrl( url ) )
+         throw new ProxyErrorException( "Proxy tried to redirect to"
+                          + "a URL that it handles: " + url );
+
+      try
+         {
+         mWindow.requestUrl( url );
+         }
+      catch ( Exception e )
+         {
+         Log.p( "Could not redirect to requested url "
+                + url + ":", Log.CLIENT, 0 );
+         Log.p( e, Log.CLIENT, 0 );
+         }
       }
    
    private ViewerWindow mWindow;
+   private ProxyClientConnection mProxy;
    }

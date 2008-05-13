@@ -40,6 +40,7 @@ public class Any implements DvtpExternalizable
       return DvtpObject.getSerializedClassNumber();
       }
    public boolean isSendableByProxy()  {  return false;  }
+   public boolean isSendableByClient()  {  return false;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)

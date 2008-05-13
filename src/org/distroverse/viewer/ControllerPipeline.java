@@ -62,11 +62,12 @@ public abstract class ControllerPipeline
     * @throws Exception
     */
    @SuppressWarnings("unused")
-   public void setUrl( String url )
-   throws URISyntaxException, IOException, ClassNotFoundException, Exception
+   public void requestUrl( String url )
+   throws URISyntaxException, IOException, ClassNotFoundException,
+   Exception
       {
       throw new RuntimeException( "This controller pipeline does not"
-                    + " handle setUrl objects" );
+                                  + " handle requestUrl()s" );
       }
 
    /**
