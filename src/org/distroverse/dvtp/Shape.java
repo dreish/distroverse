@@ -26,7 +26,7 @@ import com.jme.util.geom.BufferUtils;
  * @author dreish
  *
  */
-public class Shape implements Serializable
+public class Shape implements DvtpExternalizable
    {
    /**
     * No default constructor; there is no default shape.
@@ -50,18 +50,26 @@ public class Shape implements Serializable
       mPoints = new PointArray( points_pointarr );
       mVertexCounts = vertex_counts;
       }
-   
-//   /**
-//    * Get an actual TriangleStripArray object with this Shape.
-//    * @return the shape as a TriangleStripArray
-//    */
-//   public TriangleStripArray asTriangleStripArray()
-//      {
-//      return new TriangleStripArray( mPoints.p.length,
-//                                     GeometryArray.COORDINATES 
-//                                     | GeometryArray.BY_REFERENCE,
-//                                     mVertexCounts );
-//      }
+
+   public int getClassNumber()
+      {  return 10;  }
+   public boolean isSendableByClient()
+      {  return false;  }
+   public boolean isSendableByProxy()
+      {  return false;  }
+
+   public void readExternal( ObjectInput in ) throws IOException,
+                                             ClassNotFoundException
+      {
+      // TODO Auto-generated method stub
+      
+      }
+
+   public void writeExternal( ObjectOutput out ) throws IOException
+      {
+      // TODO Auto-generated method stub
+      
+      }
    
    public TriMesh asTriMesh()
       {

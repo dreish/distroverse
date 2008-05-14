@@ -5,6 +5,10 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
+  - Add SendableByProxy and SendableByClient interfaces
+    - Include the functions defined by DvtpExternalizable
+    - Make the queues use those instead of DvtpExternalizable
+    - Could I then remove isSendableBy*()?
   - Add AddObject message
   - Add MoveObject message
   x Deform the points according to my trig functions and see whether

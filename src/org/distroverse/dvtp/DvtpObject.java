@@ -40,6 +40,12 @@ public final class DvtpObject
         ProxySpec.class,        // 7
         ProxyDefer.class,       // 8
         SetUrl.class,           // 9
+        Shape.class,            // 10
+        Vec.class,              // 11
+        AddObject.class,        // 12
+        Movement.class,         // 13
+        MoveObject.class,       // 14
+        Flo.class,              // 15
         
         null
         };
