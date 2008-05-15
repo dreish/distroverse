@@ -12,8 +12,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util.Pair;
+import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.DvtpProxy;
+import org.distroverse.dvtp.ProxySendable;
 import org.distroverse.dvtp.SetUrl;
 
 /**
@@ -59,7 +61,7 @@ public class ProxyClientConnection implements Runnable
       {
       mLocationRegexp = location_regexp;
       mUrl = url;
-      mQueue = new LinkedBlockingQueue< DvtpExternalizable >();
+      mQueue = new LinkedBlockingQueue< ProxySendable >();
       runProxy( proxy_url );
       mListener = newListener();
       mDispatcher = new ViewerDispatcher( window );
@@ -83,32 +85,17 @@ public class ProxyClientConnection implements Runnable
          {
          while ( true )
             {
-            DvtpExternalizable o = mQueue.take();
-            if ( o.isSendableByProxy() )
+            ProxySendable o = mQueue.take();
+            try
                {
-               try
-                  {
-                  mDispatcher.dispatchObject( o );
-                  }
-               catch ( ProtocolException e )
-                  {
-                  // TODO probably want to tell the user graphically
-                  Log.p( "Proxy violated DVTP protocol:", Log.DVTP, 0 );
-                  Log.p( e, Log.DVTP, 0 );
-                  }
-               catch ( ProxyErrorException e )
-                  {
-                  // TODO probably want to tell the user graphically
-                  Log.p( "Proxy did something erroneous:", 
-                         Log.PROXY, 0 );
-                  Log.p( e, Log.PROXY, 0 );
-                  }
+               mDispatcher.dispatchObject( o );
                }
-            else
+            catch ( ProxyErrorException e )
                {
                // TODO probably want to tell the user graphically
-               Log.p( "Proxy sent non-proxy object of class "
-                      + o.getClass().getCanonicalName(), 0, 0 );
+               Log.p( "Proxy did something erroneous:", 
+                      Log.PROXY, 0 );
+               Log.p( e, Log.PROXY, 0 );
                }
             }
          }
@@ -151,7 +138,7 @@ public class ProxyClientConnection implements Runnable
          mLocationRegexp = location_regexp;
       }
 
-   public void offer( DvtpExternalizable o )
+   public void offer( ClientSendable o )
       {
       mProxyInstance.offer( o );
       }
@@ -181,7 +168,7 @@ public class ProxyClientConnection implements Runnable
    
    private String mUrl;
    private String mLocationRegexp;
-   private BlockingQueue< DvtpExternalizable > mQueue;
+   private BlockingQueue< ProxySendable > mQueue;
    private Thread mListener;
    private ViewerDispatcher mDispatcher;
    private DvtpProxy mProxyInstance;

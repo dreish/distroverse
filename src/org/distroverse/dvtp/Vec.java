@@ -8,13 +8,8 @@ public class Vec implements DvtpExternalizable
    {
    public int getClassNumber()
       {  return 11;  }
-   public boolean isSendableByClient()
-      {  return false;  }
-   public boolean isSendableByProxy()
-      {  return false;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) throws IOException
       {
       // TODO Auto-generated method stub
 
@@ -25,5 +20,4 @@ public class Vec implements DvtpExternalizable
       // TODO Auto-generated method stub
 
       }
-
    }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.distroverse.core.Util;
+
 /**
  * Defines movement and rotation in three dimensions:
  * - Movement
@@ -20,7 +22,7 @@ import java.io.ObjectOutput;
  *   - M quaternions
  *   - M period floats
  *   - M offset floats
- * - A period
+ * - A duration
  * 
  * Time is measured in seconds, and vectors are in meters.
  * 
@@ -30,19 +32,34 @@ public class Movement implements DvtpExternalizable
    {
    public int getClassNumber()
       {  return 13;  }
-   public boolean isSendableByClient()
-      {  return false;  }
-   public boolean isSendableByProxy()
-      {  return false;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
     */
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) 
+   throws IOException, ClassNotFoundException
       {
-      // TODO Auto-generated method stub
+      mMoveDegree = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mMovePolyVecs
+         = DvtpObject.readArray( in, mMoveDegree, Vec.class );
+      mMoveSins =  Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mMoveSinVecs = DvtpObject.readArray( in, mMoveSins, Vec.class );
+      mMoveSinPeriods
+         = DvtpObject.readArray( in, mMoveSins, Flo.class );
+      mMoveSinOffsets
+         = DvtpObject.readArray( in, mMoveSins, Flo.class );
       
+      mRotDegree = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mRotPolyQuats
+         = DvtpObject.readArray( in, mRotDegree, Quat.class );
+      mRotSins =  Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mRotSinQuats = DvtpObject.readArray( in, mRotSins, Quat.class );
+      mRotSinPeriods
+         = DvtpObject.readArray( in, mRotSins, Flo.class );
+      mRotSinOffsets
+         = DvtpObject.readArray( in, mRotSins, Flo.class );
+      
+      (mDuration = new Flo()).readExternal( in );
       }
 
    /* (non-Javadoc)
@@ -50,9 +67,36 @@ public class Movement implements DvtpExternalizable
     */
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      CompactUlong.longAsExternal( out, mMoveDegree );
+      DvtpObject.writeArray( out, mMovePolyVecs );
+      CompactUlong.longAsExternal( out, mMoveSins );
+      DvtpObject.writeArray( out, mMoveSinVecs );
+      DvtpObject.writeArray( out, mMoveSinPeriods );
+      DvtpObject.writeArray( out, mMoveSinOffsets );
+      
+      CompactUlong.longAsExternal( out, mRotDegree );
+      DvtpObject.writeArray( out, mRotPolyQuats );
+      CompactUlong.longAsExternal( out, mRotSins );
+      DvtpObject.writeArray( out, mRotSinQuats );
+      DvtpObject.writeArray( out, mRotSinPeriods );
+      DvtpObject.writeArray( out, mRotSinOffsets );
+      
+      mDuration.writeExternal( out );
       }
 
-   private int mDegree;
+   private int mMoveDegree;
+   private Vec[] mMovePolyVecs;
+   private int mMoveSins;
+   private Vec[] mMoveSinVecs;
+   private Flo[] mMoveSinPeriods;
+   private Flo[] mMoveSinOffsets;
+   
+   private int mRotDegree;
+   private Quat[] mRotPolyQuats;
+   private int mRotSins;
+   private Quat[] mRotSinQuats;
+   private Flo[] mRotSinPeriods;
+   private Flo[] mRotSinOffsets;
+   
+   private Flo mDuration;
    }

@@ -9,7 +9,7 @@ package org.distroverse.dvtp;
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public class SetUrl extends Str
+public class SetUrl extends Str implements ClientSendable
    {
    public SetUrl()
       {  super();  }
@@ -23,13 +23,6 @@ public class SetUrl extends Str
    public int getClassNumber()
       {  return 9;  }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.Str#isSendableByClient()
-    */
-   @Override
-   public boolean isSendableByClient()
-      {  return true;  }
-   
    /**
     * @return - the URL to switch to
     */

@@ -5,12 +5,13 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Add SendableByProxy and SendableByClient interfaces
-    - Include the functions defined by DvtpExternalizable
-    - Make the queues use those instead of DvtpExternalizable
-    - Could I then remove isSendableBy*()?
-  - Add AddObject message
-  - Add MoveObject message
+  - Handle these new ProxySendable classes in the dispatchers
+    - AddObject
+      - Implement movement in the client
+    - MoveObject
+    - DeleteObject
+  - Create a simple proxy that adds some shapes and moves them around
+  - Shape needs an externalization format
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app
@@ -400,11 +401,29 @@
           + RedirectUrl (11) - the proxy sends the client to another
             world
             + URL must NOT match the range of URLs the proxy handles
+  + Add SendableByProxy and SendableByClient interfaces
+    x Include the functions defined by DvtpExternalizable
+      > Inherits from that interface
+    + Switch the sendable classes to them
+    + Make the queues use those instead of DvtpExternalizable
+      > Effectively I'm moving a runtime check to the bytecode
+        validation stage instead
+    + Could I then remove isSendableBy*()?
+      + Make return type void; fix errors by deleting
+      + Delete from interface
+      + Manually search for any stragglers
+  + Doesn't BigInt have the wrong class number?
+  + Add AddObject message
+    > Shape
+    > Id
+    > ParentId
+    > Movement
+  + Add MoveObject message
 
 - To do for 0.02:
   - Add textures to Shape class
     - Specify color of each triangle
-  - Override default serialization in PointArray to guarantee that the
+  x Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
   - Reimplement ball factory with a stack of LazyPolygons
     - LazyPolygon( origin, top_vector, side_vector, n_sides )

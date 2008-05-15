@@ -39,14 +39,11 @@ public class Any implements DvtpExternalizable
       {
       return DvtpObject.getSerializedClassNumber();
       }
-   public boolean isSendableByProxy()  {  return false;  }
-   public boolean isSendableByClient()  {  return false;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
     */
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) throws IOException
       {
       // TODO Auto-generated method stub
 

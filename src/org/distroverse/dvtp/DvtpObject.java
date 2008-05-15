@@ -46,6 +46,7 @@ public final class DvtpObject
         Movement.class,         // 13
         MoveObject.class,       // 14
         Flo.class,              // 15
+        Quat.class,             // 16
         
         null
         };
@@ -171,10 +172,67 @@ public final class DvtpObject
       type.writeExternal( oo );
       de.writeExternal( oo );
       }
+   
+   /**
+    * Reads 'n' objects of type T from 'in'.
+    * @param <T>
+    * @param in
+    * @param n
+    * @param t
+    * @return an array, T[n].
+    * @throws ClassNotFoundException 
+    * @throws IOException 
+    * @throws ClassNotFoundException 
+    */
+   @SuppressWarnings("unchecked")
+   public static <T extends DvtpExternalizable>
+   T[] readArray( ObjectInput in, int n, Class<T> t )
+   throws IOException, ClassNotFoundException
+      {
+      T[] ret = (T[]) new DvtpExternalizable[ n ];
+      for ( int i = 0; i < n; ++i )
+         {
+         try
+            {
+            ret[ i ] = t.newInstance();
+            }
+         catch ( InstantiationException e )
+            {
+            Log.p( "Impossible exception: " + e,
+                   Log.DVTP | Log.UNHANDLED, 100 );
+            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+            }
+         catch ( IllegalAccessException e )
+            {
+            Log.p( "Impossible exception: " + e,
+                   Log.DVTP | Log.UNHANDLED, 100 );
+            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+            }
+         ret[ i ].readExternal( in );
+         }
+
+      return ret;
+      }
+
+   /**
+    * This writes a NON-LENGTH-PREFIXED array.  You'll need to store the
+    * length in its own field.
+    * @param out
+    * @param arr
+    * @throws IOException
+    */
+   public static void writeArray( ObjectOutput out, 
+                                  DvtpExternalizable[] arr )
+   throws IOException
+      {
+      for ( DvtpExternalizable o : arr )
+         o.writeExternal( out );
+      }
 
    /**
     * This class cannot be constructed.  It is just a collection of
     * static methods.
     */
    private DvtpObject() { /* Nothing */ }
+
    }

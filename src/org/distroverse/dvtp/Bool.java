@@ -1,5 +1,6 @@
 package org.distroverse.dvtp;
 
+import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
@@ -22,11 +23,22 @@ public abstract class Bool implements DvtpExternalizable
       }
 
    public abstract boolean asBoolean();
-
-   public boolean isSendableByProxy()
-      {  return false;  }
-   public boolean isSendableByClient()
-      {  return false;  }
+   
+   public static boolean externalAsBoolean( ObjectInput in ) 
+   throws IOException, ClassNotFoundException
+      {
+      DvtpExternalizable o = DvtpObject.parseObject( in );
+      if ( o instanceof Bool )
+         return ((Bool) o).asBoolean();
+      throw new ClassNotFoundException( "Expected Bool subclass, got: "
+                                  + o.getClass().getCanonicalName() );
+      }
+   
+   public static void booleanAsExternal( ObjectOutput out, boolean b )
+   throws IOException
+      {
+      DvtpObject.writeInnerObject( out, Bool.newInstance( b ) );
+      }
 
    public void readExternal( @SuppressWarnings("unused")
                              ObjectInput in )

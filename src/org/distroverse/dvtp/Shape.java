@@ -28,13 +28,9 @@ import com.jme.util.geom.BufferUtils;
  */
 public class Shape implements DvtpExternalizable
    {
-   /**
-    * No default constructor; there is no default shape.
-    */
-   @SuppressWarnings("unused")
-   private Shape()
+   public Shape()
       {
-      // Disallowed.
+      super();
       }
    
    /**
@@ -53,13 +49,8 @@ public class Shape implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 10;  }
-   public boolean isSendableByClient()
-      {  return false;  }
-   public boolean isSendableByProxy()
-      {  return false;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) throws IOException
       {
       // TODO Auto-generated method stub
       

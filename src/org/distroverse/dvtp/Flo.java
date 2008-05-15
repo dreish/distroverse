@@ -14,12 +14,10 @@ public class Flo implements DvtpExternalizable
    public Flo()           { mF = 0; }
    public Flo( float f )  { mF = f; }
    
+   public float asFloat()  {  return mF;  }
+   
    public int getClassNumber()
       {  return 15;  }
-   public boolean isSendableByClient()
-      {  return false;  }
-   public boolean isSendableByProxy()
-      {  return false;  }
 
    public static float externalAsFloat( ObjectInput in ) 
    throws IOException

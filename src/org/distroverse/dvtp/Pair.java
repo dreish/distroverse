@@ -43,10 +43,6 @@ public class Pair implements DvtpExternalizable
     */
    public int getClassNumber()
       {  return 1;  }
-   public boolean isSendableByProxy()  
-      {  return false;  }
-   public boolean isSendableByClient()  
-      {  return false;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)

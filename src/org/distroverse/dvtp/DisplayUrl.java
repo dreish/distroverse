@@ -8,7 +8,7 @@ package org.distroverse.dvtp;
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public class DisplayUrl extends Str
+public class DisplayUrl extends Str implements ProxySendable
    {
    public DisplayUrl()
       {  super();  }
@@ -22,13 +22,6 @@ public class DisplayUrl extends Str
    public int getClassNumber()
       {  return 10;  }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.Str#isSendableByProxy()
-    */
-   @Override
-   public boolean isSendableByProxy()
-      {  return true;  }
-   
    /**
     * @return - the URL to switch to
     */

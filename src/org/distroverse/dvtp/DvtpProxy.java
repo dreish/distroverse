@@ -1,6 +1,6 @@
 package org.distroverse.dvtp;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 public interface DvtpProxy
    {
@@ -9,7 +9,7 @@ public interface DvtpProxy
     * client.
     * @param queue
     */
-   public void setQueue( Queue< DvtpExternalizable > queue );
+   public void setQueue( BlockingQueue< ProxySendable > queue );
 
    /**
     * Starts the proxy.  Does not return.
@@ -20,5 +20,5 @@ public interface DvtpProxy
     * Feeds an object from the client to the proxy.
     * @param o
     */
-   public void offer( DvtpExternalizable o );
+   public void offer( ClientSendable o );
    }

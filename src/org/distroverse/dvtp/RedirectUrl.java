@@ -10,7 +10,7 @@ package org.distroverse.dvtp;
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public class RedirectUrl extends Str
+public class RedirectUrl extends Str implements ProxySendable
    {
    public RedirectUrl()
       {  super();  }
@@ -23,13 +23,6 @@ public class RedirectUrl extends Str
    @Override
    public int getClassNumber()
       {  return 11;  }
-
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.Str#isSendableByProxy()
-    */
-   @Override
-   public boolean isSendableByProxy()
-      {  return true;  }
    
    /**
     * @return - the URL to switch to

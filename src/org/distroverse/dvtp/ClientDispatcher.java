@@ -3,8 +3,6 @@
  */
 package org.distroverse.dvtp;
 
-import java.net.ProtocolException;
-
 import org.distroverse.viewer.ProxyErrorException;
 
 /**
@@ -14,8 +12,8 @@ import org.distroverse.viewer.ProxyErrorException;
  */
 public abstract class ClientDispatcher
    {
-   public void dispatchObject( DvtpExternalizable o ) 
-   throws ProtocolException, ProxyErrorException
+   public void dispatchObject( ProxySendable o ) 
+   throws ProxyErrorException
       {
       switch ( o.getClassNumber() )
          {
@@ -25,13 +23,15 @@ public abstract class ClientDispatcher
          case 11:
             dispatchRedirectUrl( (RedirectUrl) o );
             break;
+         case 12:
+            dispatchAddObject( (AddObject) o );
+            break;
+         case 14:
+            dispatchMoveObject( (MoveObject) o );
+            break;
          default:
-            if ( o.isSendableByProxy() )
-               throw new RuntimeException( "ClientDispatcher does not"
+            throw new RuntimeException( "ClientDispatcher does not"
                             + " know how to handle a valid class, "
-                            + o.getClass().getCanonicalName() );
-            throw new ProtocolException( "Proxy sent an illegal"
-                            + " DvtpExternalizable subclass, "
                             + o.getClass().getCanonicalName() );
          }
       }
@@ -39,5 +39,9 @@ public abstract class ClientDispatcher
    protected abstract void dispatchDisplayUrl( DisplayUrl o )
    throws ProxyErrorException;
    protected abstract void dispatchRedirectUrl( RedirectUrl o )
+   throws ProxyErrorException;
+   protected abstract void dispatchAddObject( AddObject o )
+   throws ProxyErrorException;
+   protected abstract void dispatchMoveObject( MoveObject o )
    throws ProxyErrorException;
    }
