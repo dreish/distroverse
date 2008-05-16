@@ -1,11 +1,5 @@
-/**
- * An abstract base class handling the annoying details of a DVTP
- * server.  Subclass this and implement handleLocation(), handleGet(),
- * and handleProxyOpen() to define your server.
+/*
  * 
- * Instantiate it with an instance of a subclass of DvtpListener that
- * will define how your server handles multiple connections (e.g.,
- * multiple threads, multiplexing, or a combination).
  */
 package org.distroverse.distroplane.lib;
 
@@ -16,8 +10,16 @@ import org.distroverse.core.*;
 import org.distroverse.core.net.*;
 
 /**
- * @author dreish
+ * An abstract base class handling the annoying details of a DVTP
+ * server.  Subclass this and implement handleLocation(), handleGet(),
+ * and handleProxyOpen() to define your server.
+ * 
+ * Instantiate it with an instance of a subclass of DvtpListener that
+ * will define how your server handles multiple connections (e.g.,
+ * multiple threads, multiplexing, or a combination), or use
+ * createServer() to set up a DvtpMultiplexedListener.
  *
+ * @author dreish
  */
 public abstract class DvtpServer
    {
@@ -103,7 +105,7 @@ public abstract class DvtpServer
     * Handles the LOCATION command, which tells a client the URL of the
     * server that should be used for that location URL.  It must return
     * the URL of a Java .jar file (various compressed jar extensions are
-    * recognized) or a Scheme source file with an URL ending in ".szp".
+    * recognized).
     * @param location - an URL
     */
    public abstract void handleLocation( String location,
@@ -129,6 +131,18 @@ public abstract class DvtpServer
     */
    public abstract void handleProxyOpen( String token,
                                          NetOutQueue< Object > noq )
+   throws IOException;
+
+   /**
+    * Handles any arbitrary object from a proxy.  This is the only
+    * method called on a DvtpServer from a session that has entered
+    * proxy mode by calling setProxyMode() on the NetSession object.
+    * @param net_in_object
+    * @param session
+    */
+   public abstract void 
+   handleProxyObject( Object net_in_object,
+                      NetSession< Object > session )
    throws IOException;
    
    /**

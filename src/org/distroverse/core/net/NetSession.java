@@ -1,5 +1,12 @@
 package org.distroverse.core.net;
 
+/**
+ * Bundles an input queue and an output queue of some type, and holds
+ * arbitrary state information about the session in the form of a
+ * generic attachment.
+ * @author dreish
+ * @param <T>
+ */
 public class NetSession< T >
    {
    public NetSession( NetInQueue < T > niqs,
@@ -10,12 +17,17 @@ public class NetSession< T >
       noqs.setSession( this );
       mNetInQueue  = niqs;
       mNetOutQueue = noqs;
+      mProxyMode = false;
       }
    
    public NetInQueue< T > getNetInQueue()
       {  return mNetInQueue;  }
    public NetOutQueue< T > getNetOutQueue()
       {  return mNetOutQueue;  }
+   public void setProxyMode()
+      {  mProxyMode = true;  }
+   public boolean inProxyMode()
+      {  return mProxyMode;  }
    public < AT > void setAttachment( Class< AT > attachment_class,
                                      AT attachment )
       {
@@ -36,6 +48,7 @@ public class NetSession< T >
    @SuppressWarnings("unchecked")
    public < AT > AT getAttachmentOrNull( Class< AT > attachment_class )
       {
+      // This is type-checking enough:
       if ( mAttachment != null
            &&  attachment_class.isAssignableFrom( mAttachmentClass ) )
          return (AT) mAttachment;
@@ -54,4 +67,5 @@ public class NetSession< T >
    private NetOutQueue< T > mNetOutQueue;
    private Object           mAttachment;
    private Class< ? >       mAttachmentClass;
+   private boolean          mProxyMode;
    }

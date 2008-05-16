@@ -11,7 +11,9 @@
     - MoveObject
     - DeleteObject
   - Create a simple proxy that adds some shapes and moves them around
-  - Shape needs an externalization format
+    - Shape needs an externalization format
+  - Create a simple server that feeds some shapes to a simple proxy and
+    moves them around
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app

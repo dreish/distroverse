@@ -1,6 +1,7 @@
 package org.distroverse.core.net;
 
 import java.io.IOException;
+import java.net.ProtocolException;
 
 import org.distroverse.distroplane.lib.*;
 
@@ -18,12 +19,23 @@ extends NetInQueueWatcher< Object >
                                      NetInQueue< Object > queue )
    throws IOException
       {
-      // TODO Auto-generated method stub
-      if ( net_in_object instanceof String )
+      NetSession< Object > session = queue.getSession();
+      
+      if ( session.inProxyMode() )
          {
-         NetOutQueue< Object > noq
-            = queue.getSession().getNetOutQueue();
+         mServer.handleProxyObject( net_in_object, session );
+         }
+      else if ( net_in_object instanceof String )
+         {
+         NetOutQueue< Object > noq = session.getNetOutQueue();
          mServer.handleCommand( (String) net_in_object, noq );
+         }
+      else
+         {
+         throw new ProtocolException( "Received a non-string object"
+                      + " of type "
+                      + net_in_object.getClass().getCanonicalName()
+                      + " while in conversation mode" );
          }
       }
 

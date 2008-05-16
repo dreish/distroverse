@@ -21,17 +21,21 @@ import org.distroverse.dvtp.Str;
 /**
  * A connection to a remote DVTP server, with methods for simple,
  * synchronous I/O.
+ * TODO: Add timeouts to the synchronous reads.
  * @author dreish
  */
 public class DvtpServerConnection
    {
+   private static final double MIN_SUPPORTED_VERSION = 0.01;
+
    /**
     * Construct a new connection to a DVTP server, getting the hostname
     * from a URL.
     * @param url
     * @throws IOException 
     */
-   public DvtpServerConnection( URI u ) throws IOException
+   public DvtpServerConnection( URI u )
+   throws IOException
       {
       mHostname = u.getHost();
       mPort = u.getPort();
@@ -39,6 +43,66 @@ public class DvtpServerConnection
          mPort = DvtpServer.DEFAULT_PORT;
       
       mSock = new Socket( mHostname, mPort );
+      try
+         {
+         checkGreeting();
+         }
+      catch ( IOException e )
+         {
+         this.close();
+         throw e;
+         }
+      }
+
+   /**
+    * Read the greeting from a newly-connected-to DVTP server and make
+    * sure the protocol and version are compatible with this class.
+    * @throws IOException
+    */
+   private void checkGreeting()
+   throws IOException
+      {
+      Object greeting_ob;
+      try
+         {
+         greeting_ob = getResponse();
+         }
+      catch ( IOException e )
+         {
+         throw e;
+         }
+      catch ( ClassNotFoundException e )
+         {
+         throw new ProtocolException( e.getLocalizedMessage() );
+         }
+      if ( greeting_ob instanceof Str )
+         greeting_ob = ((Str) greeting_ob).toString();
+      String protocol_version = null;
+      if ( greeting_ob instanceof String )
+         {
+         String greeting = (String) greeting_ob;
+         protocol_version = (greeting.split( " ", 2 ))[ 0 ];
+         }
+      if ( protocol_version == null )
+         throw new ProtocolException( "Server sent something other"
+                           + " than a DVTP string for its greeting" );
+      if ( ! Util.stringStartsIgnoreCase( protocol_version, "DVTP/" ) )
+         throw new ProtocolException( "Server sent a greeting"
+                       + " indicating some other protocol than DVTP: "
+                       + protocol_version );
+      double version;
+      try
+         {
+         version = Double.valueOf( protocol_version.substring( 5 ) );
+         }
+      catch ( NumberFormatException e )
+         {
+         throw new ProtocolException( e.getLocalizedMessage() );
+         }
+      if ( version < DvtpServerConnection.MIN_SUPPORTED_VERSION )
+         throw new ProtocolException( "Server speaks a version of"
+                       + "DVTP so old that this client does not"
+                       + "maintain backward compatability that far" );
       }
    
    public void close() throws IOException
@@ -84,6 +148,16 @@ public class DvtpServerConnection
          }  
       }
 
+   /**
+    * Sends a query given a query type name (such as "GET" or
+    * "LOCATION"), and a URI, which must match the server this object is
+    * connected to.
+    * @param type
+    * @param u
+    * @return
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
    public Object query( String type, URI u )
    throws IOException, ClassNotFoundException
       {
@@ -100,6 +174,14 @@ public class DvtpServerConnection
                      + " at port " + mPort );
       }
    
+   /**
+    * Sends a query string and returns an object in response, which will 
+    * either be a String or a DvtpExternalizable object.
+    * @param q
+    * @return
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
    public Object query( String q ) 
    throws IOException, ClassNotFoundException
       {
@@ -128,6 +210,7 @@ public class DvtpServerConnection
    private Util.Pair< String, String > 
    receiveLocation( Object response ) throws ProtocolException
       {
+      // XXX LOCATION no longer returns a Pair.
       try
          {
          // TODO possibly throw an exception if the regexp doesn't

@@ -97,9 +97,10 @@ public class NetOutQueue< T >
       mObjectStreamer.write( mClient );
       }
 
-   // TODO duplicate with NetInQueue; factor out
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }
+   public NetSession< T > getSession()
+      {  return mNetSession;  }
    public ObjectStreamer< T > getStreamer()
       {  return mObjectStreamer;  }
 
