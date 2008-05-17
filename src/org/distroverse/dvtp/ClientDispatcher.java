@@ -29,6 +29,9 @@ public abstract class ClientDispatcher
          case 14:
             dispatchMoveObject( (MoveObject) o );
             break;
+         case 17:
+            dispatchDeleteObject( (DeleteObject) o );
+            break;
          default:
             throw new RuntimeException( "ClientDispatcher does not"
                             + " know how to handle a valid class, "
@@ -43,5 +46,7 @@ public abstract class ClientDispatcher
    protected abstract void dispatchAddObject( AddObject o )
    throws ProxyErrorException;
    protected abstract void dispatchMoveObject( MoveObject o )
+   throws ProxyErrorException;
+   protected abstract void dispatchDeleteObject( DeleteObject o )
    throws ProxyErrorException;
    }

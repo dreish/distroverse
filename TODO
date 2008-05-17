@@ -8,6 +8,8 @@
   - Handle these new ProxySendable classes in the dispatchers
     - AddObject
       - Implement movement in the client
+        > jmetest.curve.TestBezierCurve demonstrates one way to move an
+          object
     - MoveObject
     - DeleteObject
   - Create a simple proxy that adds some shapes and moves them around
@@ -40,6 +42,8 @@
   + <T> T foldr( T[], folder )
     + Why can't I have a public abstract static method (in
       FoldingFunction)?
+      > Because the only time a class isn't known at compile time is
+        when there is a concrete object -- but classes are objects, too
       > Doesn't need to be static, does need to be abstract
     x How does Callable work, and would it be sufficient for this?
   + PointArray class in DVTP

@@ -47,6 +47,7 @@ public final class DvtpObject
         MoveObject.class,       // 14
         Flo.class,              // 15
         Quat.class,             // 16
+        DeleteObject.class,     // 17
         
         null
         };
