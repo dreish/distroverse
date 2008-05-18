@@ -5,7 +5,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Adds an object, with initial movement.
+ * Adds an object, with initial movement sequence.  If the MoveSeq is
+ * empty, the object is not yet visible -- it will become visible when
+ * it is first given a position with a nonempty MoveObject.
  * @author dreish
  */
 public class AddObject implements ProxySendable
@@ -16,24 +18,24 @@ public class AddObject implements ProxySendable
       }
    
    public AddObject( Shape s, CompactUlong id, CompactUlong pid,
-                     Movement m )
+                     MoveSeq m )
       {
       super();
       mHasShape = true;
       mShape = s;
       mId = id;
       mParentId = pid;
-      mMovement = m;
+      mMoveSeq = m;
       }
 
-   public AddObject( CompactUlong id, CompactUlong pid, Movement m )
+   public AddObject( CompactUlong id, CompactUlong pid, MoveSeq m )
       {
       super();
       mHasShape = false;
       mShape = null;
       mId = id;
       mParentId = pid;
-      mMovement = m;
+      mMoveSeq = m;
       }
 
    public int getClassNumber()
@@ -42,7 +44,7 @@ public class AddObject implements ProxySendable
    public Shape        getShape()     {  return mShape;     }
    public CompactUlong getId()        {  return mId;        }
    public CompactUlong getParentId()  {  return mParentId;  }
-   public Movement     getMovement()  {  return mMovement;  }
+   public MoveSeq      getMoveSeq()      {  return mMoveSeq;   }
 
    public void readExternal( ObjectInput in )
    throws IOException, ClassNotFoundException
@@ -54,7 +56,7 @@ public class AddObject implements ProxySendable
          mShape = null;
       (mId = new CompactUlong()).readExternal( in );
       (mParentId = new CompactUlong()).readExternal( in );
-      (mMovement = new Movement()).readExternal( in );
+      (mMoveSeq = new MoveSeq()).readExternal( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
@@ -64,12 +66,12 @@ public class AddObject implements ProxySendable
          mShape.writeExternal( out );
       mId.writeExternal( out );
       mParentId.writeExternal( out );
-      mMovement.writeExternal( out );
+      mMoveSeq.writeExternal( out );
       }
 
    private boolean      mHasShape;
    private Shape        mShape;
    private CompactUlong mId;
    private CompactUlong mParentId;
-   private Movement     mMovement;
+   private MoveSeq      mMoveSeq;
    }

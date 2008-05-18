@@ -43,11 +43,12 @@ public final class DvtpObject
         Shape.class,            // 10
         Vec.class,              // 11
         AddObject.class,        // 12
-        Movement.class,         // 13
+        Move.class,             // 13
         MoveObject.class,       // 14
         Flo.class,              // 15
         Quat.class,             // 16
         DeleteObject.class,     // 17
+        MoveSeq.class,          // 18
         
         null
         };

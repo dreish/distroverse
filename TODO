@@ -10,8 +10,14 @@
       - Implement movement in the client
         > jmetest.curve.TestBezierCurve demonstrates one way to move an
           object
+        + MoveSeq could all get turned into a single Curve
+        - Create a Curve that represents the polynomial/sin combination
+        - Give that to the standard CurveController
     - MoveObject
     - DeleteObject
+  - Get AboutControllerPipeline working again, post change to addShape()
+    type signature
+    - Add constructor for MoveSeq given a vector and a quaternion
   - Create a simple proxy that adds some shapes and moves them around
     - Shape needs an externalization format
   - Create a simple server that feeds some shapes to a simple proxy and
@@ -471,6 +477,17 @@
     > Maybe the architecture is:
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
+  - Proxy: short-range chat:
+    - Nearest N people (six or seven -- what a person can normally keep
+      track of in conversation) appear along the bottom and scroll up,
+      horizontally aligned with the person speaking (arrows for people
+      off the edge of the screen)
+    - In a crowd of people, speech from those further away appears above
+      the horizon
+    - For calculating distance, factor in the direction the speaker is
+      facing (but not the listener)
+    - Focus on a person makes their speech boldface?  Decreases distance
+      - Press F and click?  Hover and press F?
   - Client: master volume control and mute keystroke
   - Option to swap brackets and parens (so '[' key sends '(', etc.)
   - Client: prompt user if site requests resize; one option should

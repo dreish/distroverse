@@ -8,6 +8,11 @@ import org.distroverse.dvtp.DisplayUrl;
 import org.distroverse.dvtp.MoveObject;
 import org.distroverse.dvtp.RedirectUrl;
 
+/**
+ * An implementation of the ClientDispatcher abstraction designed to
+ * work with the Viewer client.
+ * @author dreish
+ */
 public class ViewerDispatcher extends ClientDispatcher
    {
    public ViewerDispatcher( ViewerWindow w )
@@ -56,8 +61,10 @@ public class ViewerDispatcher extends ClientDispatcher
    protected void dispatchAddObject( AddObject o )
    throws ProxyErrorException
       {
-      // TODO Auto-generated method stub
-      
+      mWindow.getWorld().addShape( o.getShape(),
+                                   o.getId().toLong(),
+                                   o.getParentId().toLong(),
+                                   o.getMoveSeq() );
       }
 
    @Override

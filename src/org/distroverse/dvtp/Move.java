@@ -8,7 +8,7 @@ import org.distroverse.core.Util;
 
 /**
  * Defines movement and rotation in three dimensions:
- * - Movement
+ * - Move
  *   - A polynomial degree (N)
  *   - N+1 vectors
  *   - A sinusoidal count (M)
@@ -28,7 +28,7 @@ import org.distroverse.core.Util;
  * 
  * @author dreish
  */
-public class Movement implements DvtpExternalizable
+public class Move implements DvtpExternalizable
    {
    public int getClassNumber()
       {  return 13;  }

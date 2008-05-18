@@ -44,6 +44,9 @@ public class CompactUlong implements DvtpExternalizable
    public int getClassNumber()
       {  return 0;  }
 
+   public long toLong()
+      {  return mVal;  }
+
    public static long externalAsLong( ObjectInput in )
    throws IOException
       {
