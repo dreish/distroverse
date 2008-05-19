@@ -31,13 +31,13 @@ public class AboutControllerPipeline extends ControllerPipeline
                     .setNumRows( 30 )
                     .setEquatorialRadius( 2 )
                     .generate();
-      wg.addShape( s, "octey", null, 
-                   new Vector3f( 0, 0, -100 ), 
-                   new Quaternion( 1, 0, 0, 0 ) );
+      wg.addShape( s, 1L, 0L,
+                   VUtil.simpleMove( new Vector3f( 0, 0, -100 ), 
+                                     new Quaternion( 1, 0, 0, 0 ) ) );
       Shape simple = simpleShape();
-      wg.addShape( simple, "simple", null, 
-                   new Vector3f( 0, 0, 0 ), 
-                   new Quaternion( 1, 0, 0, 0 ) );
+      wg.addShape( simple, 2L, 0L,
+                   VUtil.simpleMove( new Vector3f( 0, 0, 0 ), 
+                                     new Quaternion( 1, 0, 0, 0 ) ) );
       }
 
    // Returns a single right triangle, for testing.

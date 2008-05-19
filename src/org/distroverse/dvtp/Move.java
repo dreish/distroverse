@@ -6,6 +6,9 @@ import java.io.ObjectOutput;
 
 import org.distroverse.core.Util;
 
+import com.jme.math.Quaternion;
+import com.jme.math.Vector3f;
+
 /**
  * Defines movement and rotation in three dimensions:
  * - Move
@@ -30,6 +33,51 @@ import org.distroverse.core.Util;
  */
 public class Move implements DvtpExternalizable
    {
+   public Move()
+      {
+      super();
+      mMoveDegree = 0;
+      mMovePolyVecs = new Vec[ 0 ];
+      mMoveSins = 0;
+      mMoveSinVecs = new Vec[ 0 ];
+      
+      mRotSinPeriods = mRotSinOffsets 
+         = mMoveSinPeriods = mMoveSinOffsets 
+         = new Flo[ 0 ];
+      
+      mRotDegree = 0;
+      mRotPolyQuats = new Quat[ 0 ];
+      mRotSinQuats = new Quat[ 0 ];
+      
+      mDuration = new Flo( -1.0f );
+      }
+
+   /**
+    * Constructs a simple stationary Move of infinite duration.
+    * @param pos
+    * @param rot
+    */
+   public Move( Vec pos, Quat rot )
+      {
+      super();
+      mMoveDegree = 1;
+      mMovePolyVecs = new Vec[ 1 ];
+      mMovePolyVecs[ 0 ] = pos;
+      mMoveSins = 0;
+      mMoveSinVecs = new Vec[ 0 ];
+      
+      mRotSinPeriods = mRotSinOffsets 
+         = mMoveSinPeriods = mMoveSinOffsets 
+         = new Flo[ 0 ];
+      
+      mRotDegree = 1;
+      mRotPolyQuats = new Quat[ 1 ];
+      mRotPolyQuats[ 0 ] = rot;
+      mRotSinQuats = new Quat[ 0 ];
+      
+      mDuration = new Flo( -1.0f );
+      }
+
    public int getClassNumber()
       {  return 13;  }
 
@@ -84,6 +132,8 @@ public class Move implements DvtpExternalizable
       mDuration.writeExternal( out );
       }
 
+   // Here and below, "degree" is actually the degree of the polynomial
+   // plus one.
    private int mMoveDegree;
    private Vec[] mMovePolyVecs;
    private int mMoveSins;

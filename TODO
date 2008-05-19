@@ -435,6 +435,9 @@
 - To do for 0.02:
   - Add textures to Shape class
     - Specify color of each triangle
+  - Add WarpObject message
+    - Polynomial/sin change over time, but each coefficient is a Shape
+      instead of a vector or quaternion
   x Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
   - Reimplement ball factory with a stack of LazyPolygons
