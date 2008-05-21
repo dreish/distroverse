@@ -37,7 +37,7 @@ public abstract class ShapeFactory implements Factory
                               - prev_triangle_strips_size;
          prev_triangle_strips_size = triangle_strips.size();
          }
-      return new Shape( triangle_strips, vertex_counts );
+      return new Shape( triangle_strips, vertex_counts, 1 );
       }
 
    /**

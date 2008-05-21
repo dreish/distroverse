@@ -17,6 +17,11 @@ import com.jme.scene.Spatial;
 public class DvCurve extends Curve
    {
    /**
+    * 
+    */
+   private static final long serialVersionUID = 9141698020038034251L;
+
+   /**
     * @param name
     */
    public DvCurve( String name )

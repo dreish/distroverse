@@ -30,10 +30,11 @@ import com.jme.util.geom.BufferUtils;
  */
 public class PointArray implements DvtpExternalizable
    {
-   /**
-    * The float buffer.
-    */
-   private FloatBuffer mFb;
+   public PointArray()
+      {
+      super();
+      allocate( 0 );
+      }
    
    /**
     * Constructor with the size of the array, in points (not floats).
@@ -41,13 +42,16 @@ public class PointArray implements DvtpExternalizable
     */
    public PointArray( int n )
       {
+      super();
       allocate( n );
       }
    
    /**
-    * Constructor with an existing array of Point3ds.
+    * Constructor with an existing array of Point3ds.  I've deprecated
+    * this because I want to prefer using Vector3fs wherever possible.
     * @param ap
     */
+   @Deprecated
    public PointArray( Point3d[] ap )
       {
       Vector3f[] ap_f = new Vector3f[ ap.length ];
@@ -56,6 +60,15 @@ public class PointArray implements DvtpExternalizable
                                    (float)ap[i].y, 
                                    (float)ap[i].z );
       mFb = BufferUtils.createFloatBuffer( ap_f );
+      }
+
+   /**
+    * Constructor with an existing array of Vector3fs.
+    * @param ap
+    */
+   public PointArray( Vector3f[] ap )
+      {
+      mFb = BufferUtils.createFloatBuffer( ap );
       }
    
    private void allocate( int n_points )
@@ -96,4 +109,6 @@ public class PointArray implements DvtpExternalizable
       for ( float f : fa )
          out.writeDouble( f );
       }
+
+   private FloatBuffer mFb;
    }

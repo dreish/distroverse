@@ -49,7 +49,7 @@ public class AboutControllerPipeline extends ControllerPipeline
       alp.add( new Point3d( 0, 1, 1 ) );
       int[] vc = { 3 };
       
-      return new Shape( alp, vc );
+      return new Shape( alp, vc, 1 );
       }
    
    @Override

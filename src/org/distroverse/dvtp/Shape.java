@@ -11,9 +11,12 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
-import javax.vecmath.*;
+import javax.vecmath.Point3d;
+
+import org.distroverse.core.Util;
 
 import com.jme.bounding.BoundingBox;
+import com.jme.math.Vector3f;
 import com.jme.renderer.ColorRGBA;
 import com.jme.scene.TriMesh;
 import com.jme.util.geom.BufferUtils;
@@ -39,29 +42,33 @@ public class Shape implements DvtpExternalizable
     * @param points - One-dimensional list of points
     * @param vertex_counts - Number of points in each triangle strip
     */
-   public Shape( List<Point3d> points, int[] vertex_counts )
+   @Deprecated
+   public Shape( List<Point3d> points, int[] vertex_counts,
+                 @SuppressWarnings("unused") int dummy )
       {
-      Point3d[] points_pointarr 
+      Point3d[] points_arr 
          = points.toArray( new Point3d[ points.size() ] );
-      mPoints = new PointArray( points_pointarr );
+      mPoints = new PointArray( points_arr );
+      mVertexCounts = vertex_counts;
+      }
+
+   /**
+    * Constructor from a List of vectors and an array of vertex counts,
+    * as for a TriangleStripArray.
+    * @param points - One-dimensional list of points
+    * @param vertex_counts - Number of points in each triangle strip
+    */
+   public Shape( List<Vector3f> vectors, int[] vertex_counts )
+      {
+      Vector3f[] vectors_arr 
+         = vectors.toArray( new Vector3f[ vectors.size() ] );
+      mPoints = new PointArray( vectors_arr );
       mVertexCounts = vertex_counts;
       }
 
    public int getClassNumber()
       {  return 10;  }
 
-   public void readExternal( ObjectInput in ) throws IOException
-      {
-      // TODO Auto-generated method stub
-      
-      }
-
-   public void writeExternal( ObjectOutput out ) throws IOException
-      {
-      // TODO Auto-generated method stub
-      
-      }
-   
    public TriMesh asTriMesh()
       {
       FloatBuffer p  = mPoints.asFloatBuffer();
@@ -118,8 +125,26 @@ public class Shape implements DvtpExternalizable
       return ret;
       }
 
+   public void readExternal( ObjectInput in )
+   throws IOException, ClassNotFoundException
+      {
+      (mPoints = new PointArray()).readExternal( in );
+      int num_vcs = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      CompactUlong[] vcs = DvtpObject.readArray( in, num_vcs, 
+                                                 CompactUlong.class );
+      for ( int i = 0; i < vcs.length; ++i )
+         mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
+      }
+
+   public void writeExternal( ObjectOutput out ) throws IOException
+      {
+      mPoints.writeExternal( out );
+      CompactUlong.longAsExternal( out, mVertexCounts.length );
+      for ( int vc : mVertexCounts )
+         CompactUlong.longAsExternal( out, vc );
+      }
+
    // TODO Add texture fields and methods.
    private PointArray mPoints;
    private int[]      mVertexCounts;
-   static final long  serialVersionUID = 1;
    }
