@@ -1,9 +1,12 @@
 package org.distroverse.distroplane.lib;
 
 import org.distroverse.dvtp.*;
+import org.distroverse.viewer.VUtil;
 //import org.distroverse.core.*;
 import javax.vecmath.*;
 import java.util.*;
+
+import com.jme.math.Vector3f;
 
 public abstract class ShapeFactory implements Factory
    {
@@ -11,19 +14,19 @@ public abstract class ShapeFactory implements Factory
    
    /**
     * Generates a Shape connecting the two-dimensional array of
-    * Point3ds.  Useful in a variety of subclasses.
+    * Vector3fs.  Useful in a variety of subclasses.
     * @param vertices - A two-dimensional array of points to
     * be knitted together into a surface
     * @return An org.distoverse.core.Shape connecting the given
     * points with triangles that are as close to equilateral as
     * possible
     */
-   protected static Shape generateSurface( Point3d[][] vertices )
+   protected static Shape generateSurface( Vector3f[][] vertices )
       {
       if ( vertices.length < 2 )
          throw new IllegalArgumentException( "A surface must have" 
                        + "at least two rows of points" );
-      List<Point3d> triangle_strips = new ArrayList<Point3d>();
+      List< Vector3f > triangle_strips = new ArrayList< Vector3f >();
       int vertex_counts[] = new int[ vertices.length - 1 ];
       int prev_triangle_strips_size = 0;
       for ( int i = 0; i < vertices.length - 1; ++i )
@@ -37,7 +40,7 @@ public abstract class ShapeFactory implements Factory
                               - prev_triangle_strips_size;
          prev_triangle_strips_size = triangle_strips.size();
          }
-      return new Shape( triangle_strips, vertex_counts, 1 );
+      return new Shape( triangle_strips, vertex_counts );
       }
 
    /**
@@ -51,12 +54,12 @@ public abstract class ShapeFactory implements Factory
     * @param row_1 - The other row of points
     * @return The number of vertices added for this strip
     */
-   private static void connectWithTriangles( List<Point3d> target,
-                                             Point3d[] row_0,
-                                             Point3d[] row_1 )
+   private static void connectWithTriangles( List< Vector3f > target,
+                                             Vector3f[] row_0,
+                                             Vector3f[] row_1 )
       {
       int index[]      = { 0, 0 };
-      Point3d[][]row   = { row_0, row_1 };
+      Vector3f[][]row   = { row_0, row_1 };
       int current_row  = longerDiagonal( row[0], row[1], 
                                          index[0], index[1], 1.0 );
       
@@ -109,7 +112,8 @@ public abstract class ShapeFactory implements Factory
     * @param bias - Factor by which to favor row_0
     * @return 0 or 1, depending on which row's diagonal is longer
     */
-   private static int longerDiagonal( Point3d[] row_0, Point3d[] row_1,
+   private static int longerDiagonal( Vector3f[] row_0,
+                                      Vector3f[] row_1,
                                       int index_0, int index_1,
                                       double bias )
       {
@@ -131,10 +135,10 @@ public abstract class ShapeFactory implements Factory
          row = 0;
       else 
          {
-         double dist_from_0
-            = row_0[ index_0 ].distance( row_1[ index_1 + 1 ] );
-         double dist_from_1
-            = row_1[ index_1 ].distance( row_0[ index_0 + 1 ] );
+         float dist_from_0 = VUtil.vecDist( row_0[ index_0 ],
+                                            row_1[ index_1 + 1 ] );
+         float dist_from_1 = VUtil.vecDist( row_1[ index_1 ],
+                                            row_0[ index_0 + 1 ] );
          if ( dist_from_0 * bias > dist_from_1 )
             row = 0;
          else

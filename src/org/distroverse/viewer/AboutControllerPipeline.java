@@ -24,6 +24,7 @@ public class AboutControllerPipeline extends ControllerPipeline
    public AboutControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window )
       {
+      // TODO: examine url and produce different results depending.
       WorldGraph wg = window.getWorld();
       wg.clear();
       // TODO: load from a file instead of using distroplane.lib.
@@ -43,13 +44,13 @@ public class AboutControllerPipeline extends ControllerPipeline
    // Returns a single right triangle, for testing.
    private Shape simpleShape()
       {
-      ArrayList< Point3d > alp = new ArrayList< Point3d >();
-      alp.add( new Point3d( 0, 0, 1 ) );
-      alp.add( new Point3d( 1, 0, 1 ) );
-      alp.add( new Point3d( 0, 1, 1 ) );
+      ArrayList< Vector3f > alp = new ArrayList< Vector3f >();
+      alp.add( new Vector3f( 0, 0, 1 ) );
+      alp.add( new Vector3f( 1, 0, 1 ) );
+      alp.add( new Vector3f( 0, 1, 1 ) );
       int[] vc = { 3 };
       
-      return new Shape( alp, vc, 1 );
+      return new Shape( alp, vc );
       }
    
    @Override
