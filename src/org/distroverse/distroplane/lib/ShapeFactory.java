@@ -2,8 +2,6 @@ package org.distroverse.distroplane.lib;
 
 import org.distroverse.dvtp.*;
 import org.distroverse.viewer.VUtil;
-//import org.distroverse.core.*;
-import javax.vecmath.*;
 import java.util.*;
 
 import com.jme.math.Vector3f;

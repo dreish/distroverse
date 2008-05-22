@@ -5,8 +5,8 @@ package org.distroverse.distroplane.lib;
 
 import org.distroverse.core.*;
 import org.distroverse.dvtp.*;
-//import javax.media.j3d.*;
-import javax.vecmath.*;
+
+import com.jme.math.Vector3f;
 
 /**
  * A BallFactory is a Factory that generates roughly spherical Shapes.
@@ -47,28 +47,28 @@ public class BallFactory extends ShapeFactory
    @Override
    public Shape generate()
       {
-      Point3d vertices[][] = generateVertices();
+      Vector3f vertices[][] = generateVertices();
       return generateSurface( vertices );
       }
    
-   private Point3d[][] generateVertices()
+   private Vector3f[][] generateVertices()
       {
       // TODO Handle slices of a ball here, and in AddVertexRow.
       mRenderedRows = Util.safeInt( mNumRows );
-      Point3d vertices[][] = new Point3d[ mRenderedRows ][];
+      Vector3f vertices[][] = new Vector3f[ mRenderedRows ][];
       for ( int i = 0; i < mRenderedRows; ++i )
          addVertexRow( vertices, i, mRenderedRows );
       return vertices;
       }
    
-   private void addVertexRow( Point3d vertices[][], int row,
+   private void addVertexRow( Vector3f vertices[][], int row,
                               int total_rows )
       {
       // 'latitude' in radians south of north pole.
       // TODO Make rows evenly spaced in terms of dist., not lat.
       double latitude = Math.PI * row / (total_rows - 1);
-      double y = Math.cos( latitude ) * mEquatorialRadius
-                 * mAspectRatio;
+      float y = (float) (Math.cos( latitude ) * mEquatorialRadius
+                         * mAspectRatio);
       double circle_radius = Math.sin( latitude )
                              * mEquatorialRadius;
       int n_points = Util.safeInt( 
@@ -78,7 +78,7 @@ public class BallFactory extends ShapeFactory
       // Make sure the last point is the same as the first one.  This
       // turns out to be the right thing to do even for the poles:
       ++n_points;
-      vertices[ row ] = new Point3d[ n_points ];
+      vertices[ row ] = new Vector3f[ n_points ];
       double offset = (row % 2 == 1) ? 0.5 : 0.0;
       for ( int i = 0; i < n_points; ++i )
          {
@@ -88,9 +88,9 @@ public class BallFactory extends ShapeFactory
          else
             longitude = 2.0 * Math.PI * (i + offset) 
                         / circle_divisions;
-         double x = Math.sin( longitude ) * circle_radius;
-         double z = Math.cos( longitude ) * circle_radius;
-         vertices[ row ][ i ] = new Point3d( x, y, z );
+         float x = (float) (Math.sin( longitude ) * circle_radius);
+         float z = (float) (Math.cos( longitude ) * circle_radius);
+         vertices[ row ][ i ] = new Vector3f( x, y, z );
          }
       }
 
