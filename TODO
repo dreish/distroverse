@@ -435,9 +435,13 @@
 - To do for 0.02:
   - Add textures to Shape class
     - Specify color of each triangle
-  - Add WarpObject message
+  - Add WarpShape message
     - Polynomial/sin change over time, but each coefficient is a Shape
       instead of a vector or quaternion
+  - Add AddRef message
+    > Object id and MoveSeq
+    > Creates a new object with the same shape as another object
+    > Changes to the other object's shape affect referring objects
   x Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
   - Reimplement ball factory with a stack of LazyPolygons
@@ -491,7 +495,9 @@
       facing (but not the listener)
     - Focus on a person makes their speech boldface?  Decreases distance
       - Press F and click?  Hover and press F?
-  - Client: master volume control and mute keystroke
+  - Client: master volume control and mute button/keystroke
+    > Mute icon blinks (optionally) when something is trying to make
+      noise
   - Option to swap brackets and parens (so '[' key sends '(', etc.)
   - Client: prompt user if site requests resize; one option should
     defeat malicious sites that flood the user with resize requests and

@@ -3,6 +3,8 @@
  */
 package org.distroverse.viewer;
 
+import org.distroverse.dvtp.MoveSeq;
+
 import com.jme.curve.Curve;
 import com.jme.intersection.CollisionResults;
 import com.jme.math.Matrix3f;
@@ -38,6 +40,11 @@ public class DvCurve extends Curve
       {
       super( name, controlPoints );
       // TODO Auto-generated constructor stub
+      }
+   
+   public void setMoves( MoveSeq ms )
+      {
+      mMoves = ms;
       }
 
    /* (non-Javadoc)
@@ -101,4 +108,5 @@ public class DvCurve extends Curve
       return false;
       }
 
+   private MoveSeq mMoves;
    }
