@@ -12,6 +12,7 @@
           object
         + MoveSeq could all get turned into a single Curve
         - Create a Curve that represents the polynomial/sin combination
+          - As a trivial test, just always return the same sin
         - Give that to the standard CurveController
     - MoveObject
     - DeleteObject

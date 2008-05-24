@@ -24,22 +24,31 @@ public class DvCurve extends Curve
    private static final long serialVersionUID = 9141698020038034251L;
 
    /**
-    * @param name
+    * @param n - name
     */
-   public DvCurve( String name )
+   public DvCurve( String n )
       {
-      super( name );
-      // TODO Auto-generated constructor stub
+      super( n );
       }
 
    /**
-    * @param name
-    * @param controlPoints
+    * @param n - name
     */
-   public DvCurve( String name, Vector3f[] controlPoints )
+   public DvCurve( String n, MoveSeq ms )
       {
-      super( name, controlPoints );
-      // TODO Auto-generated constructor stub
+      super( n );
+      setMoves( ms );
+      }
+
+   /**
+    * @param n - name
+    * @param cp - control points (unused)
+    */
+   @SuppressWarnings("unused")
+   private DvCurve( String n, Vector3f[] cp )
+      {
+      super( n, cp );
+      // Unreachable.
       }
    
    public void setMoves( MoveSeq ms )
@@ -74,8 +83,7 @@ public class DvCurve extends Curve
    @Override
    public Vector3f getPoint( float time )
       {
-      // TODO Auto-generated method stub
-      return null;
+      return getPoint( time, new Vector3f() );
       }
 
    /* (non-Javadoc)
@@ -84,8 +92,11 @@ public class DvCurve extends Curve
    @Override
    public Vector3f getPoint( float time, Vector3f store )
       {
-      // TODO Auto-generated method stub
-      return null;
+      // FIXME this is a joke implementation for testing
+      store.x = (float) Math.sin( time ) * 2;
+      store.y = (float) Math.sin( time * 1.251398413891 ) * 2;
+      store.z = (float) Math.sin( time * 1.449734986243 ) * 2;
+      return store;
       }
 
    /* (non-Javadoc)
