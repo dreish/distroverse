@@ -5,10 +5,8 @@ import java.util.HashMap;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.Shape;
 
-import com.jme.math.Quaternion;
-import com.jme.math.Vector3f;
+import com.jme.curve.CurveController;
 import com.jme.scene.Node;
-import com.jme.scene.TriMesh;
 
 
 public class WorldGraph
@@ -27,6 +25,7 @@ public class WorldGraph
       Node object_node = new Node( "dvo#" + id );
       Node parent_node = getNode( pid );
       if ( parent_node == null )
+         // FIXME Throw exception here instead?
          parent_node = mWorldHead;
       mIdMap.put( id, new WorldGraphObject( object_node, pid ) );
       object_node.attachChild( s.asTriMesh() );
@@ -38,10 +37,28 @@ public class WorldGraph
       parent_node.attachChild( object_node );
       }
 
-   private void addMoveSeq( MoveSeq init_move_seq, Node object_node )
+   private void addMoveSeq( MoveSeq ms, Node object_node )
       {
       // TODO Auto-generated method stub
-      
+      DvCurve curve = new DvCurve( object_node.getName() + "-mover",
+                                   ms );
+      CurveController cc = new CurveController( curve, object_node );
+      object_node.addController( cc );
+      // FIXME set repeat type
+      }
+   
+   public void addMoveSeq( MoveSeq ms, Long id )
+      {
+      // TODO check for bad id
+      addMoveSeq( ms, getNode( id ) );
+      }
+
+   public void deleteShape( Long id )
+      {
+      // TODO check for bad id
+      Node object_node = getNode( id );
+      object_node.removeFromParent();
+      mIdMap.remove( id );
       }
 
    public void clear()

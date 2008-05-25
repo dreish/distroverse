@@ -59,7 +59,6 @@ public class ViewerDispatcher extends ClientDispatcher
 
    @Override
    protected void dispatchAddObject( AddObject o )
-   throws ProxyErrorException
       {
       mWindow.getWorld().addShape( o.getShape(),
                                    o.getId().toLong(),
@@ -69,18 +68,14 @@ public class ViewerDispatcher extends ClientDispatcher
 
    @Override
    protected void dispatchMoveObject( MoveObject o )
-   throws ProxyErrorException
       {
-      // TODO Auto-generated method stub
-      
+      mWindow.getWorld().addMoveSeq( o.getMoveSeq(), o.getId() );
       }
 
    @Override
    protected void dispatchDeleteObject( DeleteObject o )
-   throws ProxyErrorException
       {
-      // TODO Auto-generated method stub
-      
+      mWindow.getWorld().deleteShape( o.getId() );
       }
    
    private ViewerWindow mWindow;

@@ -6,9 +6,6 @@ import java.io.ObjectOutput;
 
 import org.distroverse.core.Util;
 
-import com.jme.math.Quaternion;
-import com.jme.math.Vector3f;
-
 /**
  * Defines movement and rotation in three dimensions:
  * - Move
@@ -25,7 +22,7 @@ import com.jme.math.Vector3f;
  *   - M quaternions
  *   - M period floats
  *   - M offset floats
- * - A duration
+ * - A duration -- negative means "until interrupted"
  * 
  * Time is measured in seconds, and vectors are in meters.
  * 

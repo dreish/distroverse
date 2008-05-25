@@ -22,4 +22,8 @@ public class DeleteObject implements ProxySendable
 
       }
 
+   public Long getId()
+      {  return mId;  }
+
+   private Long mId;
    }

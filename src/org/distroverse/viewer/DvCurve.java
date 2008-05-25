@@ -8,6 +8,7 @@ import org.distroverse.dvtp.MoveSeq;
 import com.jme.curve.Curve;
 import com.jme.intersection.CollisionResults;
 import com.jme.math.Matrix3f;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 import com.jme.scene.Spatial;
 
@@ -62,8 +63,8 @@ public class DvCurve extends Curve
    @Override
    public Matrix3f getOrientation( float time, float precision )
       {
-      // TODO Auto-generated method stub
-      return null;
+      // FIXME this is a joke implementation for testing
+      return getOrientation( time, precision, Vector3f.UNIT_Y );
       }
 
    /* (non-Javadoc)
@@ -73,8 +74,12 @@ public class DvCurve extends Curve
    public Matrix3f getOrientation( float time, float precision,
                                    Vector3f up )
       {
-      // TODO Auto-generated method stub
-      return null;
+      Quaternion o = new Quaternion();
+      o.slerp( new Quaternion( 1, 0, 0, 0 ),
+               new Quaternion( 0.7071f, 0, 0.7071f, 0 ),
+               time );
+      o.mult( (new Quaternion()).fromAngleAxis( 0, up ) );
+      return o.toRotationMatrix();
       }
 
    /* (non-Javadoc)

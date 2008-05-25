@@ -5,24 +5,11 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Handle these new ProxySendable classes in the dispatchers
-    - AddObject
-      - Implement movement in the client
-        > jmetest.curve.TestBezierCurve demonstrates one way to move an
-          object
-        + MoveSeq could all get turned into a single Curve
-        - Create a Curve that represents the polynomial/sin combination
-          - As a trivial test, just always return the same sin
-        - Give that to the standard CurveController
-    - MoveObject
-    - DeleteObject
-  - Get AboutControllerPipeline working again, post change to addShape()
-    type signature
-    - Add constructor for MoveSeq given a vector and a quaternion
   - Create a simple proxy that adds some shapes and moves them around
     - Shape needs an externalization format
-  - Create a simple server that feeds some shapes to a simple proxy and
-    moves them around
+  - Create a pass-through proxy
+  - Create a simple server that feeds some shapes to a pass-through
+    proxy and moves them around
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app
@@ -432,6 +419,21 @@
     > ParentId
     > Movement
   + Add MoveObject message
+  + Handle these new ProxySendable classes in the dispatchers
+    + AddObject
+      + Implement movement in the client
+        > jmetest.curve.TestBezierCurve demonstrates one way to move an
+          object
+        + MoveSeq could all get turned into a single Curve
+        + Create a Curve that represents the polynomial/sin combination
+          + As a trivial test, just always return the same sin
+        + Give that to the standard CurveController
+    + MoveObject
+    + DeleteObject
+  + Get AboutControllerPipeline working again, post change to addShape()
+    type signature
+    x Add constructor for MoveSeq given a vector and a quaternion
+    + VUtil.simpleMove()
 
 - To do for 0.02:
   - Add textures to Shape class
@@ -465,6 +467,9 @@
     > OpenID
 
 - Future:
+  - Backward compatibility
+    - Client should be able to ignore child classes of ProxySendable
+      that it does not recognize
   - Textures must be specifiable as URLs (?) or else they can only be
     loaded from the DVTP server, because that's all the proxy can
     connect to
