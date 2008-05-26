@@ -49,6 +49,11 @@ public final class DvtpObject
         Quat.class,             // 16
         DeleteObject.class,     // 17
         MoveSeq.class,          // 18
+        Keystroke.class,        // 19
+        KeyDown.class,          // 20
+        KeyUp.class,            // 21
+        Click.class,           // 22
+        Click2.class,           // 23
         
         null
         };

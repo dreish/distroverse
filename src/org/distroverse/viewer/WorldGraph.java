@@ -29,7 +29,7 @@ public class WorldGraph
          parent_node = mWorldHead;
       mIdMap.put( id, new WorldGraphObject( object_node, pid ) );
       object_node.attachChild( s.asTriMesh() );
-      addMoveSeq( init_move_seq, object_node );
+      setMoveSeq( init_move_seq, object_node );
 //      object_node.setLocalTranslation( init_pos );
 //      object_node.setLocalRotation( rotation );
       object_node.setLocalScale( 1 );
@@ -37,7 +37,7 @@ public class WorldGraph
       parent_node.attachChild( object_node );
       }
 
-   private void addMoveSeq( MoveSeq ms, Node object_node )
+   private void setMoveSeq( MoveSeq ms, Node object_node )
       {
       // TODO Auto-generated method stub
       DvCurve curve = new DvCurve( object_node.getName() + "-mover",
@@ -47,10 +47,10 @@ public class WorldGraph
       // FIXME set repeat type
       }
    
-   public void addMoveSeq( MoveSeq ms, Long id )
+   public void setMoveSeq( MoveSeq ms, Long id )
       {
       // TODO check for bad id
-      addMoveSeq( ms, getNode( id ) );
+      setMoveSeq( ms, getNode( id ) );
       }
 
    public void deleteShape( Long id )

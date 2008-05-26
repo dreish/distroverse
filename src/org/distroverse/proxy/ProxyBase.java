@@ -2,17 +2,29 @@ package org.distroverse.proxy;
 
 import java.util.concurrent.BlockingQueue;
 
+import org.distroverse.core.Log;
+import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
+import org.distroverse.core.net.NetInQueue;
+import org.distroverse.core.net.NetInQueueWatcher;
+import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.dvtp.ClientSendable;
+import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.ProxySendable;
 
 /**
- * Provides a useful base upon which to build proxy classes.
+ * Provides a useful base upon which to build proxy classes that
+ * communicate with a server.
  * @author dreish
  */
 public abstract class ProxyBase implements DvtpProxy
    {
-
+   public ProxyBase()
+      {
+      mWatcher = new DvtpProxyInQueueObjectWatcher( this );
+      mWatcher.start();
+      }
+   
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpProxy#offer(org.distroverse.dvtp.ClientSendable)
     */
@@ -40,19 +52,32 @@ public abstract class ProxyBase implements DvtpProxy
       }
    
    protected void putQueue( ProxySendable o )
-   throws InterruptedException
       {
-      mClientQueue.put( o );
+      while ( true )
+         {
+         try
+            {
+            mClientQueue.put( o );
+            return;
+            }
+         catch ( InterruptedException e )
+            {
+            Log.p( "mClientQueue.put() interrupted:", Log.UNHANDLED,
+                   0 );
+            Log.p( e, Log.UNHANDLED, 0 );
+            }
+         }
       }
 
    /**
-    * This method is called by ProxyBase every time an object is sent
-    * from the server.
+    * This method is called by the NetInQueueWatcher every time an
+    * object is sent from the server.
     * @param o
-    * @throws InterruptedException
     */
-   protected abstract void receiveFromServer( Object o )
-   throws InterruptedException;
+   public abstract void receiveFromServer( Object o );
 
    private BlockingQueue< ProxySendable > mClientQueue;
+   private NetOutQueue< DvtpExternalizable > mToServerQueue;
+   private NetInQueue< DvtpExternalizable > mFromServerQueue;
+   private NetInQueueWatcher< Object > mWatcher;
    }

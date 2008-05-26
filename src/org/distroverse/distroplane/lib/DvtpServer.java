@@ -65,7 +65,7 @@ public abstract class DvtpServer
          return;
          }
       NetInQueueWatcher< Object > watcher_thread =
-         new DvtpInQueueObjectWatcher( server );
+         new DvtpServerInQueueObjectWatcher( server );
       watcher_thread.start();
       l.setWatcher( watcher_thread );
       l.setGreeting( greeting );

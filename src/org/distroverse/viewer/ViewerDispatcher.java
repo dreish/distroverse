@@ -69,7 +69,7 @@ public class ViewerDispatcher extends ClientDispatcher
    @Override
    protected void dispatchMoveObject( MoveObject o )
       {
-      mWindow.getWorld().addMoveSeq( o.getMoveSeq(), o.getId() );
+      mWindow.getWorld().setMoveSeq( o.getMoveSeq(), o.getId() );
       }
 
    @Override

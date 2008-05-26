@@ -6,9 +6,13 @@ import org.distroverse.dvtp.ProxySendable;
 public class PassThroughProxy extends ProxyBase
    {
    @Override
-   protected void receiveFromServer( Object o )
-   throws InterruptedException
+   public void receiveFromServer( Object o )
       {
       this.putQueue( (ProxySendable) o );
+      }
+   
+   protected void receiveFromClient( Object o )
+      {
+      
       }
    }

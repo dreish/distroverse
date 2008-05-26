@@ -5,10 +5,15 @@ import java.net.ProtocolException;
 
 import org.distroverse.distroplane.lib.*;
 
-public class DvtpInQueueObjectWatcher 
+/**
+ * Defines an object-handling method for NetInQueueWatcher appropriate
+ * for a DvtpServer.
+ * @author dreish
+ */
+public class DvtpServerInQueueObjectWatcher 
 extends NetInQueueWatcher< Object >
    {
-   public DvtpInQueueObjectWatcher( DvtpServer s )
+   public DvtpServerInQueueObjectWatcher( DvtpServer s )
       {
       super();
       mServer = s;

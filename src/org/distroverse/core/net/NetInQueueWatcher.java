@@ -7,6 +7,13 @@ import java.util.NoSuchElementException;
 
 import org.distroverse.core.*;
 
+/**
+ * A thread that watches a NetInQueue< T >, calling the abstract method
+ * handleNetObject() with every object that appears in any of the
+ * watched queues.
+ * @author dreish
+ * @param <T>
+ */
 public abstract class NetInQueueWatcher< T > extends Thread
    {
    public NetInQueueWatcher()

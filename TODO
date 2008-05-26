@@ -8,6 +8,13 @@
   - Create a simple proxy that adds some shapes and moves them around
     - Shape needs an externalization format
   - Create a pass-through proxy
+    + I don't think I can use NetInQueue or NetOutQueue here -- they are
+      designed to be as nonblocking as possible, but the proxy actually
+      should block reads when it is busy
+      > Unless I can catch InterruptedException somewhere
+      + Catch it, log the exception, and retry the put
+    - Feed objects from the client to the server
+    - Feed objects from the server to the client
   - Create a simple server that feeds some shapes to a pass-through
     proxy and moves them around
   x Deform the points according to my trig functions and see whether
