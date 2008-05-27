@@ -3,7 +3,7 @@ package org.distroverse.proxy;
 import org.distroverse.dvtp.ProxySendable;
 
 
-public class PassThroughProxy extends ProxyBase
+public class PassThroughProxy extends NetProxyBase
    {
    @Override
    public void receiveFromServer( Object o )

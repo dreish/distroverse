@@ -44,7 +44,7 @@ public class AddObject implements ProxySendable
    public Shape        getShape()     {  return mShape;     }
    public CompactUlong getId()        {  return mId;        }
    public CompactUlong getParentId()  {  return mParentId;  }
-   public MoveSeq      getMoveSeq()      {  return mMoveSeq;   }
+   public MoveSeq      getMoveSeq()   {  return mMoveSeq;   }
 
    public void readExternal( ObjectInput in )
    throws IOException, ClassNotFoundException

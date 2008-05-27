@@ -1,16 +1,16 @@
 package org.distroverse.core.net;
 
-import org.distroverse.proxy.ProxyBase;
+import org.distroverse.proxy.NetProxyBase;
 
 /**
  * Defines an object-handling method for NetInQueueWatcher appropriate
- * for a ProxyBase.
+ * for a NetProxyBase.
  * @author dreish
  */
 public class DvtpProxyInQueueObjectWatcher
 extends NetInQueueWatcher< Object >
    {
-   public DvtpProxyInQueueObjectWatcher( ProxyBase p )
+   public DvtpProxyInQueueObjectWatcher( NetProxyBase p )
       {
       super();
       mProxy = p;
@@ -23,5 +23,5 @@ extends NetInQueueWatcher< Object >
       mProxy.receiveFromServer( net_in_object );
       }
 
-   private ProxyBase mProxy;
+   private NetProxyBase mProxy;
    }

@@ -3,54 +3,38 @@ package org.distroverse.proxy;
 import java.util.concurrent.BlockingQueue;
 
 import org.distroverse.core.Log;
-import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
-import org.distroverse.core.net.NetInQueue;
-import org.distroverse.core.net.NetInQueueWatcher;
-import org.distroverse.core.net.NetOutQueue;
-import org.distroverse.dvtp.ClientSendable;
-import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.CompactUlong;
 import org.distroverse.dvtp.DvtpProxy;
+import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.ProxySendable;
+import org.distroverse.dvtp.Shape;
 
 /**
- * Provides a useful base upon which to build proxy classes that
- * communicate with a server.
+ * Provides some handy utility classes and implements the fairly obvious
+ * setQueue() method.
  * @author dreish
  */
 public abstract class ProxyBase implements DvtpProxy
    {
    public ProxyBase()
       {
-      mWatcher = new DvtpProxyInQueueObjectWatcher( this );
-      mWatcher.start();
-      }
-   
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpProxy#offer(org.distroverse.dvtp.ClientSendable)
-    */
-   public void offer( ClientSendable o )
-      {
-      // TODO Auto-generated method stub
-
+      super();
       }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpProxy#run()
-    */
-   public void run()
-      {
-      // TODO Auto-generated method stub
-
-      }
-
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpProxy#setQueue(java.util.concurrent.BlockingQueue)
-    */
    public void setQueue( BlockingQueue< ProxySendable > queue )
       {
       mClientQueue = queue;
       }
-   
+
+   /**
+    * Add an object to the client's queue.  In most cases, there is
+    * another method in ProxyBase that provides a convenient alternative
+    * to calling this one.
+    * 
+    * For now, this is just going to log and keep retrying if it gets
+    * interrupted.  This is probably a very bad strategy, but we'll see.
+    * @param o
+    */
    protected void putQueue( ProxySendable o )
       {
       while ( true )
@@ -68,16 +52,12 @@ public abstract class ProxyBase implements DvtpProxy
             }
          }
       }
-
-   /**
-    * This method is called by the NetInQueueWatcher every time an
-    * object is sent from the server.
-    * @param o
-    */
-   public abstract void receiveFromServer( Object o );
-
+   
+   protected void addObject( Shape s, CompactUlong id, CompactUlong pid,
+                             MoveSeq m )
+      {
+      
+      }
+   
    private BlockingQueue< ProxySendable > mClientQueue;
-   private NetOutQueue< DvtpExternalizable > mToServerQueue;
-   private NetInQueue< DvtpExternalizable > mFromServerQueue;
-   private NetInQueueWatcher< Object > mWatcher;
    }
