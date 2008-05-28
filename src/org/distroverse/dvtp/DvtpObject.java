@@ -52,11 +52,20 @@ public final class DvtpObject
         Keystroke.class,        // 19
         KeyDown.class,          // 20
         KeyUp.class,            // 21
-        Click.class,           // 22
+        Click.class,            // 22
         Click2.class,           // 23
         
         null
         };
+
+   public static final Class< ? > mExtendedClassList[]
+      = {
+        FunCall.class,          // 128
+        FunRet.class,           // 129
+
+        null
+        };
+   
    public static final int mSerializedClassNumber = 0xB00BAD;
    
    /**
@@ -70,30 +79,37 @@ public final class DvtpObject
    public static DvtpExternalizable getNew( int class_number ) 
    throws ClassNotFoundException
       {
-      if ( class_number < mClassList.length
-           &&  class_number >= 0 )
+      Class< ? extends DvtpExternalizable > newclass;
+      if ( class_number < mClassList.length - 1
+            &&  class_number >= 0 )
          {
-         Class< ? extends DvtpExternalizable > newclass
-            = (Class< ? extends DvtpExternalizable >) 
-              mClassList[ class_number ];
-         DvtpExternalizable ret;
-         try  {  ret = newclass.newInstance();  }
-         catch ( Exception e )
-            {
-            Log.p( "Impossible exception: " + e, 
-                   Log.DVTP | Log.UNHANDLED, 100 );
-            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-            System.exit( 42 );
-            return null;   // I have to do this to avoid an error?
-            }
-         assert( ret.getClassNumber() == class_number );
-         return ret;
+         newclass = (Class< ? extends DvtpExternalizable >) 
+                    mClassList[ class_number ];
+         }
+      else if ( class_number < mExtendedClassList.length + 127
+                &&  class_number >= 128 )
+         {
+         newclass = (Class< ? extends DvtpExternalizable >) 
+                    mClassList[ class_number - 128 ];
          }
       else if ( class_number == mSerializedClassNumber )
          return new Any();
       else 
          throw new ClassNotFoundException( "No such"
              + " DvtpExternalizable class number: " + class_number );
+
+      DvtpExternalizable ret;
+      try  {  ret = newclass.newInstance();  }
+      catch ( Exception e )
+         {
+         Log.p( "Impossible exception: " + e, 
+                Log.DVTP | Log.UNHANDLED, 100 );
+         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+         System.exit( 42 );
+         return null;   // I have to do this to avoid an error?
+         }
+      assert( ret.getClassNumber() == class_number );
+      return ret;
       }
    
    public static int getSerializedClassNumber()
