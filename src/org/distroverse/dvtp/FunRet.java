@@ -1,25 +1,22 @@
 package org.distroverse.dvtp;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-public class FunRet implements DvtpExternalizable
+/**
+ * A list of arbitrary DvtpExternalizable objects.
+ * @author dreish
+ */
+public class FunRet extends DList
    {
+   public FunRet()
+      {
+      super();
+      }
+   
+   public FunRet( DvtpExternalizable[] f )
+      {
+      super( f );
+      }
+   
+   @Override
    public int getClassNumber()
-      {  return 129;  }
-
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      // TODO Auto-generated method stub
-
-      }
-
-   public void writeExternal( ObjectOutput out ) throws IOException
-      {
-      // TODO Auto-generated method stub
-
-      }
-
+      {  return 130;  }
    }

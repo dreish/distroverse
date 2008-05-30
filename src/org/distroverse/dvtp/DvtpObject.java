@@ -60,8 +60,9 @@ public final class DvtpObject
 
    public static final Class< ? > mExtendedClassList[]
       = {
-        FunCall.class,          // 128
-        FunRet.class,           // 129
+        DList.class,            // 128
+        FunCall.class,          // 129
+        FunRet.class,           // 130
 
         null
         };
@@ -244,11 +245,11 @@ public final class DvtpObject
     * @param arr
     * @throws IOException
     */
-   public static void writeArray( ObjectOutput out, 
-                                  DvtpExternalizable[] arr )
+   public static <T extends DvtpExternalizable> 
+   void writeArray( ObjectOutput out, T[] arr )
    throws IOException
       {
-      for ( DvtpExternalizable o : arr )
+      for ( T o : arr )
          o.writeExternal( out );
       }
 
