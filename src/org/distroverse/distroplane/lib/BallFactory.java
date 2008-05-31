@@ -20,7 +20,7 @@ import com.jme.math.Vector3f;
  * @author dreish
  * 
  */
-public class BallFactory extends ShapeFactory
+public class BallFactory extends ShapeFactory implements DimFactory
    {
    public static final int DEFAULT_NUM_ROWS = 16;
    
@@ -92,6 +92,15 @@ public class BallFactory extends ShapeFactory
          float z = (float) (Math.cos( longitude ) * circle_radius);
          vertices[ row ][ i ] = new Vector3f( x, y, z );
          }
+      }
+
+   
+   public BallFactory setDims( double radius, double v_aspect,
+                               double h_aspect )
+      {
+      mEquatorialRadius = radius;
+      mAspectRatio = v_aspect;
+      return this;
       }
 
    private double mEquatorialRadius;

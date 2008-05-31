@@ -23,7 +23,7 @@ public class HelloSimpleProxy extends ProxyBase
                  -30.0, 10.0, 40.0 );
       addObject( pf.setPrimShape( PrimShape.PYRAMID ).generate(), 2L,
                  +00.0, 10.0, 40.0 );
-      addObject( pf.setPrimShape( PrimShape.CUBE    ).generate(), 3L,
+      addObject( pf.setPrimShape( PrimShape.CUBOID  ).generate(), 3L,
                  +30.0, 10.0, 40.0 );
       
       }
