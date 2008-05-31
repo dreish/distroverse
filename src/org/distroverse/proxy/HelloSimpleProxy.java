@@ -1,16 +1,14 @@
 package org.distroverse.proxy;
 
-import java.util.concurrent.BlockingQueue;
-
+import org.distroverse.distroplane.lib.PrimFactory;
+import org.distroverse.distroplane.lib.PrimFactory.PrimShape;
 import org.distroverse.dvtp.ClientSendable;
-import org.distroverse.dvtp.DvtpProxy;
-import org.distroverse.dvtp.ProxySendable;
 
 /**
  * A simple demo proxy that does not connect to any server.
  * @author dreish
  */
-public class HelloSimpleProxy implements DvtpProxy
+public class HelloSimpleProxy extends ProxyBase
    {
    public void offer( ClientSendable o )
       {
@@ -19,13 +17,14 @@ public class HelloSimpleProxy implements DvtpProxy
 
    public void run()
       {
+      PrimFactory pf = new PrimFactory();
+      pf.setDims( 10.0, 1.0, 1.0 );
+      addObject( pf.setPrimShape( PrimShape.SPHERE  ).generate(), 1L,
+                 -30.0, 10.0, 40.0 );
+      addObject( pf.setPrimShape( PrimShape.PYRAMID ).generate(), 2L,
+                 +00.0, 10.0, 40.0 );
+      addObject( pf.setPrimShape( PrimShape.CUBE    ).generate(), 3L,
+                 +30.0, 10.0, 40.0 );
       
       }
-
-   public void setQueue( BlockingQueue< ProxySendable > queue )
-      {
-      mClientQueue = queue;
-      }
-
-   private BlockingQueue< ProxySendable > mClientQueue;
    }

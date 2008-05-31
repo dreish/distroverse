@@ -466,7 +466,8 @@
 
 > Required for 1.0:
   > Client
-    > Figure animations
+    > Text -- can't escape the morass
+    > Figure animations (as long as a proxy can do it)
     > Sound
     > Inventory system with remote object browser integration
   > Server

@@ -58,6 +58,14 @@ public abstract class ProxyBase implements DvtpProxy
       {
       
       }
+
+   protected void addObject( Shape s, long id,
+                             double x, double y, double z )
+      {
+      // TODO Auto-generated method stub
+      
+      }
+
    
    private BlockingQueue< ProxySendable > mClientQueue;
    }
