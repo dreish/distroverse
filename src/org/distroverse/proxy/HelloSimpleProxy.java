@@ -20,11 +20,11 @@ public class HelloSimpleProxy extends ProxyBase
       PrimFactory pf = new PrimFactory();
       pf.setDims( 10.0, 1.0, 1.0 );
       addObject( pf.setPrimShape( PrimShape.SPHERE  ).generate(), 1L,
-                 -30.0, 10.0, 40.0 );
+                 -30.0f, 10.0f, 40.0f );
       addObject( pf.setPrimShape( PrimShape.PYRAMID ).generate(), 2L,
-                 +00.0, 10.0, 40.0 );
+                 +00.0f, 10.0f, 40.0f );
       addObject( pf.setPrimShape( PrimShape.CUBOID  ).generate(), 3L,
-                 +30.0, 10.0, 40.0 );
+                 +30.0f, 10.0f, 40.0f );
       
       }
    }

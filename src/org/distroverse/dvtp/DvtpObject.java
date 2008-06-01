@@ -54,6 +54,8 @@ public final class DvtpObject
         KeyUp.class,            // 21
         Click.class,            // 22
         Click2.class,           // 23
+        MoreDetail.class,       // 24
+        LessDetail.class,       // 25
         
         null
         };

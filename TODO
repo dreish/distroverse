@@ -6,6 +6,9 @@
 
 - To do for 0.01:
   - Create a simple proxy that adds some shapes and moves them around
+    - PrimFactory
+      - PyramidFactory
+      - PrismFactory
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually

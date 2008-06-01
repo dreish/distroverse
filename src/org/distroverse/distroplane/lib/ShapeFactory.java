@@ -15,30 +15,55 @@ public abstract class ShapeFactory implements Factory
     * Vector3fs.  Useful in a variety of subclasses.
     * @param vertices - A two-dimensional array of points to
     * be knitted together into a surface
-    * @return An org.distoverse.core.Shape connecting the given
+    * @return An org.distoverse.dvtp.Shape connecting the given
     * points with triangles that are as close to equilateral as
     * possible
     */
    protected static Shape generateSurface( Vector3f[][] vertices )
       {
-      if ( vertices.length < 2 )
+      ArrayList< List< Vector3f > > vertices_list
+         = new ArrayList< List< Vector3f > >( vertices.length );
+      
+      for ( Vector3f[] row : vertices )
+         vertices_list.add( Arrays.asList( row ) );
+      
+      return generateSurface( vertices_list );
+      }
+   
+   /**
+    * Generates a Shape connecting the two-dimensional array of
+    * Vector3fs.  Useful in a variety of subclasses.
+    * @param vertices - A list of lists of points to be knitted together
+    * into a surface
+    * @return An org.distoverse.dvtp.Shape connecting the given
+    * points with triangles that are as close to equilateral as
+    * possible
+    */
+   protected static Shape generateSurface( List< List< Vector3f > >
+                                           vertices )
+      {
+      if ( vertices.size() < 2 )
          throw new IllegalArgumentException( "A surface must have" 
                        + "at least two rows of points" );
       List< Vector3f > triangle_strips = new ArrayList< Vector3f >();
-      int vertex_counts[] = new int[ vertices.length - 1 ];
+      int vertex_counts[] = new int[ vertices.size() - 1 ];
       int prev_triangle_strips_size = 0;
-      for ( int i = 0; i < vertices.length - 1; ++i )
+      Vector3f[] prev_row = vertices.get( 0 )
+                                    .toArray( new Vector3f[0] );
+      for ( int i = 0; i < vertices.size() - 1; ++i )
          {
-         if (    vertices[ i   ].length > 1 
-              || vertices[ i+1 ].length > 1 )
-            connectWithTriangles( triangle_strips,
-                                  vertices[ i   ],
-                                  vertices[ i+1 ] );
+         Vector3f[] next_row = vertices.get( i + 1 )
+                                       .toArray( new Vector3f[0] );
+         if (    prev_row.length > 1 
+              || next_row.length > 1 )
+            connectWithTriangles( triangle_strips, prev_row, next_row );
          vertex_counts[ i ] = triangle_strips.size() 
                               - prev_triangle_strips_size;
          prev_triangle_strips_size = triangle_strips.size();
+         prev_row = next_row;
          }
       return new Shape( triangle_strips, vertex_counts );
+      
       }
 
    /**
@@ -57,7 +82,7 @@ public abstract class ShapeFactory implements Factory
                                              Vector3f[] row_1 )
       {
       int index[]      = { 0, 0 };
-      Vector3f[][]row   = { row_0, row_1 };
+      Vector3f[][] row = { row_0, row_1 };
       int current_row  = longerDiagonal( row[0], row[1], 
                                          index[0], index[1], 1.0 );
       

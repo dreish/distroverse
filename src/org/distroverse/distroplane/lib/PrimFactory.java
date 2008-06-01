@@ -17,8 +17,10 @@ public class PrimFactory extends ShapeFactory implements DimFactory
             case PYRAMID:
                return new PyramidFactory();
             case CUBOID:
-               return new CuboidFactory();
+               return new PrismFactory();
             }
+         // Only Java thinks this is necessary:
+         return null;
          }
       }
 

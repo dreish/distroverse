@@ -8,6 +8,10 @@ import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.ProxySendable;
 import org.distroverse.dvtp.Shape;
+import org.distroverse.viewer.VUtil;
+
+import com.jme.math.Quaternion;
+import com.jme.math.Vector3f;
 
 /**
  * Provides some handy utility classes and implements the fairly obvious
@@ -56,14 +60,15 @@ public abstract class ProxyBase implements DvtpProxy
    protected void addObject( Shape s, CompactUlong id, CompactUlong pid,
                              MoveSeq m )
       {
-      
+      // XXX implement this!
       }
 
    protected void addObject( Shape s, long id,
-                             double x, double y, double z )
+                             float x, float y, float z )
       {
-      // TODO Auto-generated method stub
-      
+      addObject( s, new CompactUlong( id ), new CompactUlong( 0 ),
+                 VUtil.simpleMove( new Vector3f( x, y, z ),
+                                   new Quaternion() ) );
       }
 
    
