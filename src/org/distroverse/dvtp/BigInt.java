@@ -92,7 +92,6 @@ public class BigInt implements DvtpExternalizable,
     */
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
       byte[] output;
       if ( mVal.signum() >= 0 )
          output = mVal.toByteArray();

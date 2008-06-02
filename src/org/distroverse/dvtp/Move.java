@@ -6,6 +6,8 @@ import java.io.ObjectOutput;
 
 import org.distroverse.core.Util;
 
+import com.jme.math.Vector3f;
+
 /**
  * Defines movement and rotation in three dimensions:
  * - Move
@@ -77,6 +79,19 @@ public class Move implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 13;  }
+
+   public Vector3f initialPosition()
+      {
+      Vector3f ret = mMovePolyVecs[ 0 ].asVector3f();
+      for ( int i = 0; i < mMoveSins; ++i )
+         {
+         float coefficient
+            = (float) Math.sin( mMoveSinOffsets[ i ].asFloat() );
+         ret.addLocal( mMoveSinVecs[ i ].asVector3f()
+                                        .mult( coefficient ) );
+         }
+      return ret;
+      }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)

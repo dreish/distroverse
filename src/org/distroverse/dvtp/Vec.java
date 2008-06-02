@@ -11,6 +11,7 @@ public class Vec implements DvtpExternalizable
    public Vec()
       {
       super();
+      mVec = new Vector3f();
       }
 
    public Vec( Vector3f v )
@@ -22,17 +23,24 @@ public class Vec implements DvtpExternalizable
    public int getClassNumber()
       {  return 11;  }
 
+   public Vector3f asVector3f()
+      {
+      return mVec;
+      }
+
    public void readExternal( ObjectInput in ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      mVec.x = Flo.externalAsFloat( in );
+      mVec.y = Flo.externalAsFloat( in );
+      mVec.z = Flo.externalAsFloat( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      Flo.floatAsExternal( out, mVec.x );
+      Flo.floatAsExternal( out, mVec.y );
+      Flo.floatAsExternal( out, mVec.z );
       }
    
-   Vector3f mVec;
+   private Vector3f mVec;
    }

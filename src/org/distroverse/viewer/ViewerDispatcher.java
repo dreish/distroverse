@@ -38,7 +38,6 @@ public class ViewerDispatcher extends ClientDispatcher
    protected void dispatchRedirectUrl( RedirectUrl o )
    throws ProxyErrorException
       {
-      // TODO Auto-generated method stub
       String url = o.getUrl();
 
       if ( mProxy.handlesUrl( url ) )

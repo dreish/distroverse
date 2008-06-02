@@ -9,17 +9,14 @@ public class DeleteObject implements ProxySendable
    public int getClassNumber()
       {  return 17;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( ObjectInput in ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      mId = CompactUlong.externalAsLong( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      CompactUlong.longAsExternal( out, mId );
       }
 
    public Long getId()

@@ -16,7 +16,6 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
    public DvtpFlexiStreamer( ByteBuffer b )
       {
       super( b );
-      // TODO Auto-generated constructor stub
       }
 
    @Override

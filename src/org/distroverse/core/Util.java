@@ -221,7 +221,6 @@ public final class Util
          }
       catch ( IOException e )
          {
-         // TODO Auto-generated catch block
          Log.p( "Unlikely exception, not handled", Log.UNHANDLED, 100 );
          Log.p( e, Log.UNHANDLED, 100 );
          throw new RuntimeException( "Unlikely exception" );

@@ -35,8 +35,7 @@ public class MoveSeq implements ProxySendable
 
    public Vector3f initialPosition()
       {
-      // TODO Auto-generated method stub
-      return null;
+      return mMoves[ 0 ].initialPosition();
       }
 
    public void readExternal( ObjectInput in )

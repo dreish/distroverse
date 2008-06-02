@@ -110,8 +110,8 @@ public class DvCurve extends Curve
    @Override
    public void findCollisions( Spatial scene, CollisionResults results )
       {
-      // TODO Auto-generated method stub
-
+      throw new UnsupportedOperationException( "DvCurve does not"
+                                   + " support collision detection" );
       }
 
    /* (non-Javadoc)
@@ -120,8 +120,8 @@ public class DvCurve extends Curve
    @Override
    public boolean hasCollision( Spatial scene, boolean checkTriangles )
       {
-      // TODO Auto-generated method stub
-      return false;
+      throw new UnsupportedOperationException( "DvCurve does not"
+                                   + " support collision detection" );
       }
 
    private MoveSeq mMoves;

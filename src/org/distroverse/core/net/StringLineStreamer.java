@@ -1,6 +1,5 @@
 /**
  * Outputs each string given as a line terminated by CR-LF.
- * TODO check that the input string doesn't contain CR-LF
  */
 package org.distroverse.core.net;
 
@@ -35,7 +34,12 @@ public class StringLineStreamer extends ObjectStreamer< String >
          {
          if ( queue.size() > 0 )
             {
-            byte[] string_as_bytes = queue.remove().getBytes( "UTF-8" ); 
+            String s = queue.remove();
+            if ( s.indexOf( "\r\n" ) >= 0 )
+               throw new IllegalArgumentException( "String containing"
+                            + " a newline found in StringLineStreamer"
+                            + " queue" );
+            byte[] string_as_bytes = s.getBytes( "UTF-8" );
             baos.write( string_as_bytes );
             baos.write( "\r\n".getBytes( "UTF-8" ) );
             }

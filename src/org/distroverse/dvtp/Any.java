@@ -14,10 +14,13 @@ import java.io.Serializable;
 
 /**
  * This class is actually NOT part of DVTP, the protocol -- just dvtp,
- * the package.  The DvtpFlexiParser and DvtpFlexiStreamer will not send
- * or receive this class, but the ExtraFlexiParser and
+ * the package.  None of the ClientSendable or ProxySendable classes use
+ * this class.  The DvtpFlexiParser and DvtpFlexiStreamer will not send
+ * or receive objects of this class, but the ExtraFlexiParser and
  * ExtraFlexiStreamer will.  It packs any Serializable object with
  * deflate compression.
+ * 
+ * TODO Any is completely unimplemented.
  * 
  * @author dreish
  */

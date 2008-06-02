@@ -22,6 +22,8 @@ public class WorldGraph
    public void addShape( Shape s, Long id, Long pid,
                          MoveSeq init_move_seq )
       {
+      if ( id < 0  ||  pid < 0 )
+         throw new IllegalArgumentException( "ID must be nonnegative" );
       Node object_node = new Node( "dvo#" + id );
       Node parent_node = getNode( pid );
       if ( parent_node == null )
@@ -39,7 +41,6 @@ public class WorldGraph
 
    private void setMoveSeq( MoveSeq ms, Node object_node )
       {
-      // TODO Auto-generated method stub
       DvCurve curve = new DvCurve( object_node.getName() + "-mover",
                                    ms );
       CurveController cc = new CurveController( curve, object_node );

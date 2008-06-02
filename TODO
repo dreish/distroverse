@@ -5,10 +5,16 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
+  - Note that object IDs must always be nonnegative; check for this
+    where needed
   - Create a simple proxy that adds some shapes and moves them around
-    - PrimFactory
-      - PyramidFactory
-      - PrismFactory
+    > HelloSimpleProxy
+    + PrimFactory
+      + PyramidFactory
+      + PrismFactory
+    - Implement ProxyBase.addObject()
+  - Create a server that directs the client to HelloSimpleProxy
+  - Connect and test
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually
