@@ -5,14 +5,6 @@
 > M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
-  - Note that object IDs must always be nonnegative; check for this
-    where needed
-  - Create a simple proxy that adds some shapes and moves them around
-    > HelloSimpleProxy
-    + PrimFactory
-      + PyramidFactory
-      + PrismFactory
-    - Implement ProxyBase.addObject()
   - Create a server that directs the client to HelloSimpleProxy
   - Connect and test
   - Create a pass-through proxy
@@ -34,7 +26,7 @@
     x Create methods to set its position, velocity, & acceleration
     x Create methods to do the same for its orientation
   x core.DataPackage (abstract)
-    - Find out whether something like this already exists
+    x Find out whether something like this already exists
       > Presents a simple array of objects
       > Serialization produces different results depending on 
         implementation
@@ -450,6 +442,14 @@
     type signature
     x Add constructor for MoveSeq given a vector and a quaternion
     + VUtil.simpleMove()
+  + Note that object IDs must always be nonnegative; check for this
+    where needed
+  + Create a simple proxy that adds some shapes and moves them around
+    > HelloSimpleProxy
+    + PrimFactory
+      + PyramidFactory
+      + PrismFactory
+    + Implement ProxyBase.addObject()
 
 - To do for 0.02:
   - Add textures to Shape class
