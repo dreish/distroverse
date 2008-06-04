@@ -6,6 +6,7 @@ import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
+import org.distroverse.dvtp.Err;
 
 public class HelloSimpleServer extends DvtpServer
    {
@@ -18,8 +19,14 @@ public class HelloSimpleServer extends DvtpServer
    public void handleGet( String url, NetOutQueue< Object > noq )
    throws IOException
       {
-      // TODO Auto-generated method stub
-
+      if ( url.equals( "drtp://localhost/HelloSimpleProxy.jar" ) )
+         {
+         
+         }
+      else
+         {
+         noq.add( new Err( url, 404 ) );
+         }
       }
 
    @Override
@@ -27,8 +34,7 @@ public class HelloSimpleServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      // TODO Auto-generated method stub
-
+      noq.add( "drtp://localhost/HelloSimpleProxy.jar" );
       }
 
    @Override
@@ -37,13 +43,14 @@ public class HelloSimpleServer extends DvtpServer
    throws IOException
       {
       // TODO Auto-generated method stub
+      NetOutQueue< Object > noq = session.getNetOutQueue();
 
       }
 
    @Override
    public void handleProxyOpen( String token, 
                                 NetOutQueue< Object > noq )
-                                                                         throws IOException
+   throws IOException
       {
       // TODO Auto-generated method stub
 
@@ -54,8 +61,8 @@ public class HelloSimpleServer extends DvtpServer
     */
    public static void main( String[] args )
       {
-      // TODO Auto-generated method stub
-
+      createServer( HelloSimpleServer.class,
+                    "DVTP/0.01 HelloSimpleServer 1.0.0" );
       }
 
    }

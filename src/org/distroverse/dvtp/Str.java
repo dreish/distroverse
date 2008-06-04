@@ -28,6 +28,9 @@ public class Str implements DvtpExternalizable
    public Str()
       {  mVal = null;  }
 
+   /**
+    * Returns the Str as a String.
+    */
    @Override
    public String toString()
       {  return mVal;  }
