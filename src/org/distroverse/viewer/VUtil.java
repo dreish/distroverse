@@ -9,7 +9,7 @@ import org.distroverse.dvtp.MoveSeq.RepeatType;
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 
-public abstract class VUtil
+public final class VUtil
    {
    /**
     * Creates a simple stationary MoveSeq out of a vector and

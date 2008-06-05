@@ -56,6 +56,7 @@ public final class DvtpObject
         Click2.class,           // 23
         MoreDetail.class,       // 24
         LessDetail.class,       // 25
+        Blob.class,             // 26
         
         null
         };

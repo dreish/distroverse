@@ -6,6 +6,7 @@ import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
+import org.distroverse.distroplane.lib.SUtil;
 import org.distroverse.dvtp.Err;
 
 public class HelloSimpleServer extends DvtpServer
@@ -21,7 +22,7 @@ public class HelloSimpleServer extends DvtpServer
       {
       if ( url.equals( "drtp://localhost/HelloSimpleProxy.jar" ) )
          {
-         
+         SUtil.sendFile( "HelloSimpleProxy.jar", noq );
          }
       else
          {
