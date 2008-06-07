@@ -40,9 +40,9 @@ public final class SUtil
          = new ArrayList< Blob >( (int) (file_length / max_blob_size) );
 
       long pos = 0;
+      byte[] next_bytes = new byte[ max_blob_size ];
       while ( true )
          {
-         byte[] next_bytes = new byte[ max_blob_size ];
          int n_read = fis.read( next_bytes );
          if ( n_read < 1 )
             break;

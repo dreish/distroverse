@@ -30,9 +30,9 @@ public class Vec implements DvtpExternalizable
 
    public void readExternal( ObjectInput in ) throws IOException
       {
-      mVec.x = Flo.externalAsFloat( in );
-      mVec.y = Flo.externalAsFloat( in );
-      mVec.z = Flo.externalAsFloat( in );
+      mVec = new Vector3f( Flo.externalAsFloat( in ),
+                           Flo.externalAsFloat( in ),
+                           Flo.externalAsFloat( in ) );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException

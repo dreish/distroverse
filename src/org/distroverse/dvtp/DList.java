@@ -11,13 +11,13 @@ public class DList implements DvtpExternalizable
    public DList()
       {
       super();
-      mFunction = null;
+      mContents = null;
       }
    
    public DList( DvtpExternalizable[] f )
       {
       super();
-      mFunction = f;
+      mContents = f;
       }
    
    public int getClassNumber()
@@ -27,24 +27,24 @@ public class DList implements DvtpExternalizable
     * setting values.
     * @return
     */
-   public DvtpExternalizable[] getFunction()
-      {  return mFunction;  }
+   public DvtpExternalizable[] getContents()
+      {  return mContents;  }
 
    public void readExternal( ObjectInput in ) throws IOException,
                                              ClassNotFoundException
       {
       int length = Util.safeInt( CompactUlong.externalAsLong( in ) );
-      mFunction = new DvtpExternalizable[ length ];
+      mContents = new DvtpExternalizable[ length ];
       for ( int i = 0; i < length; ++i )
-         mFunction[ i ] = DvtpObject.parseObject( in );
+         mContents[ i ] = DvtpObject.parseObject( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mFunction.length );
-      for ( DvtpExternalizable o : mFunction )
+      CompactUlong.longAsExternal( out, mContents.length );
+      for ( DvtpExternalizable o : mContents )
          DvtpObject.writeInnerObject( out, o );
       }
 
-   private DvtpExternalizable[] mFunction;
+   private DvtpExternalizable[] mContents;
    }

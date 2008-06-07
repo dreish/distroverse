@@ -3,34 +3,88 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.net.ProtocolException;
 
+import org.distroverse.core.Util;
+
+/**
+ * The current maximum blob size is 65,536 bytes, though this limit
+ * could easily be increased in the future if appropriate, up to 2^63
+ * bytes.
+ * @author dreish
+ */
 public class Blob implements DvtpExternalizable
    {
+   /**
+    * Does NOT take ownership of 'bytes'
+    * @param bytes
+    * @param n_read
+    * @param resource
+    * @param pos
+    * @param file_length
+    * @throws ProtocolException 
+    */
    public Blob( byte[] bytes, int n_read, String resource,
                 long pos, long file_length )
       {
-      // TODO Auto-generated constructor stub
+      super();
+      if ( bytes.length > 65536 )
+         throw new IllegalArgumentException( "Blob above legal maximum"
+                                             + " size" );
+      if ( n_read == bytes.length )
+         mBytes = bytes.clone();
+      else
+         {
+         mBytes = new byte[ n_read ];
+         System.arraycopy( bytes, 0, mBytes, 0, n_read );
+         }
+      mResource = new Str( resource );
+      mPos = pos;
+      mFileLength = file_length;
       }
 
    public Blob()
       {
-      // TODO Auto-generated constructor stub
+      super();
       }
 
    public int getClassNumber()
       {  return 26;  }
+   public byte[] getBytes()
+      {  return mBytes;  }
+   public Str getResource()
+      {  return mResource;  }
+   public long getPos()
+      {  return mPos;  }
+   public long getFileLength()
+      {  return mFileLength;  }
 
    public void readExternal( ObjectInput in ) throws IOException,
                                              ClassNotFoundException
       {
-      // TODO Auto-generated method stub
-
+      int bytes_len = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      if ( bytes_len > 65536 )
+         throw new ProtocolException( "Blob above legal maximum size" );
+      mBytes = new byte[ bytes_len ];
+      if ( in.read( mBytes ) != bytes_len )
+         throw new ProtocolException( "End of file while reading"
+                                      + " Blob" );
+      (mResource = new Str()).readExternal( in );
+      mPos = CompactUlong.externalAsLong( in );
+      mFileLength = CompactUlong.externalAsLong( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      CompactUlong.longAsExternal( out, mBytes.length );
+      out.write( mBytes );
+      mResource.writeExternal( out );
+      CompactUlong.longAsExternal( out, mPos );
+      CompactUlong.longAsExternal( out, mFileLength );
       }
 
+   private byte[] mBytes;
+   private Str mResource;
+   private long mPos;
+   private long mFileLength;
    }

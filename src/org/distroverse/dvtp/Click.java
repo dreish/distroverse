@@ -37,8 +37,8 @@ public class Click implements ClientSendable
 
    public void readExternal( ObjectInput in ) throws IOException
       {
-      mDirection.readExternal( in );
-      mForce.readExternal( in );
+      (mDirection = new Vec()).readExternal( in );
+      (mForce = new Flo()).readExternal( in );
       }
 
    public void writeExternal( ObjectOutput out ) throws IOException
