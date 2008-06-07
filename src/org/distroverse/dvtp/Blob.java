@@ -6,6 +6,17 @@ import java.io.ObjectOutput;
 
 public class Blob implements DvtpExternalizable
    {
+   public Blob( byte[] bytes, int n_read, String resource,
+                long pos, long file_length )
+      {
+      // TODO Auto-generated constructor stub
+      }
+
+   public Blob()
+      {
+      // TODO Auto-generated constructor stub
+      }
+
    public int getClassNumber()
       {  return 26;  }
 

@@ -22,7 +22,7 @@ public class HelloSimpleServer extends DvtpServer
       {
       if ( url.equals( "drtp://localhost/HelloSimpleProxy.jar" ) )
          {
-         SUtil.sendFile( "HelloSimpleProxy.jar", noq );
+         SUtil.sendFile( "HelloSimpleProxy.jar", url, noq );
          }
       else
          {
