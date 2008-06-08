@@ -38,7 +38,7 @@ public final class DvtpObject
         False.class,            // 5
         True.class,             // 6
         ProxySpec.class,        // 7
-        ProxyDefer.class,       // 8
+        RedirectUrl.class,      // 8
         SetUrl.class,           // 9
         Shape.class,            // 10
         Vec.class,              // 11
@@ -57,6 +57,7 @@ public final class DvtpObject
         MoreDetail.class,       // 24
         LessDetail.class,       // 25
         Blob.class,             // 26
+        DisplayUrl.class,       // 27
         
         null
         };

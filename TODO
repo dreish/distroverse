@@ -1,11 +1,14 @@
-> Java 3D examples at:
-  http://java.sun.com/products/java-media/3D/collateral/examples.zip
-> API documentation at: http://download.java.net/media/java3d/
-  builds/release/1.5.1/java3d-1_5_1-api-docs.zip
-> M-Th: 50, Fr: 75, Sa/Su: 250
 
 - To do for 0.01:
   - Create a server that directs the client to HelloSimpleProxy
+    > HelloSimpleServer
+    + Send the HelloSimpleProxy.jar
+      + SUtil.sendFile()
+    - Client must be able to receive it -- this is the DRTP protocol: a
+      GET command and a series of Blobs in response
+      - ResourceCache.internalizeResourceUrl( String remote_url )
+        + Why the hell am I using a singleton here?  Why not just make
+          everything static?
   - Connect and test
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
@@ -451,6 +454,7 @@
       + PrismFactory
     + Implement ProxyBase.addObject()
 
+------------------------------------------------------------------------
 - To do for 0.02:
   - Add textures to Shape class
     - Specify color of each triangle
@@ -473,20 +477,26 @@
       as well as possibly being useful for other things
   - Add better logging facilities
 
+------------------------------------------------------------------------
 > Required for 1.0:
   > Client
     > Text -- can't escape the morass
     > Figure animations (as long as a proxy can do it)
     > Sound
     > Inventory system with remote object browser integration
+  > Proxy
+    > Obviously these need to be loaded
+    > Client asks server for permission to let proxy connect to it
   > Server
     > Darc
     > OpenID
 
+------------------------------------------------------------------------
 - Future:
   - Backward compatibility
     - Client should be able to ignore child classes of ProxySendable
       that it does not recognize
+      > Is this just a matter of making the default case a fall-through?
   - Textures must be specifiable as URLs (?) or else they can only be
     loaded from the DVTP server, because that's all the proxy can
     connect to

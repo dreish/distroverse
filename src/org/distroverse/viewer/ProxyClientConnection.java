@@ -4,7 +4,6 @@
 package org.distroverse.viewer;
 
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.concurrent.BlockingQueue;
@@ -13,14 +12,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.distroverse.core.Log;
 import org.distroverse.core.Util.Pair;
 import org.distroverse.dvtp.ClientSendable;
-import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.ProxySendable;
 import org.distroverse.dvtp.SetUrl;
 
 /**
+ * A ProxyClientConnection listens for objects from a proxy and
+ * dispatches them.  It also handles messages that the client may need
+ * to send to the proxy.
+ * 
  * @author dreish
- *
  */
 public class ProxyClientConnection implements Runnable
    {

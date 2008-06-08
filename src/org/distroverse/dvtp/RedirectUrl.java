@@ -22,7 +22,7 @@ public class RedirectUrl extends Str implements ProxySendable
     */
    @Override
    public int getClassNumber()
-      {  return 11;  }
+      {  return 8;  }
    
    /**
     * @return - the URL to switch to

@@ -20,7 +20,7 @@ public class DisplayUrl extends Str implements ProxySendable
     */
    @Override
    public int getClassNumber()
-      {  return 10;  }
+      {  return 27;  }
 
    /**
     * @return - the URL to switch to
