@@ -14,7 +14,9 @@ import org.distroverse.core.Util;
 import org.distroverse.dvtp.Pair;
 import org.distroverse.core.net.DvtpFlexiStreamer;
 import org.distroverse.distroplane.lib.DvtpServer;
+import org.distroverse.dvtp.Blob;
 import org.distroverse.dvtp.DvtpObject;
+import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.Str;
 
 
@@ -112,36 +114,56 @@ public class DvtpServerConnection
       mSock = null;
       }
 
-   public Object get( URI u )
-   throws IOException, ClassNotFoundException
-      {  return query( "get", u );  }
+   public Blob get( URI u )
+   throws IOException
+      {
+      try
+         {
+         return receiveBlob( query( "get", u ) );
+         }
+      catch ( ClassNotFoundException e )    // From query()
+         {
+         throw new ProtocolException( "Server did not return a Blob in"
+                                      + " response to a GET query" );
+         }
+      }
    
-   public Object get( String resource_name )
-   throws IOException, ClassNotFoundException
-      {  return query( "get " + resource_name );  }
+   public Blob get( String resource_name )
+   throws IOException
+      {  
+      try
+         {
+         return receiveBlob( query( "get " + resource_name ) );
+         }
+      catch ( ClassNotFoundException e )    // From query()
+         {
+         throw new ProtocolException( "Server did not return a Blob in"
+                                      + " response to a GET query" );
+         }
+      }
 
-   public Util.Pair< String, String > location( URI u )
+   public ProxySpec location( URI u )
    throws IOException, ProtocolException
       { 
       try
          {
          return receiveLocation( query( "location", u ) );
          }
-      catch ( ClassNotFoundException e )
+      catch ( ClassNotFoundException e )    // From query()
          {
          throw new ProtocolException( "Server did not return a pair of"
                         + " strings in response to a LOCATION query" );
          }  
       }
    
-   public Util.Pair< String, String > location( String resource_name ) 
+   public ProxySpec location( String resource_name ) 
    throws IOException, ProtocolException
       {  
       try
          {
          return receiveLocation( query( "location " + resource_name ) );
          }
-      catch ( ClassNotFoundException e )
+      catch ( ClassNotFoundException e )    // From query()
          {
          throw new ProtocolException( "Server did not return a pair of"
                         + " strings in response to a LOCATION query" );
@@ -207,25 +229,32 @@ public class DvtpServerConnection
          }
       }
 
-   private Util.Pair< String, String > 
+   private ProxySpec
    receiveLocation( Object response ) throws ProtocolException
       {
-      // XXX LOCATION no longer returns a Pair.
       try
          {
          // TODO possibly throw an exception if the regexp doesn't
          // match 'url', but only if it solves a real problem.
-         // I'll bet this is what he meant by "halfway to Lisp":
-         Pair response_pair = (Pair) response;
-         return new Util.Pair< String, String >
-            (((Str) response_pair.getFirst()).toString(),
-             ((Str) response_pair.getSecond()).toString());
-         // I want my money back.
+         return (ProxySpec) response;
          }
       catch ( ClassCastException e )
          {
          throw new ProtocolException( "Server did not return a pair of"
                         + " strings in response to a LOCATION query" );
+         }
+      }
+
+   private Blob receiveBlob( Object response ) throws ProtocolException
+      {
+      try
+         {
+         return (Blob) response;
+         }
+      catch ( ClassCastException e )
+         {
+         throw new ProtocolException( "Server did not return a blob in"
+                                      + " response to a GET query" );
          }
       }
 

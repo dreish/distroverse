@@ -5,12 +5,12 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * This class is the only valid response to a LOCATION query.  It gives
- * the URL of a proxy to use to connect to this site at the requested
- * location, and a resource regular expression specifying the range of
- * URLs (at the same host) covered by this proxy.  For example, a simple
- * site covered in its entirety by a single proxy could return ".*" for
- * the resource regexp.
+ * This class is the only valid non-error response to a LOCATION query.
+ * It gives the URL of a proxy to use to connect to this site at the
+ * requested location, and a resource regular expression specifying the
+ * range of URLs (at the same host) covered by this proxy.  For example,
+ * a simple site covered in its entirety by a single proxy could return
+ * ".*" for the resource regexp.
  * 
  * @author dreish
  */
