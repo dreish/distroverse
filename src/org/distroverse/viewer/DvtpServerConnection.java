@@ -151,8 +151,8 @@ public class DvtpServerConnection
          }
       catch ( ClassNotFoundException e )    // From query()
          {
-         throw new ProtocolException( "Server did not return a pair of"
-                        + " strings in response to a LOCATION query" );
+         throw new ProtocolException( "Server did not return a"
+                       + " ProxySpec in response to a LOCATION query" );
          }  
       }
    
@@ -165,8 +165,8 @@ public class DvtpServerConnection
          }
       catch ( ClassNotFoundException e )    // From query()
          {
-         throw new ProtocolException( "Server did not return a pair of"
-                        + " strings in response to a LOCATION query" );
+         throw new ProtocolException( "Server did not return a"
+                       + " ProxySpec in response to a LOCATION query" );
          }  
       }
 

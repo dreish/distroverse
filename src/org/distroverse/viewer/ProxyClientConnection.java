@@ -14,6 +14,7 @@ import org.distroverse.core.Util.Pair;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.ProxySendable;
+import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.SetUrl;
 
 /**
@@ -44,16 +45,19 @@ public class ProxyClientConnection implements Runnable
    /**
     * Loads a proxy and creates a connection to it
     * @param url - The Location URL
-    * @param proxy_info - a (proxy_url, location_regexp) Pair
+    * @param proxy_spec - a (proxy_url, location_regexp) Pair
     * @throws MalformedURLException 
     * @throws ClassNotFoundException
     */
    public ProxyClientConnection( String url,
-                                 Pair< String, String > proxy_info,
+                                 ProxySpec proxy_spec,
                                  ViewerWindow window )
    throws Exception
       {
-      init( url, proxy_info.a, proxy_info.b, window );
+      init( url,
+            proxy_spec.getProxyUrl().toString(),
+            proxy_spec.getResourceRegexp().toString(),
+            window );
       }
    
    private void init( String url, String proxy_url,

@@ -9,6 +9,7 @@
       - ResourceCache.internalizeResourceUrl( String remote_url )
         + Why the hell am I using a singleton here?  Why not just make
           everything static?
+        - dvtpUrlDownload()
   - Connect and test
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
