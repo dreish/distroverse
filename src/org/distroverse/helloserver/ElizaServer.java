@@ -38,6 +38,16 @@ public final class ElizaServer extends DvtpServer
       }
 
    /* (non-Javadoc)
+    * @see org.distroverse.distroplane.lib.DvtpServer#handleKnock(java.lang.String, org.distroverse.core.net.NetOutQueue)
+    */
+   @Override
+   public void handleKnock( String location, NetOutQueue< Object > noq )
+   throws IOException
+      {
+      noq.add( "Who's there?" );
+      }
+
+   /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyOpen(java.lang.String)
     */
    @Override

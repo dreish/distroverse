@@ -97,6 +97,9 @@ public abstract class DvtpServer
       else if ( Util.stringStartsIgnoreCase( command, "proxyopen " ) )
          handleProxyOpen( command.substring( "proxyopen ".length() ),
                           noq );
+      else if ( Util.stringStartsIgnoreCase( command, "knock " ) )
+         handleKnock( command.substring( "knock ".length() ),
+                      noq );
       else
          handleUnrecognizedCommand( command, noq );
       }
@@ -121,6 +124,20 @@ public abstract class DvtpServer
     */
    public abstract void handleGet( String url,
                                    NetOutQueue< Object > noq )
+   throws IOException;
+   
+   /**
+    * Ask this server whether it allows connections from the given
+    * location URL.  The server need not necessarily _handle_ that URL;
+    * that is, a LOCATION request with the same URL might reasonably
+    * return a 404 even though KNOCK returns an affirmative response.
+    * 
+    * The question is essentially: is a proxy serving the given
+    * location allowed to connect to this server?
+    * @param location - an URL
+    */
+   public abstract void handleKnock( String location,
+                                     NetOutQueue< Object > noq )
    throws IOException;
    
    /**

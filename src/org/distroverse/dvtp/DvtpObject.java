@@ -68,6 +68,7 @@ public final class DvtpObject
         FunCall.class,          // 129
         FunRet.class,           // 130
         Err.class,              // 131
+        ConPerm.class,          // 132
 
         null
         };

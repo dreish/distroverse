@@ -7,6 +7,7 @@ import org.distroverse.core.net.NetSession;
 import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.distroplane.lib.SUtil;
+import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.Err;
 
 public class HelloSimpleServer extends DvtpServer
@@ -39,6 +40,13 @@ public class HelloSimpleServer extends DvtpServer
       }
 
    @Override
+   public void handleKnock( String location, NetOutQueue< Object > noq )
+   throws IOException
+      {
+      noq.add( new ConPerm( false, "" ) );
+      }
+
+   @Override
    public void handleProxyObject( Object net_in_object,
                                   NetSession< Object > session )
    throws IOException
@@ -65,5 +73,4 @@ public class HelloSimpleServer extends DvtpServer
       createServer( HelloSimpleServer.class,
                     "DVTP/0.01 HelloSimpleServer 1.0.0" );
       }
-
    }

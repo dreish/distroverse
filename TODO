@@ -1,5 +1,7 @@
 
 - To do for 0.01:
+  - Add "KNOCK" DVTP command
+    - Implement ConPerm
   - Create a server that directs the client to HelloSimpleProxy
     > HelloSimpleServer
     + Send the HelloSimpleProxy.jar
@@ -543,6 +545,9 @@
   - Client: prompt user if site requests all heads-up UI elements be
     hidden (pointing out that they can be brought back by selecting the
     menu "Interface / (Un)hide all")
+  - Client: Some way to tell whether a texture has finished loading --
+    few things are more annoying than standing in front of a texture,
+    wondering if it is ever going to get less blocky
   - Client: any grayed-out menu item must explain why it is disabled
   - Good idea from SL: explicit affordance, such as highlighting
     clickable objects in red when the user holds down the alt key
