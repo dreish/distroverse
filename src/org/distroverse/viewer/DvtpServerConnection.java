@@ -67,7 +67,7 @@ public class DvtpServerConnection
       Object greeting_ob;
       try
          {
-         greeting_ob = getResponse();
+         greeting_ob = getObject();
          }
       catch ( IOException e )
          {
@@ -208,7 +208,7 @@ public class DvtpServerConnection
    throws IOException, ClassNotFoundException
       {
       safeSend( q );
-      return getResponse();
+      return getObject();
       }
 
    /**
@@ -258,7 +258,7 @@ public class DvtpServerConnection
          }
       }
 
-   private Object getResponse() 
+   public Object getObject() 
    throws IOException, ClassNotFoundException
       {
       InputStream sis = mSock.getInputStream();

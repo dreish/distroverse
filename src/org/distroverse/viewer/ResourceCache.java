@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -160,10 +161,27 @@ public abstract class ResourceCache
    private static void drtpUrlDownload( URI remote_uri, File target )
    throws IOException, ClassNotFoundException
       {
-      DvtpServerConnection remote
+      DvtpServerConnection remote_site
          = new DvtpServerConnection( remote_uri );
-      Blob first_blob = (Blob) remote.get( remote_uri );
+      RandomAccessFile local_data 
+         = new RandomAccessFile( target, "rw" );
       
+      Blob first_blob = remote_site.get( remote_uri );
+      long file_length = first_blob.getFileLength();
+      long fetched     = first_blob.getBytes().length;
+      
+      local_data.seek( first_blob.getPos() );
+      local_data.write( first_blob.getBytes() );
+
+      while ( fetched < file_length )
+         {
+         Blob next_blob = (Blob) remote_site.getObject();
+
+         local_data.seek( next_blob.getPos() );
+         local_data.write( next_blob.getBytes() );
+         }
+      
+      local_data.close();
       }
 
    /**

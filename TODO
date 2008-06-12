@@ -4,12 +4,12 @@
     > HelloSimpleServer
     + Send the HelloSimpleProxy.jar
       + SUtil.sendFile()
-    - Client must be able to receive it -- this is the DRTP protocol: a
+    + Client must be able to receive it -- this is the DRTP protocol: a
       GET command and a series of Blobs in response
-      - ResourceCache.internalizeResourceUrl( String remote_url )
+      + ResourceCache.internalizeResourceUrl( String remote_url )
         + Why the hell am I using a singleton here?  Why not just make
           everything static?
-        - dvtpUrlDownload()
+        + ResourceCache.dvtpUrlDownload()
   - Connect and test
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
@@ -468,8 +468,8 @@
     > Changes to the other object's shape affect referring objects
   x Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
-  - Reimplement ball factory with a stack of LazyPolygons
-    - LazyPolygon( origin, top_vector, side_vector, n_sides )
+  - Reimplement ball factory with a stack of DynPolygons
+    - DynPolygon( origin, top_vector, side_vector, n_sides )
       - get(n) -> vertex of polygon
         - where n % n_sides == 0 -> origin + top_vector
         - where (n % n_sides) * 4 == n_sides -> origin + side_vector
@@ -482,6 +482,9 @@
 > Required for 1.0:
   > Client
     > Text -- can't escape the morass
+    > Smoothing
+    > Decide whether to build in things like feel, temperature, specific
+      heat, etc
     > Figure animations (as long as a proxy can do it)
     > Sound
     > Inventory system with remote object browser integration
