@@ -51,9 +51,10 @@ public class HelloSimpleServer extends DvtpServer
                                   NetSession< Object > session )
    throws IOException
       {
-      // TODO Auto-generated method stub
-      NetOutQueue< Object > noq = session.getNetOutQueue();
-
+      /* This server only hands out self-sufficient proxies.  There's no
+       * way to establish proxy connections.
+       */
+      throw new IOException( "handleProxyObject() unimplemented" );
       }
 
    @Override
@@ -61,8 +62,8 @@ public class HelloSimpleServer extends DvtpServer
                                 NetOutQueue< Object > noq )
    throws IOException
       {
-      // TODO Auto-generated method stub
-
+      // This server only hands out self-sufficient proxies.
+      noq.add( new Err( "PROXYOPEN not implemented", 501 ) );
       }
 
    /**

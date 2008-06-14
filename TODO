@@ -534,6 +534,7 @@
       facing (but not the listener)
     - Focus on a person makes their speech boldface?  Decreases distance
       - Press F and click?  Hover and press F?
+  - Learning mode: periodically pops up hints and available commands?
   - Client: master volume control and mute button/keystroke
     > Mute icon blinks (optionally) when something is trying to make
       noise
