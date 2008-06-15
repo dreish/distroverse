@@ -82,6 +82,11 @@ public class CompactUlong implements DvtpExternalizable
          val ^= bits;
          if ( val == 0 )
             b |= 0x80;
+         else
+            {
+            mask <<= 7;
+            shift += 7;
+            }
          out.write( b );
          }
       }

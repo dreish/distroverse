@@ -10,7 +10,7 @@ package org.distroverse.dvtp;
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public class RedirectUrl extends Str implements ProxySendable
+public final class RedirectUrl extends Str implements ProxySendable
    {
    public RedirectUrl()
       {  super();  }

@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 
 import org.distroverse.core.*;
 import org.distroverse.core.net.*;
+import org.distroverse.dvtp.Err;
 
 /**
  * An abstract base class handling the annoying details of a DVTP
@@ -170,7 +171,7 @@ public abstract class DvtpServer
                                           NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "Unrecognized command: " + token );
+      noq.add( new Err( "Unrecognized command: " + token, 501 ) );
       }
 
 

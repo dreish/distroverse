@@ -10,7 +10,7 @@ import java.io.ObjectOutput;
  * it is first given a position with a nonempty MoveObject.
  * @author dreish
  */
-public class AddObject implements ProxySendable
+public final class AddObject implements ProxySendable
    {
    public AddObject()
       {

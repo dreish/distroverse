@@ -10,7 +10,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.distroverse.core.Log;
-import org.distroverse.core.Util.Pair;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.ProxySendable;
@@ -34,12 +33,13 @@ public class ProxyClientConnection implements Runnable
     * @throws MalformedURLException 
     * @throws ClassNotFoundException 
     */
-   public ProxyClientConnection( String url, String proxy_url, 
+   public ProxyClientConnection( String url, String proxy_url,
+                                 String proxy_name,
                                  String location_regexp,
                                  ViewerWindow window )
    throws Exception
       {
-      init( url, proxy_url, location_regexp, window );
+      init( url, proxy_url, proxy_name, location_regexp, window );
       }
    
    /**
@@ -56,18 +56,20 @@ public class ProxyClientConnection implements Runnable
       {
       init( url,
             proxy_spec.getProxyUrl().toString(),
+            proxy_spec.getProxyName().toString(),
             proxy_spec.getResourceRegexp().toString(),
             window );
       }
    
-   private void init( String url, String proxy_url,
+   private void init( String url, String proxy_url, String proxy_name,
                       String location_regexp, ViewerWindow window )
    throws Exception
       {
       mLocationRegexp = location_regexp;
       mUrl = url;
+      mName = proxy_name;
       mQueue = new LinkedBlockingQueue< ProxySendable >();
-      runProxy( proxy_url );
+      runProxy( proxy_url, proxy_name );
       mListener = newListener();
       mDispatcher = new ViewerDispatcher( window );
       }
@@ -105,22 +107,31 @@ public class ProxyClientConnection implements Runnable
             }
          }
       catch ( InterruptedException e )
-         {  /* Fall through. */  }
+         {
+         Log.p( "ProxyClientConnection interrupted:",
+                Log.CLIENT, -50 );
+         Log.p( e, Log.CLIENT, -50 );
+         /* Fall through. */
+         }
       }
 
-   private void runProxy( String proxy_url )
+   private void runProxy( String proxy_url, String class_name )
    throws Exception
       {
       String cache_url
          = ResourceCache.internalizeResourceUrl( proxy_url );
       URL[] urls = { new URL( cache_url ) };
       URLClassLoader loader = new URLClassLoader( urls );
-      // XXX I have a feeling this will only work once:
-      Class< ? > proxy = loader.loadClass( "Proxy" );
+      // FIXME I have a feeling this will not work for different classes
+      // with the same name:
+      // XXX This does not seem to actually load classes from 'urls':
+      Class< ? > proxy = loader.loadClass( class_name );
+      
       // FIXME Add a SecurityManager to prevent proxy from doing stuff
       final DvtpProxy proxy_instance = (DvtpProxy) proxy.newInstance();
       mProxyInstance = proxy_instance;
       proxy_instance.setQueue( mQueue );
+
       Thread t = new Thread( new Runnable()
          {
          public void run() { proxy_instance.run(); }
@@ -167,11 +178,12 @@ public class ProxyClientConnection implements Runnable
       }
 
    public String getProxyUrl()
-      {
-      return mUrl;
-      }
+      {  return mUrl;  }
+   public String getProxyName()
+      {  return mName;  }
    
    private String mUrl;
+   private String mName;
    private String mLocationRegexp;
    private BlockingQueue< ProxySendable > mQueue;
    private Thread mListener;

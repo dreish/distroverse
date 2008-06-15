@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-public class DeleteObject implements ProxySendable
+public final class DeleteObject implements ProxySendable
    {
    public int getClassNumber()
       {  return 17;  }

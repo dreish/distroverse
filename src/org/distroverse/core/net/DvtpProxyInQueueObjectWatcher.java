@@ -1,5 +1,6 @@
 package org.distroverse.core.net;
 
+import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.proxy.NetProxyBase;
 
 /**
@@ -8,7 +9,7 @@ import org.distroverse.proxy.NetProxyBase;
  * @author dreish
  */
 public class DvtpProxyInQueueObjectWatcher
-extends NetInQueueWatcher< Object >
+extends NetInQueueWatcher< DvtpExternalizable >
    {
    public DvtpProxyInQueueObjectWatcher( NetProxyBase p )
       {
@@ -17,8 +18,9 @@ extends NetInQueueWatcher< Object >
       }
 
    @Override
-   protected void handleNetInObject( Object net_in_object,
-                                     NetInQueue< Object > queue )
+   protected void 
+   handleNetInObject( DvtpExternalizable net_in_object,
+                      NetInQueue< DvtpExternalizable > queue )
       {
       mProxy.receiveFromServer( net_in_object );
       }

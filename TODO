@@ -1,18 +1,14 @@
 
 - To do for 0.01:
-  - Add "KNOCK" DVTP command
-    - Implement ConPerm
-  - Create a server that directs the client to HelloSimpleProxy
-    > HelloSimpleServer
-    + Send the HelloSimpleProxy.jar
-      + SUtil.sendFile()
-    + Client must be able to receive it -- this is the DRTP protocol: a
-      GET command and a series of Blobs in response
-      + ResourceCache.internalizeResourceUrl( String remote_url )
-        + Why the hell am I using a singleton here?  Why not just make
-          everything static?
-        + ResourceCache.dvtpUrlDownload()
-  - Connect and test
+  - I'm suspicious about the ProxySpec being sent by HelloSimpleServer;
+    it doesn't appear to include the URL
+    - Make an ultra-simple client that sends some queries and diagrams
+      the responses
+  - Connect and test with the client
+    + Need some way to specify the class name to load
+      + Simplest solution: make this part of the ProxySpec
+        > Also happens to be the most flexible
+    - Set client's default location URL to dvtp://localhost/
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually
@@ -456,6 +452,44 @@
       + PyramidFactory
       + PrismFactory
     + Implement ProxyBase.addObject()
+  + Add "KNOCK" DVTP command
+    + Implement ConPerm
+  + Create a server that directs the client to HelloSimpleProxy
+    > HelloSimpleServer
+    + Send the HelloSimpleProxy.jar
+      + SUtil.sendFile()
+    + Client must be able to receive it -- this is the DRTP protocol: a
+      GET command and a series of Blobs in response
+      + ResourceCache.internalizeResourceUrl( String remote_url )
+        + Why the hell am I using a singleton here?  Why not just make
+          everything static?
+        + ResourceCache.dvtpUrlDownload()
+  + Create HelloSimpleProxy.jar, which will need to be in the directory
+    the server runs in
+  + Run server
+  + Connect and test by hand
+    + It locks up on GET
+      > When running LOCATION on the first connect, and GET on the
+        second, it gets an OutOfMemoryError
+      + mNextObject is huge, and contains the lines input so far, over
+        and over
+        + reset baos after pulling bytes from it
+      + Still getting an OutOfMemoryError
+        + Does it ever get to handleGet()?  Try ElizaServer
+          > Yes, and KNOCK is fine as well
+          > This suggests to me the problem is adding objects other than
+            strings (presumably in streaming them)
+        + Step through it by hand and watch for where things go wrong
+          > Trying an error request (GET /) instead; will likely produce
+            the same problem
+          + ((CompactUlong) class_num=131)
+            + Mask was not being shifted
+      > Now it sends the whole object
+    + Send proper object response to LOCATION (ProxySpec)
+    > Throws an exception on disconnect, but keeps running
+      > I think I'm punting on this right now, since it appears to be
+        harmless -- it doesn't interfere with the demonstration of any
+        of the concepts
 
 ------------------------------------------------------------------------
 - To do for 0.02:
@@ -484,6 +518,7 @@
 > Required for 1.0:
   > Client
     > Text -- can't escape the morass
+    > Sound
     > Smoothing
     > Decide whether to build in things like feel, temperature, specific
       heat, etc

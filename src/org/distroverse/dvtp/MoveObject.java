@@ -8,7 +8,7 @@ import java.io.ObjectOutput;
  * Takes an object ID and a MoveSeq, and moves it.
  * @author dreish
  */
-public class MoveObject implements ProxySendable
+public final class MoveObject implements ProxySendable
    {
    public MoveObject()
       {

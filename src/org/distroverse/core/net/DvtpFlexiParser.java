@@ -28,6 +28,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
       while ( cont )
          {
          mNextObject.write( baos.toByteArray() );
+         baos.reset();
          byte[] next_object = mNextObject.toByteArray();
          
          if ( beginsWithNul( next_object ) )

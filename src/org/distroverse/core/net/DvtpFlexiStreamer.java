@@ -12,7 +12,6 @@ import org.distroverse.dvtp.Str;
 
 public class DvtpFlexiStreamer extends ObjectStreamer< Object >
    {
-
    public DvtpFlexiStreamer( ByteBuffer b )
       {
       super( b );

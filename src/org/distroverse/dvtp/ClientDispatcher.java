@@ -17,10 +17,10 @@ public abstract class ClientDispatcher
       {
       switch ( o.getClassNumber() )
          {
-         case 10:
+         case 7:
             dispatchDisplayUrl( (DisplayUrl) o );
             break;
-         case 11:
+         case 8:
             dispatchRedirectUrl( (RedirectUrl) o );
             break;
          case 12:
@@ -33,6 +33,7 @@ public abstract class ClientDispatcher
             dispatchDeleteObject( (DeleteObject) o );
             break;
          default:
+            // XXX Probably should just ignore this
             throw new RuntimeException( "ClientDispatcher does not"
                             + " know how to handle a valid class, "
                             + o.getClass().getCanonicalName() );

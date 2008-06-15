@@ -21,23 +21,27 @@ public class ProxySpec implements DvtpExternalizable
       mProxyUrl = mResourceRegexp = null;
       }
    
-   public ProxySpec( Str proxy_url, Str resource_regexp )
+   public ProxySpec( Str proxy_url, Str resource_regexp,
+                     Str proxy_name )
       {
       mProxyUrl = proxy_url;
       mResourceRegexp = resource_regexp;
+      mProxyName = proxy_name;
       }
    
-   public ProxySpec( String proxy_url, String resource_regexp )
+   public ProxySpec( String proxy_url, String resource_regexp,
+                     String proxy_name )
       {
       mProxyUrl = new Str( proxy_url );
       mResourceRegexp = new Str( resource_regexp );
+      mProxyName = new Str( proxy_name );
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 7;  }
+      {  return 133;  }
 
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
@@ -47,6 +51,7 @@ public class ProxySpec implements DvtpExternalizable
       {
       (mProxyUrl = new Str()).readExternal( in );
       (mResourceRegexp = new Str()).readExternal( in );
+      (mProxyName = new Str()).readExternal( in );
       }
 
    /* (non-Javadoc)
@@ -56,11 +61,14 @@ public class ProxySpec implements DvtpExternalizable
       {
       mProxyUrl.writeExternal( out );
       mResourceRegexp.writeExternal( out );
+      mProxyName.writeExternal( out );
       }
    
-   public Str  getProxyUrl()  {  return mProxyUrl;  }
-   public Str  getResourceRegexp()  {  return mResourceRegexp;  }
+   public Str getProxyUrl()  {  return mProxyUrl;  }
+   public Str getResourceRegexp()  {  return mResourceRegexp;  }
+   public Str getProxyName()  {  return mProxyName;  }
 
-   private Str  mProxyUrl;
-   private Str  mResourceRegexp;
+   private Str mProxyUrl;
+   private Str mResourceRegexp;
+   private Str mProxyName;
    }

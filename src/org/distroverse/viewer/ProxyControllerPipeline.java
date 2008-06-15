@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.distroverse.core.Util;
 import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.SetUrl;
 
@@ -65,15 +64,17 @@ public class ProxyControllerPipeline extends ControllerPipeline
       {
       ProxySpec proxy_info = getProxyUrl( location_url );
       String proxy_url  = proxy_info.getProxyUrl().toString();
+      String proxy_name = proxy_info.getProxyName().toString();
       String loc_regexp = proxy_info.getResourceRegexp().toString();
       if ( mProxy != null
-           &&  proxy_url == mProxy.getProxyUrl() )
+           &&  proxy_url  == mProxy.getProxyUrl()
+           &&  proxy_name == mProxy.getProxyName() )
          mProxy.setUrl( location_url, loc_regexp );
       else
          {
          mProxy.close();
          mProxy = new ProxyClientConnection( location_url, proxy_url,
-                                             loc_regexp, mWindow );
+                                      proxy_name, loc_regexp, mWindow );
          }
       }
 

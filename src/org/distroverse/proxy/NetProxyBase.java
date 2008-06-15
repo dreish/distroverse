@@ -1,19 +1,18 @@
 package org.distroverse.proxy;
 
-import java.util.concurrent.BlockingQueue;
+import java.nio.channels.ClosedChannelException;
 
-import org.distroverse.core.Log;
 import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
 import org.distroverse.core.net.NetInQueue;
 import org.distroverse.core.net.NetInQueueWatcher;
 import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
-import org.distroverse.dvtp.ProxySendable;
 
 /**
  * Provides a useful base upon which to build proxy classes that
- * communicate with a server.
+ * communicate with a server using pure-object DVTP (i.e., no simple
+ * CRLF-terminated strings).
  * @author dreish
  */
 public abstract class NetProxyBase extends ProxyBase
@@ -29,7 +28,7 @@ public abstract class NetProxyBase extends ProxyBase
     */
    public void offer( ClientSendable o )
       {
-      // TODO Auto-generated method stub
+      // XXX Auto-generated method stub
 
       }
 
@@ -38,8 +37,14 @@ public abstract class NetProxyBase extends ProxyBase
     */
    public void run()
       {
-      // TODO Auto-generated method stub
+      // XXX Auto-generated method stub
 
+      }
+   
+   public void sendToServer( DvtpExternalizable o )
+   throws ClosedChannelException
+      {
+      mToServerQueue.add( o );
       }
    
    /**
@@ -47,9 +52,9 @@ public abstract class NetProxyBase extends ProxyBase
     * object is sent from the server.
     * @param o
     */
-   public abstract void receiveFromServer( Object o );
+   public abstract void receiveFromServer( DvtpExternalizable o );
 
    private NetOutQueue< DvtpExternalizable > mToServerQueue;
    private NetInQueue< DvtpExternalizable > mFromServerQueue;
-   private NetInQueueWatcher< Object > mWatcher;
+   private NetInQueueWatcher< DvtpExternalizable > mWatcher;
    }

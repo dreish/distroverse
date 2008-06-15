@@ -37,7 +37,7 @@ public final class DvtpObject
         PointArray.class,       // 4
         False.class,            // 5
         True.class,             // 6
-        ProxySpec.class,        // 7
+        DisplayUrl.class,       // 7
         RedirectUrl.class,      // 8
         SetUrl.class,           // 9
         Shape.class,            // 10
@@ -57,7 +57,6 @@ public final class DvtpObject
         MoreDetail.class,       // 24
         LessDetail.class,       // 25
         Blob.class,             // 26
-        DisplayUrl.class,       // 27
         
         null
         };
@@ -69,7 +68,8 @@ public final class DvtpObject
         FunRet.class,           // 130
         Err.class,              // 131
         ConPerm.class,          // 132
-
+        ProxySpec.class,        // 133
+        
         null
         };
    

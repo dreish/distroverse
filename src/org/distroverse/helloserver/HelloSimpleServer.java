@@ -9,6 +9,7 @@ import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.distroplane.lib.SUtil;
 import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.Err;
+import org.distroverse.dvtp.ProxySpec;
 
 public class HelloSimpleServer extends DvtpServer
    {
@@ -27,7 +28,7 @@ public class HelloSimpleServer extends DvtpServer
          }
       else
          {
-         noq.add( new Err( url, 404 ) );
+         noq.add( new Err( "Resource not found: " + url, 404 ) );
          }
       }
 
@@ -36,13 +37,16 @@ public class HelloSimpleServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( "drtp://localhost/HelloSimpleProxy.jar" );
+      noq.add( new ProxySpec( "drtp://localhost/HelloSimpleProxy.jar",
+                              ".*",
+                     "org.distroverse.helloserver.HelloSimpleProxy" ) );
       }
 
    @Override
    public void handleKnock( String location, NetOutQueue< Object > noq )
    throws IOException
       {
+      // No proxy is ever allowed to connect to this server:
       noq.add( new ConPerm( false, "" ) );
       }
 
