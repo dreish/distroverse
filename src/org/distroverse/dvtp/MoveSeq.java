@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
@@ -38,7 +38,7 @@ public class MoveSeq implements DvtpExternalizable
       return mMoves[ 0 ].initialPosition();
       }
 
-   public void readExternal( ObjectInput in )
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mNumMoves = Util.safeInt( CompactUlong.externalAsLong( in ) );
@@ -56,11 +56,18 @@ public class MoveSeq implements DvtpExternalizable
                           + " out of range" );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, mNumMoves );
       DvtpObject.writeArray( out, mMoves );
       CompactUlong.longAsExternal( out, mRepeatType.ordinal() );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(MoveSeq "
+             + Util.prettyPrintList( mNumMoves, mMoves,
+                                     mRepeatType ) + ")";
       }
 
    private int mNumMoves;

@@ -4,6 +4,12 @@
     it doesn't appear to include the URL
     - Make an ultra-simple client that sends some queries and diagrams
       the responses
+      + ObjectInputStream in DvtpServerConnection is invalid
+        + Abandon use of ObjectStreams; this was an ignorant decision
+      - Client appears to be getting no response at all, yet the server
+        isn't spinning
+        - Debug client; confirm it is getting no bytes
+        - Debug server; find out why it isn't sending anything
   - Connect and test with the client
     + Need some way to specify the class name to load
       + Simplest solution: make this part of the ProxySpec
@@ -585,6 +591,9 @@
     few things are more annoying than standing in front of a texture,
     wondering if it is ever going to get less blocky
   - Client: any grayed-out menu item must explain why it is disabled
+  - Client: boldface the hostname in the location bar
+    > Could lead to confusion when on a stitched-together pass-through
+      site
   - Good idea from SL: explicit affordance, such as highlighting
     clickable objects in red when the user holds down the alt key
     > Even better: auto label them with the name of the action

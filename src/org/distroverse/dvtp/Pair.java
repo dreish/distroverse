@@ -8,8 +8,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * A pair of DvtpExternalizable objects.  They get externalized
@@ -45,9 +47,9 @@ public class Pair implements DvtpExternalizable
       {  return 1;  }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) 
+   public void readExternal( InputStream in ) 
    throws IOException, ClassNotFoundException
       {
       mFirst  = DvtpObject.parseObject( in );
@@ -55,14 +57,20 @@ public class Pair implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       DvtpObject.writeObject( out, mFirst );
       DvtpObject.writeObject( out, mSecond );
       }
 
+   public String prettyPrint()
+      {
+      return "(Pair " 
+             + Util.prettyPrintList( mFirst, mSecond ) + ")";
+      }
+   
    private DvtpExternalizable mFirst;
    private DvtpExternalizable mSecond;
    }

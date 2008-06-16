@@ -3,15 +3,11 @@ package org.distroverse.viewer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.URI;
 
 import org.distroverse.core.Util;
-import org.distroverse.dvtp.Pair;
 import org.distroverse.core.net.DvtpFlexiStreamer;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.dvtp.Blob;
@@ -39,10 +35,31 @@ public class DvtpServerConnection
    public DvtpServerConnection( URI u )
    throws IOException
       {
-      mHostname = u.getHost();
-      mPort = u.getPort();
-      if ( mPort < 0 )
-         mPort = DvtpServer.DEFAULT_PORT;
+      String hostname = u.getHost();
+      int port = u.getPort();
+      if ( port < 0 )
+         port = DvtpServer.DEFAULT_PORT;
+      
+      init( hostname, port );
+      }
+   
+   public DvtpServerConnection( String hostname, int port )
+   throws IOException
+      {
+      init( hostname, port );
+      }
+   
+   public DvtpServerConnection( String hostname )
+   throws IOException
+      {
+      init( hostname, DvtpServer.DEFAULT_PORT );
+      }
+   
+   private void init( String hostname, int port )
+   throws IOException
+      {
+      mHostname = hostname;
+      mPort = port;
       
       mSock = new Socket( mHostname, mPort );
       try
@@ -55,6 +72,7 @@ public class DvtpServerConnection
          throw e;
          }
       }
+   
 
    /**
     * Read the greeting from a newly-connected-to DVTP server and make
@@ -223,9 +241,8 @@ public class DvtpServerConnection
          mSock.getOutputStream().write( q.getBytes( "UTF-8" ) );
       else
          {
-         ObjectOutput oo 
-            = new ObjectOutputStream( mSock.getOutputStream() );
-         DvtpObject.writeObject( oo, new Str( q ) );
+         DvtpObject.writeObject( mSock.getOutputStream(),
+                                 new Str( q ) );
          }
       }
 
@@ -258,15 +275,14 @@ public class DvtpServerConnection
          }
       }
 
-   public Object getObject() 
+   public Object getObject()
    throws IOException, ClassNotFoundException
       {
       InputStream sis = mSock.getInputStream();
-      ObjectInputStream osis = new ObjectInputStream( sis );
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       int first_byte = sis.read();
       if ( first_byte == 0 )
-         return DvtpObject.parseObject( osis );
+         return DvtpObject.parseObject( sis );
 
       baos.write( first_byte );
       return getString( baos, sis );

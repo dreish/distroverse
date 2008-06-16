@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A superclass for the two Boolean types, so that they're actually
@@ -24,7 +24,7 @@ public abstract class Bool implements DvtpExternalizable
 
    public abstract boolean asBoolean();
    
-   public static boolean externalAsBoolean( ObjectInput in ) 
+   public static boolean externalAsBoolean( InputStream in ) 
    throws IOException, ClassNotFoundException
       {
       DvtpExternalizable o = DvtpObject.parseObject( in );
@@ -34,16 +34,21 @@ public abstract class Bool implements DvtpExternalizable
                                   + o.getClass().getCanonicalName() );
       }
    
-   public static void booleanAsExternal( ObjectOutput out, boolean b )
+   public static void booleanAsExternal( OutputStream out, boolean b )
    throws IOException
       {
       DvtpObject.writeInnerObject( out, Bool.newInstance( b ) );
       }
 
    public void readExternal( @SuppressWarnings("unused")
-                             ObjectInput in )
+                             InputStream in )
       {  /* Do nothing. */  }
    public void writeExternal( @SuppressWarnings("unused")
-                              ObjectOutput out )
+                              OutputStream out )
       {  /* Do nothing. */  }
+   
+   public String prettyPrint()
+      {
+      return "(Bool " + asBoolean() + ")";
+      }
    }

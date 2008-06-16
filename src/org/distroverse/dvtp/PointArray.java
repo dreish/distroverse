@@ -8,8 +8,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -91,23 +91,28 @@ public class PointArray implements DvtpExternalizable
    public int getClassNumber()
       {  return 4;  }
 
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       int len = Util.safeInt( CompactUlong.externalAsLong( in ) * 3 );
       Vector3f[] ap_f = new Vector3f[ len ];
       for ( int i = 0; i < len * 3; ++i )
-         ap_f[ i ] = new Vector3f( (float) in.readDouble(),
-                                   (float) in.readDouble(),
-                                   (float) in.readDouble() );
+         ap_f[ i ] = new Vector3f( Flo.externalAsFloat( in ),
+                                   Flo.externalAsFloat( in ),
+                                   Flo.externalAsFloat( in ) );
       mFb = BufferUtils.createFloatBuffer( ap_f );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, length() );
       float[] fa = mFb.array();
       for ( float f : fa )
-         out.writeDouble( f );
+         Flo.floatAsExternal( out, f );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(PointArray " + mFb + ")";
       }
 
    private FloatBuffer mFb;

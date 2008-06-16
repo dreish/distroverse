@@ -1,5 +1,7 @@
 package org.distroverse.dvtp;
 
+import org.distroverse.core.Util;
+
 /**
  * Sent by a proxy to a client to tell it to show a different URL in the
  * location widget.  The URL contained in this object must be part of
@@ -27,4 +29,10 @@ public final class DisplayUrl extends Str implements ProxySendable
     */
    public String getUrl()
       {  return toString();  }
+
+   @Override
+   public String prettyPrint()
+      {
+      return "(DisplayUrl " + Util.prettyPrintList( getUrl() ) + ")";
+      }
    }

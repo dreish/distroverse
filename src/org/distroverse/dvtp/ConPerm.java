@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * This message is sent from a server to a client in response to a KNOCK
@@ -42,17 +44,23 @@ public class ConPerm implements DvtpExternalizable
    public Str getPermitRegexp()
       {  return mPermitRegexp;  }
 
-   public void readExternal( ObjectInput in ) 
+   public void readExternal( InputStream in ) 
    throws IOException, ClassNotFoundException
       {
       mMayConnect = Bool.externalAsBoolean( in );
       (mPermitRegexp = new Str()).readExternal( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       Bool.booleanAsExternal( out, mMayConnect );
       mPermitRegexp.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Bool " + Util.prettyPrintList( mMayConnect,
+                                              mPermitRegexp ) + ")";
       }
 
    private boolean mMayConnect;

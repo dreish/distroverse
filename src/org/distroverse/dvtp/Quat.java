@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.jme.math.Quaternion;
 
@@ -24,7 +24,7 @@ public class Quat implements DvtpExternalizable
    public int getClassNumber()
       {  return 16;  }
 
-   public static Quaternion externalAsQuaternion( ObjectInput in )
+   public static Quaternion externalAsQuaternion( InputStream in )
    throws IOException
       {
       return new Quaternion( Flo.externalAsFloat( in ),
@@ -33,7 +33,7 @@ public class Quat implements DvtpExternalizable
                              Flo.externalAsFloat( in ) );
       }
    
-   public static void quaternionAsExternal( ObjectOutput out,
+   public static void quaternionAsExternal( OutputStream out,
                                             Quaternion q )
    throws IOException
       {
@@ -43,14 +43,19 @@ public class Quat implements DvtpExternalizable
       Flo.floatAsExternal( out, q.z );
       }
    
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       mQuat = Quat.externalAsQuaternion( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       Quat.quaternionAsExternal( out, mQuat );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Quat " + mQuat + ")";
       }
 
    private Quaternion mQuat;

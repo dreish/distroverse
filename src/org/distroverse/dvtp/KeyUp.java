@@ -11,4 +11,10 @@ public class KeyUp extends Keystroke
    @Override
    public int getClassNumber()
       {  return 21;  }
+
+   @Override
+   public String prettyPrint()
+      {
+      return "(KeyUp " + getKey() + ")";
+      }
    }

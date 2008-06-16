@@ -9,9 +9,8 @@ package org.distroverse.dvtp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util;
@@ -130,7 +129,7 @@ public final class DvtpObject
     * @throws IOException
     * @throws ClassNotFoundException
     */
-   public static DvtpExternalizable parseObject( ObjectInput in ) 
+   public static DvtpExternalizable parseObject( InputStream in ) 
    throws IOException, ClassNotFoundException
       {
       int class_number 
@@ -140,12 +139,12 @@ public final class DvtpObject
    
    /**
     * This class parses an object of a known class.
-    * @param in - an ObjectInput stream
+    * @param in - an InputStream stream
     * @param class_number - the class number of the object to parse
     * @return - an object of the requested class
     * @throws ClassNotFoundException 
     */
-   public static DvtpExternalizable parseObject( ObjectInput in,
+   public static DvtpExternalizable parseObject( InputStream in,
                                                  int class_number )
    throws IOException, ClassNotFoundException
       {
@@ -166,18 +165,17 @@ public final class DvtpObject
 
    /**
     * Writes a complete NUL/length/type-prefixed DVTP object to the
-    * given ObjectOutput.
+    * given OutputStream.
     * @param oo - Output to which to write 'de'
     * @param de - Object to write
     * @throws IOException
     */
-   public static void writeObject( ObjectOutput oo, 
+   public static void writeObject( OutputStream oo, 
                                    DvtpExternalizable de )
    throws IOException
       {
       ByteArrayOutputStream rawob = new ByteArrayOutputStream();
-      ObjectOutput rawob_oo = new ObjectOutputStream( rawob );
-      DvtpObject.writeInnerObject( rawob_oo, de );
+      DvtpObject.writeInnerObject( rawob, de );
       
       // NUL,
       oo.write( 0 );
@@ -189,12 +187,12 @@ public final class DvtpObject
       }
 
    /**
-    * Writes a type-prefixed DVTP object to the given ObjectOutput.
+    * Writes a type-prefixed DVTP object to the given OutputStream.
     * @param oo - Output to which to write 'de'
     * @param de - Object to write
     * @throws IOException
     */
-   public static void writeInnerObject( ObjectOutput oo, 
+   public static void writeInnerObject( OutputStream oo, 
                                         DvtpExternalizable de )
    throws IOException
       {
@@ -216,7 +214,7 @@ public final class DvtpObject
     */
    @SuppressWarnings("unchecked")
    public static <T extends DvtpExternalizable>
-   T[] readArray( ObjectInput in, int n, Class<T> t )
+   T[] readArray( InputStream in, int n, Class<T> t )
    throws IOException, ClassNotFoundException
       {
       T[] ret = (T[]) new DvtpExternalizable[ n ];
@@ -252,7 +250,7 @@ public final class DvtpObject
     * @throws IOException
     */
    public static <T extends DvtpExternalizable> 
-   void writeArray( ObjectOutput out, T[] arr )
+   void writeArray( OutputStream out, T[] arr )
    throws IOException
       {
       for ( T o : arr )

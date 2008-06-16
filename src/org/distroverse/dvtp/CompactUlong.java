@@ -8,8 +8,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Compact ulong (unsigned long) class.  Range is 0 to 2^63, so this is
@@ -47,7 +47,7 @@ public class CompactUlong implements DvtpExternalizable
    public long toLong()
       {  return mVal;  }
 
-   public static long externalAsLong( ObjectInput in )
+   public static long externalAsLong( InputStream in )
    throws IOException
       {
       int shift = 0;
@@ -55,7 +55,7 @@ public class CompactUlong implements DvtpExternalizable
       
       while ( true )
          {
-         byte b = in.readByte();
+         byte b = (byte) in.read();
          ret |= (b << shift);
          if ( (b & 128) == 128 )
             return ret;
@@ -65,7 +65,7 @@ public class CompactUlong implements DvtpExternalizable
          }
       }
    
-   public static void longAsExternal( ObjectOutput out, long l )
+   public static void longAsExternal( OutputStream out, long l )
    throws IOException
       {
       long val = l;
@@ -92,19 +92,24 @@ public class CompactUlong implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       mVal = externalAsLong( in );
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       longAsExternal( out, mVal );
+      }
+
+   public String prettyPrint()
+      {
+      return "(CompactUlong " + mVal + ")";
       }
 
    long mVal;

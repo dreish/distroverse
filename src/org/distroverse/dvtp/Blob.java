@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ProtocolException;
 
 import org.distroverse.core.Util;
@@ -59,8 +59,7 @@ public class Blob implements DvtpExternalizable
    public long getFileLength()
       {  return mFileLength;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( InputStream in ) throws IOException
       {
       int bytes_len = Util.safeInt( CompactUlong.externalAsLong( in ) );
       if ( bytes_len > 65536 )
@@ -74,13 +73,19 @@ public class Blob implements DvtpExternalizable
       mFileLength = CompactUlong.externalAsLong( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, mBytes.length );
       out.write( mBytes );
       mResource.writeExternal( out );
       CompactUlong.longAsExternal( out, mPos );
       CompactUlong.longAsExternal( out, mFileLength );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Blob " + Util.prettyPrintList( mBytes, mResource,
+                                              mPos, mFileLength ) + ")";
       }
 
    private byte[] mBytes;

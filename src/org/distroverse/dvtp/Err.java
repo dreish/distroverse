@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
@@ -36,18 +36,23 @@ public class Err implements DvtpExternalizable
    public int getCode()
       {  return mCode;  }
 
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       mMessage = Str.externalAsString( in );
       mCode    = Util.safeInt( CompactUlong.externalAsLong( in ) );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       Str.stringAsExternal( out, mMessage );
       CompactUlong.longAsExternal( out, mCode );
       }
-   
+
+   public String prettyPrint()
+      {
+      return "(Err " + Util.prettyPrintList( mMessage, mCode ) + ")";
+      }
+
    private String mMessage;
    private int    mCode;
    }

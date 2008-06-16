@@ -16,4 +16,11 @@ public class Click2 extends Click
    @Override
    public int getClassNumber()
       {  return 23;  }
+
+   @Override
+   public String prettyPrint()
+      {
+      // XXX don't do this
+      return super.prettyPrint().replaceFirst( " ", "2 " );
+      }
    }

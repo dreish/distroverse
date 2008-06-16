@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * Takes an object ID and a MoveSeq, and moves it.
@@ -27,17 +29,23 @@ public final class MoveObject implements ProxySendable
    public long    getId()       {  return mId;       }
    public MoveSeq getMoveSeq()  {  return mMoveSeq;  }
 
-   public void readExternal( ObjectInput in )
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mId = CompactUlong.externalAsLong( in );
       (mMoveSeq = new MoveSeq()).readExternal( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, mId );
       mMoveSeq.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(MoveObject " 
+             + Util.prettyPrintList( mId, mMoveSeq ) + ")";
       }
 
    private long mId;

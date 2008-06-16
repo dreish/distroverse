@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
@@ -94,9 +94,9 @@ public class Move implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) 
+   public void readExternal( InputStream in ) 
    throws IOException, ClassNotFoundException
       {
       mMoveDegree = Util.safeInt( CompactUlong.externalAsLong( in ) );
@@ -123,9 +123,9 @@ public class Move implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, mMoveDegree );
       DvtpObject.writeArray( out, mMovePolyVecs );
@@ -142,6 +142,17 @@ public class Move implements DvtpExternalizable
       DvtpObject.writeArray( out, mRotSinOffsets );
       
       mDuration.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Move " 
+             + Util.prettyPrintList( mMoveDegree, mMovePolyVecs,
+                   mMoveSins, mMoveSinVecs, mMoveSinPeriods,
+                   mMoveSinOffsets, mRotDegree, mRotPolyQuats, mRotSins,
+                   mRotSinQuats, mRotSinPeriods, mRotSinOffsets,
+                   mDuration )
+             + ")";
       }
 
    // Here and below, "degree" is actually the degree of the polynomial

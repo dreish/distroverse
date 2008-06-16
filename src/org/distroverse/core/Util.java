@@ -2,16 +2,16 @@
  * Copyright (c) 2007 Dan Reish.
  * 
  * For license details, see the file COPYING in your distribution,
- * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
+ * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (GPL) version 3 or later</a>
  */
 
 package org.distroverse.core;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
+import java.io.InputStream;
+
+import org.distroverse.dvtp.DvtpExternalizable;
 
 // import java.lang.reflect.*;
 
@@ -206,25 +206,16 @@ public final class Util
       }
 
    /**
-    * Wraps a byte array in a ByteArrayInputStream, and than that in an
-    * ObjectInputStream.  Expects exceptions would be impossible, so it
-    * re-throws them as application exceptions.
+    * Wraps a byte array in a ByteArrayInputStream.  Expects exceptions
+    * would be impossible, so it re-throws them as application
+    * exceptions.
+    * XXX get rid of this; not needed now, without ObjectInputStreams
     * @param object
     * @return
     */
-   public static ObjectInput baToObjectInput( byte[] object )
+   public static InputStream baToInput( byte[] object )
       {
-      try
-         {
-         return new ObjectInputStream( 
-                       new ByteArrayInputStream( object ) );
-         }
-      catch ( IOException e )
-         {
-         Log.p( "Unlikely exception, not handled", Log.UNHANDLED, 100 );
-         Log.p( e, Log.UNHANDLED, 100 );
-         throw new RuntimeException( "Unlikely exception" );
-         }
+      return new ByteArrayInputStream( object );
       }
 
    /**
@@ -232,4 +223,27 @@ public final class Util
     * static methods.
     */
    private Util() { /* Nothing */ }
+
+   /**
+    * Pretty-prints a list of objects.
+    * @param objects
+    * @return
+    */
+   public static String prettyPrintList( Object... objects )
+      {
+      StringBuilder ret = new StringBuilder();
+      for ( Object o : objects )
+         {
+         if ( o instanceof DvtpExternalizable )
+            ret.append( ((DvtpExternalizable) o).prettyPrint() );
+//         else if ( o instanceof String )
+//            ret.append( o.toString() )
+         else
+            ret.append( o.toString() );
+         ret.append( ' ' );
+         }
+      if ( ret.length() > 1 )
+         ret.setLength( ret.length() - 1 );
+      return ret.toString();
+      }
    }

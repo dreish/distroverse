@@ -8,8 +8,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -64,11 +64,11 @@ public class BigInt implements DvtpExternalizable,
       {  return mVal.intValue();  }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
-      int length = in.readByte();
+      int length = in.read();
       int sign   = 1;
       if ( length == 0 )
          {
@@ -82,15 +82,15 @@ public class BigInt implements DvtpExternalizable,
             sign   = -1;
             }
          byte[] data = new byte[length];
-         in.readFully( data );
+         in.read( data );
          mVal = new BigInteger( sign, data ); 
          }
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       byte[] output;
       if ( mVal.signum() >= 0 )
@@ -98,12 +98,17 @@ public class BigInt implements DvtpExternalizable,
       else
          output = BigInteger.ZERO.subtract( mVal ).toByteArray();
       
-      out.writeByte( Util.SafeByte( output.length * mVal.signum() ) );
+      out.write( Util.SafeByte( output.length * mVal.signum() ) );
       out.write( output );
       }
 
    public int getClassNumber()
       {  return 3;  }
+
+   public String prettyPrint()
+      {
+      return "(BigInt " + Util.prettyPrintList( mVal ) + ")";
+      }
 
    BigInteger mVal;
    }

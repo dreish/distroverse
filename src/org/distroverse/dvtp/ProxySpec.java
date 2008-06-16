@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * This class is the only valid non-error response to a LOCATION query.
@@ -44,9 +46,9 @@ public class ProxySpec implements DvtpExternalizable
       {  return 133;  }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) 
+   public void readExternal( InputStream in ) 
    throws IOException, ClassCastException
       {
       (mProxyUrl = new Str()).readExternal( in );
@@ -55,13 +57,20 @@ public class ProxySpec implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       mProxyUrl.writeExternal( out );
       mResourceRegexp.writeExternal( out );
       mProxyName.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(ProxySpec " 
+             + Util.prettyPrintList( mProxyUrl, mResourceRegexp,
+                                     mProxyName ) + ")";
       }
    
    public Str getProxyUrl()  {  return mProxyUrl;  }

@@ -1,8 +1,8 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
@@ -30,7 +30,7 @@ public class DList implements DvtpExternalizable
    public DvtpExternalizable[] getContents()
       {  return mContents;  }
 
-   public void readExternal( ObjectInput in ) throws IOException,
+   public void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       int length = Util.safeInt( CompactUlong.externalAsLong( in ) );
@@ -39,11 +39,17 @@ public class DList implements DvtpExternalizable
          mContents[ i ] = DvtpObject.parseObject( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, mContents.length );
       for ( DvtpExternalizable o : mContents )
          DvtpObject.writeInnerObject( out, o );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(DList " 
+             + Util.prettyPrintList( (Object[]) mContents ) + ")";
       }
 
    private DvtpExternalizable[] mContents;

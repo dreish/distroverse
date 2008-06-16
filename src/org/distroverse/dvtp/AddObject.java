@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * Adds an object, with initial movement sequence.  If the MoveSeq is
@@ -46,7 +48,7 @@ public final class AddObject implements ProxySendable
    public CompactUlong getParentId()  {  return mParentId;  }
    public MoveSeq      getMoveSeq()   {  return mMoveSeq;   }
 
-   public void readExternal( ObjectInput in )
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mHasShape = Bool.externalAsBoolean( in );
@@ -59,7 +61,7 @@ public final class AddObject implements ProxySendable
       (mMoveSeq = new MoveSeq()).readExternal( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       Bool.booleanAsExternal( out, mHasShape );
       if ( mHasShape )
@@ -67,6 +69,13 @@ public final class AddObject implements ProxySendable
       mId.writeExternal( out );
       mParentId.writeExternal( out );
       mMoveSeq.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(AddObject "
+             + Util.prettyPrintList( mHasShape, mShape, mId, mParentId,
+                                     mMoveSeq ) + ")";
       }
 
    private boolean      mHasShape;

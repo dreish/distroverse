@@ -8,9 +8,11 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+
+import org.distroverse.core.Util;
 
 /**
  * This class is actually NOT part of DVTP, the protocol -- just dvtp,
@@ -44,21 +46,26 @@ public class Any implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+    * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       // TODO Auto-generated method stub
 
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+    * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       // TODO Auto-generated method stub
 
+      }
+
+   public String prettyPrint()
+      {
+      return "(Any " + Util.prettyPrintList( mContents ) + ")";
       }
 
    private Serializable mContents;

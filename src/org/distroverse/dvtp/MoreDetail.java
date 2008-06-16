@@ -20,4 +20,10 @@ public class MoreDetail extends Flo implements ClientSendable
    
    public float getAmount()
       {  return asFloat();  }
+
+   @Override
+   public String prettyPrint()
+      {
+      return "(MoreDetail " + getAmount() + ")";
+      }
    }

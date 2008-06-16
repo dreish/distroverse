@@ -1,5 +1,7 @@
 package org.distroverse.dvtp;
 
+import org.distroverse.core.Util;
+
 /**
  * A list of arbitrary DvtpExternalizable objects.  Typically the first
  * would be the name of a function, or a serial number of a function,
@@ -21,4 +23,11 @@ public class FunCall extends DList
    @Override
    public int getClassNumber()
       {  return 129;  }
+
+   @Override
+   public String prettyPrint()
+      {
+      return "(FunCall " 
+             + Util.prettyPrintList( (Object[]) getContents() ) + ")";
+      }
    }

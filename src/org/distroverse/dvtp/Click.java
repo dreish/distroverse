@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 /**
  * A mouseclick with the primary (index finger) mouse button.  Typically
@@ -35,16 +37,22 @@ public class Click implements ClientSendable
       mForce = force;
       }
 
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       (mDirection = new Vec()).readExternal( in );
       (mForce = new Flo()).readExternal( in );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       mDirection.writeExternal( out );
       mForce.writeExternal( out );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Click " 
+             + Util.prettyPrintList( mDirection, mForce ) + ")";
       }
 
    private Vec mDirection;

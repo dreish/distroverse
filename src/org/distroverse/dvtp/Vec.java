@@ -1,8 +1,10 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
@@ -28,18 +30,24 @@ public class Vec implements DvtpExternalizable
       return mVec;
       }
 
-   public void readExternal( ObjectInput in ) throws IOException
+   public void readExternal( InputStream in ) throws IOException
       {
       mVec = new Vector3f( Flo.externalAsFloat( in ),
                            Flo.externalAsFloat( in ),
                            Flo.externalAsFloat( in ) );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       Flo.floatAsExternal( out, mVec.x );
       Flo.floatAsExternal( out, mVec.y );
       Flo.floatAsExternal( out, mVec.z );
+      }
+   
+   public String prettyPrint()
+      {
+      return "(Vec " 
+             + Util.prettyPrintList( mVec ) + ")";
       }
    
    private Vector3f mVec;

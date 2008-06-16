@@ -7,13 +7,20 @@
  */
 package org.distroverse.dvtp;
 
-import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author dreish
  *
  */
-public interface DvtpExternalizable extends Externalizable
+public interface DvtpExternalizable
    {
    public abstract int getClassNumber();
+   public abstract String prettyPrint();
+   public abstract void readExternal( InputStream in )
+   throws IOException, ClassNotFoundException;
+   public abstract void writeExternal( OutputStream out )
+   throws IOException;
    }

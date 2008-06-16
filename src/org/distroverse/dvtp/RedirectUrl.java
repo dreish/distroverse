@@ -1,5 +1,7 @@
 package org.distroverse.dvtp;
 
+import org.distroverse.core.Util;
+
 /**
  * Sent by a proxy to a client to tell it to go to a URL at a different
  * site.  The URL contained in this object must NOT be part of the site
@@ -29,4 +31,11 @@ public final class RedirectUrl extends Str implements ProxySendable
     */
    public String getUrl()
       {  return toString();  }
+   
+   @Override
+   public String prettyPrint()
+      {
+      return "(RedirectUrl " 
+             + Util.prettyPrintList( getUrl() ) + ")";
+      }
    }

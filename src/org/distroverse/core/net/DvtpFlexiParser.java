@@ -2,10 +2,11 @@ package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.distroverse.core.*;
+import org.distroverse.core.Log;
+import org.distroverse.core.Util;
 import org.distroverse.dvtp.CompactUlong;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.DvtpObject;
@@ -35,7 +36,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
             {
             // This is an arbitrary DvtpExternalizable object.  Find the
             // length and find out whether we have the whole thing yet.
-            ObjectInput in = Util.baToObjectInput( next_object );
+            InputStream in = Util.baToInput( next_object );
             int ob_len = objectLength( in );
             boolean writeback = false;
             
@@ -113,7 +114,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
     * number itself.  Returns -1 if not enough has been ready to even
     * compute the length.
     */
-   private int objectLength( ObjectInput in )
+   private int objectLength( InputStream in )
       {
       try
          {

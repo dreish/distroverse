@@ -125,7 +125,7 @@ public class Shape implements DvtpExternalizable
       return ret;
       }
 
-   public void readExternal( ObjectInput in )
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       (mPoints = new PointArray()).readExternal( in );
@@ -136,12 +136,18 @@ public class Shape implements DvtpExternalizable
          mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
       }
 
-   public void writeExternal( ObjectOutput out ) throws IOException
+   public void writeExternal( OutputStream out ) throws IOException
       {
       mPoints.writeExternal( out );
       CompactUlong.longAsExternal( out, mVertexCounts.length );
       for ( int vc : mVertexCounts )
          CompactUlong.longAsExternal( out, vc );
+      }
+
+   public String prettyPrint()
+      {
+      return "(Shape " 
+             + Util.prettyPrintList( mPoints, mVertexCounts ) + ")";
       }
 
    // TODO Add texture fields and methods.

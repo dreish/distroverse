@@ -11,4 +11,10 @@ public class KeyDown extends Keystroke
    @Override
    public int getClassNumber()
       {  return 20;  }
+   
+   @Override
+   public String prettyPrint()
+      {
+      return "(KeyDown " + getKey() + ")";
+      }
    }
