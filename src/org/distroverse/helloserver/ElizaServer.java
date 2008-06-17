@@ -1,5 +1,6 @@
 package org.distroverse.helloserver;
 
+import org.distroverse.core.Log;
 import org.distroverse.core.net.*;
 import org.distroverse.distroplane.lib.*;
 import java.io.*;
@@ -23,6 +24,7 @@ public final class ElizaServer extends DvtpServer
    public void handleGet( String url, NetOutQueue< Object > noq )
    throws IOException
       {
+      Log.p( "got: get " + url, Log.SERVER, -50 );
       noq.add( "What do you expect to find at " + url + "?" );
       }
 
@@ -34,6 +36,7 @@ public final class ElizaServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
+      Log.p( "got: location " + location, Log.SERVER, -50 );
       noq.add( "So, you want to go to " + location + "?" );
       }
 
@@ -44,6 +47,7 @@ public final class ElizaServer extends DvtpServer
    public void handleKnock( String location, NetOutQueue< Object > noq )
    throws IOException
       {
+      Log.p( "got: knock " + location, Log.SERVER, -50 );
       noq.add( "Who's there?" );
       }
 
@@ -55,6 +59,7 @@ public final class ElizaServer extends DvtpServer
                                 NetOutQueue< Object > noq )
    throws IOException
       {
+      Log.p( "got: proxyopen " + token, Log.SERVER, -50 );
       noq.add( "Tell me more about " + token + "." );
 //      // This is how we would normally handle the PROXYOPEN command:
 //      noq.getSession().setAttachment( ProxySession.class,
