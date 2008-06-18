@@ -1,7 +1,6 @@
 package org.distroverse.core.net;
 
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 
 import org.distroverse.core.Log;
@@ -56,8 +55,7 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
             // Write object length to baos
             CompactUlong object_length
                = new CompactUlong( externalized_object.size() );
-            object_length.writeExternal( 
-                                new ObjectOutputStream( baos ) );
+            object_length.writeExternal( baos );
             /* Write object itself (already prefixed with class number)
              * to baos
              */

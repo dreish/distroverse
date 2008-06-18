@@ -96,7 +96,7 @@ public final class DvtpObject
                 &&  class_number >= 128 )
          {
          newclass = (Class< ? extends DvtpExternalizable >) 
-                    mClassList[ class_number - 128 ];
+                    mExtendedClassList[ class_number - 128 ];
          }
       else if ( class_number == mSerializedClassNumber )
          return new Any();

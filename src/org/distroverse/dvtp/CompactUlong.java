@@ -56,7 +56,7 @@ public class CompactUlong implements DvtpExternalizable
       while ( true )
          {
          byte b = (byte) in.read();
-         ret |= (b << shift);
+         ret |= ((b & 127) << shift);
          if ( (b & 128) == 128 )
             return ret;
          shift += 7;

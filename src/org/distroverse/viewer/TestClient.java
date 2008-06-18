@@ -16,13 +16,17 @@ public class TestClient
          DvtpServerConnection dsc
             = new DvtpServerConnection( "localhost" );
          pr( "Querying localhost: LOCATION dvtp://localhost/foo" );
-         Object response = dsc.location( "dvtp://localhost/foo" );
+         Object response = dsc.query( "LOCATION dvtp://localhost/foo" );
          pr( "Response:" );
          pr( response.getClass().getCanonicalName() );
          pr( ((DvtpExternalizable) response).prettyPrint() );
          dsc.close();
          }
       catch ( IOException e )
+         {
+         e.printStackTrace();
+         }
+      catch ( ClassNotFoundException e )
          {
          e.printStackTrace();
          }
