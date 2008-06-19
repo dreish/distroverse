@@ -236,8 +236,11 @@ public final class Util
          {
          if ( o instanceof DvtpExternalizable )
             ret.append( ((DvtpExternalizable) o).prettyPrint() );
-//         else if ( o instanceof String )
-//            ret.append( o.toString() )
+         else if ( o instanceof String )
+            ret.append( "\""
+                        + o.toString().replaceAll( "\\\\", "\\\\" )
+                                      .replaceAll( "\"", "\\\"" )
+                        + "\"" );
          else
             ret.append( o.toString() );
          ret.append( ' ' );

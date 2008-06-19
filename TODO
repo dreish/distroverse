@@ -1,43 +1,5 @@
 
 - To do for 0.01:
-  - I'm suspicious about the ProxySpec being sent by HelloSimpleServer;
-    it doesn't appear to include the URL
-    - Make an ultra-simple client that sends some queries and diagrams
-      the responses
-      + ObjectInputStream in DvtpServerConnection is invalid
-        + Abandon use of ObjectStreams; this was an ignorant decision
-      - Client appears to be getting no response at all, yet the server
-        isn't spinning
-        + Debug client; confirm it is getting no bytes
-          + Create MacOS .app for HelloSimpleServer; run from zsh
-            > Didn't need this, actually
-          > TestClient does in fact wait on the first sis.read() in
-            DvtpServerConnection.getObject()
-        + Debug server; find out why it isn't sending anything
-          + It seems never to be reaching the LOCATION handler
-            + Test ElizaServer with TestClient
-              + It doesn't work; debug it
-                + ElizaServer claims it never got the LOCATION query
-                  > Just wasn't appending \r\n
-            x Try making LOCATION add a string to the queue, like in
-              ElizaServer; test with TestClient
-        + Now it is supposedly getting class number -84, which should be
-          impossible; watch TestClient in the debugger
-          > Wasn't stripping high bit off bytes before |=ing them
-        + Now it is getting class #44, which isn't a valid class number
-          + Watch what the server sends; look for byte -84
-            > Wasn't discarding the length prefix (unused in synchronous
-              reader)
-        + Now it is getting class #5, which is the first byte of the
-          actual class number
-          + Debug TestClient and watch it reconstruct the class num
-            > Problem was in DvtpObject.getNew()
-        - Now it dies on "Could not read full Str" while parsing the
-          ProxySpec
-          + Trace through client
-            > First string comes through perfectly
-            > Second one has three NULs before the length
-          - Trace through server
   - Connect and test with the client
     + Need some way to specify the class name to load
       + Simplest solution: make this part of the ProxySpec
@@ -524,6 +486,47 @@
       > I think I'm punting on this right now, since it appears to be
         harmless -- it doesn't interfere with the demonstration of any
         of the concepts
+  + I'm suspicious about the ProxySpec being sent by HelloSimpleServer;
+    it doesn't appear to include the URL
+    + Make an ultra-simple client that sends some queries and diagrams
+      the responses
+      + ObjectInputStream in DvtpServerConnection is invalid
+        + Abandon use of ObjectStreams; this was an ignorant decision
+      + Client appears to be getting no response at all, yet the server
+        isn't spinning
+        + Debug client; confirm it is getting no bytes
+          + Create MacOS .app for HelloSimpleServer; run from zsh
+            > Didn't need this, actually
+          > TestClient does in fact wait on the first sis.read() in
+            DvtpServerConnection.getObject()
+        + Debug server; find out why it isn't sending anything
+          + It seems never to be reaching the LOCATION handler
+            + Test ElizaServer with TestClient
+              + It doesn't work; debug it
+                + ElizaServer claims it never got the LOCATION query
+                  > Just wasn't appending \r\n
+            x Try making LOCATION add a string to the queue, like in
+              ElizaServer; test with TestClient
+        + Now it is supposedly getting class number -84, which should be
+          impossible; watch TestClient in the debugger
+          > Wasn't stripping high bit off bytes before |=ing them
+        + Now it is getting class #44, which isn't a valid class number
+          + Watch what the server sends; look for byte -84
+            > Wasn't discarding the length prefix (unused in synchronous
+              reader)
+        + Now it is getting class #5, which is the first byte of the
+          actual class number
+          + Debug TestClient and watch it reconstruct the class num
+            > Problem was in DvtpObject.getNew()
+        + Now it dies on "Could not read full Str" while parsing the
+          ProxySpec
+          + Trace through client
+            > First string comes through perfectly
+            > Second one has three NULs before the length
+          + Trace through server
+            + In stringAsExternal(), I need to write only the limit of
+              the buffer, not the whole array
+      + Quote strings in prettyPrint
 
 ------------------------------------------------------------------------
 - To do for 0.02:

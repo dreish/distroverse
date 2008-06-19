@@ -53,7 +53,7 @@ public class Str implements DvtpExternalizable
       ByteBuffer bb = Charset.forName( "UTF-8" )
                              .encode( CharBuffer.wrap( val ) );
       CompactUlong.longAsExternal( out, bb.limit() );
-      out.write( bb.array() );
+      out.write( bb.array(), 0, bb.limit() );
       return;
       }
 
