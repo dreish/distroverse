@@ -91,12 +91,13 @@ public abstract class ResourceCache
 
    private static String localizeUrl( String remote_url )
       {
-      // FIXME This hardcoded directory obviously bogus and stupid
+      // FIXME This hardcoded directory is obviously bogus and stupid
       // FIXME This set of escaped chars is not nearly portable
       return "file:///Users/dreish/.dv/cache/"
              + remote_url.replaceAll( "_", "__" )
                          .replaceAll( "/", "_%" )
-                         .replaceAll( ":", "_." );
+                         .replaceAll( ":", "_." )
+                         .replaceAll(  "%", "%25" );
       }
 
    private static boolean fileUrlExists( String file_url )

@@ -4,7 +4,14 @@
     + Need some way to specify the class name to load
       + Simplest solution: make this part of the ProxySpec
         > Also happens to be the most flexible
-    - Set client's default location URL to dvtp://localhost/
+    + Set client's default location URL to dvtp://localhost/
+      + Just displays "initial-text", and no objects
+        + Bad URI syntax
+        + Can't use percents without escaping them
+    - blob was not successfully streamed -- EOF before end
+    - despite IO failure while reading the resource, the file still came
+      into being; must not allow that
+    - Look for shape objects from proxy; are they coming through?
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually

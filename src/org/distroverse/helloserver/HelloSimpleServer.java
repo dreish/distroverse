@@ -39,7 +39,7 @@ public class HelloSimpleServer extends DvtpServer
       {
       noq.add( new ProxySpec( "drtp://localhost/HelloSimpleProxy.jar",
                               ".*",
-                     "org.distroverse.helloserver.HelloSimpleProxy" ) );
+                          "org.distroverse.proxy.HelloSimpleProxy" ) );
       }
 
    @Override

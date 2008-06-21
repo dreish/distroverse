@@ -43,6 +43,7 @@ public class ViewerWindow
             newPipelineUrl( url );
          else
             mPipeline.requestUrl( url );
+         setDisplayedUrl( url );
          }
       catch ( URISyntaxException e )
          {

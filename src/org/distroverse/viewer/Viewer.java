@@ -18,7 +18,7 @@ public class Viewer
       ViewerWindow w = new ViewerWindow();
       try
          {
-         w.requestUrl( "about:hello" );
+         w.requestUrl( "dvtp://localhost/" );
          }
       catch ( Exception e )
          {
