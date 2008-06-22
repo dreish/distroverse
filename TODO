@@ -8,7 +8,13 @@
       + Just displays "initial-text", and no objects
         + Bad URI syntax
         + Can't use percents without escaping them
-    - blob was not successfully streamed -- EOF before end
+    + Blob was not successfully streamed -- EOF before end
+      + TestClient it
+        > mPos==0 is getting lost (length/bytes/resource/pos/flength)
+      + Debug the server
+        > Confirmed, it is not in the streamed bytes
+        + longAsExternal() does not send anything for zero
+          > Add special case, send -128
     - despite IO failure while reading the resource, the file still came
       into being; must not allow that
     - Look for shape objects from proxy; are they coming through?
@@ -524,7 +530,8 @@
         + Now it is getting class #5, which is the first byte of the
           actual class number
           + Debug TestClient and watch it reconstruct the class num
-            > Problem was in DvtpObject.getNew()
+            > Problem was in DvtpObject.getNew() -- was indexing into
+              the wrong array
         + Now it dies on "Could not read full Str" while parsing the
           ProxySpec
           + Trace through client
@@ -648,6 +655,15 @@
       implement such a thing
       > With a protocol for passing object directories around; it has to
         be done
+  - Proxy-side collisions with no trust needed
+    > Any proxy may report a moment and point of collision between two
+      objects; the server knows the trajectories of the objects,
+      verifies the collision (cheap), and calculates resulting forces
+      > The same method could be used to pass this back to the client,
+        if it were advantageous to use the client's world tree
+    > Collision with a door non-physical object is required for crossing
+      into a solid cell
+    > Server could apply simplified physics in unattended areas
   - History tree(s), as suggested by
     > http://www.jacobsheehy.com/technology/browsing-the-web-with-a-tree
     - Each RedirectUrl creates a branch

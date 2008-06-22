@@ -7,8 +7,8 @@ import java.io.OutputStream;
 import org.distroverse.core.Util;
 
 /**
- * A mouseclick with the primary (index finger) mouse button.  Typically
- * represents a touch, grab, or pull.
+ * A mouseclick with the primary (index finger) mouse button, or a
+ * one-fingered touch.  Typically represents a touch, grab, or pull.
  * @author dreish
  */
 public class Click implements ClientSendable

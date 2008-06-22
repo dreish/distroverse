@@ -15,8 +15,10 @@ public class TestClient
          {
          DvtpServerConnection dsc
             = new DvtpServerConnection( "localhost" );
-         pr( "Querying localhost: LOCATION dvtp://localhost/foo" );
-         Object response = dsc.query( "LOCATION dvtp://localhost/foo" );
+//         String query = "LOCATION dvtp://localhost/foo";
+         String query = "GET drtp://localhost/HelloSimpleProxy.jar";
+         pr( "Querying localhost: " + query );
+         Object response = dsc.query( query );
          pr( "Response:" );
          pr( response.getClass().getCanonicalName() );
          pr( ((DvtpExternalizable) response).prettyPrint() );

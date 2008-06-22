@@ -1,8 +1,9 @@
 package org.distroverse.dvtp;
 
 /**
- * A mouseclick with the secondary mouse button.  Typically calls a
- * context-dependent menu, so "force" may not be relevant in most cases.
+ * A mouseclick with the secondary mouse button, or a two-fingered
+ * touch.  Typically calls a context-dependent menu, so "force" may not
+ * be relevant in most cases, but it's available.
  * @author dreish
  */
 public class Click2 extends Click

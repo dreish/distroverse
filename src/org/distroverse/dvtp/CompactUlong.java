@@ -75,6 +75,9 @@ public class CompactUlong implements DvtpExternalizable
       if ( val < 0 )
          throw new IllegalArgumentException( 
                            "CompactUlong must be nonnegative" );
+      if ( val == 0 )
+         out.write( (byte) -128 );
+
       while ( val != 0 )
          {
          long bits = val & mask;
