@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Dan Reish.
+ * Copyright (c) 2007-2008 Dan Reish.
  * 
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
