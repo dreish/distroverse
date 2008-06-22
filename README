@@ -46,8 +46,11 @@ version 1.0 browser as quickly as possible, and then focus on servers.
 The browser is meant to be as simple and as easy-to-implement as
 possible.  Much of the user interface is to be generated in the
 downloaded bytecode, much like with a web application.  One goal of the
-project is to publish a selection of standard 
+project is to publish a selection of standard downloadable bytecodes so
+that site creators do not need to create or host them.
 
+For details on the specific areas that need to be implemented, see the
+TODO file.
 
 
 
