@@ -544,6 +544,7 @@
 
 ------------------------------------------------------------------------
 - To do for 0.02:
+  - Switch to latest jME
   - Add textures to Shape class
     - Specify color of each triangle
   - Add WarpShape message
