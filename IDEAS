@@ -1,4 +1,17 @@
 
+[Note: This is my file for jotting down thoughts as I have them.  I have
+done little or no editing of any of this text, so there are plenty of
+places where I would choose different words on further reflection, such
+as the part where I describe ideal abstractions as "concrete and real".
+The first few entries are somewhat disjointed excerpts from a general-
+purpose journal.
+
+Remember that this is stream-of-consciousness documentation of an idea
+in progress.  A lot of the ideas I had along the way no longer make any
+sense.  It took a long time to fully shift my thought process away from
+the fat-client/fat-protocol/homogenous-server paradigm and figure out
+how something as abstract as what I ended up with would actually work.]
+
 2007-02-04
 
 I just don't have any interest in anything on Second Life anymore.
@@ -3757,16 +3770,12 @@ Turning a program into a Mac executable is surprisingly easy in Eclipse.
 
 I have jME downloaded and imported into my Distroverse working set.
 
-</pre>
-
 That was somewhat painful, but I got it [the jME TestArrow demo -- not
 anything I wrote] running.  Now, I want to see whether I can wrap it up
 into an application that I can copy over to the work MBP and run without
 having to download anything.  Somehow I doubt it.  I guess I should be
 able to just look inside the package to see whether it contains all the
 necessary .jars and native libraries.
-
-<pre>
 
 jME does suffer from the same sort of jagged update problem I noticed
 with Java3D.  I'm hoping that can go away at some point.
@@ -4855,3 +4864,80 @@ a command to go to SSL mode?  Can I do that?
 
 It might help if I knew what SSL really was.
 
+2008-06-23
+
+Linus released Linux 0.01 in mid-September 1991, and it took until
+December 1992 to get to version 0.99, which I assume was
+feature-complete (or seemingly so at the time) but bug-riddled.  It
+took until March *1994* (!) to get to 1.0.0.
+
+That's amazing -- not how I thought it went.  I remember I found out
+about it a few weeks later -- it was up to 1.0.9 by the time I first
+downloaded Slackware to floppies and installed it on a machine.  That
+was actually only a month later, so maybe 0.99 was further from 1.0.0
+than I thought.  It must have been; it was less than half as big.
+
+I want the experience of a given place to be unified (in what I have
+in mind for dvtp://distroverse.com/, anyway), and the concept of
+subcells with potentially limited access (which I think is a fantastic
+idea -- it essentially removes any need for any kind of physics from
+the server) would get horrendously complicated if there were not a
+single unified stitched version of the universe.
+
+I think I just had a flash of insight into how the Cartesian fakeout
+for a round planet would work.  In some polar region, the land would
+just be a flat circle -- though altitudes (everywhere) would be
+lowered parabolically beyond a certain don't-care cutoff to reduce
+processing time for nearby objects -- so actually the world is a
+truncated paraboloid always centered on the viewer.  Outside that, the
+world is ... no, my idea doesn't work with rectangles.  It's going to
+require trapezoids.
+
+Oh well.  I'll figure out a good way to do that, I'm sure.  I don't
+think it'll really be that big a deal.  It just requires that there be
+something other than a trivial rectangle to define boundaries, and
+some angle translation for moving between regions.
+
+The circle should be fine, though.  Though I guess it will actually be
+a polyhedron.  Maybe I'll compose the whole thing out of triangles.
+
+Triangular prisms.
+
+So the basic idea is:
+
+- Generate a polyhedral approximation of a sphere
+- ...
+
+Wait.  The triangles won't fit together in a plane if they roughly
+tile a sphere.  I could make them _really_ small and just ignore that
+fact.  I think what I need to do is make an icosahedron, flatten it,
+and figure out how to make some sort of equivalent plane tiling out of
+it.
+
+I think continuously warping space would be too computationally
+expensive.
+
+The more I think about this, the more I think I'd be better off just
+displaying the _actual_ polyhedron, saying gravity _actually_ always
+points toward the center of the planet, and relying on the bumpiness
+of the landscape to make the seams of the polyhedron (which would
+undoubtedly have hundreds of thousands of triangles, only a few of
+which would be relevant at any moment) not noticeable.
+
+Anything I do to avoid dealing with that reality is going to create
+more difficulties than it could ever eliminate.
+
+An Earth-sized planet would be around 12,500 miles along the surface
+from pole to pole, so representing such with 12,500 rows of triangles
+would mean sides roughly a mile long.  The distance between the circle
+and the center of a chord intersecting 1/25,000 of the whole circle
+would be ... 5 cm.
+
+The terrain-generating code could even round that out, come to think
+of it.  In case anyone would ever notice a statistically significant
+grid of points spaced a mile apart that are two inches lower on
+average than the surrounding points.
+
+So no.  That would not be necessary.
+
+And, we come back to my original idea for round planets.  Nice.

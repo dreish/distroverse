@@ -171,8 +171,9 @@ public abstract class ResourceCache
       {
       DvtpServerConnection remote_site
          = new DvtpServerConnection( remote_uri );
+      String tmpname = target + "_tmp";
       RandomAccessFile local_data 
-         = new RandomAccessFile( target, "rw" );
+         = new RandomAccessFile( tmpname, "rw" );
       
       Blob first_blob = remote_site.get( remote_uri );
       long file_length = first_blob.getFileLength();
@@ -190,6 +191,7 @@ public abstract class ResourceCache
          }
       
       local_data.close();
+      (new File( tmpname )).renameTo( target );
       }
 
    /**
