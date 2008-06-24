@@ -20,12 +20,17 @@ import org.distroverse.dvtp.DvtpObject;
 
 public class DvtpFlexiParser extends ObjectParser< Object >
    {
+   private static final int MAX_OBJECT_LENGTH = 1024 * 1024 * 2;
+
    public DvtpFlexiParser( ByteBuffer b )
       {
       super( b );
       mNextObject = new ByteArrayOutputStream( 1024 );
       }
 
+   /* (non-Javadoc)
+    * @see org.distroverse.core.net.ObjectParser#parseObjects(java.io.ByteArrayOutputStream, org.distroverse.core.net.NetInQueue)
+    */
    @Override
    protected void parseObjects( ByteArrayOutputStream baos,
                                 NetInQueue< Object > queue )
@@ -49,8 +54,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
             
             if ( ob_len == 0 )
                {
-               // FIXME I'm allowing (ignoring) null objects, but why?
-               writeback = true;
+               throw new IOException( "zero-length object in input" );
                }
             else if ( ob_len <= in.available() )
                {
@@ -121,21 +125,24 @@ public class DvtpFlexiParser extends ObjectParser< Object >
     * number itself.  Returns -1 if not enough has been ready to even
     * compute the length.
     */
-   private int objectLength( InputStream in )
+   private int objectLength( InputStream in ) throws IOException
       {
+      int ret = -1;
+
       try
          {
-         /* FIXME Probably don't want to use a CompactUlong here, since
-          * this is a local protocol; space is less important than
-          * speed.
-          */
-         long len = CompactUlong.externalAsLong( in );
-         return Util.safeInt( len );
+         ret = Util.safeInt( CompactUlong.externalAsLong( in ) );
          }
       catch ( IOException e )
          {
-         return -1;
+         ret = -1;
          }
+      
+      if ( ret > MAX_OBJECT_LENGTH )
+         throw new IOException( "Object length " + ret + " exceeds"
+                                + " limit " + MAX_OBJECT_LENGTH );
+      
+      return ret;
       }
 
    ByteArrayOutputStream mNextObject;

@@ -567,7 +567,7 @@
   - Add better logging facilities
 
 ------------------------------------------------------------------------
-> Required for 1.0:
+> Required for 0.99:
   > Client
     > Text -- can't escape the morass
     > Sound
@@ -682,6 +682,10 @@
     > That is, if there's any ablity to fill out forms with things like
       name, address, etc., standardize the field names and implement an
       auto-fill method early on
+  - Should be able to cache R-tree nodes (in the proxy, keeping them in
+    cookies)
+    - Just check the top-level node on the server; if the timestamp is
+      the same as the cached one, no need to update any of the subnodes
   - Use PGP (or something similar) for authentication?  What's the legal
     status of that?
   x WibbleConfrobulator class

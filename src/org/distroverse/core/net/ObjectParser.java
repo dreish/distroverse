@@ -69,13 +69,23 @@ public abstract class ObjectParser< T >
       mBuffer.clear();
       }
    
+   /**
+    * Called by readBytes() every time bytes are added to
+    * ObjectParser.mBaos, this method must parse any and all complete
+    * and fully parseable objects in the given BAOS, removing those and
+    * any remaining bytes into the subclass' own BAOS, and adding any
+    * objects to 'queue'.
+    * FIXME this method always clears baos; doesn't need to be a BAOS. 
+    * @param baos - byte stream input
+    * @param queue - object output
+    * @throws Exception
+    */
    abstract protected void
    parseObjects( ByteArrayOutputStream baos,
                  NetInQueue< T > queue )
    throws Exception;
 
    private NetInQueue< T >       mQueue;
-//   private int                   mPosition;
    private ByteArrayOutputStream mBaos;
    private ByteBuffer            mBuffer;
    }
