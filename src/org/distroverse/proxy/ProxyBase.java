@@ -10,6 +10,7 @@ package org.distroverse.proxy;
 import java.util.concurrent.BlockingQueue;
 
 import org.distroverse.core.Log;
+import org.distroverse.dvtp.AddObject;
 import org.distroverse.dvtp.CompactUlong;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.MoveSeq;
@@ -67,7 +68,7 @@ public abstract class ProxyBase implements DvtpProxy
    protected void addObject( Shape s, CompactUlong id, CompactUlong pid,
                              MoveSeq m )
       {
-      // XXX implement this!
+      putQueue( new AddObject( s, id, pid, m ) );
       }
 
    protected void addObject( Shape s, long id,

@@ -4941,3 +4941,16 @@ average than the surrounding points.
 So no.  That would not be necessary.
 
 And, we come back to my original idea for round planets.  Nice.
+
+2008-06-25
+
+Cool!  I actually have a proxy running and adding moving objects to the
+viewer!
+
+Granted, they're just getting a hardcoded default movement, ignoring the
+stationary MoveSeq they're supposed to use.  And granted, only the
+sphere is even really recognizable -- all three objects display
+incorrectly.  But the movement is really smooth.  I like that.
+
+Everything after this point is just details and cleanup.
+

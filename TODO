@@ -1,23 +1,5 @@
 
 - To do for 0.01:
-  - Connect and test with the client
-    + Need some way to specify the class name to load
-      + Simplest solution: make this part of the ProxySpec
-        > Also happens to be the most flexible
-    + Set client's default location URL to dvtp://localhost/
-      + Just displays "initial-text", and no objects
-        + Bad URI syntax
-        + Can't use percents without escaping them
-    + Blob was not successfully streamed -- EOF before end
-      + TestClient it
-        > mPos==0 is getting lost (length/bytes/resource/pos/flength)
-      + Debug the server
-        > Confirmed, it is not in the streamed bytes
-        + longAsExternal() does not send anything for zero
-          > Add special case, send -128
-    + despite IO failure while reading the resource, the file still came
-      into being; must not allow that
-    - Look for shape objects from proxy; are they coming through?
   - Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually
@@ -541,6 +523,31 @@
             + In stringAsExternal(), I need to write only the limit of
               the buffer, not the whole array
       + Quote strings in prettyPrint
+  + Connect and test with the client
+    + Need some way to specify the class name to load
+      + Simplest solution: make this part of the ProxySpec
+        > Also happens to be the most flexible
+    + Set client's default location URL to dvtp://localhost/
+      + Just displays "initial-text", and no objects
+        + Bad URI syntax
+        + Can't use percents without escaping them
+    + Blob was not successfully streamed -- EOF before end
+      + TestClient it
+        > mPos==0 is getting lost (length/bytes/resource/pos/flength)
+      + Debug the server
+        > Confirmed, it is not in the streamed bytes
+        + longAsExternal() does not send anything for zero
+          > Add special case, send -128
+    + despite IO failure while reading the resource, the file still came
+      into being; must not allow that
+    + Look for shape objects from proxy; are they coming through?
+      > None
+      + Is the proxy code getting called?
+        > Yes
+      + Do the objects get added to the queue?
+        + I never bothered to implement ProxyBase.addObject()
+          > It probably took longer to write the XXX comment than the
+            actual method
 
 ------------------------------------------------------------------------
 - To do for 0.02:
