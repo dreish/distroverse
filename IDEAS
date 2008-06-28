@@ -4954,3 +4954,50 @@ incorrectly.  But the movement is really smooth.  I like that.
 
 Everything after this point is just details and cleanup.
 
+2008-06-26
+
+I thought briefly about not using names as a form of identity -- and
+actually I'm already coming back to that as I write this.
+
+My first thought was: Don't have names at all.  I'm creating an
+alternate reality, and there's no physical manifestation of my name
+built into my physical body, so why should a virtual one have that as a
+property?  People can just learn each other's names and recognize each
+other just like they do in the real world.
+
+But then I realized that there's a unique problem: It would be
+relatively easy to pose as someone else -- probably.  (There might be
+features that are difficult to rip; gait, perhaps.)  So then I thought,
+what about some system whereby people you've identified as a friend, and
+whose identities are confirmed, have some symbol float over them (from
+your point of view only)?
+
+Then I realized that I've more-or-less come full circle.  The system
+would still need to transmit a name or some name-like property for this
+to work.
+
+But it isn't exactly the same: The property to be transmitted could be
+an RSA public key, verified and vouched for by the server.  Maybe the
+client could do its own verification, but that seems wasteful if the
+server is reasonably trusted.  So maybe that could be an optional
+handshake of some kind.
+
+The name itself might not even be transmitted by the server.  It might
+be an association made only in the client based on the user's own input;
+"I know this avatar as 'Jimmy James'", which may or may not be what the
+avatar's user calls himself most often.
+
+This is all relevant to implementing a site, not really to the client. 
+Though it might be necessary to build in some support for some concept
+of identity, if friends are to be recognized wherever they are and not
+just within a given site [the one where they were met].
+
+People will probably, make that inevitably, want to choose which
+identity they're broadcasting at any given moment.  That's the supposed
+death of social networks -- when you accumulate too many "friends" you'd
+rather avoid.
+
+Marking of recognized avatars would have to be done entirely within the
+client to avoid leaking friend information all over the place.
+
+Shouldn't be a big deal.
