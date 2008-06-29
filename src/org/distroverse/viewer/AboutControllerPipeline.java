@@ -12,8 +12,6 @@ package org.distroverse.viewer;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import org.distroverse.distroplane.lib.BallFactory;
 import org.distroverse.dvtp.Shape;
 
@@ -28,6 +26,13 @@ import com.jmex.game.StandardGame;
  */
 public class AboutControllerPipeline extends ControllerPipeline
    {
+   /**
+    * Constructor adds shapes.  URL is ignored for now
+    * TODO - add other about: urls
+    * @param url
+    * @param game
+    * @param window
+    */
    public AboutControllerPipeline( String url, StandardGame game,
                                    ViewerWindow window )
       {

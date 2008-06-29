@@ -32,6 +32,5 @@ public class HelloSimpleProxy extends ProxyBase
                  +00.0f, 10.0f, 40.0f );
       addObject( pf.setPrimShape( PrimShape.CUBOID  ).generate(), 3L,
                  +30.0f, 10.0f, 40.0f );
-      
       }
    }
