@@ -10,6 +10,7 @@
  */
 package org.distroverse.viewer;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -153,15 +154,17 @@ public class ProxyClientConnection implements Runnable
     * requestUrl().
     * @param url - New location URL
     * @param location_regexp - New regexp, or null to leave unchanged
+    * @throws IOException 
     */
    public void setUrl( String url, String location_regexp )
+   throws IOException
       {
       offer( new SetUrl( url ) );
       if ( location_regexp != null )
          mLocationRegexp = location_regexp;
       }
 
-   public void offer( ClientSendable o )
+   public void offer( ClientSendable o ) throws IOException
       {
       mProxyInstance.offer( o );
       }

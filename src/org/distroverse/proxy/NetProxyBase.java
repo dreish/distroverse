@@ -7,6 +7,7 @@
  */
 package org.distroverse.proxy;
 
+import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
 import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
@@ -15,6 +16,8 @@ import org.distroverse.core.net.NetInQueueWatcher;
 import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.SetUrl;
+import org.distroverse.viewer.DvtpServerConnection;
 
 /**
  * Provides a useful base upon which to build proxy classes that
@@ -34,9 +37,14 @@ public abstract class NetProxyBase extends ProxyBase
     * @see org.distroverse.dvtp.DvtpProxy#offer(org.distroverse.dvtp.ClientSendable)
     */
    public void offer( ClientSendable o )
+   throws IOException
       {
-      // XXX Auto-generated method stub
-
+      if ( o instanceof SetUrl )
+         {
+         SetUrl su = (SetUrl) o;
+         DvtpServerConnection mConnection
+            = new DvtpServerConnection( su.getUrl() );
+         }
       }
 
    /* (non-Javadoc)

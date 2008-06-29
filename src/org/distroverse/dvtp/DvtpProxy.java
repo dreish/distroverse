@@ -7,6 +7,7 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -30,6 +31,7 @@ public interface DvtpProxy
    /**
     * Called by the client to feed an object to the proxy.
     * @param o
+    * @throws IOException 
     */
-   public void offer( ClientSendable o );
+   public void offer( ClientSendable o ) throws IOException;
    }
