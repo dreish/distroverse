@@ -12,6 +12,7 @@ package org.distroverse.dvtp;
  * detailed scene.  The number indicates the factor below the target
  * frames/second rate at which the client is currently rendering.  It
  * should always be greater than 1.
+ * XXX This is retarded.  Combine with MoreDetail.
  * @author dreish
  */
 public class LessDetail extends Flo implements ClientSendable

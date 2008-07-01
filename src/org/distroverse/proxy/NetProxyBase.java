@@ -30,7 +30,9 @@ public abstract class NetProxyBase extends ProxyBase
    public NetProxyBase()
       {
       mWatcher = new DvtpProxyInQueueObjectWatcher( this );
+      mWatcher.addQueue( mFromServerQueue );
       mWatcher.start();
+      mConnection = null;
       }
    
    /* (non-Javadoc)
@@ -42,8 +44,13 @@ public abstract class NetProxyBase extends ProxyBase
       if ( o instanceof SetUrl )
          {
          SetUrl su = (SetUrl) o;
-         DvtpServerConnection mConnection
-            = new DvtpServerConnection( su.getUrl() );
+         if ( mConnection != null )
+            mConnection.close();
+         mConnection = new DvtpServerConnection( su.getUrl() );
+         }
+      else
+         {
+         receiveFromClient( o );
          }
       }
 
@@ -68,8 +75,18 @@ public abstract class NetProxyBase extends ProxyBase
     * @param o
     */
    public abstract void receiveFromServer( DvtpExternalizable o );
+   
+   /**
+    * This method is called by offer() for any object that is not a
+    * SetUrl.
+    * @param o
+    * @throws ClosedChannelException
+    */
+   abstract protected void receiveFromClient( ClientSendable o )
+   throws ClosedChannelException;
 
    private NetOutQueue< DvtpExternalizable > mToServerQueue;
    private NetInQueue< DvtpExternalizable > mFromServerQueue;
    private NetInQueueWatcher< DvtpExternalizable > mWatcher;
+   private DvtpServerConnection mConnection;
    }

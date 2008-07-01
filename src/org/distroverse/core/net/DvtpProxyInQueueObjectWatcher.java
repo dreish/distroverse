@@ -24,6 +24,9 @@ extends NetInQueueWatcher< DvtpExternalizable >
       mProxy = p;
       }
 
+   /* (non-Javadoc)
+    * @see org.distroverse.core.net.NetInQueueWatcher#handleNetInObject(java.lang.Object, org.distroverse.core.net.NetInQueue)
+    */
    @Override
    protected void 
    handleNetInObject( DvtpExternalizable net_in_object,

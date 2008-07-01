@@ -85,6 +85,14 @@ public abstract class NetInQueueWatcher< T > extends Thread
          }
       }
 
+   /**
+    * The specialization of this method will be called by
+    * NetInQueueWatcher.clearAllQueues() for every object that is
+    * received.
+    * @param net_in_object
+    * @param queue
+    * @throws IOException
+    */
    protected abstract void handleNetInObject( T net_in_object,
                                               NetInQueue< T > queue )
    throws IOException;
