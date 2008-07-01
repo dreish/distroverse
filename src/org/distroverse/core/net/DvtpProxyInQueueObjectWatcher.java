@@ -18,6 +18,12 @@ import org.distroverse.proxy.NetProxyBase;
 public class DvtpProxyInQueueObjectWatcher
 extends NetInQueueWatcher< DvtpExternalizable >
    {
+   /**
+    * Create a thread object that, when started, will watch any queues
+    * that are added to it and dispatch each object o in those queues
+    * with p.receiveFromServer( o ).
+    * @param p
+    */
    public DvtpProxyInQueueObjectWatcher( NetProxyBase p )
       {
       super();

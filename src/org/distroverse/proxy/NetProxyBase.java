@@ -35,6 +35,41 @@ public abstract class NetProxyBase extends ProxyBase
       mConnection = null;
       }
    
+   private class ServerWatcher extends Thread
+      {
+      public ServerWatcher( DvtpServerConnection c,
+                            NetProxyBase         q )
+         {
+         mWatchedConnection = c;
+         mNetProxy          = q;
+         }
+      @Override
+      public void run()
+         {
+         try
+            {
+            while ( true )
+               {
+               Object o = mWatchedConnection.getObject();
+               mNetProxy.receiveFromServer( (DvtpExternalizable) o );
+               }
+            }
+         catch ( IOException e )
+            {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            }
+         catch ( ClassNotFoundException e )
+            {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            }
+         }
+      
+      private DvtpServerConnection mWatchedConnection;
+      private NetProxyBase mNetProxy;
+      }
+   
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpProxy#offer(org.distroverse.dvtp.ClientSendable)
     */
@@ -47,6 +82,7 @@ public abstract class NetProxyBase extends ProxyBase
          if ( mConnection != null )
             mConnection.close();
          mConnection = new DvtpServerConnection( su.getUrl() );
+         new ServerWatcher( mConnection, this ).start();
          }
       else
          {
@@ -60,7 +96,7 @@ public abstract class NetProxyBase extends ProxyBase
    public void run()
       {
       // XXX Auto-generated method stub
-
+      // There might be nothing to do here.
       }
    
    public void sendToServer( DvtpExternalizable o )
