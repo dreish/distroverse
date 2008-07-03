@@ -13,9 +13,12 @@ package org.distroverse.distroplane.lib;
 import org.distroverse.core.net.NetInQueueWatcher;
 
 /**
+ * A DvtpListener's serve() method opens a server socket, listens for
+ * incoming connections, receives DVTP commands and sends responses as
+ * defined by a DvtpServer.
  * @author dreish
  */
-public abstract class DvtpListener
+public interface DvtpListener
    {
    /**
     * Waits for incoming connections and handles them.  Does not return
@@ -23,19 +26,11 @@ public abstract class DvtpListener
     */
    public abstract void serve();
 
-   public DvtpServer getServer()
-      {  return mServer;  }
+   public DvtpServer getServer();
 
-   public void setServer( DvtpServer server )
-      {  mServer = server;  }
+   public void setServer( DvtpServer server );
 
-   public void setWatcher( NetInQueueWatcher< Object > watcher_thread )
-      {  mWatcher = watcher_thread;  }
+   public void setWatcher( NetInQueueWatcher< Object > watcher_thread );
 
-   public void setGreeting( String greeting )
-      {  mGreeting = greeting;  }
-
-   protected DvtpServer                  mServer;
-   protected NetInQueueWatcher< Object > mWatcher;
-   protected String                      mGreeting;
+   public void setGreeting( String greeting );
    }

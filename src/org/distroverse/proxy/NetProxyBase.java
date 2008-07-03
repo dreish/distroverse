@@ -8,8 +8,11 @@
 package org.distroverse.proxy;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 
+import org.distroverse.core.net.DvtpExtParser;
+import org.distroverse.core.net.DvtpFlexiParser;
 import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
 import org.distroverse.core.net.NetInQueue;
 import org.distroverse.core.net.NetInQueueWatcher;
@@ -27,11 +30,18 @@ import org.distroverse.viewer.DvtpServerConnection;
  */
 public abstract class NetProxyBase extends ProxyBase
    {
+   private static final int DEFAULT_QUEUE_SIZE = 10;
+
    public NetProxyBase()
       {
+      mFromServerQueue 
+         = new NetInQueue< DvtpExternalizable >
+               (new DvtpExtParser( ByteBuffer.allocate( 1024 ) ),
+                DEFAULT_QUEUE_SIZE, null, null);
       mWatcher = new DvtpProxyInQueueObjectWatcher( this );
       mWatcher.addQueue( mFromServerQueue );
       mWatcher.start();
+      
       mConnection = null;
       }
    
@@ -56,7 +66,7 @@ public abstract class NetProxyBase extends ProxyBase
             }
          catch ( IOException e )
             {
-            // TODO Auto-generated catch block
+            // FIXME this probably just means the connection was closed
             e.printStackTrace();
             }
          catch ( ClassNotFoundException e )

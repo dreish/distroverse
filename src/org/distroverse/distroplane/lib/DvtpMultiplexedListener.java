@@ -20,21 +20,17 @@ import org.distroverse.core.Log;
 import org.distroverse.core.net.*;
 
 /**
- * This class implements DvtpListener in a simple, straightforward, and
- * not particularly efficient way using multiple threads.  It always has
- * the same number of listening threads (except during the brief period
- * between accepting a connection and creating a new thread), plus a
- * thread for each active session.
+ * This class implements DvtpListener using a single thread to listen
+ * for new connections and process I/O on existing connections.
  * @author dreish
  */
 public class 
 DvtpMultiplexedListener< P extends ObjectParser< Object >,
-                         S extends ObjectStreamer< Object > > 
-extends DvtpListener
+                         S extends ObjectStreamer< Object > >
+extends DvtpMultiplexedConnection< Object, P, S >
+implements DvtpListener
    {
    public static final int DEFAULT_NUM_THREADS = 8;
-   public static final int DEFAULT_QUEUE_SIZE  = 10;
-
    /**
     * 
     */
@@ -48,10 +44,18 @@ extends DvtpListener
 //      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
 
+   public DvtpServer getServer()
+      {  return mServer;  }
+
+   public void setServer( DvtpServer server )
+      {  mServer = server;  }
+
+   public void setGreeting( String greeting )
+      {  mGreeting = greeting;  }
+
    /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpListener#serve()
     */
-   @Override
    public void serve()
       {
       // Set up the sockets
@@ -109,37 +113,8 @@ extends DvtpListener
          }
       }
    
-   private void processIo()
-      {
-      for ( SelectionKey key : mSelector.selectedKeys() )
-         {
-         try
-            {
-            if ( key.isAcceptable() )
-               acceptConnection( key );
-            if ( key.isReadable() )
-               readConnection( key );
-            if ( key.isWritable() )
-               writeConnection( key );
-            }
-         catch ( Exception e )
-            {
-            Log.p( "Canceling an unknown key due to an exception",
-                   Log.NET, -10 );
-            key.cancel();
-            Log.p( e, Log.NET, -10 );
-            try 
-               {  key.channel().close();  }
-            catch ( IOException e2 )
-               {  
-               Log.p( "Unhandled exception: " + e, 
-                      Log.NET | Log.UNHANDLED, 1 ); 
-               }
-            }
-         }
-      }
-   
-   private void acceptConnection( SelectionKey key )
+   @Override
+   protected void acceptConnection( SelectionKey key )
    throws IOException
       {
       Log.p( "acceptConnection called", Log.NET, -50 );
@@ -194,29 +169,8 @@ extends DvtpListener
          noqs.add( mGreeting );
       }
 
-   private void readConnection( SelectionKey key )
-   throws Exception
-      {
-      Log.p( "readConnection called", Log.NET, -50 );
-      @SuppressWarnings( "unchecked" )
-      NetSession< Object > session 
-         = (NetSession< Object >) key.attachment();
-      session.getNetInQueue().read();
-      }
-
-   private void writeConnection( SelectionKey key )
-   throws Exception
-      {
-      Log.p( "writeConnection called", Log.NET, -50 );
-      @SuppressWarnings( "unchecked" )
-      NetSession< Object > session 
-         = (NetSession< Object >) key.attachment();
-      session.getNetOutQueue().write();
-      }
-
-//   private int                 mNumThreads;
-   private ServerSocketChannel    mServerChannel;
-   private Selector               mSelector;
-   private Class< P >             mParserClass;
-   private Class< S >             mStreamerClass;
+   //   private int                 mNumThreads;
+   private ServerSocketChannel         mServerChannel;
+   private DvtpServer                  mServer;
+   private String                      mGreeting;
    }

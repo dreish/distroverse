@@ -22,6 +22,7 @@ public class PassThroughProxy extends NetProxyBase
       this.putQueue( (ProxySendable) o );
       }
    
+   @Override
    protected void receiveFromClient( ClientSendable o )
    throws ClosedChannelException
       {
