@@ -37,7 +37,7 @@ public class NetOutQueue< T >
       os.setQueue( this );
       mWriterKey      = null;
       mSelector       = s;
-      mClient         = client;
+      mRemote         = client;
       }
    
    public void add( T o )
@@ -86,12 +86,16 @@ public class NetOutQueue< T >
          }
       }
    
+   /**
+    * This only gets called when objects are added to the queue.
+    * @throws ClosedChannelException
+    */
    synchronized private void activateNetworkWriter()
    throws ClosedChannelException
       {
       if ( mWriterKey == null )
          {
-         mWriterKey = mClient.register( mSelector,
+         mWriterKey = mRemote.register( mSelector,
                                         SelectionKey.OP_WRITE );
          mWriterKey.attach( mNetSession );
          }
@@ -101,7 +105,7 @@ public class NetOutQueue< T >
 
    public void write() throws Exception
       {
-      mObjectStreamer.write( mClient );
+      mObjectStreamer.write( mRemote );
       }
 
    public void setSession( NetSession< T > ns )
@@ -111,18 +115,33 @@ public class NetOutQueue< T >
    public ObjectStreamer< T > getStreamer()
       {  return mObjectStreamer;  }
 
-   /* Plan:
-    * - This object should have a reference to the network connection,
-    * and should turn on and off the waiting-for-readability status
-    * - Add a method to get as much as the next N bytes (or just
-    * something that takes a ByteBuffer and fills/flips it)
+   /**
+    * Objects waiting to be sent
     */
-
    private LinkedList< T >     mContents;
+   /**
+    * Length limit before further adds fail
+    */
    private int                 mMaxLength;
+   /**
+    * An object that can convert objects of type T into bytes
+    */
    private ObjectStreamer< T > mObjectStreamer;
+   /**
+    * The key that registers this NetOutQueue's interest in writing
+    * bytes to mRemote
+    */
    private SelectionKey        mWriterKey;
+   /**
+    * The Selector through which input and output are multiplexed
+    */
    private Selector            mSelector;
-   private SocketChannel       mClient;
+   /**
+    * The connection to the remote (receiving) socket
+    */
+   private SocketChannel       mRemote;
+   /**
+    * The session associated with this connection.
+    */
    private NetSession< T >     mNetSession;
    }

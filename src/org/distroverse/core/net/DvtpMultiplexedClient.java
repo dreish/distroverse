@@ -4,7 +4,9 @@
 package org.distroverse.core.net;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
 import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
@@ -17,13 +19,9 @@ public class DvtpMultiplexedClient< O extends Object,
                                     S extends ObjectStreamer< O > >
 extends DvtpMultiplexedConnection< O, P, S >
    {
-
-   /**
-    * 
-    */
    public DvtpMultiplexedClient()
       {
-      // TODO Auto-generated constructor stub
+      super();
       }
 
    /* (non-Javadoc)
@@ -36,4 +34,11 @@ extends DvtpMultiplexedConnection< O, P, S >
       throw new IOException( "Client cannot accept connections" );
       }
 
+   public NetSession< O > connect( SocketAddress remote_address )
+   throws IOException
+      {
+      SocketChannel remote = SocketChannel.open();
+      remote.connect( remote_address );
+      return addSocket( remote );
+      }
    }

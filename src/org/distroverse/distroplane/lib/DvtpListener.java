@@ -32,5 +32,8 @@ public interface DvtpListener
 
    public void setWatcher( NetInQueueWatcher< Object > watcher_thread );
 
-   public void setGreeting( String greeting );
+   public void setGreeting( Object greeting );
+
+//   public void addSocket( SocketChannel client ) throws IOException,
+//                                          ClosedChannelException;
    }

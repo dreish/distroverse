@@ -10,14 +10,17 @@
  */
 package org.distroverse.distroplane.lib;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.net.*;
-import java.nio.*;
-import java.nio.channels.*;
-// import java.nio.charset.*;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+
 import org.distroverse.core.Log;
-import org.distroverse.core.net.*;
+import org.distroverse.core.net.ObjectParser;
+import org.distroverse.core.net.ObjectStreamer;
 
 /**
  * This class implements DvtpListener using a single thread to listen
@@ -40,8 +43,6 @@ implements DvtpListener
       super();
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
-//      mNumThreads = DEFAULT_NUM_THREADS;
-//      mEncoder = Charset.forName( "US-ASCII" ).newEncoder();
       }
 
    public DvtpServer getServer()
@@ -49,9 +50,6 @@ implements DvtpListener
 
    public void setServer( DvtpServer server )
       {  mServer = server;  }
-
-   public void setGreeting( String greeting )
-      {  mGreeting = greeting;  }
 
    /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpListener#serve()
@@ -85,9 +83,7 @@ implements DvtpListener
    
    /**
     * This function does not return.  When it receives a connection, it
-    * creates a new listener thread to take over the job of listening
-    * for new connections.  When it finishes with that connection, the
-    * thread ends.
+    * adds that connection to the multiplexer.
     * 
     * Exceptions are ignored.
     * 
@@ -95,8 +91,7 @@ implements DvtpListener
     */
    private void listen()
       {
-      boolean encountered_fatal_exception = false;
-      while ( ! encountered_fatal_exception )
+      while ( true )
          {
          try
             {
@@ -108,7 +103,6 @@ implements DvtpListener
             Log.p( "Unhandled exception: " + e, 
                    Log.NET | Log.UNHANDLED, 1 );
             Log.p( e, Log.NET | Log.UNHANDLED, 1 );
-            encountered_fatal_exception = true;
             }
          }
       }
@@ -121,56 +115,10 @@ implements DvtpListener
       ServerSocketChannel server = (ServerSocketChannel) key.channel();
       SocketChannel       client = server.accept();
       if ( client == null )  return;
-      client.configureBlocking( false );
-//      SelectionKey tmp_key = client.register( mSelector,
-//                                              SelectionKey.OP_READ );
-
-      ByteBuffer parser_buffer   = ByteBuffer.allocate( 1024 );
-      ByteBuffer streamer_buffer = ByteBuffer.allocate( 1024 );
-      P parser;
-      S streamer;
-      try
-         {
-         Constructor< P > parser_constructor 
-            = mParserClass.getConstructor( ByteBuffer.class ); 
-         Constructor< S > streamer_constructor 
-            = mStreamerClass.getConstructor( ByteBuffer.class );
-         parser   = parser_constructor  .newInstance( parser_buffer );
-         streamer = streamer_constructor.newInstance( streamer_buffer );
-         }
-      catch ( Exception e )
-         {
-         /* This exception should never occur, because the base classes
-          * ObjectParser and ObjectStreamer define concrete constructors
-          * with one ByteBuffer argument.
-          */
-         Log.p( "Impossible exception: " + e, Log.NET, 100 );
-         try
-            {  key.channel().close();  }
-         catch ( IOException e2 )
-            {  
-            Log.p( "Unhandled impossible exception: " + e,
-                   Log.NET | Log.UNHANDLED, 100 );  
-            }
-         return;
-         }
-      NetInQueue< Object > niqs = new NetInQueue< Object >(
-            parser,   DEFAULT_QUEUE_SIZE, mSelector, client );
-      NetOutQueue< Object > noqs = new NetOutQueue< Object >(
-            streamer, DEFAULT_QUEUE_SIZE, mSelector, client );
-      new NetSession< Object >( niqs, noqs );
-      mWatcher.addQueue( niqs );
-      /* activateNetworkReader() creates a SelectionKey and attaches
-       * niqs to it, so all three of the above objects survive at least
-       * as long as the SelectionKey survives.
-       */ 
-      niqs.activateNetworkReader();
-      if ( mGreeting != null )
-         noqs.add( mGreeting );
+      // TODO - might not always want to throw away the NetSession
+      addSocket( client );
       }
 
-   //   private int                 mNumThreads;
-   private ServerSocketChannel         mServerChannel;
-   private DvtpServer                  mServer;
-   private String                      mGreeting;
+   private ServerSocketChannel  mServerChannel;
+   private DvtpServer           mServer;
    }
