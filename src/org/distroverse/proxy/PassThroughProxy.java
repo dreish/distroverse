@@ -9,15 +9,16 @@ package org.distroverse.proxy;
 
 import java.nio.channels.ClosedChannelException;
 
+import org.distroverse.core.net.NetSession;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.ProxySendable;
 
-
-public class PassThroughProxy extends NetProxyBase
+public class PassThroughProxy extends SingleServerProxyBase
    {
    @Override
-   public void receiveFromServer( DvtpExternalizable o )
+   public void receiveFromServer( NetSession< Object > s,
+                                  DvtpExternalizable o )
       {
       this.putQueue( (ProxySendable) o );
       }

@@ -23,7 +23,7 @@ import com.jme.math.Vector3f;
 
 /**
  * Provides some handy utility classes and implements the fairly obvious
- * setQueue() method.
+ * setQueue() method.  Leaves unimplemented: run(), offer().
  * @author dreish
  */
 public abstract class ProxyBase implements DvtpProxy

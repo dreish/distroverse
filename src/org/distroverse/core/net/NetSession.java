@@ -70,6 +70,15 @@ public class NetSession< T >
    public Object getAttachment()
       {  return mAttachment;  }
 
+   /**
+    * Close the socket associated with this connection
+    */
+   public void close()
+      {
+      // FIXME Auto-generated method stub
+
+      }
+
    private NetInQueue< T >  mNetInQueue;
    private NetOutQueue< T > mNetOutQueue;
    private Object           mAttachment;

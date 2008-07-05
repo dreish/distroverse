@@ -8,6 +8,7 @@
 package org.distroverse.core.net;
 
 import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.Str;
 import org.distroverse.proxy.NetProxyBase;
 
 /**
@@ -16,7 +17,7 @@ import org.distroverse.proxy.NetProxyBase;
  * @author dreish
  */
 public class DvtpProxyInQueueObjectWatcher
-extends NetInQueueWatcher< DvtpExternalizable >
+extends NetInQueueWatcher< Object >
    {
    /**
     * Create a thread object that, when started, will watch any queues
@@ -35,10 +36,18 @@ extends NetInQueueWatcher< DvtpExternalizable >
     */
    @Override
    protected void 
-   handleNetInObject( DvtpExternalizable net_in_object,
-                      NetInQueue< DvtpExternalizable > queue )
+   handleNetInObject( Object net_in_object,
+                      NetInQueue< Object > queue )
       {
-      mProxy.receiveFromServer( net_in_object );
+      if ( net_in_object instanceof String )
+         mProxy.receiveFromServer( queue.getSession(),
+                                   new Str( (String) net_in_object ) );
+      else if ( net_in_object instanceof DvtpExternalizable )
+         mProxy.receiveFromServer( queue.getSession(),
+                                   (DvtpExternalizable) net_in_object );
+      else
+         throw new IllegalArgumentException( "net_in_object not a valid"
+                                             + "DVTP type" );
       }
 
    private NetProxyBase mProxy;

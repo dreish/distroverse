@@ -69,7 +69,7 @@ implements DvtpListener
          mServerChannel.register( mSelector, SelectionKey.OP_ACCEPT );
          Log.p( "Listening for connections", Log.NET, -40 );
 
-         listen();
+         run();
          }
       catch ( IOException e )
          {
@@ -78,32 +78,6 @@ implements DvtpListener
          Log.p( e, Log.NET | Log.UNHANDLED, 1 );
          // Returns without listening; it is assumed that the socket
          // could not be created.
-         }
-      }
-   
-   /**
-    * This function does not return.  When it receives a connection, it
-    * adds that connection to the multiplexer.
-    * 
-    * Exceptions are ignored.
-    * 
-    * FIXME Handle IOException properly
-    */
-   private void listen()
-      {
-      while ( true )
-         {
-         try
-            {
-            mSelector.select();
-            processIo();
-            }
-         catch ( IOException e )
-            {
-            Log.p( "Unhandled exception: " + e, 
-                   Log.NET | Log.UNHANDLED, 1 );
-            Log.p( e, Log.NET | Log.UNHANDLED, 1 );
-            }
          }
       }
    

@@ -30,6 +30,7 @@ public abstract class
 DvtpMultiplexedConnection< O extends Object,
                            P extends ObjectParser< O >, 
                            S extends ObjectStreamer< O > >
+implements Runnable
    {
    public static final int DEFAULT_QUEUE_SIZE = 10;
 
@@ -51,6 +52,35 @@ DvtpMultiplexedConnection< O extends Object,
 
    public void setWatcher( NetInQueueWatcher< O > watcher_thread )
       {  mWatcher = watcher_thread;  }
+
+   public void setGreeting( O greeting )
+      {  mGreeting = greeting;  }
+
+   /**
+    * This function does not return.  When it receives a connection, it
+    * adds that connection to the multiplexer.
+    * 
+    * Exceptions are ignored.
+    * 
+    * FIXME Handle IOException properly
+    */
+   public void run()
+      {
+      while ( true )
+         {
+         try
+            {
+            mSelector.select();
+            processIo();
+            }
+         catch ( IOException e )
+            {
+            Log.p( "Unhandled exception: " + e, 
+                   Log.NET | Log.UNHANDLED, 1 );
+            Log.p( e, Log.NET | Log.UNHANDLED, 1 );
+            }
+         }
+      }
 
    protected void processIo()
       {
@@ -167,9 +197,6 @@ DvtpMultiplexedConnection< O extends Object,
       
       return ret;
       }
-
-   public void setGreeting( O greeting )
-      {  mGreeting = greeting;  }
 
    protected Class< P > mParserClass;
    protected Class< S > mStreamerClass;

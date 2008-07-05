@@ -8,19 +8,17 @@
 package org.distroverse.proxy;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
 
-import org.distroverse.core.net.DvtpExtParser;
 import org.distroverse.core.net.DvtpFlexiParser;
+import org.distroverse.core.net.DvtpFlexiStreamer;
+import org.distroverse.core.net.DvtpMultiplexedClient;
 import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
-import org.distroverse.core.net.NetInQueue;
 import org.distroverse.core.net.NetInQueueWatcher;
-import org.distroverse.core.net.NetOutQueue;
+import org.distroverse.core.net.NetSession;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
-import org.distroverse.dvtp.SetUrl;
-import org.distroverse.viewer.DvtpServerConnection;
 
 /**
  * Provides a useful base upon which to build proxy classes that
@@ -30,76 +28,16 @@ import org.distroverse.viewer.DvtpServerConnection;
  */
 public abstract class NetProxyBase extends ProxyBase
    {
-   private static final int DEFAULT_QUEUE_SIZE = 10;
-
    public NetProxyBase()
       {
-      mFromServerQueue 
-         = new NetInQueue< DvtpExternalizable >
-               (new DvtpExtParser( ByteBuffer.allocate( 1024 ) ),
-                DEFAULT_QUEUE_SIZE, null, null);
+      mMultiplexer
+         = new DvtpMultiplexedClient< Object, DvtpFlexiParser,
+                                      DvtpFlexiStreamer >();
       mWatcher = new DvtpProxyInQueueObjectWatcher( this );
-      mWatcher.addQueue( mFromServerQueue );
+      mMultiplexer.setWatcher( mWatcher );
       mWatcher.start();
-      
-      mConnection = null;
       }
    
-   private class ServerWatcher extends Thread
-      {
-      public ServerWatcher( DvtpServerConnection c,
-                            NetProxyBase         q )
-         {
-         mWatchedConnection = c;
-         mNetProxy          = q;
-         }
-      @Override
-      public void run()
-         {
-         try
-            {
-            while ( true )
-               {
-               Object o = mWatchedConnection.getObject();
-               mNetProxy.receiveFromServer( (DvtpExternalizable) o );
-               }
-            }
-         catch ( IOException e )
-            {
-            // FIXME this probably just means the connection was closed
-            e.printStackTrace();
-            }
-         catch ( ClassNotFoundException e )
-            {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            }
-         }
-      
-      private DvtpServerConnection mWatchedConnection;
-      private NetProxyBase mNetProxy;
-      }
-   
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpProxy#offer(org.distroverse.dvtp.ClientSendable)
-    */
-   public void offer( ClientSendable o )
-   throws IOException
-      {
-      if ( o instanceof SetUrl )
-         {
-         SetUrl su = (SetUrl) o;
-         if ( mConnection != null )
-            mConnection.close();
-         mConnection = new DvtpServerConnection( su.getUrl() );
-         new ServerWatcher( mConnection, this ).start();
-         }
-      else
-         {
-         receiveFromClient( o );
-         }
-      }
-
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpProxy#run()
     */
@@ -108,19 +46,43 @@ public abstract class NetProxyBase extends ProxyBase
       // XXX Auto-generated method stub
       // There might be nothing to do here.
       }
-   
-   public void sendToServer( DvtpExternalizable o )
+
+   /**
+    * Create a new connection to a server and initialize the connection
+    * with sendGreeting().
+    * @param remote_address
+    * @return
+    * @throws IOException
+    */
+   protected NetSession< Object >
+   connect( SocketAddress remote_address )
+   throws IOException
+      {
+      NetSession< Object > ret = mMultiplexer.connect( remote_address );
+      sendGreeting( ret );
+      return ret;
+      }
+
+   /**
+    * Defines how 
+    * @param new_server
+    * @throws ClosedChannelException
+    */
+   protected void sendGreeting( NetSession< Object > new_server )
    throws ClosedChannelException
       {
-      mToServerQueue.add( o );
+      // FIXME: rather than doing it this way, respond to the server's
+      // greeting.
+      new_server.getNetOutQueue().add( "PROXYOPEN" );
       }
-   
+
    /**
     * This method is called by the NetInQueueWatcher every time an
-    * object is sent from the server.
+    * object is sent from a server.
     * @param o
     */
-   public abstract void receiveFromServer( DvtpExternalizable o );
+   public abstract void receiveFromServer( NetSession< Object > s,
+                                           DvtpExternalizable o );
    
    /**
     * This method is called by offer() for any object that is not a
@@ -131,8 +93,7 @@ public abstract class NetProxyBase extends ProxyBase
    abstract protected void receiveFromClient( ClientSendable o )
    throws ClosedChannelException;
 
-   private NetOutQueue< DvtpExternalizable > mToServerQueue;
-   private NetInQueue< DvtpExternalizable > mFromServerQueue;
-   private NetInQueueWatcher< DvtpExternalizable > mWatcher;
-   private DvtpServerConnection mConnection;
+   private NetInQueueWatcher< Object > mWatcher;
+   private DvtpMultiplexedClient< Object, DvtpFlexiParser,
+                                  DvtpFlexiStreamer > mMultiplexer;
    }

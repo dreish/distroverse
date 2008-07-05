@@ -15,9 +15,10 @@
       - Maybe the behavior of listening versus opening new connections
         should be a specialization of DvtpMultiplexedConnection?
         - DvtpMultiplexedClient
-          - connect( SocketAddress remote )
-      - DvtpExtParser
-      - DvtpExtStreamer
+          + connect( SocketAddress remote )
+      x DvtpExtParser
+      x DvtpExtStreamer
+        > These will not be useful for connecting to a DVTP server
   - Create a simple server that feeds some shapes to a pass-through
     proxy and moves them around
     + Shape needs an externalization format
