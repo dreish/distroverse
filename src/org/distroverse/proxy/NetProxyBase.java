@@ -36,6 +36,7 @@ public abstract class NetProxyBase extends ProxyBase
       mWatcher = new DvtpProxyInQueueObjectWatcher( this );
       mMultiplexer.setWatcher( mWatcher );
       mWatcher.start();
+      mMultiplexer.start();
       }
    
    /* (non-Javadoc)

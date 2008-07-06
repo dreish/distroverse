@@ -17,13 +17,14 @@ import org.distroverse.core.Util;
 /**
  * The current maximum blob size is 65,536 bytes, though this limit
  * could easily be increased in the future if appropriate, up to 2^63
- * bytes.
+ * bytes.  It is limited solely to discourage the use of huge message
+ * objects.
  * @author dreish
  */
 public class Blob implements DvtpExternalizable
    {
    /**
-    * Does NOT take ownership of 'bytes'
+    * Copies, and does NOT take ownership of 'bytes'.
     * @param bytes
     * @param n_read
     * @param resource
@@ -56,7 +57,7 @@ public class Blob implements DvtpExternalizable
       }
 
    public int getClassNumber()
-      {  return 26;  }
+      {  return 25;  }
    public byte[] getBytes()
       {  return mBytes;  }
    public Str getResource()

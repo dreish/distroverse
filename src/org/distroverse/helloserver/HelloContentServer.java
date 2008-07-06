@@ -88,7 +88,7 @@ public class HelloContentServer extends DvtpServer
       addObject( noq, 
                  pf.setPrimShape( PrimShape.CUBOID  ).generate(), 3L,
                  +30.0f, 10.0f, 40.0f );
-      // XXX - Wait, how do I close connections from the server?
+      noq.getSession().close();
       }
 
    protected void addObject( NetOutQueue< Object > noq, Shape s,
@@ -99,6 +99,7 @@ public class HelloContentServer extends DvtpServer
       noq.add( new AddObject( s, id, pid, m ) );
       }
 
+   // XXX This is mostly duplicated with ProxyBase.
    protected void addObject( NetOutQueue< Object > noq, Shape s, 
                              long id, float x, float y, float z )
    throws ClosedChannelException

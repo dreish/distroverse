@@ -25,7 +25,8 @@ import org.distroverse.dvtp.Err;
  * Instantiate it with an instance of a subclass of DvtpListener that
  * will define how your server handles multiple connections (e.g.,
  * multiple threads, multiplexing, or a combination), or use
- * createServer() to set up a DvtpMultiplexedListener.
+ * createServer() to set up a DvtpMultiplexedListener.  (See the
+ * org.distroverse.helloserver.* classes for simple examples.)
  *
  * @author dreish
  */
@@ -180,7 +181,6 @@ public abstract class DvtpServer
       {
       noq.add( new Err( "Unrecognized command: " + token, 501 ) );
       }
-
 
    /**
     * @return the listen port

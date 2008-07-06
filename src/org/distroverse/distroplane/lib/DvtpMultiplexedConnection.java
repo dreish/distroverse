@@ -30,7 +30,7 @@ public abstract class
 DvtpMultiplexedConnection< O extends Object,
                            P extends ObjectParser< O >, 
                            S extends ObjectStreamer< O > >
-implements Runnable
+extends Thread
    {
    public static final int DEFAULT_QUEUE_SIZE = 10;
 
@@ -64,6 +64,7 @@ implements Runnable
     * 
     * FIXME Handle IOException properly
     */
+   @Override
    public void run()
       {
       while ( true )

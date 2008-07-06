@@ -1,6 +1,6 @@
 
 - To do for 0.01:
-  - Create a pass-through proxy
+  + Create a pass-through proxy
     + I don't think I can use NetInQueue or NetOutQueue here -- they are
       designed to be as nonblocking as possible, but the proxy actually
       should block reads when it is busy
@@ -10,12 +10,12 @@
     + Feed objects from the server to the client
       + Proxy needs to establish a connection to the server
         + This should happen when the client offers the proxy a SetUrl
-    - Start over without using NetInQueue -- it's designed specifically
+    x Start over without using NetInQueue -- it's designed specifically
       to work with multiplexed input
-      - Maybe the behavior of listening versus opening new connections
-        should be a specialization of DvtpMultiplexedConnection?
-        - DvtpMultiplexedClient
-          + connect( SocketAddress remote )
+    + Maybe the behavior of listening versus opening new connections
+      should be a specialization of DvtpMultiplexedConnection?
+      + DvtpMultiplexedClient
+        + connect( SocketAddress remote )
       x DvtpExtParser
       x DvtpExtStreamer
         > These will not be useful for connecting to a DVTP server
