@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -32,6 +32,20 @@ public class Vec implements DvtpExternalizable
    public int getClassNumber()
       {  return 11;  }
 
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o instanceof Vec )
+         return mVec.equals( ((Vec) o).mVec );
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mVec.hashCode();
+      }
+
    public Vector3f asVector3f()
       {
       return mVec;
@@ -50,12 +64,12 @@ public class Vec implements DvtpExternalizable
       Flo.floatAsExternal( out, mVec.y );
       Flo.floatAsExternal( out, mVec.z );
       }
-   
+
    public String prettyPrint()
       {
-      return "(Vec " 
+      return "(Vec "
              + Util.prettyPrintList( mVec ) + ")";
       }
-   
+
    private Vector3f mVec;
    }

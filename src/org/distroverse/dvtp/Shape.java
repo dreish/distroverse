@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -25,7 +25,7 @@ import com.jme.util.geom.BufferUtils;
  * This class is part of the DVTP protocol.  It defines how shapes
  * are transmitted from the proxy to the client.  Shape includes
  * texture and image map.
- * 
+ *
  * @author dreish
  *
  */
@@ -35,7 +35,7 @@ public class Shape implements DvtpExternalizable
       {
       super();
       }
-   
+
    /**
     * Constructor from a List of points and an array of vertex counts,
     * as for a TriangleStripArray.
@@ -46,7 +46,7 @@ public class Shape implements DvtpExternalizable
    public Shape( List<Point3d> points, int[] vertex_counts,
                  @SuppressWarnings("unused") int dummy )
       {
-      Point3d[] points_arr 
+      Point3d[] points_arr
          = points.toArray( new Point3d[ points.size() ] );
       mPoints = new PointArray( points_arr );
       mVertexCounts = vertex_counts;
@@ -60,7 +60,7 @@ public class Shape implements DvtpExternalizable
     */
    public Shape( List<Vector3f> vectors, int[] vertex_counts )
       {
-      Vector3f[] vectors_arr 
+      Vector3f[] vectors_arr
          = vectors.toArray( new Vector3f[ vectors.size() ] );
       mPoints = new PointArray( vectors_arr );
       mVertexCounts = vertex_counts;
@@ -68,6 +68,25 @@ public class Shape implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 10;  }
+
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o instanceof Shape )
+         {
+         Shape s = (Shape) o;
+         return (   mPoints.equals( s.mPoints )
+                 && Arrays.equals( mVertexCounts, s.mVertexCounts ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mPoints.hashCode()
+             ^ Arrays.hashCode( mVertexCounts );
+      }
 
    public TriMesh asTriMesh()
       {
@@ -84,19 +103,19 @@ public class Shape implements DvtpExternalizable
                                       1 );
 
       TriMesh tm = new TriMesh( "DvtpShape",
-                                p, null, 
+                                p, null,
                                 BufferUtils.createFloatBuffer( colors ),
                                 p, vi );
       tm.setModelBound( new BoundingBox() );
       tm.updateModelBound();
-            
+
       return tm;
       }
-   
+
    private IntBuffer vertexIndices()
       {
       IntBuffer ret = IntBuffer.allocate( numVertexIndices() );
-      
+
       int pos = 0;
       for ( int vertex_count : mVertexCounts )
          {
@@ -107,16 +126,16 @@ public class Shape implements DvtpExternalizable
             }
          pos += vertex_count;
          }
-      
+
       return ret;
       }
-   
+
    private void addTriangleIndices( IntBuffer ib, int n )
       {
       for ( int i = 0; i < 3; ++i )
          ib.put( n + i );
       }
-   
+
    private int numVertexIndices()
       {
       int ret = 0;
@@ -130,8 +149,9 @@ public class Shape implements DvtpExternalizable
       {
       (mPoints = new PointArray()).readExternal( in );
       int num_vcs = Util.safeInt( CompactUlong.externalAsLong( in ) );
-      CompactUlong[] vcs = DvtpObject.readArray( in, num_vcs, 
+      CompactUlong[] vcs = DvtpObject.readArray( in, num_vcs,
                                                  CompactUlong.class );
+      mVertexCounts = new int[ num_vcs ];
       for ( int i = 0; i < vcs.length; ++i )
          mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
       }
@@ -146,7 +166,7 @@ public class Shape implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Shape " 
+      return "(Shape "
              + Util.prettyPrintList( mPoints, mVertexCounts ) + ")";
       }
 

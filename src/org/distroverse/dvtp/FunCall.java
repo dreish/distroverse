@@ -22,7 +22,7 @@ public class FunCall extends DList
       super();
       }
    
-   public FunCall( DvtpExternalizable[] f )
+   public FunCall( DvtpExternalizable... f )
       {
       super( f );
       }

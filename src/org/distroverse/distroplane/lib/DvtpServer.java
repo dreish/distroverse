@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
  */
 /*
- * 
+ *
  */
 package org.distroverse.distroplane.lib;
 
@@ -21,7 +21,7 @@ import org.distroverse.dvtp.Err;
  * An abstract base class handling the annoying details of a DVTP
  * server.  Subclass this and implement handleLocation(), handleGet(),
  * and handleProxyOpen() to define your server.
- * 
+ *
  * Instantiate it with an instance of a subclass of DvtpListener that
  * will define how your server handles multiple connections (e.g.,
  * multiple threads, multiplexing, or a combination), or use
@@ -35,7 +35,7 @@ public abstract class DvtpServer
    public final static int DEFAULT_PORT = 1808;
 
    /**
-    * 
+    *
     */
    public DvtpServer( DvtpListener listener )
       {
@@ -43,7 +43,7 @@ public abstract class DvtpServer
       mListener   = listener;
       mListener.setServer( this );
       }
-   
+
    /**
     * Performs the routine task of setting up and running a DvtpServer
     * instance, with a standard set of supporting objects.  Does not
@@ -56,14 +56,14 @@ public abstract class DvtpServer
    createServer( Class<S> server_class, String greeting )
       {
       DvtpListener l
-         = new DvtpMultiplexedListener< DvtpFlexiParser, 
+         = new DvtpMultiplexedListener< DvtpFlexiParser,
                                         DvtpFlexiStreamer >
                ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
       DvtpServer server;
       try
          {
-         Constructor< S > server_constructor 
-            = server_class.getConstructor( DvtpListener.class ); 
+         Constructor< S > server_constructor
+            = server_class.getConstructor( DvtpListener.class );
          server = server_constructor.newInstance( l );
          }
       catch ( Exception e )
@@ -80,7 +80,7 @@ public abstract class DvtpServer
       l.setGreeting( greeting );
       l.serve();  // Does not return.
       }
-   
+
    /**
     * Call the listen() method in the DvtpListener implementation.
     */
@@ -88,27 +88,30 @@ public abstract class DvtpServer
       {
       mListener.serve();
       }
-   
+
    /**
     * Decodes the command and calls the appropriate handle*() function.
     * @param command
     */
-   public void handleCommand( String command, 
+   public void handleCommand( String command,
                               NetOutQueue< Object > noq )
    throws IOException
       {
+      Log.p( "Received command: " + command, Log.SERVER, -20 );
       // TODO Add lambdas and/or method references to Java and rewrite
       if      ( Util.stringStartsIgnoreCase( command, "get " ) )
          handleGet( command.substring( "get ".length() ), noq );
       else if ( Util.stringStartsIgnoreCase( command, "location " ) )
          handleLocation( command.substring( "location ".length() ),
                          noq );
-      else if ( Util.stringStartsIgnoreCase( command, "proxyopen " ) )
-         handleProxyOpen( command.substring( "proxyopen ".length() ),
-                          noq );
       else if ( Util.stringStartsIgnoreCase( command, "knock " ) )
          handleKnock( command.substring( "knock ".length() ),
                       noq );
+      else if ( Util.stringStartsIgnoreCase( command, "proxyopen " ) )
+         handleProxyOpen( command.substring( "proxyopen ".length() ),
+                          noq );
+      else if ( command.equalsIgnoreCase( "proxyopen" ) )
+         handleProxyOpen( null, noq );
       else
          handleUnrecognizedCommand( command, noq );
       }
@@ -123,7 +126,7 @@ public abstract class DvtpServer
    public abstract void handleLocation( String location,
                                         NetOutQueue< Object > noq )
    throws IOException;
-   
+
    /**
     * Get an arbitrary resource by URL.  This mimics the GET method of
     * an HTTP server to some extent, but a DVTP server does not ever
@@ -134,13 +137,13 @@ public abstract class DvtpServer
    public abstract void handleGet( String url,
                                    NetOutQueue< Object > noq )
    throws IOException;
-   
+
    /**
     * Ask this server whether it allows connections from the given
     * location URL.  The server need not necessarily _handle_ that URL;
     * that is, a LOCATION request with the same URL might reasonably
     * return a 404 even though KNOCK returns an affirmative response.
-    * 
+    *
     * The question is essentially: is a proxy serving the given
     * location allowed to connect to this server?
     * @param location - an URL
@@ -148,11 +151,11 @@ public abstract class DvtpServer
    public abstract void handleKnock( String location,
                                      NetOutQueue< Object > noq )
    throws IOException;
-   
+
    /**
     * Handles the PROXYOPEN command, which is the handshake that begins
     * a session between proxy and server.  The response, and every
-    * aspect of the protocol after that point, are completely 
+    * aspect of the protocol after that point, are completely
     * @param token
     */
    public abstract void handleProxyOpen( String token,
@@ -166,11 +169,11 @@ public abstract class DvtpServer
     * @param net_in_object
     * @param session
     */
-   public abstract void 
+   public abstract void
    handleProxyObject( Object net_in_object,
                       NetSession< Object > session )
    throws IOException;
-   
+
    /**
     * Handles any unrecognized command by printing an error message.
     * @param token

@@ -1,17 +1,22 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
  */
 package org.distroverse.core.net;
 
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
-import org.distroverse.core.*;
+import org.distroverse.core.Log;
+import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
 // TODO Factor out the copy/paste code from NetOutQueue.
 public class NetInQueue< T >
@@ -19,7 +24,8 @@ public class NetInQueue< T >
    public NetInQueue( ObjectParser< T > op,
                       int max_length,
                       Selector s,
-                      SocketChannel client )
+                      SocketChannel remote,
+                      DvtpMultiplexedConnection< T, ?, ? > multiplexer )
       {
       mContents         = new LinkedList< T >();
       mQueueWatchers    = new LinkedList< NetInQueueWatcher< T > >();
@@ -28,7 +34,8 @@ public class NetInQueue< T >
       op.setQueue( this );
       mReaderKey        = null;
       mSelector         = s;
-      mClient           = client;
+      mRemote           = remote;
+      mMultiplexer      = multiplexer;
       }
 
    /**
@@ -48,26 +55,26 @@ public class NetInQueue< T >
    synchronized public T remove()
    throws ClosedChannelException
       {
-      if ( mReaderKey == null  
+      if ( mReaderKey == null
            &&  mContents.size() < mMaxLength )
          activateNetworkReader();
       return mContents.remove();
       }
-   
+
    synchronized public int size()
       {
       return mContents.size();
       }
-   
+
    synchronized public void readBytes( ByteBuffer b )
    throws Exception
       {
       mObjectParser.readBytes( b );
       }
-   
+
    synchronized public void read() throws Exception
       {
-      mObjectParser.read( mClient );
+      mObjectParser.read( mRemote );
       }
 
    synchronized public void stopNetworkReader()
@@ -78,15 +85,20 @@ public class NetInQueue< T >
 //         mReaderKey.cancel();
 //      mReaderKey = null;
       }
-   
+
    synchronized public void activateNetworkReader()
    throws ClosedChannelException
       {
       if ( mReaderKey == null )
          {
-         mReaderKey = mClient.register( mSelector,
-                                        SelectionKey.OP_READ );
-         mReaderKey.attach( mNetSession );
+         synchronized ( mRemote )
+            {
+            ReadLock l = mMultiplexer.pauseGetLock();
+            mReaderKey = mRemote.register( mSelector,
+                                           SelectionKey.OP_READ );
+            mMultiplexer.unpause( l );
+            mReaderKey.attach( mNetSession );
+            }
          }
       else
          mReaderKey.interestOps( SelectionKey.OP_READ );
@@ -98,19 +110,19 @@ public class NetInQueue< T >
       stopNetworkReader();
       activateNetworkReader();
       }
-   
+
    synchronized public void addQueueWatcher( NetInQueueWatcher< T > t )
       {  mQueueWatchers.add( t );  }
-   synchronized public boolean 
+   synchronized public boolean
    removeQueueWatcher( NetInQueueWatcher< T > t )
       {  return mQueueWatchers.remove( t );  }
    public void setSession( NetSession< T > ns )
       {  mNetSession = ns;  }
    public NetSession< T > getSession()
       {  return mNetSession;  }
-   public SocketChannel getClient()
-      {  return mClient;  }
-   
+   public SocketChannel getRemote()
+      {  return mRemote;  }
+
    synchronized public void activateQueueWatcher()
       {
       // TODO actually allow more than one queue reader thread - a pool?
@@ -118,13 +130,13 @@ public class NetInQueue< T >
          mQueueWatchers.getFirst().interrupt();
       }
 
-   private LinkedList< T >      mContents;
-   private LinkedList< NetInQueueWatcher< T > > 
-      mQueueWatchers;
-   private int                  mMaxLength;
-   private ObjectParser< T >    mObjectParser;
-   private SelectionKey         mReaderKey;
-   private Selector             mSelector;
-   private SocketChannel        mClient;
-   private NetSession< T >      mNetSession;
+   private LinkedList< T >                        mContents;
+   private LinkedList< NetInQueueWatcher< T > >   mQueueWatchers;
+   private int                                    mMaxLength;
+   private ObjectParser< T >                      mObjectParser;
+   private SelectionKey                           mReaderKey;
+   private Selector                               mSelector;
+   private SocketChannel                          mRemote;
+   private NetSession< T >                        mNetSession;
+   private DvtpMultiplexedConnection< T, ?, ? >   mMultiplexer;
    }

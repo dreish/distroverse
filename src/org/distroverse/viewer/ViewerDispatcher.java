@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -22,14 +22,15 @@ import org.distroverse.dvtp.RedirectUrl;
  */
 public class ViewerDispatcher extends ClientDispatcher
    {
-   public ViewerDispatcher( ViewerWindow w )
+   public ViewerDispatcher( ViewerWindow w, ProxyClientConnection p )
       {
       super();
       mWindow = w;
+      mProxy  = p;
       }
-   
+
    @Override
-   protected void dispatchDisplayUrl( DisplayUrl o ) 
+   protected void dispatchDisplayUrl( DisplayUrl o )
    throws ProxyErrorException
       {
       String url = o.getUrl();
@@ -83,7 +84,7 @@ public class ViewerDispatcher extends ClientDispatcher
       {
       mWindow.getWorld().deleteShape( o.getId() );
       }
-   
+
    private ViewerWindow mWindow;
    private ProxyClientConnection mProxy;
    }

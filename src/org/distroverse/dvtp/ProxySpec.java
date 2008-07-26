@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -20,7 +20,7 @@ import org.distroverse.core.Util;
  * range of URLs (at the same host) covered by this proxy.  For example,
  * a simple site covered in its entirety by a single proxy could return
  * ".*" for the resource regexp.
- * 
+ *
  * @author dreish
  */
 public class ProxySpec implements DvtpExternalizable
@@ -29,7 +29,7 @@ public class ProxySpec implements DvtpExternalizable
       {
       mProxyUrl = mResourceRegexp = null;
       }
-   
+
    public ProxySpec( Str proxy_url, Str resource_regexp,
                      Str proxy_name )
       {
@@ -37,7 +37,7 @@ public class ProxySpec implements DvtpExternalizable
       mResourceRegexp = resource_regexp;
       mProxyName = proxy_name;
       }
-   
+
    public ProxySpec( String proxy_url, String resource_regexp,
                      String proxy_name )
       {
@@ -52,10 +52,32 @@ public class ProxySpec implements DvtpExternalizable
    public int getClassNumber()
       {  return 133;  }
 
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o.getClass().equals( this.getClass() ) )
+         {
+         ProxySpec ps = (ProxySpec) o;
+         return (   mProxyUrl.equals( ps.mProxyUrl )
+                 && mResourceRegexp.equals( ps.mResourceRegexp )
+                 && mProxyName.equals( ps.mProxyName ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return   mProxyUrl.hashCode()
+             ^ mResourceRegexp.hashCode() * 529
+             ^ mProxyName.hashCode() * 279841
+             ^ this.getClass().hashCode();
+      }
+
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) 
+   public void readExternal( InputStream in )
    throws IOException, ClassCastException
       {
       (mProxyUrl = new Str()).readExternal( in );
@@ -72,14 +94,14 @@ public class ProxySpec implements DvtpExternalizable
       mResourceRegexp.writeExternal( out );
       mProxyName.writeExternal( out );
       }
-   
+
    public String prettyPrint()
       {
-      return "(ProxySpec " 
+      return "(ProxySpec "
              + Util.prettyPrintList( mProxyUrl, mResourceRegexp,
                                      mProxyName ) + ")";
       }
-   
+
    public Str getProxyUrl()  {  return mProxyUrl;  }
    public Str getResourceRegexp()  {  return mResourceRegexp;  }
    public Str getProxyName()  {  return mProxyName;  }

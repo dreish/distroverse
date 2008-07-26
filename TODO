@@ -1,29 +1,63 @@
 
 - To do for 0.01:
-  + Create a pass-through proxy
-    + I don't think I can use NetInQueue or NetOutQueue here -- they are
-      designed to be as nonblocking as possible, but the proxy actually
-      should block reads when it is busy
-      > Unless I can catch InterruptedException somewhere
-      + Catch it, log the exception, and retry the put
-    + Feed objects from the client to the server
-    + Feed objects from the server to the client
-      + Proxy needs to establish a connection to the server
-        + This should happen when the client offers the proxy a SetUrl
-    x Start over without using NetInQueue -- it's designed specifically
-      to work with multiplexed input
-    + Maybe the behavior of listening versus opening new connections
-      should be a specialization of DvtpMultiplexedConnection?
-      + DvtpMultiplexedClient
-        + connect( SocketAddress remote )
-      x DvtpExtParser
-      x DvtpExtStreamer
-        > These will not be useful for connecting to a DVTP server
   - Create a simple server that feeds some shapes to a pass-through
     proxy and moves them around
     + Shape needs an externalization format
-    - URL is displayed as "initial-text"
+    + Need to create PassThroughProxy.jar
     - No objects are visible
+      + Add log of objects received in proxy
+      x Proxy is apparently not being constructed
+        x Step through everything after sending LOCATION query
+          x Never returns anything
+            x Trace through the server
+              > Must have been running an obsolete (broken) version; the
+                problem doesn't exist after restarting it
+      + DvtpMultiplexedClient does not set mParserClass/mStreamerClass
+      + DvtpMultiplexedClient does not set mSelector
+      x This exception is being thrown as an "impossible exception";
+        "Unloadable proxy"; obviously it isn't impossible
+      - PassThroughProxy is being instantiated, and then nothing else
+        happens
+        + Handle SetUrl messages differently
+        x Freezing on NetInQueue.activateNetworkReader()
+          > At mClient.register()
+          + Inside SocketChannelImpl(SelectableChannel)
+            .register(Selector,int), which has no available source code
+            > I believe this function is not supposed to block and is
+              not blocking; the problem is more likely one of
+              synchronization
+              > Downloaded source; line it stops on is in
+                SelectorImpl.register(), synchronized this.publicKeys
+          > I had two threads hitting a breakpoint; the one I was
+            looking at was blocking until the other one finished
+            registering the selector
+        + activateNetworkReader() must pause/block the selector before
+          registering a new channel with it
+          x ReentrantReadWriteLock doesn't seem to like being shared
+            between threads; throws IllegalMonitorStateException
+            > No, this is because I had an exception before getting the
+              lock; needed to narrow the scope of the try block
+        + Same with activateNetworkWriter()
+        + Getting NullPointerException in DvtpMultConn.readConnection()
+        x Fix handshake when proxy connects to DVTP server
+          > Proxy gets greeting and ignores it; this is probably fine
+          > Might want to respond to the server greeting with PROXYOPEN
+      - It looks like PointArray is not being transmitted correctly
+        - Make the smaller shape get sent first
+        - Step through the externalization of it
+          - AddObject.mShape.mVertexCounts looks really wrong
+        - Step through the reading of it
+    - URL is displayed as "initial-text"
+  - Move DvtpMultiplexed* out of distroplane.lib, into core.net
+  - Announce 0.01
+    - Describe overall idea
+    - List the major existing issues
+      - Display glitches
+      - Using obsolete jME
+      - Huge portions unimplemented (HUD, text, textures, bgimage, mouse
+        pointer mode, for that matter any user input at all)
+      - Client does not exit on quit
+      - No timeouts
   x Deform the points according to my trig functions and see whether
     it produces decent-looking planets
   x Write a simple Java3D app
@@ -34,7 +68,7 @@
   x core.DataPackage (abstract)
     x Find out whether something like this already exists
       > Presents a simple array of objects
-      > Serialization produces different results depending on 
+      > Serialization produces different results depending on
         implementation
     x core.DataPackagePlain
       > No compression
@@ -123,7 +157,7 @@
         > activateNetworkWriter()
       + ObjectStreamer tells the Selector (through NetOutQueue) to
         stop waking-on-writable when it finishes writing the last
-        object (there must be only one NetOutQueue in use for a given 
+        object (there must be only one NetOutQueue in use for a given
         network connection)
         > stopNetworkWriter()
       + The ObjectStreamer can access and delete the head of the queue
@@ -315,7 +349,7 @@
               shady_square until it breaks
               + Use a TriMesh constructor with all the parameters
                 instead of TriMesh.reconstruct()
-                > Still looks fine 
+                > Still looks fine
               + Write down exactly what I'm feeding the TriMesh in my
                 Shape constructor, and change shady_square bit by bit to
                 match
@@ -561,6 +595,38 @@
         + I never bothered to implement ProxyBase.addObject()
           > It probably took longer to write the XXX comment than the
             actual method
+  + Create a pass-through proxy
+    + I don't think I can use NetInQueue or NetOutQueue here -- they are
+      designed to be as nonblocking as possible, but the proxy actually
+      should block reads when it is busy
+      > Unless I can catch InterruptedException somewhere
+      + Catch it, log the exception, and retry the put
+    + Feed objects from the client to the server
+    + Feed objects from the server to the client
+      + Proxy needs to establish a connection to the server
+        + This should happen when the client offers the proxy a SetUrl
+    x Start over without using NetInQueue -- it's designed specifically
+      to work with multiplexed input
+    + Maybe the behavior of listening versus opening new connections
+      should be a specialization of DvtpMultiplexedConnection?
+      + DvtpMultiplexedClient
+        + connect( SocketAddress remote )
+      x DvtpExtParser
+      x DvtpExtStreamer
+        > These will not be useful for connecting to a DVTP server
+  + Create unit tests for externalization
+    + Specialize equals() on all the DvtpExternalizable classes, and
+      hashCode()
+      + PointArrays are not equal apparently only because their float
+        buffers are not both rewound (in, which was read in
+        making the copy, is at end-of-buffer; out is at the beginning)
+      + No, there's also the fact that all the floats come through as
+        zero on the other side
+        > Shifting bug
+    + mRotPolyQuats is getting corrupted in the Move inside the
+      AddObject test
+      + Try beaming a Quat: 0 0 0 1
+      + Does the same MoveSeq transfer cleanly on its own?
 
 ------------------------------------------------------------------------
 - To do for 0.02:
@@ -585,6 +651,9 @@
     > This should hopefully simplify generation of sections of a ball,
       as well as possibly being useful for other things
   - Add better logging facilities
+  - Time out synchronous queries
+  - Show some sort of "loading in progress" status indicator when going
+    to a new URL, before the connection is fully established
 
 ------------------------------------------------------------------------
 > Required for 0.99:

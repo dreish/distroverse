@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -8,10 +8,12 @@
 package org.distroverse.core.net;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.nio.*;
 import java.nio.channels.*;
 
 import org.distroverse.core.*;
+import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a
@@ -21,7 +23,7 @@ import org.distroverse.core.*;
  * that determines how add()ed objects are encoded.  It is expected that
  * multiple threads will need to add and remove from the queue, so all
  * methods are synchronized.
- * 
+ *
  * @author dreish
  */
 public class NetOutQueue< T >
@@ -29,7 +31,8 @@ public class NetOutQueue< T >
    public NetOutQueue( ObjectStreamer< T > os,
                        int max_length,
                        Selector s,
-                       SocketChannel client )
+                       SocketChannel client,
+                       DvtpMultiplexedConnection< T, ?, ? > mplexer )
       {
       mContents       = new LinkedList< T >();
       mMaxLength      = max_length;
@@ -38,15 +41,16 @@ public class NetOutQueue< T >
       mWriterKey      = null;
       mSelector       = s;
       mRemote         = client;
+      mMultiplexer    = mplexer;
       }
-   
+
    public void add( T o )
    throws ClosedChannelException
       {
       if ( ! offer( o ) )
          throw new BufferOverflowException();
       }
-   
+
    synchronized public boolean offer( T o )
    throws ClosedChannelException
       {
@@ -57,18 +61,18 @@ public class NetOutQueue< T >
          activateNetworkWriter();
       return true;
       }
-   
+
    synchronized public T remove()
       {
       return mContents.remove();
       }
-   
+
    // TODO duplicate with NetInQueue; factor out
    synchronized public int size()
       {
       return mContents.size();
       }
-   
+
    synchronized public void stopNetworkWriter()
       {
       Log.p( "stopNetworkWriter() called", Log.NET, -50 );
@@ -85,7 +89,7 @@ public class NetOutQueue< T >
          Log.p( e, Log.NET, 5 );
          }
       }
-   
+
    /**
     * This only gets called when objects are added to the queue.
     * @throws ClosedChannelException
@@ -95,8 +99,10 @@ public class NetOutQueue< T >
       {
       if ( mWriterKey == null )
          {
+         ReadLock l = mMultiplexer.pauseGetLock();
          mWriterKey = mRemote.register( mSelector,
                                         SelectionKey.OP_WRITE );
+         mMultiplexer.unpause( l );
          mWriterKey.attach( mNetSession );
          }
       else
@@ -144,4 +150,8 @@ public class NetOutQueue< T >
     * The session associated with this connection.
     */
    private NetSession< T >     mNetSession;
+   /**
+    * The I/O multiplexer handling this session.
+    */
+   private DvtpMultiplexedConnection< T, ?, ? > mMultiplexer;
    }

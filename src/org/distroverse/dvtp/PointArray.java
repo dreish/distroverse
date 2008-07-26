@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -28,14 +28,14 @@ import com.jme.util.geom.BufferUtils;
  * floats.
  * @author dreish
  */
-public class PointArray implements DvtpExternalizable
+public final class PointArray implements DvtpExternalizable
    {
    public PointArray()
       {
       super();
       allocate( 0 );
       }
-   
+
    /**
     * Constructor with the size of the array, in points (not floats).
     * @param n - capacity in number of (x,y,z) tuples
@@ -45,7 +45,7 @@ public class PointArray implements DvtpExternalizable
       super();
       allocate( n );
       }
-   
+
    /**
     * Constructor with an existing array of Point3ds.  I've deprecated
     * this because I want to prefer using Vector3fs wherever possible.
@@ -56,8 +56,8 @@ public class PointArray implements DvtpExternalizable
       {
       Vector3f[] ap_f = new Vector3f[ ap.length ];
       for ( int i = 0; i < ap.length; ++i )
-         ap_f[ i ] = new Vector3f( (float)ap[i].x, 
-                                   (float)ap[i].y, 
+         ap_f[ i ] = new Vector3f( (float)ap[i].x,
+                                   (float)ap[i].y,
                                    (float)ap[i].z );
       mFb = BufferUtils.createFloatBuffer( ap_f );
       }
@@ -70,13 +70,13 @@ public class PointArray implements DvtpExternalizable
       {
       mFb = BufferUtils.createFloatBuffer( ap );
       }
-   
+
    private void allocate( int n_points )
       {
       mFb = ByteBuffer.allocateDirect( (n_points * 3) * 4 )
-                     .asFloatBuffer();  
+                     .asFloatBuffer();
       }
-   
+
    private static final long serialVersionUID = 1;
 
    public FloatBuffer asFloatBuffer()
@@ -91,11 +91,24 @@ public class PointArray implements DvtpExternalizable
    public int getClassNumber()
       {  return 4;  }
 
+   @Override
+   public boolean equals( Object o )
+      {
+      return (o instanceof PointArray
+              && ((PointArray) o).mFb.equals( mFb ));
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mFb.hashCode();
+      }
+
    public void readExternal( InputStream in ) throws IOException
       {
-      int len = Util.safeInt( CompactUlong.externalAsLong( in ) * 3 );
+      int len = Util.safeInt( CompactUlong.externalAsLong( in ) );
       Vector3f[] ap_f = new Vector3f[ len ];
-      for ( int i = 0; i < len * 3; ++i )
+      for ( int i = 0; i < len; ++i )
          ap_f[ i ] = new Vector3f( Flo.externalAsFloat( in ),
                                    Flo.externalAsFloat( in ),
                                    Flo.externalAsFloat( in ) );
@@ -105,14 +118,33 @@ public class PointArray implements DvtpExternalizable
    public void writeExternal( OutputStream out ) throws IOException
       {
       CompactUlong.longAsExternal( out, length() );
-      float[] fa = mFb.array();
+      float[] fa;
+      if ( mFb.hasArray() )
+         fa = mFb.array();
+      else
+         {
+         fa = new float[ mFb.limit() ];
+         mFb.get( fa );
+         mFb.rewind();
+         }
       for ( float f : fa )
          Flo.floatAsExternal( out, f );
       }
-   
+
    public String prettyPrint()
       {
-      return "(PointArray " + mFb + ")";
+      return "(PointArray " + printFloatBuffer() + ")";
+      }
+
+   private String printFloatBuffer()
+      {
+      String ret = "[";
+      float[] fa = new float[ mFb.limit() ];
+      mFb.get( fa );
+      mFb.rewind();
+      for ( float f : fa )
+         ret += f + " ";
+      return ret + "]";
       }
 
    private FloatBuffer mFb;

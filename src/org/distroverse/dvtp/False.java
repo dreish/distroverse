@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -21,4 +21,16 @@ public class False extends Bool
    @Override
    public boolean asBoolean()
       {  return false;  }
+
+   @Override
+   public boolean equals( Object o )
+      {
+      return o instanceof False;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return False.class.hashCode();
+      }
    }

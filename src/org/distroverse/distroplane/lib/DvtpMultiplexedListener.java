@@ -39,11 +39,7 @@ implements DvtpListener
     */
    public DvtpMultiplexedListener( Class< P > parser_class,
                                    Class< S > streamer_class )
-      {
-      super();
-      mParserClass   = parser_class;
-      mStreamerClass = streamer_class;
-      }
+      {  super( parser_class, streamer_class );  }
 
    public DvtpServer getServer()
       {  return mServer;  }

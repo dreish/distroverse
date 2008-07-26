@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -23,16 +23,35 @@ public final class MoveObject implements ProxySendable
       {
       super();
       }
-   
+
    public MoveObject( long id, MoveSeq m )
       {
       mId = id;
       mMoveSeq = m;
       }
-   
+
    public int getClassNumber()
       {  return 14;  }
-   
+
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o instanceof MoveObject )
+         {
+         MoveObject mo = (MoveObject) o;
+         return (mId == mo.mId
+                 && mMoveSeq.equals( mo.mMoveSeq ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return (int) mId
+             ^ mMoveSeq.hashCode();
+      }
+
    public long    getId()       {  return mId;       }
    public MoveSeq getMoveSeq()  {  return mMoveSeq;  }
 
@@ -48,10 +67,10 @@ public final class MoveObject implements ProxySendable
       CompactUlong.longAsExternal( out, mId );
       mMoveSeq.writeExternal( out );
       }
-   
+
    public String prettyPrint()
       {
-      return "(MoveObject " 
+      return "(MoveObject "
              + Util.prettyPrintList( mId, mMoveSeq ) + ")";
       }
 

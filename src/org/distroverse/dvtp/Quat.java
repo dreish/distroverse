@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -13,23 +13,36 @@ import java.io.OutputStream;
 
 import com.jme.math.Quaternion;
 
-public class Quat implements DvtpExternalizable
+public final class Quat implements DvtpExternalizable
    {
    public Quat()
       {
       super();
       }
-   
+
    public Quat( Quaternion q )
       {
       mQuat = q;
       }
-   
+
    public Quaternion asQuaternion()
       {  return mQuat;  }
-   
+
    public int getClassNumber()
       {  return 16;  }
+
+   @Override
+   public boolean equals( Object o )
+      {
+      return ( o instanceof Quat
+               &&  mQuat.equals( ((Quat) o).mQuat ) );
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mQuat.hashCode();
+      }
 
    public static Quaternion externalAsQuaternion( InputStream in )
    throws IOException
@@ -39,17 +52,17 @@ public class Quat implements DvtpExternalizable
                              Flo.externalAsFloat( in ),
                              Flo.externalAsFloat( in ) );
       }
-   
+
    public static void quaternionAsExternal( OutputStream out,
                                             Quaternion q )
    throws IOException
       {
-      Flo.floatAsExternal( out, q.w );
       Flo.floatAsExternal( out, q.x );
       Flo.floatAsExternal( out, q.y );
       Flo.floatAsExternal( out, q.z );
+      Flo.floatAsExternal( out, q.w );
       }
-   
+
    public void readExternal( InputStream in ) throws IOException
       {
       mQuat = Quat.externalAsQuaternion( in );
@@ -59,7 +72,7 @@ public class Quat implements DvtpExternalizable
       {
       Quat.quaternionAsExternal( out, mQuat );
       }
-   
+
    public String prettyPrint()
       {
       return "(Quat " + mQuat + ")";

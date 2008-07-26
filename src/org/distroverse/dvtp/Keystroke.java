@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -29,7 +29,20 @@ public class Keystroke implements ClientSendable
 
    public int getClassNumber()
       {  return 19;  }
-   
+
+   @Override
+   public boolean equals( Object o )
+      {
+      return (o.getClass().equals( this.getClass() )
+              &&  mKeyNum == ((Keystroke) o).mKeyNum);
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mKeyNum ^ this.getClass().hashCode();
+      }
+
    public int getKey()
       {  return mKeyNum;  }
    public void setKey( int kn )

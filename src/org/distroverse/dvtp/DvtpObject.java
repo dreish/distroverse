@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * Lesser General Public License (GPL) version 3 or later</a>
@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util;
@@ -27,8 +28,8 @@ public final class DvtpObject
     * Maps integer to class.  To go the other way, call
     * getClassNumber().
     */
-   public static final Class< ? > mClassList[] 
-      = { 
+   public static final Class< ? > mClassList[]
+      = {
         CompactUlong.class,     // 0
         Pair.class,             // 1
         Str.class,              // 2
@@ -55,7 +56,7 @@ public final class DvtpObject
         Click2.class,           // 23
         MoreDetail.class,       // 24
         Blob.class,             // 25
-        
+
         null
         };
 
@@ -67,39 +68,39 @@ public final class DvtpObject
         Err.class,              // 131
         ConPerm.class,          // 132
         ProxySpec.class,        // 133
-        
+
         null
         };
-   
+
    public static final int mSerializedClassNumber = 0xB00BAD;
-   
+
    /**
     * Returns a new object (constructed with the default constructor) of
     * the given class number.
     * @param class_number
     * @return
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
     */
    @SuppressWarnings("unchecked")
-   public static DvtpExternalizable getNew( int class_number ) 
+   public static DvtpExternalizable getNew( int class_number )
    throws ClassNotFoundException
       {
       Class< ? extends DvtpExternalizable > newclass;
       if ( class_number < mClassList.length - 1
             &&  class_number >= 0 )
          {
-         newclass = (Class< ? extends DvtpExternalizable >) 
+         newclass = (Class< ? extends DvtpExternalizable >)
                     mClassList[ class_number ];
          }
       else if ( class_number < mExtendedClassList.length + 127
                 &&  class_number >= 128 )
          {
-         newclass = (Class< ? extends DvtpExternalizable >) 
+         newclass = (Class< ? extends DvtpExternalizable >)
                     mExtendedClassList[ class_number - 128 ];
          }
       else if ( class_number == mSerializedClassNumber )
          return new Any();
-      else 
+      else
          throw new ClassNotFoundException( "No such"
              + " DvtpExternalizable class number: " + class_number );
 
@@ -107,7 +108,7 @@ public final class DvtpObject
       try  {  ret = newclass.newInstance();  }
       catch ( Exception e )
          {
-         Log.p( "Impossible exception: " + e, 
+         Log.p( "Impossible exception: " + e,
                 Log.DVTP | Log.UNHANDLED, 100 );
          Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
          System.exit( 42 );
@@ -116,10 +117,10 @@ public final class DvtpObject
       assert( ret.getClassNumber() == class_number );
       return ret;
       }
-   
+
    public static int getSerializedClassNumber()
       {  return mSerializedClassNumber;  }
-   
+
    /**
     * This class parses everything except an initial NUL and length:
     * class number followed by the object itself.
@@ -128,20 +129,20 @@ public final class DvtpObject
     * @throws IOException
     * @throws ClassNotFoundException
     */
-   public static DvtpExternalizable parseObject( InputStream in ) 
+   public static DvtpExternalizable parseObject( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      int class_number 
+      int class_number
          = Util.safeInt( CompactUlong.externalAsLong( in ) );
       return parseObject( in, class_number );
       }
-   
+
    /**
     * This class parses an object of a known class.
     * @param in - an InputStream stream
     * @param class_number - the class number of the object to parse
     * @return - an object of the requested class
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
     */
    public static DvtpExternalizable parseObject( InputStream in,
                                                  int class_number )
@@ -155,8 +156,8 @@ public final class DvtpObject
          }
       catch ( ClassNotFoundException e )
          {
-         Log.p( "Impossible exception: " + e, Log.DVTP | Log.UNHANDLED,
-                100 );
+         Log.p( "Exception while parsing external object: " + e,
+                Log.DVTP | Log.UNHANDLED, 100 );
          Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
          }
       return ob;
@@ -169,13 +170,13 @@ public final class DvtpObject
     * @param de - Object to write
     * @throws IOException
     */
-   public static void writeObject( OutputStream oo, 
+   public static void writeObject( OutputStream oo,
                                    DvtpExternalizable de )
    throws IOException
       {
       ByteArrayOutputStream rawob = new ByteArrayOutputStream();
       DvtpObject.writeInnerObject( rawob, de );
-      
+
       // NUL,
       oo.write( 0 );
       // length,
@@ -191,7 +192,7 @@ public final class DvtpObject
     * @param de - Object to write
     * @throws IOException
     */
-   public static void writeInnerObject( OutputStream oo, 
+   public static void writeInnerObject( OutputStream oo,
                                         DvtpExternalizable de )
    throws IOException
       {
@@ -199,7 +200,7 @@ public final class DvtpObject
       type.writeExternal( oo );
       de.writeExternal( oo );
       }
-   
+
    /**
     * Reads 'n' objects of type T from 'in'.
     * @param <T>
@@ -207,16 +208,16 @@ public final class DvtpObject
     * @param n
     * @param t
     * @return an array, T[n].
-    * @throws ClassNotFoundException 
-    * @throws IOException 
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
+    * @throws IOException
+    * @throws ClassNotFoundException
     */
    @SuppressWarnings("unchecked")
    public static <T extends DvtpExternalizable>
    T[] readArray( InputStream in, int n, Class<T> t )
    throws IOException, ClassNotFoundException
       {
-      T[] ret = (T[]) new DvtpExternalizable[ n ];
+      T[] ret = (T[]) Array.newInstance( t, n );
       for ( int i = 0; i < n; ++i )
          {
          try
@@ -248,7 +249,7 @@ public final class DvtpObject
     * @param arr
     * @throws IOException
     */
-   public static <T extends DvtpExternalizable> 
+   public static <T extends DvtpExternalizable>
    void writeArray( OutputStream out, T[] arr )
    throws IOException
       {

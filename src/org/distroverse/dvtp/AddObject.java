@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -25,7 +25,7 @@ public final class AddObject implements ProxySendable
       {
       super();
       }
-   
+
    public AddObject( Shape s, CompactUlong id, CompactUlong pid,
                      MoveSeq m )
       {
@@ -49,7 +49,36 @@ public final class AddObject implements ProxySendable
 
    public int getClassNumber()
       {  return 12;  }
-   
+
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o instanceof AddObject )
+         {
+         AddObject ao = (AddObject) o;
+         if ( mHasShape )
+            return (ao.mHasShape
+                    && mShape.equals( ao.mShape )
+                    && mId.equals( ao.mId )
+                    && mParentId.equals( ao.mParentId )
+                    && mMoveSeq.equals( ao.mMoveSeq ));
+         return ((! ao.mHasShape)
+                 && mId.equals( ao.mId )
+                 && mParentId.equals( ao.mParentId )
+                 && mMoveSeq.equals( ao.mMoveSeq ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return (mHasShape ? mShape.hashCode() : 0)
+             ^ mId.hashCode()
+             ^ mParentId.hashCode()
+             ^ mMoveSeq.hashCode();
+      }
+
    public Shape        getShape()     {  return mShape;     }
    public CompactUlong getId()        {  return mId;        }
    public CompactUlong getParentId()  {  return mParentId;  }
@@ -77,7 +106,7 @@ public final class AddObject implements ProxySendable
       mParentId.writeExternal( out );
       mMoveSeq.writeExternal( out );
       }
-   
+
    public String prettyPrint()
       {
       return "(AddObject "

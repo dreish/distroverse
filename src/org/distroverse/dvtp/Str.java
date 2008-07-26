@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -39,6 +39,8 @@ public class Str implements DvtpExternalizable
    throws IOException
       {
       int    len = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      if ( len == 0 )
+         return "";
       byte[] buf = new byte[ len ];
       if ( in.read( buf ) != len )
          throw new IOException( "Could not read full Str" );
@@ -46,7 +48,7 @@ public class Str implements DvtpExternalizable
                     .decode( ByteBuffer.wrap( buf ) )
                     .toString();
       }
-   
+
    public static void stringAsExternal( OutputStream out, String val )
    throws IOException
       {
@@ -60,6 +62,19 @@ public class Str implements DvtpExternalizable
    public int getClassNumber()
       {  return 2;  }
 
+   @Override
+   public boolean equals( Object o )
+      {
+      return (o.getClass().equals( Str.class )
+              &&  mVal.equals( ((Str) o).mVal ));
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mVal.hashCode();
+      }
+
    public void readExternal( InputStream in ) throws IOException
       {
       mVal = externalAsString( in );
@@ -69,10 +84,10 @@ public class Str implements DvtpExternalizable
       {
       stringAsExternal( out, mVal );
       }
-   
+
    public String prettyPrint()
       {
-      return "(Str " 
+      return "(Str "
              + Util.prettyPrintList( mVal ) + ")";
       }
 

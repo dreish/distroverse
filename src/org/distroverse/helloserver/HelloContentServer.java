@@ -73,19 +73,19 @@ public class HelloContentServer extends DvtpServer
       }
 
    @Override
-   public void handleProxyOpen( String token, 
+   public void handleProxyOpen( String token,
                                 NetOutQueue< Object > noq )
    throws IOException
       {
       PrimFactory pf = new PrimFactory();
       pf.setDims( 10.0, 1.0, 1.0 );
-      addObject( noq, 
-                 pf.setPrimShape( PrimShape.SPHERE  ).generate(), 1L,
-                 -30.0f, 10.0f, 40.0f );
-      addObject( noq, 
+      addObject( noq,
                  pf.setPrimShape( PrimShape.PYRAMID ).generate(), 2L,
                  +00.0f, 10.0f, 40.0f );
-      addObject( noq, 
+      addObject( noq,
+                 pf.setPrimShape( PrimShape.SPHERE  ).generate(), 1L,
+                 -30.0f, 10.0f, 40.0f );
+      addObject( noq,
                  pf.setPrimShape( PrimShape.CUBOID  ).generate(), 3L,
                  +30.0f, 10.0f, 40.0f );
       noq.getSession().close();
@@ -100,7 +100,7 @@ public class HelloContentServer extends DvtpServer
       }
 
    // XXX This is mostly duplicated with ProxyBase.
-   protected void addObject( NetOutQueue< Object > noq, Shape s, 
+   protected void addObject( NetOutQueue< Object > noq, Shape s,
                              long id, float x, float y, float z )
    throws ClosedChannelException
       {

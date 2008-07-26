@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -27,7 +27,7 @@ public class Pair implements DvtpExternalizable
     */
    public Pair()
       {  mFirst = mSecond = null;  }
-   
+
    public Pair( DvtpExternalizable first,
                 DvtpExternalizable second )
       {
@@ -46,10 +46,29 @@ public class Pair implements DvtpExternalizable
    public int getClassNumber()
       {  return 1;  }
 
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o instanceof Pair )
+         {
+         Pair p = (Pair) o;
+         return p.mFirst.equals( mFirst )
+                &&  p.mSecond.equals( mSecond );
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mFirst.hashCode()
+           ^ mSecond.hashCode();
+      }
+
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) 
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mFirst  = DvtpObject.parseObject( in );
@@ -61,16 +80,16 @@ public class Pair implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      DvtpObject.writeObject( out, mFirst );
-      DvtpObject.writeObject( out, mSecond );
+      DvtpObject.writeInnerObject( out, mFirst );
+      DvtpObject.writeInnerObject( out, mSecond );
       }
 
    public String prettyPrint()
       {
-      return "(Pair " 
+      return "(Pair "
              + Util.prettyPrintList( mFirst, mSecond ) + ")";
       }
-   
+
    private DvtpExternalizable mFirst;
    private DvtpExternalizable mSecond;
    }

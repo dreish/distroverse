@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
+import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
@@ -30,7 +31,7 @@ public class Blob implements DvtpExternalizable
     * @param resource
     * @param pos
     * @param file_length
-    * @throws ProtocolException 
+    * @throws ProtocolException
     */
    public Blob( byte[] bytes, int n_read, String resource,
                 long pos, long file_length )
@@ -58,6 +59,30 @@ public class Blob implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 25;  }
+
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o.getClass().equals( this.getClass() ) )
+         {
+         Blob b = (Blob) o;
+         return (    mPos == b.mPos
+                 &&  mFileLength == b.mFileLength
+                 &&  mResource.equals( b.mResource )
+                 &&  Arrays.equals( mBytes, b.mBytes ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return Arrays.hashCode( mBytes )
+             ^ mResource.hashCode()
+             ^ ((Long) mPos).hashCode()
+             ^ ((Long) mFileLength).hashCode();
+      }
+
    public byte[] getBytes()
       {  return mBytes;  }
    public Str getResource()
@@ -89,7 +114,7 @@ public class Blob implements DvtpExternalizable
       CompactUlong.longAsExternal( out, mPos );
       CompactUlong.longAsExternal( out, mFileLength );
       }
-   
+
    public String prettyPrint()
       {
       return "(Blob " + Util.prettyPrintList( mBytes, mResource,

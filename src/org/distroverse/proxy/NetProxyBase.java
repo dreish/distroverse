@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -28,24 +28,23 @@ import org.distroverse.dvtp.DvtpExternalizable;
  */
 public abstract class NetProxyBase extends ProxyBase
    {
-   public NetProxyBase()
+   public NetProxyBase() throws IOException
       {
       mMultiplexer
          = new DvtpMultiplexedClient< Object, DvtpFlexiParser,
-                                      DvtpFlexiStreamer >();
-      mWatcher = new DvtpProxyInQueueObjectWatcher( this );
-      mMultiplexer.setWatcher( mWatcher );
-      mWatcher.start();
-      mMultiplexer.start();
+                                      DvtpFlexiStreamer >
+                  ( DvtpFlexiParser.class, DvtpFlexiStreamer.class );
       }
-   
+
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpProxy#run()
     */
    public void run()
       {
-      // XXX Auto-generated method stub
-      // There might be nothing to do here.
+      mWatcher = new DvtpProxyInQueueObjectWatcher( this );
+      mMultiplexer.setWatcher( mWatcher );
+      mWatcher.start();
+      mMultiplexer.start();
       }
 
    /**
@@ -65,7 +64,7 @@ public abstract class NetProxyBase extends ProxyBase
       }
 
    /**
-    * Defines how 
+    * Defines how
     * @param new_server
     * @throws ClosedChannelException
     */
@@ -84,7 +83,7 @@ public abstract class NetProxyBase extends ProxyBase
     */
    public abstract void receiveFromServer( NetSession< Object > s,
                                            DvtpExternalizable o );
-   
+
    /**
     * This method is called by offer() for any object that is not a
     * SetUrl.

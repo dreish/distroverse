@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -45,13 +45,32 @@ public class ConPerm implements DvtpExternalizable
 
    public int getClassNumber()
       {  return 132;  }
-   
+
+   @Override
+   public boolean equals( Object o )
+      {
+      if ( o.getClass().equals( this.getClass() ) )
+         {
+         ConPerm cp = (ConPerm) o;
+         return (mMayConnect == cp.mMayConnect
+                 &&  mPermitRegexp.equals( cp.mPermitRegexp ));
+         }
+      return false;
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mPermitRegexp.hashCode()
+             * (mMayConnect ? 893871739 : 148035889);
+      }
+
    public boolean getMayConnect()
       {  return mMayConnect;  }
    public Str getPermitRegexp()
       {  return mPermitRegexp;  }
 
-   public void readExternal( InputStream in ) 
+   public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mMayConnect = Bool.externalAsBoolean( in );
@@ -63,7 +82,7 @@ public class ConPerm implements DvtpExternalizable
       Bool.booleanAsExternal( out, mMayConnect );
       mPermitRegexp.writeExternal( out );
       }
-   
+
    public String prettyPrint()
       {
       return "(Bool " + Util.prettyPrintList( mMayConnect,

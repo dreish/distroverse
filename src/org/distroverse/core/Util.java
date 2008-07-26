@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING-L in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
  * Lesser General Public License (LGPL) version 3 or later</a>
@@ -15,7 +15,7 @@ import org.distroverse.dvtp.DvtpExternalizable;
 /**
  * Util contains static methods that are bafflingly missing from
  * the standard Java libraries.
- * 
+ *
  * WARNING: Don't start reading here!  You'll ruin the surprise!  Try
  * the README files in dvop, dvtp, or viewer.
  */
@@ -29,15 +29,15 @@ public final class Util
     * TODO - improve Java's Number class hierarchy, or add templates or
     * macros, and make this generic
     * @param n - a long
-    * @return (int) n, if it is within the range of integers 
+    * @return (int) n, if it is within the range of integers
     */
    public static int safeInt( long n )
       {
       if ( n > Integer.MAX_VALUE )
-         throw new IllegalArgumentException( 
+         throw new IllegalArgumentException(
                       "long-to-int cast overflow" );
       if ( n < Integer.MIN_VALUE )
-         throw new IllegalArgumentException( 
+         throw new IllegalArgumentException(
                       "long-to-int cast underflow" );
       return (int) n;
       }
@@ -48,21 +48,21 @@ public final class Util
     * if there were some reasonable way to do this generically.
     * TODO - see safeInt()
     * @param n - a long
-    * @return (byte) n, if it is within the range of bytes 
+    * @return (byte) n, if it is within the range of bytes
     */
    public static byte SafeByte( long n )
       {
       if ( n > Byte.MAX_VALUE )
-         throw new IllegalArgumentException( 
+         throw new IllegalArgumentException(
                       "long-to-byte cast overflow" );
       if ( n < Byte.MIN_VALUE )
-         throw new IllegalArgumentException( 
+         throw new IllegalArgumentException(
                       "long-to-byte cast underflow" );
       return (byte) n;
       }
 
    /**
-    * 
+    *
     * @author dreish
     *
     * @param <A>
@@ -74,7 +74,7 @@ public final class Util
       public A a;
       public B b;
       }
-   
+
    /**
     * An anonymous function class taking two values of a type and
     * returning one value of that type.  For use with foldL, or wherever
@@ -91,9 +91,9 @@ public final class Util
     * spirit of functional programming, does not actually modify list
     * (unless 'function' modifies its parameters, which is strongly
     * discouraged).
-    * 
+    *
     * TODO Look for a way to generalize 'list' to any iterable object.
-    * 
+    *
     * @param <T> -
     *           Class of list, generally inferred
     * @param <F> -
@@ -123,7 +123,7 @@ public final class Util
     * Returns null if given an empty list. In the case where multiple
     * maximum elements are equivalent, returns the first such
     * occurrence.
-    * 
+    *
     * @param <T> -
     *           Any Comparable type
     * @param list -
@@ -143,7 +143,7 @@ public final class Util
     * Returns null if given an empty list. In the case where multiple
     * minimum elements are equivalent, returns the first such
     * occurrence.
-    * 
+    *
     * @param <T> -
     *           Any Comparable type
     * @param list -
@@ -166,13 +166,13 @@ public final class Util
          {
          max = list[0];
          for ( int i = 1; i < list.length; ++i )
-            if ( list[i].compareTo( max ) > 0 ) 
+            if ( list[i].compareTo( max ) > 0 )
                max = list[i];
          }
       return max;
       }
 
-   @Deprecated public static < T extends Comparable< T > > 
+   @Deprecated public static < T extends Comparable< T > >
    T min1( T... list )
       {
       T min = null;
@@ -180,19 +180,19 @@ public final class Util
          {
          min = list[0];
          for ( int i = 1; i < list.length; ++i )
-            if ( list[i].compareTo( min ) < 0 ) 
+            if ( list[i].compareTo( min ) < 0 )
                min = list[i];
          }
       return min;
       }
-   
+
    /**
     * This is like String.StartsWith(), but is case insensitive.
     * @param full - The string to check
     * @param prefix - The prefix to look for
     * @return Whether "full" begins with "prefix"
     */
-   public static boolean stringStartsIgnoreCase( String full, 
+   public static boolean stringStartsIgnoreCase( String full,
                                                  String prefix )
       {
       if ( prefix.length() > full.length() )
@@ -238,6 +238,8 @@ public final class Util
                         + o.toString().replaceAll( "\\\\", "\\\\" )
                                       .replaceAll( "\"", "\\\"" )
                         + "\"" );
+         else if ( o == null )
+            ret.append( "null" );
          else
             ret.append( o.toString() );
          ret.append( ' ' );

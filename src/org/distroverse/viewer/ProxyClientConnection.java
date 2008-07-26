@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
  */
 /**
- * 
+ *
  */
 package org.distroverse.viewer;
 
@@ -28,7 +28,7 @@ import org.distroverse.dvtp.SetUrl;
  * A ProxyClientConnection listens for objects from a proxy and
  * dispatches them.  It also handles messages that the client may need
  * to send to the proxy.
- * 
+ *
  * @author dreish
  */
 public class ProxyClientConnection implements Runnable
@@ -38,8 +38,8 @@ public class ProxyClientConnection implements Runnable
     * @param url - The Location URL
     * @param proxy_url - The Proxy resource URL
     * @param location_regexp - Matches what Locations the proxy handles
-    * @throws MalformedURLException 
-    * @throws ClassNotFoundException 
+    * @throws MalformedURLException
+    * @throws ClassNotFoundException
     */
    public ProxyClientConnection( String url, String proxy_url,
                                  String proxy_name,
@@ -49,12 +49,12 @@ public class ProxyClientConnection implements Runnable
       {
       init( url, proxy_url, proxy_name, location_regexp, window );
       }
-   
+
    /**
     * Loads a proxy and creates a connection to it
     * @param url - The Location URL
     * @param proxy_spec - a (proxy_url, location_regexp) Pair
-    * @throws MalformedURLException 
+    * @throws MalformedURLException
     * @throws ClassNotFoundException
     */
    public ProxyClientConnection( String url,
@@ -68,7 +68,7 @@ public class ProxyClientConnection implements Runnable
             proxy_spec.getResourceRegexp().toString(),
             window );
       }
-   
+
    private void init( String url, String proxy_url, String proxy_name,
                       String location_regexp, ViewerWindow window )
    throws Exception
@@ -79,16 +79,17 @@ public class ProxyClientConnection implements Runnable
       mQueue = new LinkedBlockingQueue< ProxySendable >();
       runProxy( proxy_url, proxy_name );
       mListener = newListener();
-      mDispatcher = new ViewerDispatcher( window );
+      mDispatcher = new ViewerDispatcher( window, this );
+      setUrl( url, location_regexp );
       }
-   
+
    private Thread newListener()
       {
       Thread ret = new Thread( this );
       ret.start();
       return ret;
       }
-   
+
    /**
     * Running a ProxyClientConnection causes it to listen to its queue
     * for objects, and to act on them.  run() does not return unless
@@ -108,7 +109,7 @@ public class ProxyClientConnection implements Runnable
             catch ( ProxyErrorException e )
                {
                // TODO probably want to tell the user graphically
-               Log.p( "Proxy did something erroneous:", 
+               Log.p( "Proxy did something erroneous:",
                       Log.PROXY, 0 );
                Log.p( e, Log.PROXY, 0 );
                }
@@ -134,7 +135,7 @@ public class ProxyClientConnection implements Runnable
       // with the same name:
       // XXX This does not seem to actually load classes from 'urls':
       Class< ? > proxy = loader.loadClass( class_name );
-      
+
       // FIXME Add a SecurityManager to prevent proxy from doing stuff
       final DvtpProxy proxy_instance = (DvtpProxy) proxy.newInstance();
       mProxyInstance = proxy_instance;
@@ -142,7 +143,10 @@ public class ProxyClientConnection implements Runnable
 
       Thread t = new Thread( new Runnable()
          {
-         public void run() { proxy_instance.run(); }
+         public void run()
+            {
+            proxy_instance.run();
+            }
          } );
       t.start();
       }
@@ -154,7 +158,7 @@ public class ProxyClientConnection implements Runnable
     * requestUrl().
     * @param url - New location URL
     * @param location_regexp - New regexp, or null to leave unchanged
-    * @throws IOException 
+    * @throws IOException
     */
    public void setUrl( String url, String location_regexp )
    throws IOException
@@ -168,7 +172,7 @@ public class ProxyClientConnection implements Runnable
       {
       mProxyInstance.offer( o );
       }
-   
+
    /**
     * Checks the given URL against the regexp returned by the server
     * when this proxy URL was specified.
@@ -191,7 +195,7 @@ public class ProxyClientConnection implements Runnable
       {  return mUrl;  }
    public String getProxyName()
       {  return mName;  }
-   
+
    private String mUrl;
    private String mName;
    private String mLocationRegexp;
