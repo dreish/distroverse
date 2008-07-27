@@ -11,7 +11,7 @@ package org.distroverse.dvtp;
  * Falsity.
  * @author dreish
  */
-public class False extends Bool
+public final class False extends Bool
    {
    public False()
       {  /* Do nothing. */  }

@@ -99,6 +99,7 @@ public class NetOutQueue< T >
       {
       if ( mWriterKey == null )
          {
+         // FIXME Rewrite using a mMultiplexer.withPausedSelector()
          ReadLock l = mMultiplexer.pauseGetLock();
          mWriterKey = mRemote.register( mSelector,
                                         SelectionKey.OP_WRITE );

@@ -15,7 +15,7 @@ import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
-public class Vec implements DvtpExternalizable
+public final class Vec implements DvtpExternalizable
    {
    public Vec()
       {

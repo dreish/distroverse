@@ -11,7 +11,7 @@ package org.distroverse.dvtp;
  * Truth.
  * @author dreish
  */
-public class True extends Bool
+public final class True extends Bool
    {
    public True()
       {  /* Do nothing. */  }

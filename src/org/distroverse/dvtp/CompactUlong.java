@@ -16,7 +16,7 @@ import java.io.OutputStream;
  * is compatible with a Java long.
  * @author dreish
  */
-public class CompactUlong implements DvtpExternalizable
+public final class CompactUlong implements DvtpExternalizable
    {
    public static final long MAX_VALUE = Long.MAX_VALUE;
 
@@ -49,12 +49,11 @@ public class CompactUlong implements DvtpExternalizable
    public long toLong()
       {  return mVal;  }
 
-   // FIXME - I don't think this is necessary for this class
    @Override
    public boolean equals( Object o )
       {
-      return ( o instanceof CompactUlong
-               &&  ((CompactUlong) o).mVal == mVal );
+      return (o instanceof CompactUlong
+              &&  ((CompactUlong) o).mVal == mVal);
       }
 
    @Override

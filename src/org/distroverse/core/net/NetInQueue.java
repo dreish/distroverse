@@ -93,6 +93,7 @@ public class NetInQueue< T >
          {
          synchronized ( mRemote )
             {
+            // FIXME Rewrite using a mMultiplexer.withPausedSelector()
             ReadLock l = mMultiplexer.pauseGetLock();
             mReaderKey = mRemote.register( mSelector,
                                            SelectionKey.OP_READ );

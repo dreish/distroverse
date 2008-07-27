@@ -16,7 +16,7 @@
       + DvtpMultiplexedClient does not set mSelector
       x This exception is being thrown as an "impossible exception";
         "Unloadable proxy"; obviously it isn't impossible
-      - PassThroughProxy is being instantiated, and then nothing else
+      + PassThroughProxy is being instantiated, and then nothing else
         happens
         + Handle SetUrl messages differently
         x Freezing on NetInQueue.activateNetworkReader()
@@ -42,12 +42,15 @@
         x Fix handshake when proxy connects to DVTP server
           > Proxy gets greeting and ignores it; this is probably fine
           > Might want to respond to the server greeting with PROXYOPEN
-      - It looks like PointArray is not being transmitted correctly
-        - Make the smaller shape get sent first
-        - Step through the externalization of it
-          - AddObject.mShape.mVertexCounts looks really wrong
-        - Step through the reading of it
-    - URL is displayed as "initial-text"
+      + It looks like PointArray is not being transmitted correctly
+        + Make the smaller shape get sent first
+        + Step through the externalization of it
+          + AddObject.mShape.mVertexCounts looks really wrong
+            + Fix externalization with some thorough unit tests
+        x Step through the reading of it
+      - Server sends valid-looking AddObjects (according to TestClient),
+        but they don't show up in the viewer
+    + URL is displayed as "initial-text"
   - Move DvtpMultiplexed* out of distroplane.lib, into core.net
   - Announce 0.01
     - Describe overall idea
@@ -675,6 +678,10 @@
 
 ------------------------------------------------------------------------
 - Future:
+  - Reestablishing a multiplexed connection after it is dropped
+    - The receiver will likely reset correctly and discard any half-sent
+      objects, but a sender will need to back up and retransmit
+      > Right now, I think I might be discarding the sent bytes
   - Backward compatibility
     - Client should be able to ignore child classes of ProxySendable
       that it does not recognize

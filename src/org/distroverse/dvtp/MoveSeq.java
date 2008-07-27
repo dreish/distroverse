@@ -16,7 +16,7 @@ import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
-public class MoveSeq implements DvtpExternalizable
+public final class MoveSeq implements DvtpExternalizable
    {
    public enum RepeatType { ONCE, LOOP, BOUNCE };
 

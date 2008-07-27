@@ -29,7 +29,7 @@ import com.jme.util.geom.BufferUtils;
  * @author dreish
  *
  */
-public class Shape implements DvtpExternalizable
+public final class Shape implements DvtpExternalizable
    {
    public Shape()
       {
@@ -166,8 +166,18 @@ public class Shape implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Shape "
-             + Util.prettyPrintList( mPoints, mVertexCounts ) + ")";
+      StringBuilder ret = new StringBuilder();
+      ret.append( "(Shape " );
+      ret.append( Util.prettyPrintList( mPoints ) );
+      ret.append( " '(" );
+      for ( int i : mVertexCounts )
+         {
+         ret.append( i );
+         ret.append( ' ' );
+         }
+      ret.deleteCharAt( ret.length() - 1 );
+      ret.append( "))" );
+      return ret.toString();
       }
 
    // TODO Add texture fields and methods.

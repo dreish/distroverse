@@ -19,7 +19,7 @@ import org.distroverse.core.Util;
  * both objects.
  * @author dreish
  */
-public class Pair implements DvtpExternalizable
+public final class Pair implements DvtpExternalizable
    {
    /**
     * This default constructor is pretty much only useful in conjunction
