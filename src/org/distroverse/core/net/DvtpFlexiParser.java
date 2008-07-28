@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -43,15 +43,17 @@ public class DvtpFlexiParser extends ObjectParser< Object >
          mNextObject.write( baos.toByteArray() );
          baos.reset();
          byte[] next_object = mNextObject.toByteArray();
-         
+
          if ( beginsWithNul( next_object ) )
             {
             // This is an arbitrary DvtpExternalizable object.  Find the
             // length and find out whether we have the whole thing yet.
             InputStream in = Util.baToInput( next_object );
+            // Discard initial NUL.
+            in.read();
             int ob_len = objectLength( in );
             boolean writeback = false;
-            
+
             if ( ob_len == 0 )
                {
                throw new IOException( "zero-length object in input" );
@@ -76,7 +78,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
             if ( writeback )
                {
                /* Delete parsed object from mNextObject by writing
-                * whatever is left in 'in' back to mNextObject. 
+                * whatever is left in 'in' back to mNextObject.
                 */
                byte[] in_buffer = new byte[ in.available() ];
                in.read( in_buffer );
@@ -90,7 +92,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
             // newline terminator yet.
             cont = false;
             for ( int i = 0; i < next_object.length - 1; ++i )
-               if (    next_object[ i   ] == '\r' 
+               if (    next_object[ i   ] == '\r'
                     && next_object[ i+1 ] == '\n' )
                   {
                   // Yes.
@@ -100,14 +102,14 @@ public class DvtpFlexiParser extends ObjectParser< Object >
                      = new ByteArrayOutputStream();
                   string_baos.write( string_part );
                   queue.add( string_baos.toString( "UTF-8" ) );
-               
+
                   byte[] remainder = new byte[ next_object.length
                                                - i - 2 ];
                   System.arraycopy( next_object, i + 2, remainder, 0,
                                     next_object.length - i - 2 );
                   mNextObject.reset();
                   mNextObject.write( remainder );
-                  
+
                   if ( remainder.length > 0 )
                      cont = true;
                   break;
@@ -120,7 +122,7 @@ public class DvtpFlexiParser extends ObjectParser< Object >
       {
       return  ba.length > 0  &&  ba[ 0 ] == '\0';
       }
-   
+
    /* Reminder: length will include the initial NUL, and the length
     * number itself.  Returns -1 if not enough has been ready to even
     * compute the length.
@@ -137,11 +139,11 @@ public class DvtpFlexiParser extends ObjectParser< Object >
          {
          ret = -1;
          }
-      
+
       if ( ret > MAX_OBJECT_LENGTH )
          throw new IOException( "Object length " + ret + " exceeds"
                                 + " limit " + MAX_OBJECT_LENGTH );
-      
+
       return ret;
       }
 

@@ -13,7 +13,12 @@ import java.io.OutputStream;
 
 /**
  * Compact ulong (unsigned long) class.  Range is 0 to 2^63-1, so this
- * is compatible with a Java long.
+ * is compatible with a Java long.  Externalization breaks the number
+ * into septets, which are packed into the low bits of a series of
+ * octets, lowest septet first, the high (sign) bit in each octet being
+ * used as a flag to indicate that the number has been completely
+ * streamed.  The high bit not being set on the seventh octet is an
+ * error.
  * @author dreish
  */
 public final class CompactUlong implements DvtpExternalizable

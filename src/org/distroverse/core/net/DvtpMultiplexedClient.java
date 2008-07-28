@@ -9,7 +9,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
 /**
  * @author dreish

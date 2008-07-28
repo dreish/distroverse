@@ -1,57 +1,5 @@
 
 - To do for 0.01:
-  - Create a simple server that feeds some shapes to a pass-through
-    proxy and moves them around
-    + Shape needs an externalization format
-    + Need to create PassThroughProxy.jar
-    - No objects are visible
-      + Add log of objects received in proxy
-      x Proxy is apparently not being constructed
-        x Step through everything after sending LOCATION query
-          x Never returns anything
-            x Trace through the server
-              > Must have been running an obsolete (broken) version; the
-                problem doesn't exist after restarting it
-      + DvtpMultiplexedClient does not set mParserClass/mStreamerClass
-      + DvtpMultiplexedClient does not set mSelector
-      x This exception is being thrown as an "impossible exception";
-        "Unloadable proxy"; obviously it isn't impossible
-      + PassThroughProxy is being instantiated, and then nothing else
-        happens
-        + Handle SetUrl messages differently
-        x Freezing on NetInQueue.activateNetworkReader()
-          > At mClient.register()
-          + Inside SocketChannelImpl(SelectableChannel)
-            .register(Selector,int), which has no available source code
-            > I believe this function is not supposed to block and is
-              not blocking; the problem is more likely one of
-              synchronization
-              > Downloaded source; line it stops on is in
-                SelectorImpl.register(), synchronized this.publicKeys
-          > I had two threads hitting a breakpoint; the one I was
-            looking at was blocking until the other one finished
-            registering the selector
-        + activateNetworkReader() must pause/block the selector before
-          registering a new channel with it
-          x ReentrantReadWriteLock doesn't seem to like being shared
-            between threads; throws IllegalMonitorStateException
-            > No, this is because I had an exception before getting the
-              lock; needed to narrow the scope of the try block
-        + Same with activateNetworkWriter()
-        + Getting NullPointerException in DvtpMultConn.readConnection()
-        x Fix handshake when proxy connects to DVTP server
-          > Proxy gets greeting and ignores it; this is probably fine
-          > Might want to respond to the server greeting with PROXYOPEN
-      + It looks like PointArray is not being transmitted correctly
-        + Make the smaller shape get sent first
-        + Step through the externalization of it
-          + AddObject.mShape.mVertexCounts looks really wrong
-            + Fix externalization with some thorough unit tests
-        x Step through the reading of it
-      - Server sends valid-looking AddObjects (according to TestClient),
-        but they don't show up in the viewer
-    + URL is displayed as "initial-text"
-  - Move DvtpMultiplexed* out of distroplane.lib, into core.net
   - Announce 0.01
     - Describe overall idea
     - List the major existing issues
@@ -630,6 +578,72 @@
       AddObject test
       + Try beaming a Quat: 0 0 0 1
       + Does the same MoveSeq transfer cleanly on its own?
+  + Create a simple server that feeds some shapes to a pass-through
+    proxy and moves them around
+    + Shape needs an externalization format
+    + Need to create PassThroughProxy.jar
+    + No objects are visible
+      + Add log of objects received in proxy
+      x Proxy is apparently not being constructed
+        x Step through everything after sending LOCATION query
+          x Never returns anything
+            x Trace through the server
+              > Must have been running an obsolete (broken) version; the
+                problem doesn't exist after restarting it
+      + DvtpMultiplexedClient does not set mParserClass/mStreamerClass
+      + DvtpMultiplexedClient does not set mSelector
+      x This exception is being thrown as an "impossible exception";
+        "Unloadable proxy"; obviously it isn't impossible
+      + PassThroughProxy is being instantiated, and then nothing else
+        happens
+        + Handle SetUrl messages differently
+        x Freezing on NetInQueue.activateNetworkReader()
+          > At mClient.register()
+          + Inside SocketChannelImpl(SelectableChannel)
+            .register(Selector,int), which has no available source code
+            > I believe this function is not supposed to block and is
+              not blocking; the problem is more likely one of
+              synchronization
+              > Downloaded source; line it stops on is in
+                SelectorImpl.register(), synchronized this.publicKeys
+          > I had two threads hitting a breakpoint; the one I was
+            looking at was blocking until the other one finished
+            registering the selector
+        + activateNetworkReader() must pause/block the selector before
+          registering a new channel with it
+          x ReentrantReadWriteLock doesn't seem to like being shared
+            between threads; throws IllegalMonitorStateException
+            > No, this is because I had an exception before getting the
+              lock; needed to narrow the scope of the try block
+        + Same with activateNetworkWriter()
+        + Getting NullPointerException in DvtpMultConn.readConnection()
+        x Fix handshake when proxy connects to DVTP server
+          > Proxy gets greeting and ignores it; this is probably fine
+          > Might want to respond to the server greeting with PROXYOPEN
+      + It looks like PointArray is not being transmitted correctly
+        + Make the smaller shape get sent first
+        + Step through the externalization of it
+          + AddObject.mShape.mVertexCounts looks really wrong
+            + Fix externalization with some thorough unit tests
+        x Step through the reading of it
+      + Server sends valid-looking AddObjects (according to TestClient),
+        but they don't show up in the viewer
+        + Trace through proxy reader; see whether it is at least getting
+          the bytes
+          > Size of first non-string DVTP object has length 19,584,
+            which is probably wrong
+        + Is this how I expect an AddObject to be encoded?
+          > [0, 25, -127, -116, -122, -119, 0, 0, 0, 0, 0, 0, 32, ...]
+          > Initial NUL (correct)
+          > Length 153 (correct -- why is this reading as 19,584?)
+          > Class 12 (correct)
+          > Has Shape: true (correct)
+          > Shape
+            > length: 9
+          > So aside from the suspicious length, yes
+          + parseObjects() needs to swallow the initial NUL
+    + URL is displayed as "initial-text"
+  + Move DvtpMultiplexed* out of distroplane.lib, into core.net
 
 ------------------------------------------------------------------------
 - To do for 0.02:
@@ -658,8 +672,12 @@
   - Show some sort of "loading in progress" status indicator when going
     to a new URL, before the connection is fully established
 
+- To do for 0.02:
+  - Text
+  - Client input
+
 ------------------------------------------------------------------------
-> Required for 0.99:
+> To do for 0.99:
   > Client
     > Text -- can't escape the morass
     > Sound

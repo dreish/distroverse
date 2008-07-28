@@ -8,7 +8,7 @@
 /**
  * 
  */
-package org.distroverse.distroplane.lib;
+package org.distroverse.core.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,8 +19,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import org.distroverse.core.Log;
-import org.distroverse.core.net.ObjectParser;
-import org.distroverse.core.net.ObjectStreamer;
+import org.distroverse.distroplane.lib.DvtpListener;
+import org.distroverse.distroplane.lib.DvtpServer;
 
 /**
  * This class implements DvtpListener using a single thread to listen

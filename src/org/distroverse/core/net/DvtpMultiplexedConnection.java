@@ -1,4 +1,4 @@
-package org.distroverse.distroplane.lib;
+package org.distroverse.core.net;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -14,12 +14,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.distroverse.core.Log;
-import org.distroverse.core.net.NetInQueue;
-import org.distroverse.core.net.NetInQueueWatcher;
-import org.distroverse.core.net.NetOutQueue;
-import org.distroverse.core.net.NetSession;
-import org.distroverse.core.net.ObjectParser;
-import org.distroverse.core.net.ObjectStreamer;
 
 /**
  * The I/O core: a class that manages either outbound or incoming

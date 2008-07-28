@@ -13,7 +13,6 @@ import java.nio.*;
 import java.nio.channels.*;
 
 import org.distroverse.core.*;
-import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
 /**
  * A NetOutQueue is a queue of objects waiting to be sent through a

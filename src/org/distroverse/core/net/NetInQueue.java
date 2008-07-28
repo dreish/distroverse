@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.distroverse.core.Log;
-import org.distroverse.distroplane.lib.DvtpMultiplexedConnection;
 
 // TODO Factor out the copy/paste code from NetOutQueue.
 public class NetInQueue< T >
