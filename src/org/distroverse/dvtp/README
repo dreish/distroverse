@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2007 Dan Reish.
- * 
- * For license details, see the file COPYING in your distribution,
- * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
- * Lesser General Public License (GPL) version 3 or later</a>
- */
 DVTP, the Distroverse Transfer Protocol, defines a standard interface
 for transmitting sensory information from a server to a client (through
 a "proxy" Java application), and for transmitting control information
@@ -14,7 +7,6 @@ The classes in org.distroverse.dvtp, together with their inline
 documentation, constitute the authoritative definition of DVTP.
 
 Unlike all the other Distroverse code, which is licensed under the GPL
-v3.0, everything in org.distroverse.dvop and org.distroverse.dvtp is
-licensed under the LGPL v3.0.
-
+v3.0, everything in org.distroverse.dvop and org.distroverse.dvtp, and
+everything required by those classes, is licensed under the LGPL v3.0.
 

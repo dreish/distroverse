@@ -1,3 +1,5 @@
+(Warning: I haven't thought about this in several months.)
+
 DVOP, the Distroverse Object Protocol, defines a standard interface for
 transmitting complete objects from one program to another.  A server
 may implement DVOP without necessarily accepting every correctly-formed

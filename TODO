@@ -1,6 +1,10 @@
 
 - To do for 0.01:
+  - Look over all the READMEs; make sure they're okay
+    - Update /README
+    - dvtp/README shouldn't have a copyright banner
   - Announce 0.01
+    - Tag it
     - Describe overall idea
     - List the major existing issues
       - Display glitches
@@ -657,6 +661,9 @@
     > Object id and MoveSeq
     > Creates a new object with the same shape as another object
     > Changes to the other object's shape affect referring objects
+  - Text
+  - Client input
+  - Cookies
   x Override default serialization in PointArray to guarantee that the
     protocol doesn't change due to changes in Point3d's serialization
   - Reimplement ball factory with a stack of DynPolygons
@@ -671,10 +678,6 @@
   - Time out synchronous queries
   - Show some sort of "loading in progress" status indicator when going
     to a new URL, before the connection is fully established
-
-- To do for 0.02:
-  - Text
-  - Client input
 
 ------------------------------------------------------------------------
 > To do for 0.99:
