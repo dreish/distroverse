@@ -11,7 +11,6 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
-import javax.vecmath.Point3d;
 
 import org.distroverse.core.Util;
 
@@ -34,22 +33,6 @@ public final class Shape implements DvtpExternalizable
    public Shape()
       {
       super();
-      }
-
-   /**
-    * Constructor from a List of points and an array of vertex counts,
-    * as for a TriangleStripArray.
-    * @param points - One-dimensional list of points
-    * @param vertex_counts - Number of points in each triangle strip
-    */
-   @Deprecated
-   public Shape( List<Point3d> points, int[] vertex_counts,
-                 @SuppressWarnings("unused") int dummy )
-      {
-      Point3d[] points_arr
-         = points.toArray( new Point3d[ points.size() ] );
-      mPoints = new PointArray( points_arr );
-      mVertexCounts = vertex_counts;
       }
 
    /**

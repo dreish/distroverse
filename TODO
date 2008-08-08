@@ -1,6 +1,7 @@
 
 - To do for 0.02:
   - Switch to latest jME
+  - Get a real GUI - FengGUI most likely
   - Add textures to Shape class
     - Specify color of each triangle
     - Include image
@@ -12,7 +13,6 @@
     > Object id and MoveSeq
     > Creates a new object with the same shape as another object
     > Changes to the other object's shape affect referring objects
-  - Text
   - Client input
   - Cookies
   x Override default serialization in PointArray to guarantee that the
@@ -32,6 +32,7 @@
 
 ------------------------------------------------------------------------
 - To do for 0.03:
+  - Text
 
 ------------------------------------------------------------------------
 - To do for 0.99:
