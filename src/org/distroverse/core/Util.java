@@ -50,7 +50,7 @@ public final class Util
     * @param n - a long
     * @return (byte) n, if it is within the range of bytes
     */
-   public static byte SafeByte( long n )
+   public static byte safeByte( long n )
       {
       if ( n > Byte.MAX_VALUE )
          throw new IllegalArgumentException(

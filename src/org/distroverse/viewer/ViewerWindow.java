@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -11,11 +11,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.distroverse.core.Log;
-
-import com.jme.scene.Node;
-import com.jmex.game.StandardGame;
-import com.jmex.game.state.DebugGameState;
-import com.jmex.game.state.GameStateManager;
+import org.distroverse.viewer.gui.DvWindow;
 
 /**
  * @author dreish
@@ -24,16 +20,23 @@ public class ViewerWindow
    {
    public ViewerWindow()
       {
-      mGame  = new StandardGame( "Distroverse Viewer" );
-      mGame.start();
-      final DebugGameState debug = new DebugGameState();
-      GameStateManager.getInstance().attachChild( debug );
-      debug.setActive( true );
-      Node root_node = debug.getRootNode();
-      mGui   = new ViewerGui( root_node );
-      mWorld = new WorldGraph( root_node );
+      mWindow = new DvWindow();
+      final DvWindow window_copy = mWindow;
+      mWindowRunner = new Thread( new Runnable()
+                                  {
+                                  public void run()
+                                  // BaseGame has a no-return start()
+                                  // method.  Boo.
+                                     {  window_copy.start();  }
+                                  } );
+      mWindowRunner.start();
+//      final DebugGameState debug = new DebugGameState();
+//      GameStateManager.getInstance().attachChild( debug );
+//      debug.setActive( true );
+      mGui = new ViewerGui( mWindow );
+      mWorld = new WorldGraph( mGui.getWorldRootNode() );
       }
-   
+
    /**
     * Requests that this viewer go to a given URL by either getting a
     * new proxy, or sending a SetUrl object to the existing proxy.
@@ -42,7 +45,7 @@ public class ViewerWindow
     * @throws IOException - general I/O problems, typically network
     * @throws ClassNotFoundException - if the proxy cannot be loaded
     */
-   public void requestUrl( String url ) 
+   public void requestUrl( String url )
       {
       try
          {
@@ -68,30 +71,25 @@ public class ViewerWindow
          Log.p( e, Log.DVTP, 5 );
          }
       }
-   
+
    public void setDisplayedUrl( String url )
       {
       mGui.getLocationBar().setText( url );
       }
-   
-   private void newPipelineUrl( String url ) 
+
+   private void newPipelineUrl( String url )
    throws Exception
       {
       if ( mPipeline != null )
          mPipeline.close();
-      if ( mProxy != null )
-         mProxy.close();
-      mProxy = new ProxyClientConnection( url,
-                        ProxyControllerPipeline.getProxyUrl( url ),
-                        this );
-      mPipeline = ControllerPipeline.getNew( url, mProxy, mGame, this );
+      mPipeline = ControllerPipeline.getNew( url, this );
       }
-   
+
    public WorldGraph getWorld()  {  return mWorld;  }
-   
-   private StandardGame          mGame;
-   private ProxyClientConnection mProxy;
-   private ControllerPipeline    mPipeline;
-   private ViewerGui             mGui;
-   private WorldGraph            mWorld;
+
+   private DvWindow           mWindow;
+   private ControllerPipeline mPipeline;
+   private ViewerGui          mGui;
+   private WorldGraph         mWorld;
+   private Thread             mWindowRunner;
    }

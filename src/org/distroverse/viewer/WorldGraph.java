@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -14,6 +14,8 @@ import org.distroverse.dvtp.Shape;
 
 import com.jme.curve.CurveController;
 import com.jme.scene.Node;
+import com.jme.scene.SceneElement;
+import com.jme.scene.TriMesh;
 
 
 public class WorldGraph
@@ -25,7 +27,7 @@ public class WorldGraph
       mParent.attachChild( mWorldHead );
       mIdMap  = new HashMap< Long, WorldGraphObject >();
       }
-   
+
    public void addShape( Shape s, Long id, Long pid,
                          MoveSeq init_move_seq )
       {
@@ -37,7 +39,9 @@ public class WorldGraph
          // FIXME Throw exception here instead?
          parent_node = mWorldHead;
       mIdMap.put( id, new WorldGraphObject( object_node, pid ) );
-      object_node.attachChild( s.asTriMesh() );
+      TriMesh tm = s.asTriMesh();
+      object_node.attachChild( tm );
+//      tm.setCullMode( SceneElement.CULL_DYNAMIC );
       setMoveSeq( init_move_seq, object_node );
 //      object_node.setLocalTranslation( init_pos );
 //      object_node.setLocalRotation( rotation );
@@ -54,7 +58,7 @@ public class WorldGraph
       object_node.addController( cc );
       // FIXME set repeat type
       }
-   
+
    public void setMoveSeq( MoveSeq ms, Long id )
       {
       // TODO check for bad id
@@ -77,7 +81,7 @@ public class WorldGraph
    private final class WorldGraphObject
       {
       public WorldGraphObject( Node n, Long pid )
-         {  
+         {
          mNode = n;
          mParentId = pid;
          }
@@ -86,7 +90,7 @@ public class WorldGraph
       private Node mNode;
       private Long mParentId;
       }
-   
+
    private Node getNode( Long m )
       {
       WorldGraphObject wgo = mIdMap.get( m );

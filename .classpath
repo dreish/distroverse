@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jME"/>
+	<classpathentry kind="lib" path="lib/FengGUI.jar" sourcepath="/Users/dreish/Documents/eclipse-workspace/fenggui/src"/>
+	<classpathentry kind="lib" path="/jME/lib/lwjgl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -40,9 +39,9 @@ public abstract class ResourceCache
     * deleted from the cache before they are used.
     * @param url - remote URL
     * @return local file:// URL
-    * @throws URISyntaxException 
-    * @throws IOException 
-    * @throws ClassNotFoundException 
+    * @throws URISyntaxException
+    * @throws IOException
+    * @throws ClassNotFoundException
     */
    public static final String internalizeResourceUrl( String url )
    throws URISyntaxException, IOException, ClassNotFoundException
@@ -50,7 +49,7 @@ public abstract class ResourceCache
       checkInit();
       synchronized ( mCanClean )
          {  mCanClean = false;  }
-      
+
       String ret = localizeUrl( url );
       if ( fileUrlExists( ret ) )
          registerUse( ret );
@@ -60,13 +59,13 @@ public abstract class ResourceCache
 
       return ret;
       }
-   
+
    /**
     * Returns true if the given remote URL is locally cached, and counts
     * as a hit for the purposes of expiring the resource from the cache.
     * @param url - remote URL
     * @return is it cached?
-    * @throws URISyntaxException 
+    * @throws URISyntaxException
     */
    public static final boolean checkResourceUrl( String url )
    throws URISyntaxException
@@ -74,7 +73,7 @@ public abstract class ResourceCache
       checkInit();
       synchronized ( mCanClean )
          {  mCanClean = false;  }
-   
+
       String local_url = localizeUrl( url );
       boolean ret = false;
       if ( fileUrlExists( local_url ) )
@@ -83,7 +82,7 @@ public abstract class ResourceCache
          ret = true;
          }
       mCanClean = true;
-      
+
       return ret;
       }
 
@@ -124,8 +123,8 @@ public abstract class ResourceCache
     * @param remote_url
     * @param file_url
     * @throws URISyntaxException
-    * @throws IOException 
-    * @throws ClassNotFoundException 
+    * @throws IOException
+    * @throws ClassNotFoundException
     */
    public static void downloadUrl( String remote_url, String file_url )
    throws URISyntaxException, IOException, ClassNotFoundException
@@ -133,7 +132,7 @@ public abstract class ResourceCache
       File target    = new File( new URI( file_url ) );
       URI remote_uri = new URI( remote_url );
       String scheme  = remote_uri.getScheme();
-      
+
       if (    scheme.equalsIgnoreCase( "http" )
            || scheme.equalsIgnoreCase( "https" )
            || scheme.equalsIgnoreCase( "ftp" ) )
@@ -146,7 +145,7 @@ public abstract class ResourceCache
                          + scheme );
       }
 
-   private static void standardUrlDownload( URI remote_uri, 
+   private static void standardUrlDownload( URI remote_uri,
                                             File target )
    throws IOException
       {
@@ -154,7 +153,7 @@ public abstract class ResourceCache
       InputStream remote_data = remote_url.openStream();
       OutputStream local_data = new FileOutputStream( target );
       byte[] buffer = new byte[ 4096 ];
-      
+
       boolean eof = false;
       while ( ! eof )
          {
@@ -172,13 +171,13 @@ public abstract class ResourceCache
       DvtpServerConnection remote_site
          = new DvtpServerConnection( remote_uri );
       String tmpname = target + "_tmp";
-      RandomAccessFile local_data 
+      RandomAccessFile local_data
          = new RandomAccessFile( tmpname, "rw" );
-      
+
       Blob first_blob = remote_site.get( remote_uri );
       long file_length = first_blob.getFileLength();
       long fetched     = first_blob.getBytes().length;
-      
+
       local_data.seek( first_blob.getPos() );
       local_data.write( first_blob.getBytes() );
 
@@ -189,7 +188,7 @@ public abstract class ResourceCache
          local_data.seek( next_blob.getPos() );
          local_data.write( next_blob.getBytes() );
          }
-      
+
       local_data.close();
       (new File( tmpname )).renameTo( target );
       }

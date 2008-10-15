@@ -44,10 +44,10 @@ public class ProxyClientConnection implements Runnable
    public ProxyClientConnection( String url, String proxy_url,
                                  String proxy_name,
                                  String location_regexp,
-                                 ViewerWindow window )
+                                 ProxyControllerPipeline pipeline )
    throws Exception
       {
-      init( url, proxy_url, proxy_name, location_regexp, window );
+      init( url, proxy_url, proxy_name, location_regexp, pipeline );
       }
 
    /**
@@ -59,18 +59,19 @@ public class ProxyClientConnection implements Runnable
     */
    public ProxyClientConnection( String url,
                                  ProxySpec proxy_spec,
-                                 ViewerWindow window )
+                                 ProxyControllerPipeline pipeline )
    throws Exception
       {
       init( url,
             proxy_spec.getProxyUrl().toString(),
             proxy_spec.getProxyName().toString(),
             proxy_spec.getResourceRegexp().toString(),
-            window );
+            pipeline );
       }
 
    private void init( String url, String proxy_url, String proxy_name,
-                      String location_regexp, ViewerWindow window )
+                      String location_regexp, 
+                      ProxyControllerPipeline pipeline )
    throws Exception
       {
       mLocationRegexp = location_regexp;
@@ -79,7 +80,8 @@ public class ProxyClientConnection implements Runnable
       mQueue = new LinkedBlockingQueue< ProxySendable >();
       runProxy( proxy_url, proxy_name );
       mListener = newListener();
-      mDispatcher = new ViewerDispatcher( window, this );
+//      mDispatcher = new ViewerDispatcher( pipeline, this );
+      mPipeline = pipeline;
       setUrl( url, location_regexp );
       }
 
@@ -104,7 +106,7 @@ public class ProxyClientConnection implements Runnable
             ProxySendable o = mQueue.take();
             try
                {
-               mDispatcher.dispatchObject( o );
+               mPipeline.dispatchObject( o );
                }
             catch ( ProxyErrorException e )
                {
@@ -201,6 +203,6 @@ public class ProxyClientConnection implements Runnable
    private String mLocationRegexp;
    private BlockingQueue< ProxySendable > mQueue;
    private Thread mListener;
-   private ViewerDispatcher mDispatcher;
    private DvtpProxy mProxyInstance;
+   private ProxyControllerPipeline mPipeline;
    }

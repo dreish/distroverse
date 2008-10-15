@@ -22,11 +22,11 @@ import org.distroverse.dvtp.RedirectUrl;
  */
 public class ViewerDispatcher extends ClientDispatcher
    {
-   public ViewerDispatcher( ViewerWindow w, ProxyClientConnection p )
+   public ViewerDispatcher( ViewerWindow w, ControllerPipeline p )
       {
       super();
-      mWindow = w;
-      mProxy  = p;
+      mWindow   = w;
+      mPipeline = p;
       }
 
    @Override
@@ -35,7 +35,7 @@ public class ViewerDispatcher extends ClientDispatcher
       {
       String url = o.getUrl();
 
-      if ( mProxy.handlesUrl( url ) )
+      if ( mPipeline.handlesUrl( url ) )
          mWindow.setDisplayedUrl( url );
       else
          throw new ProxyErrorException( "Proxy tried to display a URL"
@@ -48,7 +48,7 @@ public class ViewerDispatcher extends ClientDispatcher
       {
       String url = o.getUrl();
 
-      if ( mProxy.handlesUrl( url ) )
+      if ( mPipeline.handlesUrl( url ) )
          throw new ProxyErrorException( "Proxy tried to redirect to"
                           + "a URL that it handles: " + url );
 
@@ -85,6 +85,6 @@ public class ViewerDispatcher extends ClientDispatcher
       mWindow.getWorld().deleteShape( o.getId() );
       }
 
-   private ViewerWindow mWindow;
-   private ProxyClientConnection mProxy;
+   private ViewerWindow       mWindow;
+   private ControllerPipeline mPipeline;
    }

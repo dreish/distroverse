@@ -1,7 +1,92 @@
 
 - To do for 0.02:
-  - Switch to latest jME
   - Get a real GUI - FengGUI most likely
+    + Relocate from ~/Downloads/src/org
+    + Add jar
+    + Attach source
+    + Try a trivial test -- a dialog box with a message
+      + Make this a standalone app, and then migrate the code back into
+        Viewer
+        > Just using the example for this
+    + Wrap the whole ViewerWindow in a FengJME GUI and add root node to
+      it
+      + Subclass a BaseGame like FengJME
+        + DvWindow; provides some useful general methods for adding
+          nodes, getting protected access to the FengGUI display,
+          update()ing
+        x ViewerWindow extends DvWindow; is specific to the Viewer app
+          > Because I dislike the BaseGame namespace, I'll make
+            ViewerWindow contain a DvWindow, not extend it
+      x ViewerGui.setViewRoot( Node )
+    + Add shapes
+      + about:hello test only reaches addShape() after the window is
+        closed; trace execution and find out where it gets stuck, how I
+        can make it flow through as before
+      + There's a race condition in creating a window and immediately
+        attaching the ViewerGui node to it, in ViewerWindow();
+        initialize mRootNode in DvWindow()
+      + WorldGraph.addShape() is still being called, but the shape does
+        not display; find out whether the wg is a child of the node
+        actually being rendered
+        + Breakpoint in wg.addShape() and in DvWindow.render()
+          x Does something need to be happening in update()?
+            > From reading AbstractGame, probably not
+      x Are there any seemingly superfluous calls that need to be made
+        on one or more of the nodes for them to be displayed?
+        > Apparently not
+      + Try adding mBox to "mRootNode" again
+      + Then move the add to AboutControllerPipeline
+        + Make static DvWindow.mRootNode public
+        > This succeeds
+      + Then add it to a child node ("GUI-root")
+        > This fails
+      + What is different between "mRootNode" and "GUI-root"?
+        > Orthographic?
+        + Yes, make a window root and attach both world root and GUI
+          root under that
+      x Then try adding one of my shapes asTriMesh()
+      x Are the objects' positions or sizes preventing them from being
+        displayed?
+    + Shapes are not bobbing; why?
+      + Probably need to fill in the update() method
+        > Controller is still being added to nodes as before
+        + Find out how SimpleGame does it
+          > Just: mRootNode.updateGeometricState( tpf, true );
+    - Would be nice to know why everything renders with the wrong Z-
+      order
+      - Trace through rendering
+        - Trace deeper into GL11.glDrawElements(), called from
+          LWJGLRenderer.draw( TriangleBatch )
+          - Need to attach source to LWJGL
+      - Look at the code in a demo clearly lacking this problem
+        - jmetest.shape.TestTube renders a single complex shape with
+          correct hidden-face removal; I should be able to at least do
+          a single sphere correctly
+          - Only thing I see that is different is the shape; Tube vs.
+            my hand-rolled TriMesh
+            > jmetest.input.action.TestFirstPersonController also uses
+              multiple hand-rolled TriMeshes, and also has the same
+              problem
+            + Look at how Tube is constructed
+              > With TrangleBatch, not TriMesh
+              > With all values set in the NormalBuffer
+            - Does this not get back to the problem I brushed past a
+              while ago: my generalization of shapes breaks down because
+              I don't know which side is in and which side is out?
+              > Might have to just pick an arbitrary handedness for
+                shapes
+              > The other possible problem is that I regard shapes as
+                a stack of independent strips; there might b no easy
+                correlation between them
+        - jmetest.scene.TestPassNode
+    - Add a FengGUI location bar
+    - Find out from Joshua Keplinger what license FengJMEInputHandler
+      is offered under; also whether he wrote FengJME, and what
+      license for that as well
+  - Implement actual movement
+  - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
+    > Also nice because it avoids having system dialogs swallow a stray
+      enter key or spacebar
   - Add textures to Shape class
     - Specify color of each triangle
     - Include image
@@ -29,6 +114,26 @@
   - Time out synchronous queries
   - Show some sort of "loading in progress" status indicator when going
     to a new URL, before the connection is fully established
+  + Switch to latest jME
+    + svn checkout http://jmonkeyengine.googlecode.com/svn/trunk/   \
+      jmonkeyengine-read-only
+    + git commit old version
+    + Remove * .cvsignore
+    + Copy in new jME 2
+    + git commit new version
+    x Try loading some tests from within Eclipse
+      > Great, it crashes
+    x Find some instructions and follow them
+    > SVN version is not ready
+    + Go back to 1.0
+    + CVS update to get jME 1.0.1
+  + Now getting errors loading about:hello
+    + ControllerPipeline should have the ProxyClientConnection, not
+      ViewerWindow; otherwise there's no point to it
+      + The ProxyClientConnection currently has a way back to the
+        ViewerWindow, and gives that to the ViewerDispatcher; this must
+        instead go through the pipeline (which should have the
+        dispatcher)
 
 ------------------------------------------------------------------------
 - To do for 0.03:
@@ -38,10 +143,29 @@
 - To do for 0.99:
   - Client
     - Text -- can't escape the morass
+    - kp-enter to switch between mouselook/pointer mode
     - Sound
-    - Smoothing
+    - Shape smoothing
+      - Should this all be done at the proxy level, with additional
+        polygons?
+      > Goal: a future client with tactile output should be able to
+        distinguish between sharp and rounded edges
+      > Render versus feel detail levels?
+      > Render large area at visual detail; small area at feel detail?
+        > Proxies able to break all shapes into numerous smaller shapes
+          for ultra-high detail; also useful for microscopic avatars
+    - Mouselook smoothing
+      > E.g., if mouse resolution results in a 10-pixel movement of the
+        scene for each pixel of mouse movement, the movement should be
+        interpolated so that it isn't jerky when the mouse is moved
+        slowly
+      > Could just be a matter of choosing a resolution that results in
+        mouse pixel = screen pixel
     - Decide whether to build in things like feel, temperature, specific
       heat, etc
+      > These could be properties of objects, or they could be
+        independent messages mapping to points on the user's skin where
+        the sensation is felt, or both
     - Figure animations (as long as a proxy can do it)
     - Sound
     - Inventory system with remote object browser integration
@@ -54,6 +178,14 @@
 
 ------------------------------------------------------------------------
 - Future:
+  - Sleep mode (suspend all proxy threads and stop rendering)
+    > In a menu item, not a button; this is not something someone is
+      going to need to hit in a moment of frustration like the mute
+      button
+  - Tabs: Why not?  Put them on top like Chrome
+    > A mute button in each tab itself, appearing only when that tab is
+      making a sound, and for several seconds (30?) afterward, just
+      perceptibly smaller than when the site is actually making sound
   - Reestablishing a multiplexed connection after it is dropped
     - The receiver will likely reset correctly and discard any half-sent
       objects, but a sender will need to back up and retransmit

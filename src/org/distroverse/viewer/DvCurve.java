@@ -20,8 +20,9 @@ import com.jme.math.Vector3f;
 import com.jme.scene.Spatial;
 
 /**
- * DvCurve combines a polynomial and a sum of sines to define movement
- * in three dimensions.
+ * DvCurve is the jME implementation of the movement represented by a
+ * MoveSeq message, which combines a polynomial and a sum of sines to
+ * define movement in three dimensions.
  * @author dreish
  */
 public class DvCurve extends Curve

@@ -98,7 +98,7 @@ public class BigInt implements DvtpExternalizable,
       else
          output = BigInteger.ZERO.subtract( mVal ).toByteArray();
       
-      out.write( Util.SafeByte( output.length * mVal.signum() ) );
+      out.write( Util.safeByte( output.length * mVal.signum() ) );
       out.write( output );
       }
 

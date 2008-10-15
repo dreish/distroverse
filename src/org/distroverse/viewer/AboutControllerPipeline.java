@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
  */
 /**
- * 
+ *
  */
 package org.distroverse.viewer;
 
@@ -14,10 +14,15 @@ import java.util.ArrayList;
 
 import org.distroverse.distroplane.lib.BallFactory;
 import org.distroverse.dvtp.Shape;
+import org.distroverse.viewer.gui.DvWindow;
 
+import com.jme.bounding.BoundingSphere;
+import com.jme.math.FastMath;
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
-import com.jmex.game.StandardGame;
+import com.jme.scene.Node;
+import com.jme.scene.shape.Box;
+import com.jme.scene.shape.Tube;
 
 /**
  * This controller pipeline knows how to generate about:* views, which
@@ -33,8 +38,7 @@ public class AboutControllerPipeline extends ControllerPipeline
     * @param game
     * @param window
     */
-   public AboutControllerPipeline( String url, StandardGame game,
-                                   ViewerWindow window )
+   public AboutControllerPipeline( String url, ViewerWindow window )
       {
       // TODO: examine url and produce different results depending.
       WorldGraph wg = window.getWorld();
@@ -45,12 +49,13 @@ public class AboutControllerPipeline extends ControllerPipeline
                     .setEquatorialRadius( 2 )
                     .generate();
       wg.addShape( s, 1L, 0L,
-                   VUtil.simpleMove( new Vector3f( 0, 0, -100 ), 
+                   VUtil.simpleMove( new Vector3f( 0, 0, -100 ),
                                      new Quaternion( 1, 0, 0, 0 ) ) );
       Shape simple = simpleShape();
       wg.addShape( simple, 2L, 0L,
-                   VUtil.simpleMove( new Vector3f( 0, 0, 0 ), 
+                   VUtil.simpleMove( new Vector3f( 0, 0, 0 ),
                                      new Quaternion( 1, 0, 0, 0 ) ) );
+
       }
 
    // Returns a single right triangle, for testing.
@@ -61,10 +66,10 @@ public class AboutControllerPipeline extends ControllerPipeline
       alp.add( new Vector3f( 1, 0, 1 ) );
       alp.add( new Vector3f( 0, 1, 1 ) );
       int[] vc = { 3 };
-      
+
       return new Shape( alp, vc );
       }
-   
+
    @Override
    public void close()
       {

@@ -2189,7 +2189,7 @@ It might be most useful at this point to render them in wireframe.
 I'm (eventually) adding Scheme as an option for the downloadable proxy
 for all the people who are no damn fun at all:
 
-09:14 <nothingHappens> deadly, when i write a defmacro, anything less 
+09:14 <nothingHappens> deadly, when i write a defmacro, anything less
         than the best is a hack yo
 09:17 <spiaggia> good afternoon
 09:17 <nothingHappens> afternoon?  where?
@@ -2199,20 +2199,20 @@ for all the people who are no damn fun at all:
 09:18 <spiaggia> yeah well, that's how it goes on this planet.
 09:18 <fe[nl]ix> ciao spiaggia
 09:18 <nothingHappens> spiaggia, so i've heard
-09:19 <nothingHappens> us simple midwestern folk don't travel much.  
+09:19 <nothingHappens> us simple midwestern folk don't travel much.
         yall, dowhut,. etc
 09:20 <spiaggia> nothingHappens: so i've heard
 09:20 <nothingHappens> lowell.
-09:20 <Krystof> in case the sarcasm is too subtle for you simple 
+09:20 <Krystof> in case the sarcasm is too subtle for you simple
         midwestern folk: we are utterly uninterested
 09:20 <spiaggia> thank you Krystof for that clarification :)
 09:21 <nothingHappens> that's good.  you're perfectly welcome to ignore
         it, or go back to the not-talking-about-anything you were so
         busy with before.
 09:22 <Xach> nothingHappens: Begone.
-09:22 <spiaggia> Krystof: you have until wednesday to suggest a 
-        programming project for the 1st year masters students.  I 
-        suggested the same as last year: stamp (because it didn't 
+09:22 <spiaggia> Krystof: you have until wednesday to suggest a
+        programming project for the 1st year masters students.  I
+        suggested the same as last year: stamp (because it didn't
         advance very much) and a structure editor for CL.
 09:22 <spiaggia> (the structure editor wasn't chosen last year)
 09:23 <nothingHappens> Xach, gladly.  you guys are no damn fun at all.
@@ -2717,7 +2717,7 @@ object's state -- how can they be prevented from ruining everything?
 If object locking were done gratuitously (and automatically), it would
 be far too easy to deadlock.
 
-If it were done manually, 
+If it were done manually,
 
 A functional paradigm is not acceptable.  Objects must be mutable; it's
 no good to say, "create a new and different object" in lieu of, say,
@@ -4131,7 +4131,7 @@ Maybe even just a loose adaptation of the spam filter.  Its default
 behavior should be good -- if it doesn't see both ham and spam, it
 assumes everything is ham.
 
-The spirit of laziness would be to not do that until it was necessary. 
+The spirit of laziness would be to not do that until it was necessary.
 It's great to have ideas, but I need to focus on the productive ideas.
 
 2008-03-26
@@ -4223,7 +4223,7 @@ toward promoting your pet political or religious beliefs.  That could
 get you banned faster than flaming.
 
 '- Ideas and conjecture are great, but are you trying to look
-knowledgeable by claiming to know something you don't really know? 
+knowledgeable by claiming to know something you don't really know?
 Consider adding "I think" or "My guess is" -- a few simple words can
 make you look honest and humble (which everyone likes) instead of
 foolish and loudmouthed (which nobody likes).
@@ -4409,7 +4409,7 @@ so:
     (++ x))
  y)
 
-The use of the colon here would require changing Arc syntax a little. 
+The use of the colon here would require changing Arc syntax a little.
 Right now a bare colon is a syntax error.  [Actually, that's not true in
 a quoted list, which is what a macro becomes.]  The idea is there can be
 several variables with different types declared with a single "dec", and
@@ -4820,7 +4820,7 @@ Hold down a key and a faint circle appears over the display.  That's the
 axis around which the camera moves, using arrow keys and page up/down to
 move in and out, or the mouse and its wheel respectively (no click
 required).  Touch controls will be swipe to rotate, pinch to zoom out,
-spread to zoom in.  Touch controls will also allow tilting, I guess. 
+spread to zoom in.  Touch controls will also allow tilting, I guess.
 Home/double-tap to restore default view (as defined by the proxy).
 
 This needs to be a function of the client -- camera manipulation.
@@ -4987,7 +4987,7 @@ be an association made only in the client based on the user's own input;
 "I know this avatar as 'Jimmy James'", which may or may not be what the
 avatar's user calls himself most often.
 
-This is all relevant to implementing a site, not really to the client. 
+This is all relevant to implementing a site, not really to the client.
 Though it might be necessary to build in some support for some concept
 of identity, if friends are to be recognized wherever they are and not
 just within a given site [the one where they were met].
@@ -5001,3 +5001,430 @@ Marking of recognized avatars would have to be done entirely within the
 client to avoid leaking friend information all over the place.
 
 Shouldn't be a big deal.
+
+2008-07-13
+
+I've been trying to figure out why PassThroughProxy.connect() hangs in
+SocketChannel.register() for a while now.  I'm going to try to compile a
+sequence of events for both the PassThroughProxy startup and DvtpServer
+startup (which does work), and see if I can spot the problem.  It seems
+to me that a Selector should be designed not to hang like that, but I'm
+sure it's ultimately a symptom that I'm doing something wrong, and not a
+bug in Java 1.5.  It's unlikely I would discover such a thing after so
+relatively little work.
+
+DvtpServer.createServer():
+
+> Instantiate a new DvtpMultiplexedListener using the two parser classes
+> Instantiate a new DvtpServer implementation using the listener
+> Create a DvtpServerInQueueObjectWatcher thread using the server
+> Start the watcher thread
+> Set the watcher on the listener to the newly-activated watcher thread
+> Set the greeting on the listener
+> Call serve() on the listener
+> (Seconds pass)
+> A client connects to the server
+
+ProxyClientConnection.runProxy( ... PassThroughProxy ):
+
+> Instantiate a new DvtpProxy (PassThroughProxy)
+  > NetProxyBase constructor:
+    > Instantiate a new DvtpMultiplexedClient using DvtpFlexi*
+    > Create a DvtpProxyInQueueObjectWatcher using the DvtpProxy
+    > Set the watcher on the Multiplexer to the one just created
+    > Start the watcher thread
+    > Start the multiplexer
+  > SingleServerProxyBase constructor does nothing
+  > PassThroughProxy constructor does nothing
+> Set the proxy-to-client message queue on the proxy
+> Create a thread that will call the proxy's run() method
+> Start that thread -- PassThroughProxy.run():
+  > Does nothing
+
+I don't see how this explains the hanging behavior, but it seems to me
+that the run method should probably do a lot of what I have the
+constructor doing.
+
+No, register() still hangs.  (Though I still think it's better written
+this way.)
+
+So now I have:
+
+DvtpServer.createServer() -- works:
+
+> Instantiate a new DvtpMultiplexedListener using the two parser classes
+> Instantiate a new DvtpServer implementation using the listener
+> Create a DvtpServerInQueueObjectWatcher thread using the server
+> Start the watcher thread
+> Set the watcher on the listener to the newly-activated watcher thread
+> Set the greeting on the listener
+> Call serve() on the listener
+  > Open a ServerSocketChannel
+  > Open a Selector
+  > Bind the ServerSocketChannel to port 1808
+  > Register the ServerSocketChannel with the Selector
+  > Call DvtpMultiplexedConnection.run()
+    > Call Selector.select()
+> (Seconds pass)
+> A client connects to the server
+
+ProxyClientConnection.runProxy( ... PassThroughProxy ) -- broken:
+
+> Instantiate a new DvtpProxy (PassThroughProxy)
+  > NetProxyBase constructor:
+    > Instantiate a new DvtpMultiplexedClient using DvtpFlexi*
+      > Open a Selector
+  > SingleServerProxyBase constructor does nothing
+  > PassThroughProxy constructor does nothing
+> Set the proxy-to-client message queue on the proxy
+> Create a thread that will call the proxy's run() method
+> Start that thread -- PassThroughProxy.run():
+  > Create a DvtpProxyInQueueObjectWatcher using the DvtpProxy
+  > Set the watcher on the Multiplexer to the one just created
+  > Start the watcher thread
+  > Start the multiplexer thread (DvtpMultiplexedConnection.run())
+    > Call Selector.select()
+
+Maybe the problem here is that I can't add sockets to the selector while
+it is in Select().
+
+Maybe DvtpMultiplexedClient.connect() needs to pause the selector
+somehow.  That actually makes sense.
+
+But then activateNetworkReader() would block if the other thread was in
+select().
+
+That might well be an unencountered bug; activateNetworkReader() only
+calls register() if the queue had previously been full (which has never
+happened yet), or the first time it is called, which in case of the
+server would happen in a function dispatched by the Selector reader.
+
+So probably this needs to happen inside addSocket, to avoid duplication
+of code, and it should _not_ interrupt the selector thread if it is not
+currently blocking on select().
+
+2008-07-14
+
+My prize for getting this bug fixed will be that I get to stand in line
+for two hours for an iPhone.  I hope two hours!
+
+I'm really uncomfortable exposing the lock that the multiplexer uses to
+block selects so that others can register new connections on the
+selector.  Exposing the selector itself is arguably an unclean
+interface, but exposing a lock is the kind of thing that makes it hard
+for me to sleep at night.  I'm thinking of this as an alternative:
+
+public Object withBlockedSelector( Callable fn );
+
+A method that block/pauses the selector, calls fn.call(), and then
+unblocks it in a finally clause, so it's guaranteed to do the right
+thing.
+
+As much attention as I had to pay to getting the sequence exactly right
+within DvtpMultiplexedConnection.run(), I suspect I would rather keep
+even a relatively simple lock/unlock in one place inside the class as
+well.
+
+I might be able to shuffle some code around so that the selector is not
+exposed.  If I can't find a solid reason for exposing it, I might try to
+do that.
+
+The problem is that NetInQueue/NetOutQueue are the only classes that
+even theoretically need to touch these innards of the multiplexer, and
+there's no concept of a friend class in Java (which is fine, I guess;
+nested types appear to provide the same basic capabilities).  I could
+feed references to these things in the niq/noq constructors, but I'd
+rather just keep them encapsulated completely.
+
+Anyone who writes a proxy or a server is going to get their grubby
+fingers on the multiplexer, so it makes sense not to have stuff leaking
+out of it.
+
+2008-07-16
+
+Sometimes a proxy might want to gather more than one object from a
+server before invoking a callback.  I think it should probably work
+something like this:
+
+asyncCallback( Function< FunRet[] > c, FunCall fns... );
+
+Hm.  Where'd the complexity go?  I started writing out a bunch of
+implementation crap and realized there was no reason to do that at the
+point of use.  But here's what it'll do inside (which is slightly better
+than my first idea anyway):
+
+Get a new unique function call/return ID for each FunCall.  Register
+those IDs with a data structure mapping outstanding return values to the
+callbacks they need to be fed to, send the FunCall objects to the
+server, and as each return value is received, remove it from the
+outstanding-value data structure and increment (decrement?) a counter in
+the callback data structure.  When that counter indicates all arguments
+have been reached, invoke the callback with those FunRets.
+
+This still leaves the issue of timeouts unhandled.  That's something I
+just haven't dealt with at all in the project so far, and I think I'll
+probably leave it for v0.02 at least.  It's an interesting problem.
+Probably:
+
+asyncCallback( Function< FunRet[] > c, float timeout, FunCall fns... );
+
+and
+
+asyncCallback( Function< FunRet[] > c, float timeout,
+               Function< FunRet[] > timeout_handler, FunCall fns... );
+
+where timeout_handler could take nulls for the unfilled positions, and
+so would 'c' if timeout_handler were not supplied.  A timeout_handler of
+null would mean just drop the request if it times out.  In any case,
+FunRets that don't match up with anything would need to be dropped.
+
+I can't wait until I get to start writing servers in Clojure, after all
+the low-level stuff is taken care of.  There are so many things that
+would just be so much easier with macros.  Repetitive, dumb things.
+
+This will be an interesting problem:
+
+- Proxy sends client an AddObject
+- Proxy immediately sends client a Move targeted at that object
+- Client handles the AddObject in one thread
+- Another thread picks up the Move before the object is added
+
+Uh oh!
+
+I'd hate to have the other thread block; maybe it could get re-added to
+the back of the queue along with some kind of counter so it could give
+up after N retries?  Maybe there could be a lowest-priority retry queue
+for that?
+
+Maybe I need a Retry class, with an int counting down to zero, and the
+payload class <T extends DvtpExternalizable>.
+
+I've been thinking it would be a nice idea to turn the queues into
+priority queues anyway, but I haven't thought at all about how to do
+that.
+
+2008-07-18
+
+I think I need to make unit tests for DvtpExternalizable reading and
+writing.  I believe I still have problems with them, so why not just get
+them all ironed out and be able to stop worrying about it?
+
+Seems like a really easy unit test to write, too.
+
+2008-08-01
+
+Inventory is just like cookies, except that anything can write to the
+inventory (within some reasonable constraints -- possibly a per-site or
+just per-session quota), every item in the inventory must have some sort
+of visual representation, and only the user can read from it, by
+dragging and dropping items into the viewer window.
+
+That should be general enough to take care of everything, but I'll
+probably want to have some standard metainformation to go with each
+item, since items will need to be [at least potentially] shareable
+across all sites.
+
+2008-08-11
+
+This might be completely unnecessary, but ...
+
+I'd been thinking a few days ago in the shower about the problem of
+multi-pipeline race conditions (this part _is_ necessary), where two
+messages come through the message queue from the proxy to the client,
+one after the other -- an AddObject, and then a MoveObject on the
+just-added object.  To improve threading performance, incoming objects
+are added to different queues handled by different threads on a
+round-robin basis.  The problem is that this introduces an obvious race
+condition, where the MoveObject is handled before the object it refers
+to is added.
+
+I had been thinking that I would have to do something ugly like
+busy-wait in the thread with the MoveObject until the referred-to object
+exists, and just hope it doesn't happen very often, but ... "ugly" isn't
+a strong enough word.  This is a crime against humanity -- the amount of
+wasted electricity CPUs would burn busy-waiting, if the client were ever
+popular, could be enough to power a small city.  That would be an
+unconscionable amount of waste for a single person to be to blame for, I
+think.
+
+Not to mention the fact that it opens a can of worms about detecting
+whether the hoped-for AddObject is actually in one of the queues.
+
+So, anyway, in the shower, I realized the answer was to just hash the
+object ID and use that to assign the incoming message to a queue.
+Perhaps there could be more queues than the number of threads servicing
+them, to reduce the likelihood of a particular queue getting severely
+backed up because it happens to be handling a couple of highly active
+objects.  (Maybe the thing to do when a single queue has too many
+objects is to rehash, though.)
+
+But then I immediately thought of a denial-of-performance attack:
+Suppose an unnamed corporation wants to make the free software client
+look bad in comparison to their own proprietary embrace-and-misimplement
+client.  Suppose that there are typically no more than 8 queues, since
+most people don't have more than 8 CPU cores, and more queues would just
+add wasteful overhead.  They could just bump object IDs by 840 (which is
+divisible by every number up to 8) every time, instead of, say, one.  If
+I used the standard Java int hash (which is just the value of the int
+itself), all such objects would be funneled through the same queue, and
+handled by the same overworked thread, with the others sitting idle.
+
+This code (in Perl, trivially converted to Java) avoids the problem:
+
+sub rehash
+  {
+  my ($in) = @_;
+  return (($in ^ 2_348_942_530) * 3_177_073_841) % 4_294_967_291;
+  }
+
+2_348_942_530 is a stand-in for just any random int, generated at
+runtime, and regenerated to rehash things without changing the number of
+queues, such as when a queue backs up with no single object making up
+more than 60% of the queue contents.
+
+My claim is that even if a proxy could know the number of queues, it
+would not be able to generate a sequence of object IDs such that the
+hashed IDs would have a statistically significant chance of ending up in
+the same queue, aside from sporadic brief runs.
+
+Adding another XOR and another MUL would make it even stronger, I guess.
+
+Or it might do nothing at all.  Whatever.
+
+2008-08-12
+
+I'm on the fence on the issue of whether I should even keep trying at
+upgrading to the latest jME.  The way it blew up when I made a
+half-assed effort at it over the weekend, corrupting my entire desktop
+login session, made me wonder whether jME is even being developed
+adequately for the Mac.  I should at least give it the full ass, though,
+before I give up on it.
+
+But the idea [of staying with the old jME] is not altogether
+unappealing.  From the demos I've seen, I think it was capable enough --
+or at least, _some_ version of jME exists that can run well on a Mac and
+can do visually stunning things.
+
+All I really need at this point is something visually competent.
+
+Building an application that people can download and do interesting
+things with ... that's a worthwhile goal.  The version of the library I
+use to do that isn't especially important.
+
+2008-08-22
+
+Okay, I changed my mind about rehash().  I don't even need this function
+yet, so this is just another form of procrastination before upgrading
+jME, but here it is:
+
+sub rehash
+   {
+   my ($in) = @_;
+   my $ret = (($in  ^ RANDOM1) * 3_177_073_841) % 4_294_967_291;
+   $ret    = (($ret ^ RANDOM2) * 2_905_924_783) % 4_294_967_291;
+   return $ret;
+   }
+
+That seems to do a pretty good job.  This is not worth worrying about,
+anyway, because it doesn't need to be consistent from run to run; it
+could even theoretically be changed in the middle of a run after
+flushing all the pipelines first.
+
+One problem with the rehash scheme: there might be messages that address
+more than one object, and (though I haven't decided on the architecture
+for this yet) there might be messages to add bitmaps, which might be
+required by an object whose ID can't be known when the add-bitmap
+message is sent.
+
+Another possibility would be to create unfilled references as each
+object is dispatched to a handler pipeline.
+
+I don't even know whether any of this will be necessary -- whether the
+CPU time to handle the messages themselves will really be an issue.
+That's the most important reason I shouldn't be wasting any time on this
+right now.
+
+It's just a fun little puzzle I'm letting myself get distracted by
+because I'm not single-mindedly focused on a goal right now.
+
+2008-09-05
+
+I was thinking about my packrat web browsing habits recently after I
+lost a long-running Safari process when the laptop wouldn't wake up.  It
+had been running for over two months, and I had collected maybe 100 tabs
+that I thought might be useful or interesting later.  Rather than
+bookmarking them, since bookmarks suck, I just left the tabs open.
+
+What would work better for me?  I was thinking about maybe a better
+history mechanism, but I don't think that's really it.  Maybe I need
+better bookmarks.  Maybe it's a combination of the two.  Maybe I need to
+be able to rate a site as interesting!  That's it!  I don't want to have
+to "manage" bookmarks to keep them organized enough to be useful, and I
+don't want to sift through a pile of history.
+
+I want to feel like I can find an interesting site, do something, close
+it, and know that I will be able to find it again if I want to.
+
+That's easier to do with web pages, I guess, than with VR.  Text creates
+so many opportunities for clever algorithms.
+
+I want to encourage sites to offer metainformation as much as possible,
+but I just know that isn't going to happen.  Probably the best I can do
+is capture text that is sent.
+
+Maybe if it is clear that metainformation is the only way to get found
+in Google, people will use it.  To some extent, though, I suspect Google
+is going to learn from textual links to DV sites.
+
+So in case it wasn't clear above, "do something" would consist of, for
+example, bumping up a score, maybe with a simple up-arrow, or maybe with
+something a little more complicated.  Then you could look at your
+history in multiple different ways: most-visited, most-visited by domain
+name, or highest score.  Or highest score by domain name.
+
+Or chronologically, of course.
+
+There's also the idea of freezing a tab, which would put it into some
+sort of pile of visual representations of them.  If I could do that with
+a Safari window, I'd love it -- just put away a window, storing all the
+data to disk, and have some window I could get at and flip through those
+stored windows to get one back, with all its tabs, without having to
+reach out across the network.
+
+Better yet, when these pages reload, they should at least be _able_ to
+find the last downloaded copy in the cache.  None of this is relevant
+(as far as I know) for DV, but I can't help mixing my ideas about the
+Viewer with my ideas about a web browser.  It seems probable to me that
+the Viewer will include web browsing functionality at some point, most
+likely with a proxy.
+
+My thought was that certain protocols other than "dvtp" would correspond
+to a hardcoded proxy.  For example, a location starting with http: would
+invoke the HttpProxy.  A location starting with secondlife: would invoke
+the SecondLifeProxy.
+
+Those could be customized, I guess.
+
+2008-10-07
+
+Cookie commands to support concurrency:
+
+TestSet( Str key, DvtpExt test, DvtpExt newval, CompactUlong id ) =>
+[id, key, Bool wasSet]
+IncGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal] 
+(or exception)
+DecGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal] 
+(or exception)
+
+(I might want to rename DvtpExternalizable to DvtpExt.  I'm getting
+tired of long names.)
+
+wasSet means: Did the value change?  It would be true if the old value
+of the key cookie was equal to 'test'.  In other words, if several
+threads all attempted to set a flag that was initially set to false,
+from false to true, only one such thread would get true returned to it.
+
+The id is obviously so that each call can be associated with a callback
+in the message handler that will receive the response.  Based on that,
+the key isn't really needed, but it's duplicated for convenience.
+

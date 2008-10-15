@@ -1,19 +1,17 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
  */
 /**
- * 
+ *
  */
 package org.distroverse.viewer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-
-import com.jmex.game.StandardGame;
 
 /**
  * A subclass of ControllerPipeline receives objects from a
@@ -21,7 +19,7 @@ import com.jmex.game.StandardGame;
  * cases means some operation on a StandardGame (a jME window). It also
  * receives user events and either forwards them to the proxy, or to the
  * window.
- * 
+ *
  * @author dreish
  */
 public abstract class ControllerPipeline
@@ -35,20 +33,19 @@ public abstract class ControllerPipeline
     * @param game
     * @param window
     * @return
-    * @throws IOException 
-    * @throws URISyntaxException 
-    * @throws ClassNotFoundException 
+    * @throws IOException
+    * @throws URISyntaxException
+    * @throws ClassNotFoundException
     */
    public static ControllerPipeline
-   getNew( String url, ProxyClientConnection proxy, StandardGame game,
-           ViewerWindow window ) 
+   getNew( String url, ViewerWindow window )
    throws URISyntaxException, IOException, ClassNotFoundException,
           Exception
       {
       if ( url.matches( "(?i)about:.*" ) )
-         return new AboutControllerPipeline( url, game, window );
+         return new AboutControllerPipeline( url, window );
       if ( url.matches( "(?i)dvtp:.*" ) )
-         return new ProxyControllerPipeline( url, game, window, proxy );
+         return new ProxyControllerPipeline( url, window );
       return null;
       }
 
@@ -63,8 +60,8 @@ public abstract class ControllerPipeline
     * proxy, and either send a SetUrl object to its proxy or get a new
     * one.
     * @param url
-    * @throws IOException 
-    * @throws URISyntaxException 
+    * @throws IOException
+    * @throws URISyntaxException
     * @throws ClassNotFoundException
     * @throws Exception
     */

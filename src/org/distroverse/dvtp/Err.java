@@ -42,8 +42,8 @@ public class Err implements DvtpExternalizable
       {
       if ( o.getClass().equals( this.getClass() ) )
          {
-         Err b = (Err) o;
-         return (mCode == b.mCode && mMessage.equals( b.mMessage ));
+         Err e = (Err) o;
+         return (mCode == e.mCode && mMessage.equals( e.mMessage ));
          }
       return false;
       }
