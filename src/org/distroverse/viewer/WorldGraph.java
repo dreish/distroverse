@@ -40,6 +40,7 @@ public class WorldGraph
          parent_node = mWorldHead;
       mIdMap.put( id, new WorldGraphObject( object_node, pid ) );
       TriMesh tm = s.asTriMesh();
+//      DvTriMesh dtm = s.asDvTriMesh();
       object_node.attachChild( tm );
 //      tm.setCullMode( SceneElement.CULL_DYNAMIC );
       setMoveSeq( init_move_seq, object_node );

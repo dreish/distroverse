@@ -56,6 +56,9 @@ public class AboutControllerPipeline extends ControllerPipeline
                    VUtil.simpleMove( new Vector3f( 0, 0, 0 ),
                                      new Quaternion( 1, 0, 0, 0 ) ) );
 
+      Tube t = new Tube("Tube", 2, 1, 3);
+      t.setRandomColors();
+      DvWindow.publicRoot.attachChild( t );
       }
 
    // Returns a single right triangle, for testing.

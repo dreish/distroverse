@@ -52,33 +52,6 @@
         > Controller is still being added to nodes as before
         + Find out how SimpleGame does it
           > Just: mRootNode.updateGeometricState( tpf, true );
-    - Would be nice to know why everything renders with the wrong Z-
-      order
-      - Trace through rendering
-        - Trace deeper into GL11.glDrawElements(), called from
-          LWJGLRenderer.draw( TriangleBatch )
-          - Need to attach source to LWJGL
-      - Look at the code in a demo clearly lacking this problem
-        - jmetest.shape.TestTube renders a single complex shape with
-          correct hidden-face removal; I should be able to at least do
-          a single sphere correctly
-          - Only thing I see that is different is the shape; Tube vs.
-            my hand-rolled TriMesh
-            > jmetest.input.action.TestFirstPersonController also uses
-              multiple hand-rolled TriMeshes, and also has the same
-              problem
-            + Look at how Tube is constructed
-              > With TrangleBatch, not TriMesh
-              > With all values set in the NormalBuffer
-            - Does this not get back to the problem I brushed past a
-              while ago: my generalization of shapes breaks down because
-              I don't know which side is in and which side is out?
-              > Might have to just pick an arbitrary handedness for
-                shapes
-              > The other possible problem is that I regard shapes as
-                a stack of independent strips; there might b no easy
-                correlation between them
-        - jmetest.scene.TestPassNode
     - Add a FengGUI location bar
     - Find out from Joshua Keplinger what license FengJMEInputHandler
       is offered under; also whether he wrote FengJME, and what
@@ -134,6 +107,45 @@
         ViewerWindow, and gives that to the ViewerDispatcher; this must
         instead go through the pipeline (which should have the
         dispatcher)
+  + Would be nice to know why everything renders with the wrong Z-order
+    + Trace through rendering
+      x Trace deeper into GL11.glDrawElements(), called from
+        LWJGLRenderer.draw( TriangleBatch )
+        x Need to attach source to LWJGL
+    + Look at the code in a demo clearly lacking this problem
+      + jmetest.shape.TestTube renders a single complex shape with
+        correct hidden-face removal; I should be able to at least do a
+        single sphere correctly
+        + Only thing I see that is different is the shape; Tube vs. my
+          hand-rolled TriMesh
+          > jmetest.input.action.TestFirstPersonController also uses
+            multiple hand-rolled TriMeshes, and also has the same
+            problem
+          + Look at how Tube is constructed
+            > With TrangleBatch, extending TriMesh
+            > With all values set in the NormalBuffer
+          + Add a Tube and randomize its vertices' colors
+            > Amazingly, it has the same problem, so it can't be the
+              lack of normals (the Tube has normals)
+          + Try changing TestTube so its Tube doesn't have a texture,
+            but just random colors
+            > This requires turning off the light; otherwise the Tube is
+              just grey
+          + Found it
+            + Must call mRootNode.updateRenderState() after adding a Z=
+              buffer to it, as is done in BaseSimpleGame.initGame()
+          x Try copying the Tube class and warping the vertices
+          x Try converting Shapes to something subclassing TriMesh,
+            patterned after Tube
+            x DvTriMesh Shape.asDvTriMesh()
+          x Does this not get back to the problem I brushed past a while
+            ago: my generalization of shapes breaks down because I don't
+            know which side is in and which side is out?
+            > Might have to just pick an arbitrary handedness for shapes
+            > The other possible problem is that I regard shapes as a
+              stack of independent strips; there might b no easy
+              correlation between them
+      x jmetest.scene.TestPassNode
 
 ------------------------------------------------------------------------
 - To do for 0.03:

@@ -10,10 +10,13 @@ import com.jme.app.BaseGame;
 import com.jme.input.KeyBindingManager;
 import com.jme.input.KeyInput;
 import com.jme.input.MouseInput;
+import com.jme.light.PointLight;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
+import com.jme.renderer.ColorRGBA;
 import com.jme.renderer.Renderer;
 import com.jme.scene.Node;
+import com.jme.scene.state.LightState;
 import com.jme.scene.state.ZBufferState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.Timer;
@@ -92,6 +95,23 @@ public class DvWindow extends BaseGame
       mInput    = new FengJMEInputHandler( mDisp );
 
       enableZBuffering( mRootNode );
+
+//      // ---- LIGHTS
+//      /** Set up a basic, default light. */
+//      PointLight light = new PointLight();
+//      light.setDiffuse( new ColorRGBA( 0.75f, 0.75f, 0.75f, 0.75f ) );
+//      light.setAmbient( new ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ) );
+//      light.setLocation( new Vector3f( 100, 100, 100 ) );
+//      light.setEnabled( true );
+//
+//      /** Attach the light to a lightState and the lightState to rootNode. */
+//      LightState lightState = display.getRenderer().createLightState();
+//      lightState.setEnabled( true );
+//      lightState.attach( light );
+//      mRootNode.setRenderState( lightState );
+//      
+//      mRootNode.updateRenderState();
+
       }
 
    private void enableZBuffering( Node node )
@@ -100,6 +120,7 @@ public class DvWindow extends BaseGame
       buf.setEnabled( true );
       buf.setFunction( ZBufferState.CF_LEQUAL );
       node.setRenderState( buf );
+      mRootNode.updateRenderState();
       }
 
    /* (non-Javadoc)
