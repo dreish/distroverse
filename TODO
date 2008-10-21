@@ -53,9 +53,11 @@
         + Find out how SimpleGame does it
           > Just: mRootNode.updateGeometricState( tpf, true );
     - Add a FengGUI location bar
-    - Find out from Joshua Keplinger what license FengJMEInputHandler
+    + Find out from Joshua Keplinger what license FengJMEInputHandler
       is offered under; also whether he wrote FengJME, and what
       license for that as well
+      > Was released under a compatible BSD license
+  - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
     > Also nice because it avoids having system dialogs swallow a stray
@@ -67,10 +69,15 @@
   - Add WarpShape message
     - Polynomial/sin change over time, but each coefficient is a Shape
       instead of a vector or quaternion
+      > Shape must be topologically identical to the one it applies to
   - Add AddRef message
     > Object id and MoveSeq
-    > Creates a new object with the same shape as another object
+    > Creates a new object with the same shape as another object and its
+      children
     > Changes to the other object's shape affect referring objects
+      > This includes texture
+    > Changes to child shapes and their relative positions also affect
+      child shapes and positions of referring objects
   - Client input
   - Cookies
   x Override default serialization in PointArray to guarantee that the

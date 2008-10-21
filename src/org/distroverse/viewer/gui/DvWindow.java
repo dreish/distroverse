@@ -4,19 +4,17 @@
 package org.distroverse.viewer.gui;
 
 import org.fenggui.Display;
+import org.fenggui.Widget;
 import org.fenggui.render.lwjgl.LWJGLBinding;
 
 import com.jme.app.BaseGame;
 import com.jme.input.KeyBindingManager;
 import com.jme.input.KeyInput;
 import com.jme.input.MouseInput;
-import com.jme.light.PointLight;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Camera;
-import com.jme.renderer.ColorRGBA;
 import com.jme.renderer.Renderer;
 import com.jme.scene.Node;
-import com.jme.scene.state.LightState;
 import com.jme.scene.state.ZBufferState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.Timer;
@@ -109,7 +107,7 @@ public class DvWindow extends BaseGame
 //      lightState.setEnabled( true );
 //      lightState.attach( light );
 //      mRootNode.setRenderState( lightState );
-//      
+//
 //      mRootNode.updateRenderState();
 
       }
@@ -205,6 +203,11 @@ public class DvWindow extends BaseGame
             finish();
          }
       mRootNode.updateGeometricState( tpf, true );
+      }
+
+   public void addWidget( Widget wid )
+      {
+      mDisp.addWidget( wid );
       }
 
    private Timer               mTimer;

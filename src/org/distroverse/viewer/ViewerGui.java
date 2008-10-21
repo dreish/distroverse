@@ -10,8 +10,7 @@ package org.distroverse.viewer;
 import org.distroverse.viewer.gui.DvWindow;
 import org.distroverse.viewer.gui.TextDisplayBar;
 
-import com.jme.renderer.Renderer;
-import com.jme.scene.*;
+import com.jme.scene.Node;
 
 public class ViewerGui
    {
@@ -20,15 +19,15 @@ public class ViewerGui
       mWindowRoot = new Node( "DvWindow-root" );
       w.getRootNode().attachChild( mWindowRoot );
 
-      mGuiRoot = new Node( "GUI-root" );
-      mGuiRoot.setRenderQueueMode( Renderer.QUEUE_ORTHO );
+//      mGuiRoot = new Node( "GUI-root" );
+//      mGuiRoot.setRenderQueueMode( Renderer.QUEUE_ORTHO );
 //      mGuiRoot.setCullMode( SceneElement.CULL_NEVER );
-      mWindowRoot.attachChild( mGuiRoot );
+//      mWindowRoot.attachChild( mGuiRoot );
 
       mWorldRoot = new Node( "World-root" );
       mWindowRoot.attachChild( mWorldRoot );
 
-      mLocationBar = new TextDisplayBar( mGuiRoot, 0, 420,
+      mLocationBar = new TextDisplayBar( w, 0, 0,
                                          "initial-text" );
       }
 
@@ -40,7 +39,7 @@ public class ViewerGui
    public TextDisplayBar getLocationBar()
       {  return mLocationBar;   }
 
-   private Node           mGuiRoot;
+//   private Node           mGuiRoot;
    private Node           mWindowRoot;
    private Node           mWorldRoot;
    private TextDisplayBar mLocationBar;
