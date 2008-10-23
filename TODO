@@ -57,6 +57,13 @@
       is offered under; also whether he wrote FengJME, and what
       license for that as well
       > Was released under a compatible BSD license
+  - Begin implementing WorldServer (extends DvtpServer)
+    - Add DVTP messages:
+      - GetCookie (Str)
+      - SendCookie (Str Bool *)
+      - AskInv (Str Str)
+      - ReplyInv (Str Bool *)
+    - Add DVTP Dict class
   - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)

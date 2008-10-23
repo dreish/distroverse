@@ -56,6 +56,9 @@ public final class DvtpObject
         Click2.class,           // 23
         MoreDetail.class,       // 24
         Blob.class,             // 25
+        GetCookie.class,        // 26
+        SendCookie.class,       // 27
+        Dict.class,             // 28
 
         null
         };
@@ -68,6 +71,8 @@ public final class DvtpObject
         Err.class,              // 131
         ConPerm.class,          // 132
         ProxySpec.class,        // 133
+        AskInv.class,           // 134
+        ReplyInv.class,         // 135
 
         null
         };
