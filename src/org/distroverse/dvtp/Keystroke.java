@@ -50,12 +50,12 @@ public class Keystroke implements ClientSendable
 
    public void readExternal( InputStream in ) throws IOException
       {
-      mKeyNum = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mKeyNum = Util.safeInt( ULong.externalAsLong( in ) );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mKeyNum );
+      ULong.longAsExternal( out, mKeyNum );
       }
 
    public String prettyPrint()

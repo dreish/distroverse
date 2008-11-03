@@ -58,13 +58,13 @@ public final class MoveObject implements ProxySendable
    public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      mId = CompactUlong.externalAsLong( in );
+      mId = ULong.externalAsLong( in );
       (mMoveSeq = new MoveSeq()).readExternal( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mId );
+      ULong.longAsExternal( out, mId );
       mMoveSeq.writeExternal( out );
       }
 

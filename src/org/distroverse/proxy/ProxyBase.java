@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2007-2008 Dan Reish.
- * 
+ *
  * For license details, see the file COPYING in your distribution,
  * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
  * General Public License (GPL) version 3 or later</a>
@@ -11,11 +11,12 @@ import java.util.concurrent.BlockingQueue;
 
 import org.distroverse.core.Log;
 import org.distroverse.dvtp.AddObject;
-import org.distroverse.dvtp.CompactUlong;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.DvtpProxy;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.ProxySendable;
 import org.distroverse.dvtp.Shape;
+import org.distroverse.dvtp.WarpSeq;
 import org.distroverse.viewer.VUtil;
 
 import com.jme.math.Quaternion;
@@ -42,7 +43,7 @@ public abstract class ProxyBase implements DvtpProxy
     * Add an object to the client's queue.  In most cases, there is
     * another method in ProxyBase that provides a convenient alternative
     * to calling this one.
-    * 
+    *
     * For now, this is just going to log and keep retrying if it gets
     * interrupted.  This is probably a very bad strategy, but we'll see.
     * @param o
@@ -64,21 +65,21 @@ public abstract class ProxyBase implements DvtpProxy
             }
          }
       }
-   
-   protected void addObject( Shape s, CompactUlong id, CompactUlong pid,
+
+   protected void addObject( Shape s, ULong id, ULong pid,
                              MoveSeq m )
       {
-      putQueue( new AddObject( s, id, pid, m ) );
+      putQueue( new AddObject( true, s, id, pid, m, new WarpSeq() ) );
       }
 
    protected void addObject( Shape s, long id,
                              float x, float y, float z )
       {
-      addObject( s, new CompactUlong( id ), new CompactUlong( 0 ),
+      addObject( s, new ULong( id ), new ULong( 0 ),
                  VUtil.simpleMove( new Vector3f( x, y, z ),
                                    new Quaternion() ) );
       }
 
-   
+
    private BlockingQueue< ProxySendable > mClientQueue;
    }

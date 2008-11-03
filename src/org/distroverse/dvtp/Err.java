@@ -63,13 +63,13 @@ public class Err implements DvtpExternalizable
    public void readExternal( InputStream in ) throws IOException
       {
       mMessage = Str.externalAsString( in );
-      mCode    = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mCode    = Util.safeInt( ULong.externalAsLong( in ) );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
       Str.stringAsExternal( out, mMessage );
-      CompactUlong.longAsExternal( out, mCode );
+      ULong.longAsExternal( out, mCode );
       }
 
    public String prettyPrint()

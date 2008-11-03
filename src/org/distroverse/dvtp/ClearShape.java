@@ -11,40 +11,57 @@ import java.io.OutputStream;
  * @author dreish
  *
  */
-public class SendCookie implements DvtpExternalizable
+public class ClearShape implements ProxySendable
    {
+   /**
+    *
+    */
+   public ClearShape()
+      {
+      mId = 0;
+      }
 
    /**
     *
     */
-   public SendCookie()
+   public ClearShape( long id )
       {
-      // TODO Auto-generated constructor stub
+      mId = id;
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 27;  }
+      {  return 139;  }
+
+   @Override
+   public boolean equals( Object o )
+      {
+      return (o instanceof ClearShape
+              &&  ((ClearShape) o).mId == mId);
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return ((Long) mId).hashCode() ^ ClearShape.class.hashCode();
+      }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
     */
    public String prettyPrint()
       {
-      // TODO Auto-generated method stub
-      return null;
+      return "(ClearShape " + mId + ")";
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
+   public void readExternal( InputStream in ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      mId = ULong.externalAsLong( in );
       }
 
    /* (non-Javadoc)
@@ -52,8 +69,8 @@ public class SendCookie implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      ULong.longAsExternal( out, mId );
       }
 
+   private long mId;
    }

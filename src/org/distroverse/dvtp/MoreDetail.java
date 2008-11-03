@@ -13,8 +13,8 @@ package org.distroverse.dvtp;
  * rendering slowly and needs a less detailed scene.  The number
  * indicates the factor above the target frames/second rate at which the
  * client is currently rendering.  It should always be a positive
- * number.  Client behavior for values less than or equal to zero are
- * undefined.
+ * number.  Proxy or server behavior for values less than or equal to
+ * zero is undefined.
  * @author dreish
  */
 public class MoreDetail extends Flo implements ClientSendable

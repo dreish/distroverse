@@ -18,7 +18,7 @@ import org.distroverse.core.Util;
 /**
  * This class adds externalization to BigInteger.  The format is very
  * simple: a length/sign byte -- the &128 bit indicates sign, and &127
- * indicates the number of bytes that follow.  Unlike CompactUlong, the
+ * indicates the number of bytes that follow.  Unlike ULong, the
  * first byte is high.
  * @author dreish
  */

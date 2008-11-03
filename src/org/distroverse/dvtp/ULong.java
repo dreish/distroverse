@@ -17,18 +17,22 @@ import java.io.OutputStream;
  * into septets, which are packed into the low bits of a series of
  * octets, lowest septet first, the high (sign) bit in each octet being
  * used as a flag to indicate that the number has been completely
- * streamed.  The high bit not being set on the seventh octet is an
- * error.
+ * streamed.  An unset high bit on the seventh octet is an error.
+ *
+ * A future upgrade path for DVTP will involve first giving clients the
+ * capability to accept larger ULongs, and then deploying proxies that
+ * use this capability.
  * @author dreish
  */
-public final class CompactUlong implements DvtpExternalizable
+public final class ULong implements DvtpExternalizable
    {
    public static final long MAX_VALUE = Long.MAX_VALUE;
+   public static final long MIN_VALUE = 0;
 
    /**
     * Default constructor: value is zero.
     */
-   public CompactUlong()
+   public ULong()
       {
       mVal = 0;
       }
@@ -37,11 +41,11 @@ public final class CompactUlong implements DvtpExternalizable
     * Constructor with initial value.
     * @param val - initial value
     */
-   public CompactUlong( long val )
+   public ULong( long val )
       {
       if ( val < 0 )
          throw new IllegalArgumentException(
-                           "CompactUlong must be nonnegative" );
+                           "ULong must be nonnegative" );
       mVal = val;
       }
 
@@ -57,14 +61,14 @@ public final class CompactUlong implements DvtpExternalizable
    @Override
    public boolean equals( Object o )
       {
-      return (o instanceof CompactUlong
-              &&  ((CompactUlong) o).mVal == mVal);
+      return (o instanceof ULong
+              &&  ((ULong) o).mVal == mVal);
       }
 
    @Override
    public int hashCode()
       {
-      return ((Long) mVal).hashCode();
+      return ((Long) mVal).hashCode() ^ ULong.class.hashCode();
       }
 
    public static long externalAsLong( InputStream in )
@@ -81,7 +85,7 @@ public final class CompactUlong implements DvtpExternalizable
             return ret;
          shift += 7;
          if ( shift == 63 )
-            throw new IOException( "Malformed CompactUlong in input" );
+            throw new IOException( "Malformed ULong in input" );
          }
       }
 
@@ -94,7 +98,7 @@ public final class CompactUlong implements DvtpExternalizable
 
       if ( val < 0 )
          throw new IllegalArgumentException(
-                           "CompactUlong must be nonnegative" );
+                           "ULong must be nonnegative" );
       if ( val == 0 )
          out.write( (byte) -128 );
 
@@ -132,7 +136,7 @@ public final class CompactUlong implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(CompactUlong " + mVal + ")";
+      return "(ULong " + mVal + ")";
       }
 
    long mVal;

@@ -42,12 +42,12 @@ public final class DeleteObject implements ProxySendable
 
    public void readExternal( InputStream in ) throws IOException
       {
-      mId = CompactUlong.externalAsLong( in );
+      mId = ULong.externalAsLong( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mId );
+      ULong.longAsExternal( out, mId );
       }
 
    public String prettyPrint()

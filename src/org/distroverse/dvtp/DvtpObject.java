@@ -30,7 +30,7 @@ public final class DvtpObject
     */
    public static final Class< ? > mClassList[]
       = {
-        CompactUlong.class,     // 0
+        ULong.class,            // 0
         Pair.class,             // 1
         Str.class,              // 2
         BigInt.class,           // 3
@@ -57,8 +57,15 @@ public final class DvtpObject
         MoreDetail.class,       // 24
         Blob.class,             // 25
         GetCookie.class,        // 26
-        SendCookie.class,       // 27
+        Cookie.class,           // 27
         Dict.class,             // 28
+        DNodeRef.class,         // 29
+        DNode.class,            // 30
+        DLong.class,            // 31
+        Frac.class,             // 32
+        Real.class,             // 33
+        Warp.class,             // 34
+        WarpSeq.class,          // 35
 
         null
         };
@@ -73,6 +80,11 @@ public final class DvtpObject
         ProxySpec.class,        // 133
         AskInv.class,           // 134
         ReplyInv.class,         // 135
+        SetShape.class,         // 136
+        WarpObject.class,       // 137
+        ReparentObject.class,   // 138
+        ClearShape.class,       // 139
+        SetVisible.class,       // 140
 
         null
         };
@@ -138,7 +150,7 @@ public final class DvtpObject
    throws IOException, ClassNotFoundException
       {
       int class_number
-         = Util.safeInt( CompactUlong.externalAsLong( in ) );
+         = Util.safeInt( ULong.externalAsLong( in ) );
       return parseObject( in, class_number );
       }
 
@@ -185,7 +197,7 @@ public final class DvtpObject
       // NUL,
       oo.write( 0 );
       // length,
-      CompactUlong length = new CompactUlong( rawob.size() );
+      ULong length = new ULong( rawob.size() );
       length.writeExternal( oo );
       // type, and the object itself
       oo.write( rawob.toByteArray() );
@@ -201,7 +213,7 @@ public final class DvtpObject
                                         DvtpExternalizable de )
    throws IOException
       {
-      CompactUlong type = new CompactUlong( de.getClassNumber() );
+      ULong type = new ULong( de.getClassNumber() );
       type.writeExternal( oo );
       de.writeExternal( oo );
       }

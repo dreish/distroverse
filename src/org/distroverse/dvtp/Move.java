@@ -32,7 +32,7 @@ import com.jme.math.Vector3f;
  *   - M quaternions
  *   - M period floats
  *   - M offset floats
- * - A duration -- negative means "until interrupted"
+ * - A duration -- negative means "until replaced"
  *
  * Time is measured in seconds, and vectors are in meters.
  *
@@ -112,6 +112,13 @@ public class Move implements DvtpExternalizable
                 Flo duration )
       {
       super();
+      if ( poly_vecs.length == 0 )
+         throw new IllegalArgumentException( "poly_vecs must contain"
+                                             + " at least one vector" );
+      if ( poly_quats.length == 0 )
+         throw new IllegalArgumentException( "poly_quats must contain"
+                                         + " at least one quaternion" );
+
       mMoveDegree     = poly_vecs.length;
       mMovePolyVecs   = poly_vecs.clone();
       mMoveSins       = sin_vecs.length;
@@ -193,20 +200,20 @@ public class Move implements DvtpExternalizable
    public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      mMoveDegree = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mMoveDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
       mMovePolyVecs
          = DvtpObject.readArray( in, mMoveDegree, Vec.class );
-      mMoveSins =  Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mMoveSins =  Util.safeInt( ULong.externalAsLong( in ) );
       mMoveSinVecs = DvtpObject.readArray( in, mMoveSins, Vec.class );
       mMoveSinPeriods
          = DvtpObject.readArray( in, mMoveSins, Flo.class );
       mMoveSinOffsets
          = DvtpObject.readArray( in, mMoveSins, Flo.class );
 
-      mRotDegree = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mRotDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
       mRotPolyQuats
          = DvtpObject.readArray( in, mRotDegree, Quat.class );
-      mRotSins =  Util.safeInt( CompactUlong.externalAsLong( in ) );
+      mRotSins =  Util.safeInt( ULong.externalAsLong( in ) );
       mRotSinQuats = DvtpObject.readArray( in, mRotSins, Quat.class );
       mRotSinPeriods
          = DvtpObject.readArray( in, mRotSins, Flo.class );
@@ -221,16 +228,16 @@ public class Move implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mMoveDegree );
+      ULong.longAsExternal( out, mMoveDegree - 1 );
       DvtpObject.writeArray( out, mMovePolyVecs );
-      CompactUlong.longAsExternal( out, mMoveSins );
+      ULong.longAsExternal( out, mMoveSins );
       DvtpObject.writeArray( out, mMoveSinVecs );
       DvtpObject.writeArray( out, mMoveSinPeriods );
       DvtpObject.writeArray( out, mMoveSinOffsets );
 
-      CompactUlong.longAsExternal( out, mRotDegree );
+      ULong.longAsExternal( out, mRotDegree - 1 );
       DvtpObject.writeArray( out, mRotPolyQuats );
-      CompactUlong.longAsExternal( out, mRotSins );
+      ULong.longAsExternal( out, mRotSins );
       DvtpObject.writeArray( out, mRotSinQuats );
       DvtpObject.writeArray( out, mRotSinPeriods );
       DvtpObject.writeArray( out, mRotSinOffsets );

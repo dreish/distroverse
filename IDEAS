@@ -5428,3 +5428,683 @@ The id is obviously so that each call can be associated with a callback
 in the message handler that will receive the response.  Based on that,
 the key isn't really needed, but it's duplicated for convenience.
 
+2008-10-20
+
+I still need to get the most basic element of the GUI, the location bar,
+working, but I'm sure that won't be an intractable problem.  Meanwhile,
+I think it might be a good time to start working on the
+state-synchronization mechanisms.
+
+I think I want to represent the world as an R-tree (or something
+similar), with a last-changed property on each node.  I don't see any
+way around the problem of repeatedly having to query the top few nodes
+of the tree, which reduces performance as the universe gets bigger, even
+for a single user only caring about a single part of the universe.
+
+Ah, here's a way: a node can have a property, NoOverlaps, that indicates
+no sibling node can cross its boundaries.  In other words, everything
+within the geographic boundaries of the node is contained under that
+node.
+
+So long as a subscriber only cares about events within that space, it
+need not worry about updates to the parent node caused by updates to
+irrelevant sibling nodes.
+
+(Updates to LastChanged would still propagate all the way up in the
+server, but the subscriber would only be checking for updates to its
+"chroot" node.)
+
+Contention for updates to LastChanged on the root node are going to be a
+problem.  I might need to set some reasonable limit on resolution so
+that the updates stop flowing up at a certain point.
+
+So, here's an example structure:
+
+Top node: "universe"
+Child nodes: galaxies; each galaxy having the NoOverlaps property
+Child nodes: star systems, each with the NoOverlaps property
+Child nodes: celestial bodies, each with its own relative coordinate
+             system
+
+So how do I do relative coordinate systems?  The node for a given
+celestial body would have its own position, orientation, and movement.
+
+If, hypothetically, multiple nodes (M) with NoOverlaps properties were
+to overlap, the procedure would be:
+
+- Create a new node P WITHOUT the NoOverlaps property, with dimensions
+ encompassing all of the M nodes, and attach it to the M nodes' parent
+- Remove the NoOverlaps property from the M nodes
+- Reparent the M nodes as children of P
+- Set the NoOverlaps property on P
+
+The subscription model should be pretty simple.  Each node on the server
+would have a list of subscribers (session IDs or user identities?), and
+each time a modify method is called on the node,
+
+Again, there would be a number of these universes coexisting, each with
+its own level of detail.  A client would, for example, subscribe to a
+galaxy at an extremely low level of detail that would hardly ever
+update, to get enough information to render the night sky, a star system
+at a slightly higher level of detail to get the local star and its
+planets as disk and points respectively, again not updating much, if
+ever, and the local planet at a high enough level of detail to get the
+nearby terrain, and so forth.
+
+All this happens according to a simple detail-per-distance formula.
+
+I also thought about a reset mode that either peer on a DVTP connection
+could generate if it ever read something that didn't make sense -- an
+exception handler for the DVTP reader.  I was thinking it would have to
+be some stream of a particular byte, waiting for acknowledgment on the
+other side, and then once both sides had acknowledged the reset, they
+could attempt to start over and re-synch.
+
+Why not just close the connection and open a new one, though?
+
+I'm not sure my idea about picking levels of detail as a function of
+distance multiplied by some scalar, constantly adjusted according to the
+refresh rate, is such a good one.
+
+It seems like higher levels of detail can be tolerated as long as
+refreshes are very rare.  Specifically, I'm thinking of the galaxy, but
+wouldn't the distance to the galaxy always be zero whenever someone is
+inside it?
+
+What about the local star?  Should it get an artificial boost because it
+is so bright?
+
+What about rendering nearby stars accurately at night?  Is there any way
+around making that a special case?  Doesn't the sky just have to be
+rendered separately?
+
+I think I'm going to start out by ignoring these issues -- do it simply
+and without any special cases, and see whether it works.  If it breaks
+down, I'll come up with a solution.  Of course, I'll have to subject the
+simple approach to some harsh testing conditions to find out whether,
+and at what point, and how, it breaks down.
+
+I think there does need to be _something_ special for the sky, though. 
+I don't see the atmosphere being an object rendered just like any other,
+though I can give that a half-assed shot.  It might be a nice
+simplification.
+
+On rendering the planet, it seems to me that, as with any other object,
+if something is being rendered at a higher level of detail, it should
+not be rendered at any lower level of detail.
+
+So it seems to me the planet should be a circle bitmap at the lowest
+level of detail (presumably objects will be able to have a number of
+impostors for different angles; that would be a property of the object
+left up to the designer's discretion, but the server will likely impose
+some limit to avoid over-rendered impostors that suck up too much
+bandwidth), and a simple hollow sphere with a texture at the next level,
+and below that, it would be a number of subobjects, each of which would
+be a section of the hollow sphere.  When near enough to one of the
+subobjects, it would be rendered at a higher level of detail as further
+subdivisions, and so forth until individual hills and then rocks and so
+forth become visible.
+
+So how would this happen?
+
+The first thing the client does, on connection, is set the level of
+detail at an absurdly low level, getting the nearby planet as a disk and
+rendering that, so the first thing the user would see, for a very brief
+moment, on signing in is a crude bitmap of the entire planet beneath
+them.  At this detail level (say, -8, perhaps), the planet would have
+rules for gravity ending at roughly a thousand miles up, and the user's
+location would be specified in latitude/longitude terms relative to the
+planet, so the user would not begin falling just yet.  (When logging in
+from a space station far above the planet, location would be specified
+in terms of that space station, so I think the rule for gravity must be
+that it should not be activated until the node describing the user's
+position is loaded at a point where a gravity rule is expressed.)
+
+(Normally, this and slightly higher levels would be cached, so this
+would only be visible for a noticeable amount of time upon first visit
+to a system.  And for that matter, the sun hasn't even been loaded, so
+there probably wouldn't be any light with which to see any of this
+happening.)
+
+As the rendering frame rate would be extremely high, the detail level
+would immediately start to be cranked up, and next the planet as a
+single sphere would be loaded.  (Call it LOD -7 for now.)  Since it
+would render at that level, the LOD -8 representation would be hidden. 
+Perhaps the sun would be loaded at this point, too, and the proxy could
+begin rendering the sky in a background thread.
+
+Next, the planet as sections would be loaded -- LOD -6.  All sections
+would render equally, including the ones on the back side, but there
+should only be a handful of them.  Of course, this means the LOD -7
+representation would not be visible.
+
+Each of these sections is a subobject, though, and each one renders
+independently at its own level of detail.
+
+I'm actually not sure any of this is correct.  It seems likely to me
+some local objects would probably render before anything else, and the
+nearby terrain might render before any planet-as-disk might ever appear.
+
+It's possible nothing at all would load for the first few LOD crank-ups.
+That whole process could happen very quickly -- a series of rapid-fire
+messages:
+
+MoreDetail 1.1
+ < UpToDate
+MoreDetail 1.1
+ < UpToDate
+MoreDetail 1.1
+ < UpToDate
+MoreDetail 1.1
+ < UpToDate
+MoreDetail 1.1
+ < AddObject[] ...
+ < UpToDate
+
+I think atmosphere is going to have to be its own kind of thing.  I'll
+have to tinker around with that, I guess.
+
+I don't see how, in the above exchange, the opportunity to express that
+an object is already cached arises.
+
+Maybe the AddObject is just a top-level node, and includes a timestamp,
+and the client has to fetch the update if needed.  But that seems like
+the opposite of a publish/subscribe model.
+
+Needs more thinking.
+
+As for updates on user actions, the client by default can't set the
+avatar's location (unless it has permission to do so); it can only set
+speed (with a smooth acceleration curve), and with limits imposed on
+speed and acceleration as determined by the server.  Collision detection
+may or may not be up to the proxy and client, but access restrictions
+will be enforced with regional border controls.
+
+The proxy doesn't get to request arbitrary regions; it can only set the
+detail level and get regions centered on the avatar.
+
+Regions can be Opaque, meaning that they and their contents are only
+visible from the inside, and entry would presumably be restricted as
+described above.
+
+I think this is enough to get started with.
+
+I think I like the paradigm jME uses of having an update() method where
+changes to state happen, and a render() method where the state is
+displayed, during which time it cannot be changed.
+
+It's painfully single-threaded, though.
+
+If each node had its own update queue, it could be multi-threaded.
+
+Or, to make it more tractable, there could be a ring of update queues,
+hashed by the node ID.  What was my solution for the problem of state
+changes affecting more than one object ID (such as reparenting) at a
+time, last time I was thinking about this pattern?
+
+I'm not sure I _did_ have a solution.
+
+One possibility would be this:
+
+- For a state change request, make an ordered list of affected objects
+- Put the request in the queue owning the first affected object
+- When it reaches the front of that queue,
+  - If the second affected object exists, put a copy of the request at
+    the front of the queue owning that second affected object, but with
+    the first one removed from the ordered list of affected objects;
+    wait for the request to complete (oops! deadlock here)
+  - If the second affected object does not exist, put a copy of the
+    request at the back of the queue owning the second affected object,
+    chopped as above, and wait for the request to complete
+
+Thinking about the deadlock possibility this creates, where a request
+affects three objects, and the first and third are in the same queue, so
+the second request ends up waiting for a third copy of the request to
+proceed through a queue that is blocked, and the complexity needed to
+solve that deadlock problem (which I think _is_ feasible), makes me
+think that I'd be better off with a pure functional approach:
+
+- render() treats the state tree as read-only
+- update() runs simultaneously, also treating the state tree as
+  read-only and creating a new state tree
+- When both methods finish, the old state tree is discarded and the new
+ state tree is swapped in
+
+The problem with this is that copying and GCing all those objects could
+be tremendously expensive, but if copies of unmodified objects are
+shallow, this might not be a problem at all.
+
+Further, I had months ago had the idea to use two state trees, one for
+stationary objects, and one for moving and otherwise rapidly-updating
+objects, reasoning that at any given moment, most of the world would be
+mostly static.
+
+That seems like a really good idea.
+
+But where does a rotating, revolving planet lie in such a system?  Am I
+going to have to give up my dream of a literally-represented universe of
+planets and galaxies?
+
+Can an object be static relative to a dynamic parent node?
+
+Good grief, when do I get a Ph.D. for this?
+
+This might be a distinction without a difference, though.  It might
+happen all by itself, in the ideal way, with my LastChanged property. 
+"Static" might be a property any node can have, as long as all its child
+nodes are also Static.
+
+So this might be purely a matter of grouping: once a Static object
+suddenly starts moving (say, it has a script; a concrete example would
+be a parked car put into gear), it needs to be reparented to something
+non-Static.  The specific strategy for reparenting ... that's an
+interesting issue.
+
+I was thinking of a boat as an example, because I hate always using cars
+as examples or analogies, but boats in dock aren't stationary, are they?
+It would be better for them to wobble back and forth a bit.  But we'd
+want to be able to see the boats in the marina from four or five blocks
+away, ideally, and that could be computationally intensive.  So would it
+not make sense for simplified representations of objects to also have
+simplified movement scripts?
+
+Yes.  Yes, it would.
+
+If a Static object's children must all be Static, is there any hope for
+a planet being Static?  Or any of its regions?  Or would there tend to
+be that Static/non-Static schism at the planetary level?  If so, would
+reparenting a car, when it starts, be a long march up and down the tree?
+
+I also need to figure out whether there's any way this machine actually
+runs, ...
+
+I'm not even clear on whether I'm thinking about the proxy, the client,
+or the server, come to think of it.  Do I really want to complicate the
+protocol with these Static/non-Static issues?
+
+I should probably leave these issues in the back of my mind somewhere,
+and start with something really simple.  Then I can figure out how to
+improve it.
+
+The focus right now is on implementing a simple, easy-to-understand
+world, and implementing the simplest client that makes that possible.
+
+2008-10-21
+
+When a user connects to a site for the first time -- a site with a
+concept of identity -- he'll need to choose which ID to give to that
+site.  The user interface for doing this is something to implement in
+The Future, but I want to at least implement the back-end mechanics of
+it now.
+
+So, to get started on the real WorldServer, I'll need the following
+exchange, in this case using an unsigned identity:
+
+- Proxy->Client: GetCookie( "ID" )
+- Client->Proxy: Cookie( "ID", false, null )
+- Proxy->Client: AskInv( "ID", "ID" ) (Inv = Inventory)
+  > This will cause the browser to prompt the user to drop into the
+    dialog window providing an "ID" (the first parameter), which will be
+    copied to the site's cookie named "ID" (the second param)
+    > In this case, "ID" (first param) is special, so it can get an
+      extra-special dialog box with links to help about how IDs work
+  > But for now, it'll just have the client automatically copy
+    inventory:ID to cookie:hostname:ID
+- Client->Proxy: ReplyInv( "ID", true, ("dreish", public key, (sigs)) )
+
+I'll need to decide how the cookie contents get encoded.  Probably as a
+DvtpExternalizable object.  Yes, of course.
+
+I probably need a Dict object, which would just externalize the same way
+as a list, but would have a unique-key restriction and hash-table access
+methods.  I'm a little leery of stuffing a complex data structure into a
+list, but maybe I shouldn't be in this case.
+
+Then, the server will need to confirm the identity by asking the client
+to sign a particular string (most likely something like
+"207.138.43.173#38501 is dreish at 2008-10-21 14:08:30."); the client
+would append a random string and send the whole thing back, signed. 
+I'll skip this for now, fun though it would be to do, and just have the
+server believe whatever it is told.
+
+Then the server would say, "I know I've got 'dreish' connected to me;
+have I seen this user before?"  Checking the server's user info
+database, if the user was not there, it would be initialized from the
+skeleton user, providing at the very least a location.
+
+The server could send the proxy a simple x/y/z position, without
+necessarily telling the proxy what the position is relative to.
+
+The server will pick a starting detail level, presumably very low.
+
+Then I think it would be up to the client to pull data with MoreDetail. 
+I think the client should also not send MoreDetail requests while the
+proxy indicates it is in the process of loading data, for which there
+will need to be a LoadingState( bool ) message.
+
+2008-10-22
+
+I think the architecture is going to initially be strictly based on the
+pass-through proxy, and then I'll make the following major changes:
+
+- Caching with cookies
+- Generating elements of the user interface, especially ones that need
+  to be responsive like menus and in-world editing, in the proxy rather
+  than on the server
+
+I'll want to set up the framework for caching beforehand, I think.
+
+The conversation is a little non-obvious to me.  How will it work?
+
+Somewhere, some party will initiate the chain of events: "Get
+surroundings for point P at detail level D."  [D being something
+extremely low; possibly too low even to load anything.]
+
+- The server will send the proxy the message HoldLoadingState = true
+- The proxy will send the client LoadingState( true ) and will not reset
+  it, despite the loading queue being empty, until receiving
+  HoldLoadingState = false
+- The server will check its data structures for the lowest detail level
+  with any content
+- The server will compute the query zone for that detail level
+- The server will look for any nodes in that detail level and zone
+  > This is a depth-first search, terminating on any branch when a match
+    is found, so the smallest set of nodes containing all nodes within
+    the search area will be returned
+  > A node must be sent with the IDs of its subnodes, and their physical
+    extents and timestamps
+  > Note: a client will also be subscribed to changes to all parents of
+    all nodes it is subscribed to, but will only be informed of those
+    changes if they contain additions also within its area of interest
+- The server will send those top-level nodes to the proxy
+- The server will send the proxy the message HoldLoadingState = false
+- The proxy will check the cache for the contents of those objects, and
+  their children
+- The proxy will send the client AddObject messages every time it
+  finishes constructing a complete object
+  > Can work on partial loading later; N.B. this is a function of the
+    proxy, not the client
+- Any object not cached, or out-of-date, will cause the proxy to send
+  the server a GetObject message and send the client
+  LoadingState( true )
+- Any time the queue of objects to load is empty, if the proxy has
+  HoldLoadingState = false, the proxy will send the client
+  LoadingState( false )
+- This enables the client to send the proxy a MoreDetail message, which
+  will start the process anew
+
+Simple as pie!
+
+Unlike in a Unix filesystem, any update to the timestamp on an object
+will also update the timestamps of all ancestor objects.  (I might want
+to maintain dual timestamps for this -- one for resource modified, and
+one for children modified -- in case a node can have both a shape and
+children.  Unless I decide they can't, but that might be unwieldy.)
+
+Nothing in my plan accounts for replacing low-detail representations of
+objects with their higher-detail replacements, though.  That probably
+won't be too difficult, but I'll need to figure it out nonetheless.
+
+Because of the harsh limits on bitmap detail for low-detail objects,
+most such objects will probably use simple generator functions with a
+few parameters, or maybe small tessellations.
+
+Maybe an exception could be made for bitmaps that are already loaded,
+but that sounds complicated.  I'd rather just get the low-detail
+rendering over and done with, not get fussy trying to make it look good,
+and then move on to higher detail.
+
+I think I figured out how to make my R-tree thing scale: any time a node
+is created or resized (unless strictly shrunk), its parent node, and any
+sibling node with an overlapping extent is considered to have changed as
+well.
+
+Then, whenever a subscribed node changes, its parent node (if not also
+subscribed) will also need to be checked for being out-of-date.
+
+This way, a client will only need to subscribe to the smallest nodes
+that are completely within its extent of interest.
+
+No, wait.  That doesn't work.  There must be some way of doing this.
+
+2008-10-23
+
+I think I figured it out.
+
+I'm mixing together two ideas that need to be separate: updates, and
+caching.  For updates, every node will have a list of subscribers; a
+subscriber has dual arrays, indexed by detail level [one for negative
+numbers and one for nonnegative], of zones of interest.  (I think zones
+and notification events will probably need to be spheres.)  A subscriber
+will also have a list of nodes subscribed to, which can be lazily
+garbage collected; nodes will be unsubscribed actively when an event
+happens, and the event handler notices that a claimed subscriber is
+actually no longer interested in the entire extent of the node [not just
+the event].
+
+For caching, the upward-propagating timestamp system I had in mind
+earlier is the right one.  The important thing to realize is that
+updating a timestamp on a node is not, in and of itself, an event in
+that node requiring notification of subscribers.  It is strictly for
+clients that have not been keeping their representation of a particular
+area in sync, to determine how far down they need to fetch when they
+begin watching a node.  [Put more positively, an update on a node [such
+as would trigger notifications to all subscribers] is: a change in the
+shape or movement of the node, a change in the extent of the node or an
+immediate child node, the addition or removal of a child node, or the
+reparenting of the node.  A modification of a node, for the purpose of
+updating its timestamp, is either an update as above, or a modification
+of any of the node's children.]
+
+That leaves one scaling issue with the timestamps: a large enough
+universe will quickly reach the point where contention for updating the
+root node becomes an issue.  Therefore, whenever a node reaches that
+point, where threads have to start waiting to update it, it and any
+parents not already so marked will be marked as NeverCache, and the
+timestamp update will never propagate up to or beyond that node.
+
+This should be especially helpful when a site is spread across multiple
+servers.
+
+That one's going to be fun.  Oh boy.
+
+What about massive subterranean complexes beneath an empty field, for
+example?  Wouldn't they generate an unfortunate rendering load as the
+detail level cranks up to take in the wider landscape?
+
+No, not if the complex is composed of numerous carefully-constructed
+opaque nodes.  That's one of the two main reasons for opaque nodes, the
+other being privacy: as a sort of higher-level culling.
+
+Opacity will be controlled entirely by the server, for obvious reasons,
+and will probably be based on various conditions, depending on the
+application.  One obvious application is locked rooms; for those, any
+attempt to enter will have to be rejected unless the room is unlocked
+and the person entering is entirely within an open access point such as
+the area in front of a front door.
+
+Another application is just reducing rendering load with no implied
+privacy or secrecy; for those, the node would be made transparent
+whenever the viewer is within the specified area.
+
+Jumping to another track, revisiting my LOD table from a long time ago:
+
+Actually, this [table I proposed earlier] might be be fine.  Detail
+level would undoubtedly be much higher in an open field where one might
+be able to see far away.  I.e.,
+
+LOD  Radius   Translation
+ 1    100 m   From across field (1 block away) can see prim hair
+ 0    316 m   From 1/2 mile away, can see arms & legs
+-1      1 km  At end of football field, can see spritars at far end
+              This is also roughly a city block; can't see people
+              at all beyond that
+-2    3.2 km  Tall (30') trees visible within 2 miles
+-3     10 km  Towers (100') visible up to six miles away
+-4     32 km  330' hills and larger visible within 20 miles
+              Flat city sprites 0.5+ miles wide also visible
+-5    100 km  3300'+ mountains visible within 60 miles
+-6    316 km  Olympus Mons cliffs visible from 200 miles away
+-7   1000 km  No practical effect   (>1,000 km objects)
+-8   3160 km  No practical effect  (>10,000 km objects)
+-9     10 Mm  No practical effect (>100,000 km objects)
+
+I think the Radius(LOD) function could probably stand to be much
+better than just sqrt(10)^(-LOD) * C.  This does seem to have too much
+detail nearby and too little far away.  The function could reasonably be
+pretty complicated, I think, and could include avatar size as a
+parameter.  The above results actually look pretty reasonable, though. 
+Maybe there should just be an upper limit on LOD as a function of avatar
+size, or a discontinuous sudden drop-off at a point that is a function
+of avatar size.
+
+I think I can improve the scalability of the system even further by
+combining two ideas: separate trees for stationary and moving objects.
+[And what else?  I obviously got distracted here.  NeverCache?]  The
+tree of moving objects would make liberal use of NeverCache.  The static
+objects, much less so, though still probably at the planetary level at
+least.  (Planets would be static because their movement would be
+permanent.)
+
+2008-10-24
+
+LOD radii should probably be in proportion to the size limit, so
+10^(-LOD) rather than sqrt(10), which would mean a greater rendering
+load from faraway objects -- maybe something between the two would be
+ideal.  In any case, bright light sources should get a huge LOD bonus so
+they are among the first things to load.
+
+Moons might be somewhat late loading under this plan, though.  But they
+are more-or-less decorative, so maybe that's okay.
+
+2008-10-25
+
+An avatar will have a location relative to some node with the
+LocationBase property.  I think the entire world, as rendered by the
+client, will need coordinates relative to that base, or else floating-
+point resolution will be too low to represent the entire universe.
+
+The problem I see with this is that whenever the avatar gets reparented,
+every object being displayed by the client will need its location
+changed simultaneously.  A ProxySendable such as TransformWorld might
+solve the problem.
+
+No, I'm an idiot.  The tree will only need a relatively minor transform,
+rotating to a different root node.  The key is that the avatar's parent
+node will be the root node of the client's representation of the world.
+Grandancestor nodes of the avatar will be represented as children of
+that root node.
+
+I'm going to need to draw several pictures to figure this out.
+
+Transaction (ProxySendable):
+   TopNode
+   ProxySendable[]
+
+All ProxySendables in a Transaction must be applied within the same
+update() call.
+
+To avoid race conditions, an event happens in this order:
+
+- Parameters in the node are updated
+- The timestamp is updated
+- Ancestor and immediate child NodeRef timestamps are updated, stopping
+  at a NeverCache node
+- Subscribers are notified
+
+And a node request is served in this order:
+
+- The requester is added to the node's subscriber list
+- The node is returned
+
+Does NeverCache just mean lastUpdated = Float.POSITIVE_INFINITY?
+
+2008-10-27
+
+AddObject might as well have a WarpSeq.
+
+Unlike a MoveSeq, it would be perfectly valid for a WarpSeq to be empty.
+That would just mean the shape is not changing.  An empty or nonexistent
+MoveSeq would mean the object would not have a location, in which case
+it should not have a parent node.  There's no need to add such objects
+to the client.  They can merely be hidden and then revealed when needed.
+
+A DNode needs a radius.
+
+My idea had been that moving nodes would need to be put under a node
+with a big enough area to contain the node throughout its entire
+movement.  That probably means that user-controlled vehicles shouldn't
+have MoveSeqs longer than maybe 10 or 15 seconds, or perhaps a minute,
+to prevent them from being put under very high nodes and creating a lot
+of load for all clients.
+
+I'm torn on whether a client [really I'm thinking of the WorldProxy
+here] should load all children of a node it is interested in, or just
+the ones within its range.  Maybe the answer is to have every shape
+contained within a shapeless node.
+
+Also, how does my idea of opaque nodes complicate my plan to have the
+server choose parent nodes for moving objects based on their movement? 
+Answer: a lot.  [Or maybe it doesn't.  Maybe the answer is just that the
+node becomes transparent when the condition is met; not necessarily that
+the avatar becomes a child of that node.  Also, I might want to display
+an alternative node as a substitute for an opaque node.  And I'll need
+to figure out how the node becomes opaque again when an avatar leaves,
+such that there aren't ways of leaving that skirt around it.]
+
+Also troubling me at the moment: when an avatar comes close enough to,
+say, a city that had been represented as a single flat bitmap, and it
+can begin to be represented as individual buildings, those buildings
+would come into range one-by-one, but the sprite version of them would
+disappear all at once.  How do I deal with that?  Say that any object at
+detail level N, where the detail N-1 representation is within range but
+is not being displayed because some other part of it is being shown at
+level N, will also be displayed at level N.
+
+2008-10-29
+
+I would love for the server to eventually have the capability to do live
+upgrades like this:
+
+- In normal operation, the server frontend talks to a data backend that
+  keeps a journaled database synced to disk at all times
+- In preparation for a database upgrade, a command is given to the
+  frontend to detach from the database server:
+  - All further writes to the database are queued, and written objects
+    are kept locally cached for future reads
+  - After the database reports that it has flushed out all updates,
+    reads are done by the frontend directly off the backing files; it
+    will have rudimentary database-reading capabilities
+  - At that moment, the database can be shut down, a quick backup made
+    of the files and the frontend's journals, and the database restarted
+  - When it comes back up, it will first begin reading the modifications
+    cached by the frontend, as it would handle writes normally,
+    journaling them and bulding up a local cache of modified data no
+    longer in sync with the disk as it goes
+  - If it dies before finishing this process, the old files could be
+    put back and the old server could be started automatically; this
+    would work transparently
+  - Once it has finished reading the modifications, the frontend server
+    can nullify its local cache of the written data and stop reading
+    from the files
+  - The journal of all changes since the upgrade would continue building
+    up until the new server is accepted as stable
+- The same process could be used, with the new database server being the
+  same executable as the old one, for holding the data in a quiescent
+  state for regular backups
+- For a frontend upgrade:
+  - The active server gets a command to stop accepting connections
+  - The new server must be started up as soon after that as possible,
+    hopefully quickly enough that no one gets a rejected connection
+  - Both servers would be connected to the same database; nothing else
+    special ought to be necessary for the switchover
+  - With super snazzy versions of the proxy, it ought to be possible to
+    send a disconnect/reconnect command that is virtually unnoticeable
+    to users, silently kicking everyone off the old server
+  - Otherwise, it would be necessary to wait for everyone to stop using
+    it, finally just giving up and shutting it down at some point
+
+But of course, all this fits under the general category of The Future.
+I sure as hell don't want to get stuck in a quagmire of trying to build
+a journaling database server.
+

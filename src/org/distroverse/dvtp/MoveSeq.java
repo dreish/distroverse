@@ -28,7 +28,9 @@ public final class MoveSeq implements DvtpExternalizable
    public MoveSeq( Move[] moves, RepeatType repeat_type )
       {
       super();
-      mNumMoves   = moves.length;
+      if ( moves.length == 0 )
+         throw new IllegalArgumentException( "A MoveSeq must contain"
+                                             + " at least one Move" );
       mMoves      = moves;
       mRepeatType = repeat_type;
       }
@@ -42,9 +44,8 @@ public final class MoveSeq implements DvtpExternalizable
       if ( o instanceof MoveSeq )
          {
          MoveSeq ms = (MoveSeq) o;
-         return (   mNumMoves == ms.mNumMoves
-                 && mRepeatType.equals( ms.mRepeatType )
-                 && Arrays.equals( mMoves, ms.mMoves));
+         return (   mRepeatType.equals( ms.mRepeatType )
+                 && Arrays.equals( mMoves, ms.mMoves ));
          }
       return false;
       }
@@ -52,7 +53,7 @@ public final class MoveSeq implements DvtpExternalizable
    @Override
    public int hashCode()
       {
-      return (mNumMoves * 3
+      return (mMoves.length * 3
               + mRepeatType.ordinal())
              ^ Arrays.hashCode( mMoves );
       }
@@ -70,10 +71,12 @@ public final class MoveSeq implements DvtpExternalizable
    public void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      mNumMoves = Util.safeInt( CompactUlong.externalAsLong( in ) );
-      mMoves = DvtpObject.readArray( in, mNumMoves, Move.class );
+      int num_moves = Util.safeInt( ULong.externalAsLong( in ) );
+      if ( num_moves == 0 )
+         throw new IOException( "Malformed MoveSeq in input" );
+      mMoves = DvtpObject.readArray( in, num_moves, Move.class );
       int repeat_int
-         = Util.safeInt( CompactUlong.externalAsLong( in ) );
+         = Util.safeInt( ULong.externalAsLong( in ) );
       checkRepeatType( repeat_int );
       mRepeatType = RepeatType.values()[ repeat_int ];
       }
@@ -82,24 +85,24 @@ public final class MoveSeq implements DvtpExternalizable
       {
       if ( r < 0  ||  r >= RepeatType.values().length )
          throw new ClassNotFoundException( "Repeat type " + mRepeatType
-                          + " out of range" );
+                                           + " out of range" );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mNumMoves );
+      if ( mMoves.length == 0 )
+         throw new IOException( "Cannot write empty MoveSeq" );
+      ULong.longAsExternal( out, mMoves.length );
       DvtpObject.writeArray( out, mMoves );
-      CompactUlong.longAsExternal( out, mRepeatType.ordinal() );
+      ULong.longAsExternal( out, mRepeatType.ordinal() );
       }
 
    public String prettyPrint()
       {
-      return "(MoveSeq "
-             + Util.prettyPrintList( mNumMoves, mMoves,
-                                     mRepeatType ) + ")";
+      return "(MoveSeq " + mMoves.length + " "
+             + Util.prettyPrintList( mMoves, mRepeatType ) + ")";
       }
 
-   private int mNumMoves;
    private Move[] mMoves;
    private RepeatType mRepeatType;
    }

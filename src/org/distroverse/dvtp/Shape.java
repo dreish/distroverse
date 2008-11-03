@@ -130,9 +130,8 @@ public final class Shape implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       (mPoints = new PointArray()).readExternal( in );
-      int num_vcs = Util.safeInt( CompactUlong.externalAsLong( in ) );
-      CompactUlong[] vcs = DvtpObject.readArray( in, num_vcs,
-                                                 CompactUlong.class );
+      int num_vcs = Util.safeInt( ULong.externalAsLong( in ) );
+      ULong[] vcs = DvtpObject.readArray( in, num_vcs, ULong.class );
       mVertexCounts = new int[ num_vcs ];
       for ( int i = 0; i < vcs.length; ++i )
          mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
@@ -141,9 +140,9 @@ public final class Shape implements DvtpExternalizable
    public void writeExternal( OutputStream out ) throws IOException
       {
       mPoints.writeExternal( out );
-      CompactUlong.longAsExternal( out, mVertexCounts.length );
+      ULong.longAsExternal( out, mVertexCounts.length );
       for ( int vc : mVertexCounts )
-         CompactUlong.longAsExternal( out, vc );
+         ULong.longAsExternal( out, vc );
       }
 
    public String prettyPrint()

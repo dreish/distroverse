@@ -13,36 +13,40 @@ import org.distroverse.core.Util;
  * @author dreish
  *
  */
-public class AskInv implements ProxySendable
+public final class SetShape implements ProxySendable
    {
    /**
     *
     */
-   public AskInv()
+   public SetShape()
       {
-      mType = null;
-      mKey  = null;
+      mId      = 0;
+      mShape   = null;
+      mWarpSeq = null;
       }
 
-   public AskInv( String t, DvtpExternalizable k )
+   public SetShape( long id, Shape shape, WarpSeq warp_seq )
       {
-      mType = t;
-      mKey  = k;
+      mId      = id;
+      mShape   = shape;
+      mWarpSeq = warp_seq;
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 134;  }
+      {  return 136;  }
 
    @Override
    public boolean equals( Object o )
       {
-      if ( o.getClass().equals( getClass() ) )
+      if ( o instanceof SetShape )
          {
-         return ((AskInv) o).mType.equals( mType )
-                && ((AskInv) o).mKey.equals( mKey );
+         SetShape ss = (SetShape) o;
+         return ss.mId == mId
+                &&  ss.mShape.equals( mShape )
+                &&  ss.mWarpSeq.equals( mWarpSeq );
          }
       return false;
       }
@@ -50,9 +54,9 @@ public class AskInv implements ProxySendable
    @Override
    public int hashCode()
       {
-      return mType.hashCode()
-             ^ mKey.hashCode()
-             ^ getClass().hashCode();
+      return ((int) mId)
+             ^ mShape.hashCode()
+             ^ mWarpSeq.hashCode();
       }
 
    /* (non-Javadoc)
@@ -60,9 +64,8 @@ public class AskInv implements ProxySendable
     */
    public String prettyPrint()
       {
-      return "(AskInv "
-             + Util.prettyPrintList( mType, mKey )
-             + ")";
+      return "(SetShape " + mId + " "
+             + Util.prettyPrintList( mShape, mWarpSeq ) + ")";
       }
 
    /* (non-Javadoc)
@@ -71,8 +74,9 @@ public class AskInv implements ProxySendable
    public void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
-      mType = Str.externalAsString( in );
-      mKey  = DvtpObject.parseObject( in );
+      mId = ULong.externalAsLong( in );
+      (mShape = new Shape()).readExternal( in );
+      (mWarpSeq = new WarpSeq()).readExternal( in );
       }
 
    /* (non-Javadoc)
@@ -80,10 +84,12 @@ public class AskInv implements ProxySendable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      Str.stringAsExternal( out, mType );
-      DvtpObject.writeInnerObject( out, mKey );
+      ULong.longAsExternal( out, mId );
+      mShape.writeExternal( out );
+      mWarpSeq.writeExternal( out );
       }
 
-   String             mType;
-   DvtpExternalizable mKey;
+   private long    mId;
+   private Shape   mShape;
+   private WarpSeq mWarpSeq;
    }

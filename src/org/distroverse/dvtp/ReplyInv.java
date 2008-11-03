@@ -3,60 +3,35 @@
  */
 package org.distroverse.dvtp;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @author dreish
  *
  */
-public class ReplyInv implements DvtpExternalizable
+public class ReplyInv extends Cookie
    {
-
    /**
     *
     */
    public ReplyInv()
       {
-      // TODO Auto-generated constructor stub
+      super();
+      }
+
+   public ReplyInv( DvtpExternalizable key )
+      {
+      super( key );
+      }
+
+   public ReplyInv( DvtpExternalizable key, DvtpExternalizable value )
+      {
+      super( key, value );
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
+   @Override
    public int getClassNumber()
-      {
-      // TODO Auto-generated method stub
-      return 135;
-      }
-
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
-    */
-   public String prettyPrint()
-      {
-      // TODO Auto-generated method stub
-      return null;
-      }
-
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   public void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      // TODO Auto-generated method stub
-
-      }
-
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
-    */
-   public void writeExternal( OutputStream out ) throws IOException
-      {
-      // TODO Auto-generated method stub
-
-      }
-
+      {  return 135;  }
    }

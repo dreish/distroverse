@@ -36,7 +36,6 @@ public final class SetUrl extends Str implements ClientSendable
    public String getUrl()
       {  return toString();  }
 
-   @SuppressWarnings("cast")
    @Override
    public boolean equals( Object o )
       {

@@ -94,7 +94,7 @@ public class Blob implements DvtpExternalizable
 
    public void readExternal( InputStream in ) throws IOException
       {
-      int bytes_len = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      int bytes_len = Util.safeInt( ULong.externalAsLong( in ) );
       if ( bytes_len > 65536 )
          throw new ProtocolException( "Blob above legal maximum size" );
       mBytes = new byte[ bytes_len ];
@@ -102,17 +102,17 @@ public class Blob implements DvtpExternalizable
          throw new ProtocolException( "End of file while reading"
                                       + " Blob" );
       (mResource = new Str()).readExternal( in );
-      mPos = CompactUlong.externalAsLong( in );
-      mFileLength = CompactUlong.externalAsLong( in );
+      mPos = ULong.externalAsLong( in );
+      mFileLength = ULong.externalAsLong( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
-      CompactUlong.longAsExternal( out, mBytes.length );
+      ULong.longAsExternal( out, mBytes.length );
       out.write( mBytes );
       mResource.writeExternal( out );
-      CompactUlong.longAsExternal( out, mPos );
-      CompactUlong.longAsExternal( out, mFileLength );
+      ULong.longAsExternal( out, mPos );
+      ULong.longAsExternal( out, mFileLength );
       }
 
    public String prettyPrint()

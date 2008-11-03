@@ -6,10 +6,24 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.distroverse.dvtp.AddObject;
+import org.distroverse.dvtp.AskInv;
 import org.distroverse.dvtp.Blob;
+import org.distroverse.dvtp.ClearShape;
 import org.distroverse.dvtp.Click;
 import org.distroverse.dvtp.Click2;
-import org.distroverse.dvtp.CompactUlong;
+import org.distroverse.dvtp.Cookie;
+import org.distroverse.dvtp.DLong;
+import org.distroverse.dvtp.DNode;
+import org.distroverse.dvtp.DNodeRef;
+import org.distroverse.dvtp.Dict;
+import org.distroverse.dvtp.Frac;
+import org.distroverse.dvtp.GetCookie;
+import org.distroverse.dvtp.Real;
+import org.distroverse.dvtp.ReparentObject;
+import org.distroverse.dvtp.ReplyInv;
+import org.distroverse.dvtp.SetShape;
+import org.distroverse.dvtp.SetVisible;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.DList;
 import org.distroverse.dvtp.DeleteObject;
@@ -38,6 +52,9 @@ import org.distroverse.dvtp.Shape;
 import org.distroverse.dvtp.Str;
 import org.distroverse.dvtp.True;
 import org.distroverse.dvtp.Vec;
+import org.distroverse.dvtp.Warp;
+import org.distroverse.dvtp.WarpObject;
+import org.distroverse.dvtp.WarpSeq;
 
 import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
@@ -68,9 +85,13 @@ public class TestExternalization
    private static void testExternalization()
    throws IOException, ClassNotFoundException
       {
-      for ( int i = 0; i < DvtpObject.mClassList.length; ++i )
+      for ( int i = 0;
+            i < DvtpObject.mClassList.length - 1;
+            ++i )
          testClass( i );
-      for ( int i = 0; i < DvtpObject.mExtendedClassList.length; ++i )
+      for ( int i = 0;
+            i < DvtpObject.mExtendedClassList.length - 1;
+            ++i )
          testClass( i + 128 );
       }
 
@@ -79,56 +100,78 @@ public class TestExternalization
       {
       switch ( i )
          {
-         case 0:   testCompactUlong();  break;
-         case 1:   testPair();          break;
-         case 2:   testStr();           break;
-         case 3:   testBigInt();        break;
-         case 4:   testPointArray();    break;
-         case 5:   testFalse();         break;
-         case 6:   testTrue();          break;
-         case 7:   testDisplayUrl();    break;
-         case 8:   testRedirectUrl();   break;
-         case 9:   testSetUrl();        break;
-         case 10:  testShape();         break;
-         case 11:  testVec();           break;
-         case 12:  testAddObject();     break;
-         case 13:  testMove();          break;
-         case 14:  testMoveObject();    break;
-         case 15:  testFlo();           break;
-         case 16:  testQuat();          break;
-         case 17:  testDeleteObject();  break;
-         case 18:  testMoveSeq();       break;
-         case 19:  testKeystroke();     break;
-         case 20:  testKeyDown();       break;
-         case 21:  testKeyUp();         break;
-         case 22:  testClick();         break;
-         case 23:  testClick2();        break;
-         case 24:  testMoreDetail();    break;
-         case 25:  testBlob();          break;
+         case 0:   testCompactUlong();   break;
+         case 1:   testPair();           break;
+         case 2:   testStr();            break;
+         case 3:   testBigInt();         break;
+         case 4:   testPointArray();     break;
+         case 5:   testFalse();          break;
+         case 6:   testTrue();           break;
+         case 7:   testDisplayUrl();     break;
+         case 8:   testRedirectUrl();    break;
+         case 9:   testSetUrl();         break;
+         case 10:  testShape();          break;
+         case 11:  testVec();            break;
+         case 12:  testAddObject();      break;
+         case 13:  testMove();           break;
+         case 14:  testMoveObject();     break;
+         case 15:  testFlo();            break;
+         case 16:  testQuat();           break;
+         case 17:  testDeleteObject();   break;
+         case 18:  testMoveSeq();        break;
+         case 19:  testKeystroke();      break;
+         case 20:  testKeyDown();        break;
+         case 21:  testKeyUp();          break;
+         case 22:  testClick();          break;
+         case 23:  testClick2();         break;
+         case 24:  testMoreDetail();     break;
+         case 25:  testBlob();           break;
+         case 26:  testGetCookie();      break;
+         case 27:  testCookie();         break;
+         case 28:  testDict();           break;
+         case 29:  testDNodeRef();       break;
+         case 30:  testDNode();          break;
+         case 31:  testDLong();          break;
+         case 32:  testFrac();           break;
+         case 33:  testReal();           break;
+         case 34:  testWarp();           break;
+         case 35:  testWarpSeq();        break;
 
-         case 128: testDList();         break;
-         case 129: testFunCall();       break;
-         case 130: testFunRet();        break;
-         case 131: testErr();           break;
-         case 132: testConPerm();       break;
-         case 133: testProxySpec();     break;
+         case 128: testDList();          break;
+         case 129: testFunCall();        break;
+         case 130: testFunRet();         break;
+         case 131: testErr();            break;
+         case 132: testConPerm();        break;
+         case 133: testProxySpec();      break;
+         case 134: testAskInv();         break;
+         case 135: testReplyInv();       break;
+         case 136: testSetShape();       break;
+         case 137: testWarpObject();     break;
+         case 138: testReparentObject(); break;
+         case 139: testClearShape();     break;
+         case 140: testSetVisible();     break;
+
+         default:
+            throw new ClassNotFoundException( "No test case for "
+                                + DvtpObject.getNew( i ).getClass()
+                                + " (" + i + ")" );
          }
       }
 
    private static void testCompactUlong()
    throws IOException, ClassNotFoundException
       {
-      long[] to_try = { CompactUlong.MAX_VALUE, 0, 1, 127, 128, 129, 255, 256, 257,
-                        16383, 16384, 16385, 2097152,
-                        CompactUlong.MAX_VALUE };
+      long[] to_try = { ULong.MAX_VALUE, 0, 1, 127, 128, 129, 255, 256,
+                        257, 16383, 16384, 16385, 2097152,
+                        ULong.MAX_VALUE };
       for ( long i : to_try )
-         tryBeamObject( new CompactUlong( i ) );
+         tryBeamObject( new ULong( i ) );
       }
 
    private static void testPair()
    throws IOException, ClassNotFoundException
       {
-      tryBeamObject( new Pair( new CompactUlong( 123 ),
+      tryBeamObject( new Pair( new ULong( 123 ),
                                new Str( "foo" ) ) );
       }
 
@@ -200,7 +243,12 @@ public class TestExternalization
    private static void testShape()
    throws IOException, ClassNotFoundException
       {
-      // XXX Write shapeExamples()
+      Shape[] sex = shapeExamples();
+      tryBeamObject( sex[ 0 ] );
+      }
+
+   private static Shape[] shapeExamples()
+      {
       Vector3f[] p =
          {
          new Vector3f( 1, 2, 3 ),
@@ -208,8 +256,11 @@ public class TestExternalization
          new Vector3f( 8f, -2.5f, 7f ),
          new Vector3f( -1, -1, -1 )
          };
-      tryBeamObject( new Shape( Arrays.asList( p ),
-                                new int[] { 2, 2 } ) );
+      return new Shape[]
+         {
+         new Shape( Arrays.asList( p ),
+                    new int[] { 2, 2 } ),
+         };
       }
 
    private static void testVec()
@@ -225,10 +276,21 @@ public class TestExternalization
    private static void testAddObject()
    throws IOException, ClassNotFoundException
       {
+      AddObject[] aoex = addObjectExamples();
+      for ( AddObject ao : aoex )
+         tryBeamObject( ao );
+      }
+
+   private static AddObject[] addObjectExamples()
+      {
       MoveSeq[] msex = moveSeqExamples();
-      tryBeamObject( new AddObject( new CompactUlong( 10 ),
-                                    new CompactUlong( 100 ),
-                                    msex[ 0 ] ) );
+      // FIXME Test AddObjects with shapes
+      return new AddObject[]
+         {
+         new AddObject( new ULong( 10 ),
+                        new ULong( 100 ),
+                        msex[ 0 ] ),
+         };
       }
 
    private static MoveSeq[] moveSeqExamples()
@@ -258,7 +320,6 @@ public class TestExternalization
          new Move( new Vec( new Vector3f( 2.5f, 2.5f, 2.5f ) ),
                    new Quat( new Quaternion( 0, 0, 1, 0 ) ),
                    new Flo( 2 ) ),
-         new Move(),
          };
       }
 
@@ -309,7 +370,7 @@ public class TestExternalization
       {
       long[] to_try = { 0, 1, 127, 128, 129, 255, 256, 257,
                         16383, 16384, 16385, 2097152,
-                        CompactUlong.MAX_VALUE };
+                        ULong.MAX_VALUE };
       for ( long i : to_try )
          tryBeamObject( new DeleteObject( i ) );
       }
@@ -376,6 +437,121 @@ public class TestExternalization
       tryBeamObject( new Blob( "foo".getBytes(), 3, "bar", 5, 8 ) );
       }
 
+   private static void testGetCookie()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new GetCookie( new Str( "foo" ) ) );
+      tryBeamObject( new GetCookie(
+                        new ProxySpec( "a:--//", "b$$##\\\\", "&" ) ) );
+      Move[] mex = moveExamples();
+      tryBeamObject( new GetCookie( mex[ 1 ] ));
+      }
+
+   private static void testCookie()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new Cookie( new Str( "foo" ) ) );
+      tryBeamObject( new Cookie( new Str( "foo" ), new Str( "bar" ) ) );
+      tryBeamObject( new Cookie(
+                        new ProxySpec( "a:--//", "b$$##\\\\", "&" ) ) );
+      tryBeamObject( new Cookie(
+                          new ProxySpec( "a:--//", "b$$##\\\\", "&" ),
+                          new Flo( 3.5f ) ) );
+      }
+
+   private static void testDict()
+   throws IOException, ClassNotFoundException
+      {
+      Dict d = new Dict();
+      tryBeamObject( d );
+      d.put( new Str( "foo" ), new Str( "bar" ) );
+      tryBeamObject( d );
+      d.put( new Flo( 1.23f ), new GetCookie( new Str( "bleh" ) ) );
+      tryBeamObject( d );
+      }
+
+   private static void testDNodeRef()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new DNodeRef( "0", 123L, new Real( 123.45, 2 ) ) );
+      tryBeamObject( new DNodeRef( "example.com", 456L,
+                                   new Real( 12.777, 7 ) ) );
+      }
+
+   private static void testDNode()
+   throws IOException, ClassNotFoundException
+      {
+      AddObject[] aoex = addObjectExamples();
+      tryBeamObject(
+         new DNode( aoex[ 0 ], 2.0f,
+            new DNodeRef( "0", 123L, new Real( 123.45, 2 ) ),
+            new DNodeRef( "0", 125L, new Real( 123.45, 2 ) ),
+            new DNodeRef[] {}
+         ) );
+      }
+
+   private static void testDLong()
+   throws IOException, ClassNotFoundException
+      {
+      long[] to_try = { DLong.MAX_VALUE, 0, 1, 127, 128, 129, 255, 256,
+                        257, 16383, 16384, 16385, 2097152,
+                        -1, -127, -128, -129, -255, -256, -257, -16383,
+                        -16384, -16385, -2097152, DLong.MIN_VALUE, };
+      for ( long i : to_try )
+         tryBeamObject( new DLong( i ) );
+      }
+
+   private static void testFrac()
+   throws IOException, ClassNotFoundException
+      {
+      double[] to_try = { 0.1, 0.3, 0.5, 0.7, 0.9 };
+      for ( double d : to_try )
+         {
+         tryBeamObject( new Frac( d, 3  ) );
+         tryBeamObject( new Frac( d, 7  ) );
+         tryBeamObject( new Frac( d, 10 ) );
+         tryBeamObject( new Frac( d, 14 ) );
+         tryBeamObject( new Frac( d, 63 ) );
+         }
+      }
+
+   private static void testReal()
+   throws IOException, ClassNotFoundException
+      {
+      double[] to_try = {  0.1,  0.3,  0.5,  0.7,  0.9,
+                          -0.1, -0.3, -0.5, -0.7, -0.9 };
+      double[] to_add = { 0, 2, -2, 4, -4, 1000, -1000 };
+      for ( double d : to_try )
+         {
+         for ( double da : to_add )
+            {
+            tryBeamObject( new Real( d + da, 3  ) );
+            tryBeamObject( new Real( d + da, 7  ) );
+            tryBeamObject( new Real( d + da, 10 ) );
+            tryBeamObject( new Real( d + da, 14 ) );
+            tryBeamObject( new Real( d + da, 63 ) );
+            }
+         }
+      }
+
+   private static void testWarp()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new Warp( new PointArray[ 0 ] ) );
+      // FIXME need to try some non-empty Warps
+      }
+
+   private static void testWarpSeq()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new WarpSeq( new Warp[ 0 ],
+                                  WarpSeq.RepeatType.LOOP ) );
+      Warp[] sequence = { new Warp( new PointArray[ 0 ] ) };
+      tryBeamObject( new WarpSeq( sequence,
+                                  WarpSeq.RepeatType.ONCE ) );
+      // FIXME need to try some non-empty Warps
+      }
+
    private static void testDList()
    throws IOException, ClassNotFoundException
       {
@@ -426,6 +602,68 @@ public class TestExternalization
       tryBeamObject( new ProxySpec( "a", "b", "c" ) );
       tryBeamObject( new ProxySpec( "", "", "" ) );
       tryBeamObject( new ProxySpec( "a:--//", "b$$##\\\\", "&" ) );
+      }
+
+   private static void testAskInv()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new AskInv( "foo", new Str( "bar" ) ) );
+      tryBeamObject( new AskInv( "ID", new Flo( 1.4f ) ) );
+      }
+
+   private static void testReplyInv()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new ReplyInv( new Str( "bar" ) ) );
+      tryBeamObject( new ReplyInv( new Str( "bar" ),
+                                   new Str( "barx" ) ) );
+      }
+
+   private static void testSetShape()
+   throws IOException, ClassNotFoundException
+      {
+      Shape[] sex = shapeExamples();
+      tryBeamObject( new SetShape( 1, sex[ 0 ],
+                                   new WarpSeq( new Warp[ 0 ],
+                                          WarpSeq.RepeatType.ONCE ) ) );
+      }
+
+   private static void testWarpObject()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new WarpObject( 1,
+                             new WarpSeq( new Warp[ 0 ],
+                                          WarpSeq.RepeatType.ONCE ) ) );
+      }
+
+   private static void testReparentObject()
+   throws IOException, ClassNotFoundException
+      {
+      tryBeamObject( new ReparentObject( 3, 4 ) );
+      tryBeamObject( new ReparentObject( 0, 0 ) );
+      tryBeamObject( new ReparentObject( ULong.MAX_VALUE,
+                                         ULong.MAX_VALUE ) );
+      }
+
+   private static void testClearShape()
+   throws IOException, ClassNotFoundException
+      {
+      long[] to_try = { DLong.MAX_VALUE, 0, 1, 127, 128, 129, 255, 256,
+                        257, 16383, 16384, 16385, 2097152, };
+      for ( long i : to_try )
+         tryBeamObject( new ClearShape( i ) );
+      }
+
+   private static void testSetVisible()
+   throws IOException, ClassNotFoundException
+      {
+      long[] to_try = { DLong.MAX_VALUE, 0, 1, 127, 128, 129, 255, 256,
+                        257, 16383, 16384, 16385, 2097152, };
+      for ( long i : to_try )
+         {
+         tryBeamObject( new SetVisible( i, true ) );
+         tryBeamObject( new SetVisible( i, false ) );
+         }
       }
 
    /**

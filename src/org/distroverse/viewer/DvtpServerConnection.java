@@ -18,7 +18,7 @@ import org.distroverse.core.Util;
 import org.distroverse.core.net.DvtpFlexiStreamer;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.dvtp.Blob;
-import org.distroverse.dvtp.CompactUlong;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.Str;
@@ -295,7 +295,7 @@ public class DvtpServerConnection
          /* Throw away the length; we're a synchronous thread, so we
           * don't mind blocking for input from a slow server.
           */ 
-         CompactUlong.externalAsLong( sis );
+         ULong.externalAsLong( sis );
          return DvtpObject.parseObject( sis );
          }
 

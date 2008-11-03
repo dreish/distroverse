@@ -9,6 +9,7 @@ package org.distroverse.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.distroverse.dvtp.DvtpExternalizable;
 
@@ -240,6 +241,10 @@ public final class Util
                         + "\"" );
          else if ( o == null )
             ret.append( "null" );
+         else if ( o.getClass().isArray() )
+            {
+            ret.append( "{" + prettyPrintList( (Object[]) o ) + "}" );
+            }
          else
             ret.append( o.toString() );
          ret.append( ' ' );

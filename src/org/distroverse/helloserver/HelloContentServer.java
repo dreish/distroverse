@@ -11,12 +11,13 @@ import org.distroverse.distroplane.lib.PrimFactory;
 import org.distroverse.distroplane.lib.SUtil;
 import org.distroverse.distroplane.lib.PrimFactory.PrimShape;
 import org.distroverse.dvtp.AddObject;
-import org.distroverse.dvtp.CompactUlong;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.Shape;
+import org.distroverse.dvtp.WarpSeq;
 import org.distroverse.viewer.VUtil;
 
 import com.jme.math.Quaternion;
@@ -92,11 +93,10 @@ public class HelloContentServer extends DvtpServer
       }
 
    protected void addObject( NetOutQueue< Object > noq, Shape s,
-                             CompactUlong id, CompactUlong pid,
-                             MoveSeq m )
+                             ULong id, ULong pid, MoveSeq m )
    throws ClosedChannelException
       {
-      noq.add( new AddObject( s, id, pid, m ) );
+      noq.add( new AddObject( true, s, id, pid, m, new WarpSeq() ) );
       }
 
    // XXX This is mostly duplicated with ProxyBase.
@@ -105,7 +105,7 @@ public class HelloContentServer extends DvtpServer
    throws ClosedChannelException
       {
       // XXX - Probably bad form to call something in VUtil from here.
-      addObject( noq, s, new CompactUlong( id ), new CompactUlong( 0 ),
+      addObject( noq, s, new ULong( id ), new ULong( 0 ),
                  VUtil.simpleMove( new Vector3f( x, y, z ),
                                    new Quaternion() ) );
       }

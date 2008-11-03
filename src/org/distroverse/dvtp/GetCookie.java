@@ -7,19 +7,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * @author dreish
- *
- */
-public class GetCookie implements DvtpExternalizable
-   {
+import org.distroverse.core.Util;
 
+
+/**
+ * Sent by a proxy to a client to request a cookie from the client's
+ * cookie store.
+ * @author dreish
+ */
+public final class GetCookie implements ProxySendable
+   {
    /**
     *
     */
    public GetCookie()
       {
-      // TODO Auto-generated constructor stub
+      mKey = null;
+      }
+
+   public GetCookie( DvtpExternalizable key )
+      {
+      mKey = key;
       }
 
    /* (non-Javadoc)
@@ -28,32 +36,44 @@ public class GetCookie implements DvtpExternalizable
    public int getClassNumber()
       {  return 26;  }
 
+   /**
+    * @return - the cookie key being requested
+    */
+   public DvtpExternalizable getKey()
+      {  return mKey;  }
+
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
     */
    public String prettyPrint()
       {
-      // TODO Auto-generated method stub
-      return null;
+      return "(GetCookie " + Util.prettyPrintList( mKey ) + ")";
       }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
+   @Override
+   public boolean equals( Object o )
+      {
+      return (o instanceof GetCookie
+              && ((GetCookie) o).getKey()
+                                .equals( getKey() ) );
+      }
+
+   @Override
+   public int hashCode()
+      {
+      return mKey.hashCode() ^ GetCookie.class.hashCode();
+      }
+
    public void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
-      // TODO Auto-generated method stub
-
+      mKey = DvtpObject.parseObject( in );
       }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
-    */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      // TODO Auto-generated method stub
-
+      DvtpObject.writeInnerObject( out, mKey );
       }
 
+   private DvtpExternalizable mKey;
    }

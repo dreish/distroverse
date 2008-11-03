@@ -7,42 +7,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.distroverse.core.Util;
-
 /**
  * @author dreish
  *
  */
-public class AskInv implements ProxySendable
+public final class ReparentObject implements ProxySendable
    {
+
    /**
     *
     */
-   public AskInv()
+   public ReparentObject()
       {
-      mType = null;
-      mKey  = null;
+      mId = mParentId = 0;
       }
 
-   public AskInv( String t, DvtpExternalizable k )
+   public ReparentObject( long id, long parent_id )
       {
-      mType = t;
-      mKey  = k;
+      mId       = id;
+      mParentId = parent_id;
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 134;  }
+      {  return 138;  }
+
+   public long getId()        {  return mId;        }
+   public long getParentId()  {  return mParentId;  }
 
    @Override
    public boolean equals( Object o )
       {
-      if ( o.getClass().equals( getClass() ) )
+      if ( o instanceof ReparentObject )
          {
-         return ((AskInv) o).mType.equals( mType )
-                && ((AskInv) o).mKey.equals( mKey );
+         ReparentObject ro = (ReparentObject) o;
+         return (mId == ro.mId
+                 &&  mParentId == ro.mParentId);
          }
       return false;
       }
@@ -50,9 +52,7 @@ public class AskInv implements ProxySendable
    @Override
    public int hashCode()
       {
-      return mType.hashCode()
-             ^ mKey.hashCode()
-             ^ getClass().hashCode();
+      return (int) mId ^ ((int) mParentId * 924535727);
       }
 
    /* (non-Javadoc)
@@ -60,9 +60,7 @@ public class AskInv implements ProxySendable
     */
    public String prettyPrint()
       {
-      return "(AskInv "
-             + Util.prettyPrintList( mType, mKey )
-             + ")";
+      return "(ReparentObject " + mId + " " + mParentId + ")";
       }
 
    /* (non-Javadoc)
@@ -71,8 +69,8 @@ public class AskInv implements ProxySendable
    public void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
-      mType = Str.externalAsString( in );
-      mKey  = DvtpObject.parseObject( in );
+      mId       = ULong.externalAsLong( in );
+      mParentId = ULong.externalAsLong( in );
       }
 
    /* (non-Javadoc)
@@ -80,10 +78,10 @@ public class AskInv implements ProxySendable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      Str.stringAsExternal( out, mType );
-      DvtpObject.writeInnerObject( out, mKey );
+      ULong.longAsExternal( out, mId );
+      ULong.longAsExternal( out, mParentId );
       }
 
-   String             mType;
-   DvtpExternalizable mKey;
+   private long mId;
+   private long mParentId;
    }

@@ -38,7 +38,7 @@ public class Str implements DvtpExternalizable
    public static String externalAsString( InputStream in )
    throws IOException
       {
-      int    len = Util.safeInt( CompactUlong.externalAsLong( in ) );
+      int    len = Util.safeInt( ULong.externalAsLong( in ) );
       if ( len == 0 )
          return "";
       byte[] buf = new byte[ len ];
@@ -54,7 +54,7 @@ public class Str implements DvtpExternalizable
       {
       ByteBuffer bb = Charset.forName( "UTF-8" )
                              .encode( CharBuffer.wrap( val ) );
-      CompactUlong.longAsExternal( out, bb.limit() );
+      ULong.longAsExternal( out, bb.limit() );
       out.write( bb.array(), 0, bb.limit() );
       return;
       }
@@ -65,14 +65,14 @@ public class Str implements DvtpExternalizable
    @Override
    public boolean equals( Object o )
       {
-      return (o.getClass().equals( Str.class )
+      return (o.getClass().equals( getClass() )
               &&  mVal.equals( ((Str) o).mVal ));
       }
 
    @Override
    public int hashCode()
       {
-      return mVal.hashCode();
+      return mVal.hashCode() ^ getClass().hashCode();
       }
 
    public void readExternal( InputStream in ) throws IOException

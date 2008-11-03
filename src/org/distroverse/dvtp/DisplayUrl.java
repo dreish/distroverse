@@ -37,20 +37,20 @@ public final class DisplayUrl extends Str implements ProxySendable
    public String getUrl()
       {  return toString();  }
 
-   @SuppressWarnings("cast")
-   @Override
-   public boolean equals( Object o )
-      {
-      return (o instanceof DisplayUrl
-              && ((DisplayUrl) o).getUrl()
-                                 .equals( getUrl() ) );
-      }
+//   @SuppressWarnings("cast")
+//   @Override
+//   public boolean equals( Object o )
+//      {
+//      return (o instanceof DisplayUrl
+//              && ((DisplayUrl) o).getUrl()
+//                                 .equals( getUrl() ) );
+//      }
 
-   @Override
-   public int hashCode()
-      {
-      return super.hashCode() ^ DisplayUrl.class.hashCode();
-      }
+//   @Override
+//   public int hashCode()
+//      {
+//      return super.hashCode() ^ DisplayUrl.class.hashCode();
+//      }
 
    @Override
    public String prettyPrint()

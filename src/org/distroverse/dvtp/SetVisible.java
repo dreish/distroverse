@@ -7,52 +7,52 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.distroverse.core.Util;
-
 /**
+ * Turns visibility for an object (and its subobjects) on or off.
  * @author dreish
- *
  */
-public class AskInv implements ProxySendable
+public class SetVisible implements ProxySendable
    {
    /**
     *
     */
-   public AskInv()
+   public SetVisible()
       {
-      mType = null;
-      mKey  = null;
+      mId   = 0;
+      mFlag = false;
       }
 
-   public AskInv( String t, DvtpExternalizable k )
+   public SetVisible( long id, boolean flag )
       {
-      mType = t;
-      mKey  = k;
+      mId   = id;
+      mFlag = flag;
       }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 134;  }
+      {  return 140;  }
+
+   public long getId()
+      {  return mId;  }
+   public boolean getFlag()
+      {  return mFlag;  }
 
    @Override
    public boolean equals( Object o )
       {
-      if ( o.getClass().equals( getClass() ) )
-         {
-         return ((AskInv) o).mType.equals( mType )
-                && ((AskInv) o).mKey.equals( mKey );
-         }
-      return false;
+      return (o instanceof SetVisible
+              &&  ((SetVisible) o).mId   == mId
+              &&  ((SetVisible) o).mFlag == mFlag);
       }
 
    @Override
    public int hashCode()
       {
-      return mType.hashCode()
-             ^ mKey.hashCode()
-             ^ getClass().hashCode();
+      return ((Long) mId).hashCode()
+             ^ (mFlag ? True.class.hashCode() : False.class.hashCode())
+             ^ SetVisible.class.hashCode();
       }
 
    /* (non-Javadoc)
@@ -60,9 +60,7 @@ public class AskInv implements ProxySendable
     */
    public String prettyPrint()
       {
-      return "(AskInv "
-             + Util.prettyPrintList( mType, mKey )
-             + ")";
+      return "(SetVisible " + mId + " " + mFlag + ")";
       }
 
    /* (non-Javadoc)
@@ -71,8 +69,8 @@ public class AskInv implements ProxySendable
    public void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
-      mType = Str.externalAsString( in );
-      mKey  = DvtpObject.parseObject( in );
+      mId   = ULong.externalAsLong( in );
+      mFlag = Bool.externalAsBoolean( in );
       }
 
    /* (non-Javadoc)
@@ -80,10 +78,10 @@ public class AskInv implements ProxySendable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      Str.stringAsExternal( out, mType );
-      DvtpObject.writeInnerObject( out, mKey );
+      ULong.longAsExternal( out, mId );
+      Bool.booleanAsExternal( out, mFlag );
       }
 
-   String             mType;
-   DvtpExternalizable mKey;
+   private long    mId;
+   private boolean mFlag;
    }
