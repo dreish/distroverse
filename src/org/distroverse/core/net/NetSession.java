@@ -1,9 +1,34 @@
 /*
- * Copyright (c) 2007-2008 Dan Reish.
- * 
- * For license details, see the file COPYING in your distribution,
- * or the <a href="http://www.gnu.org/copyleft/gpl.html">GNU
- * General Public License (GPL) version 3 or later</a>
+ * <copyleft>
+ *
+ * Copyright 2007-2008 Dan Reish
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Additional permission under GNU GPL version 3 section 7
+ *
+ * If you modify this Program, or any covered work, by linking or
+ * combining it with Clojure (or a modified version of that program)
+ * or clojure-contrib (or a modified version of that library),
+ * containing parts covered by the terms of the Common Public License,
+ * the licensors of this Program grant you additional permission to
+ * convey the resulting work. {Corresponding Source for a non-source
+ * form of such a combination shall include the source code for the
+ * parts of Clojure and clojure-contrib used as well as that of the
+ * covered work.}
+ *
+ * </copyleft>
  */
 package org.distroverse.core.net;
 
@@ -26,7 +51,7 @@ public class NetSession< T >
       mNetOutQueue = noqs;
       mProxyMode = false;
       }
-   
+
    public NetInQueue< T > getNetInQueue()
       {  return mNetInQueue;  }
    public NetOutQueue< T > getNetOutQueue()
@@ -35,18 +60,19 @@ public class NetSession< T >
       {  mProxyMode = true;  }
    public boolean inProxyMode()
       {  return mProxyMode;  }
-   public < AT > void setAttachment( Class< AT > attachment_class,
-                                     AT attachment )
+   public < AT > AT setAttachment( Class< AT > attachment_class,
+                                   AT attachment )
       {
       mAttachmentClass = attachment_class;
       mAttachment      = attachment;
+      return attachment;
       }
 
    /**
     * Returns an object of class attachment_class if this NetSession has
     * such an object attached to it.  Otherwise, if this NetSession has
     * nothing attached to it at all, or has an object of a class other
-    * than attachment_class attached to it, this method returns null.  
+    * than attachment_class attached to it, this method returns null.
     * Never throws an exception.
     * @param <AT> - Type of attachment_class; inferred
     * @param attachment_class - Class to look for
@@ -61,11 +87,11 @@ public class NetSession< T >
          return (AT) mAttachment;
       return null;
       }
-   
+
    /**
     * Old-skool attachment getter, for people who are set in their ways.
     * You should probably use getAttachmentOrNull().
-    * @return - 
+    * @return -
     */
    public Object getAttachment()
       {  return mAttachment;  }

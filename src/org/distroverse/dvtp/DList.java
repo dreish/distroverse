@@ -28,6 +28,12 @@ public class DList implements DvtpExternalizable
       mContents = f;
       }
 
+   public DList( DvtpExternalizable f )
+      {
+      super();
+      mContents = new DvtpExternalizable[] { f };
+      }
+
    public int getClassNumber()
       {  return 128;  }
 
@@ -45,12 +51,12 @@ public class DList implements DvtpExternalizable
              ^ this.getClass().hashCode();
       }
 
-   /**
-    * Returns a mutable array, so this can be used for fetching and
-    * setting values.
-    * @return
-    */
-   public DvtpExternalizable[] getContents()
+   public int getContentsLength()
+      {  return mContents.length;  }
+   public DvtpExternalizable getContents( int n )
+      {  return mContents[ n ];  }
+
+   protected DvtpExternalizable[] getContents()
       {  return mContents;  }
 
    public void readExternal( InputStream in ) throws IOException,

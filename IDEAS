@@ -1951,7 +1951,7 @@ I'm resigned to going ahead with DVTP as I've designed it.  I'm hoping
 that whatever issues the JVM has that are preventing good programming
 languages from targeting it, or making it hard for them, will be
 addressed.  Maybe I'm getting a little carried away in thinking that
-my project might actual focus appreciably more attention on Java,
+my project might actually focus appreciably more attention on Java,
 spurring any kind of improvements, let alone implementation of entire
 other languages targeting the JVM.
 
@@ -5411,9 +5411,9 @@ Cookie commands to support concurrency:
 
 TestSet( Str key, DvtpExt test, DvtpExt newval, CompactUlong id ) =>
 [id, key, Bool wasSet]
-IncGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal] 
+IncGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal]
 (or exception)
-DecGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal] 
+DecGet( CompactUlong id, Str key ) => [id, key, CompactUlong newVal]
 (or exception)
 
 (I might want to rename DvtpExternalizable to DvtpExt.  I'm getting
@@ -5524,7 +5524,7 @@ down, I'll come up with a solution.  Of course, I'll have to subject the
 simple approach to some harsh testing conditions to find out whether,
 and at what point, and how, it breaks down.
 
-I think there does need to be _something_ special for the sky, though. 
+I think there does need to be _something_ special for the sky, though.
 I don't see the atmosphere being an object rendered just like any other,
 though I can give that a half-assed shot.  It might be a nice
 simplification.
@@ -5569,7 +5569,7 @@ happening.)
 As the rendering frame rate would be extremely high, the detail level
 would immediately start to be cranked up, and next the planet as a
 single sphere would be loaded.  (Call it LOD -7 for now.)  Since it
-would render at that level, the LOD -8 representation would be hidden. 
+would render at that level, the LOD -8 representation would be hidden.
 Perhaps the sun would be loaded at this point, too, and the proxy could
 begin rendering the sky in a background thread.
 
@@ -5690,7 +5690,7 @@ Can an object be static relative to a dynamic parent node?
 Good grief, when do I get a Ph.D. for this?
 
 This might be a distinction without a difference, though.  It might
-happen all by itself, in the ideal way, with my LastChanged property. 
+happen all by itself, in the ideal way, with my LastChanged property.
 "Static" might be a property any node can have, as long as all its child
 nodes are also Static.
 
@@ -5763,7 +5763,7 @@ list, but maybe I shouldn't be in this case.
 Then, the server will need to confirm the identity by asking the client
 to sign a particular string (most likely something like
 "207.138.43.173#38501 is dreish at 2008-10-21 14:08:30."); the client
-would append a random string and send the whole thing back, signed. 
+would append a random string and send the whole thing back, signed.
 I'll skip this for now, fun though it would be to do, and just have the
 server believe whatever it is told.
 
@@ -5777,7 +5777,7 @@ necessarily telling the proxy what the position is relative to.
 
 The server will pick a starting detail level, presumably very low.
 
-Then I think it would be up to the client to pull data with MoreDetail. 
+Then I think it would be up to the client to pull data with MoreDetail.
 I think the client should also not send MoreDetail requests while the
 proxy indicates it is in the process of loading data, for which there
 will need to be a LoadingState( bool ) message.
@@ -5953,7 +5953,7 @@ I think the Radius(LOD) function could probably stand to be much
 better than just sqrt(10)^(-LOD) * C.  This does seem to have too much
 detail nearby and too little far away.  The function could reasonably be
 pretty complicated, I think, and could include avatar size as a
-parameter.  The above results actually look pretty reasonable, though. 
+parameter.  The above results actually look pretty reasonable, though.
 Maybe there should just be an upper limit on LOD as a function of avatar
 size, or a discontinuous sudden drop-off at a point that is a function
 of avatar size.
@@ -6044,7 +6044,7 @@ the ones within its range.  Maybe the answer is to have every shape
 contained within a shapeless node.
 
 Also, how does my idea of opaque nodes complicate my plan to have the
-server choose parent nodes for moving objects based on their movement? 
+server choose parent nodes for moving objects based on their movement?
 Answer: a lot.  [Or maybe it doesn't.  Maybe the answer is just that the
 node becomes transparent when the condition is met; not necessarily that
 the avatar becomes a child of that node.  Also, I might want to display
@@ -6107,4 +6107,203 @@ upgrades like this:
 But of course, all this fits under the general category of The Future.
 I sure as hell don't want to get stuck in a quagmire of trying to build
 a journaling database server.
+
+2008-11-08
+
+It appears I'll be writing much of the server code in Clojure.  The more
+I learn about that language, the more I like it.
+
+I sketched out some ideas earlier this afternoon at the Starbucks on
+Fifth Street:
+
+(send-object session object)
+(add-callback session match-condition callable)
+
+So how does match-condition work?
+
+ServerReceiver:
+- Handle standard, fixed-response object types with static code (such as
+  getting a node, moving an avatar, etc.)
+- Else, match by Pair< int ObjectType, DvtpExternalizable identifier >
+  > DvtpExternalizable.getMatchIdentifier()
+
+Clojure might be just a _little_ too cutting-edge.  I downloaded a PDF
+of a draft version of the book Programming Clojure, from Pragmatic
+Programmers, and it refers to a "contrib" library that I don't see in
+the fairly recent version I downloaded.  It also isn't in SVN, as far as
+I can see.
+
+Oh, there it is.  It's a separate project, hosted on Sourceforge.
+
+Okay.  That actually only took about ten minutes to go from "Where the
+hell is this supposed to be?" to Google, to git clone, to adding to
+CLASSPATH, to using the library.  I guess that's not bad.
+
+I actually cackled with glee a moment ago.  Not proud of it.  But I'm
+enjoying Clojure that much.  It was a seemingly little thing, but it was
+looming large in the back of my mind that I really did like a lot of
+things about Arc, and the first thing that came to mind was the brevity
+of the bracket syntax for anonymous functions.
+
+Well, Clojure has something approximately as good.  The syntax adds an
+extra character -- #() -- but it also allows for more than one
+parameter.
+
+2008-11-09
+
+Given type hinting, it is claimed to be possible to write Clojure code
+that is as fast as Java.  Do I believe that?  [I know it _should_ be
+true, but being a skeptic, I want to see benchmarks.]  If so, is there
+any reason for me to continue writing _any_ of the server code in Java?
+Shouldn't I just go ahead and hook the basic DvtpServer framework
+directly into my Clojure code and do 100% of the rest of the work there?
+
+I guess that's my first Clojure programming assignment, then: write some
+benchmarks to test the things I expect will limit performance of my
+server code.
+
+I suspect the functional-programming paradigm will impose costs in some
+cases, as it will facilitate parallelization and thus improve
+performance in other cases.
+
+I'm actually starting to wonder whether I should do the client in
+Clojure as well.  Is it too late to start?  Will it become a tower of
+Babel?
+
+I think I'm on a decent track right now.  I can keep going on that track
+for now, and if in writing the server in Clojure and becoming adept at
+that language, it becomes obvious to me that I have more to gain by
+integrating and gradually switching to Clojure, then I can do that.  For
+now, though, it will just be the server.
+
+I guess there's no need for me to write my own benchmark.  Programming
+Clojure includes a simple one that makes the point very forcefully.
+
+And you can compile with warn-on-reflection, just to carp about the use
+of that computationally expensive feature.
+
+So the only thing missing is a good IDE.  I guess I'll have to get Emacs
+running on my Mac, but I'll look around and see if there's anything else
+good available.
+
+2008-11-17
+
+Reading what Paul Graham wrote about Arc a few years ago, it strikes me
+that the language really is even more beautiful than I appreciated when
+I played around with it last winter.  I mostly found it _fun_ at that
+time, but thought it was compromising on elegance in favor of brevity
+and fun.  [Mostly because I wasn't fluent enough in Lisp to recognize
+how beautiful the definitions of mac and def are.]  It was my first
+serious introduction to Lisp, since I had been put off by the seemingly
+impenetrable inscrutability of other Lisps.  I'm not sure why that is,
+but I could never get beyond toy examples of language features with
+them.  Arc, despite its clunky REPL without history or editing, invited
+me to jump in and play until I started to really understand why Lisp was
+important.
+
+I'm not sure I would have got into Clojure if it hadn't been for my
+brief experience with Arc.  I'm having about as much solving Project
+Euler puzzles in Clojure as I was having playing with Arc a few months
+ago.  It's hard for me to say why this is, though.  I _think_ it's
+because I'm getting so many of the problems right on the first try,
+generally only needing to fix minor syntax errors before getting a
+correct answer.
+
+That, and my first attempts so far have all come in under the one-minute
+suggested maximum runtime.  When I've tried to solve these in Perl or
+Arc, my first approach would often take too long to run, and I think I
+would have to spend some time optimizing, or else just shrug it off as
+the language's fault and not mine.
+
+Knowing that I'm churning out code in the most natural way I can think
+of in the language, not really going outside its idioms, in general, and
+_still_ producing acceptably fast code is even more exciting knowing
+that there are ways of producing even faster programs when needed.
+
+It makes me think I might _actually_ be able to write a VR server for my
+client all by myself in Clojure, and that it wouldn't be a scalability
+dead-end.
+
+How often has that situation existed?  How many languages let you
+conveniently drop down to a lower-level language when you need to, or
+for that matter, to write code in the high-level language that compiles
+to the same thing you would have written in the lower-level language?
+I'm not aware of any.  [I guess the situation is pretty similar with
+Common Lisp, but I'm not interested in it.]
+
+Clojure does seem a little like Arc, but not as aggressively terse, and
+with the addition of significantly practical features like the ability
+to compile to any arbitrary JVM bytecode, and access to Java's
+considerable libraries.
+
+I like it when Rich Hickey praises the JVM in the same breath that he
+dismisses Java as "goofy", because that was exactly the snap judgment I
+arrived at after a few days of considering Java for Distroverse (and in
+fact I've been waiting for a great language like Clojure to come along
+targeting the JVM -- another example of assuming things that are a good
+idea are true).
+
+He's convincing me that I need to have basically nothing at all in
+WorldSession, except maybe a Var.
+
+2008-11-21
+
+Maybe a WorldSession should actually _be_ a Var.  Or a map.  I'll have
+to think about that.  Probably Var.
+
+I've been thinking about whether using a public key pair as an ID and
+(effectively) password is a good idea.  Since they're chosen randomly
+and independently, there could be collisions.
+
+The odds of it are extremely remote, but not zero.  What I don't like
+about it is that on discovering a collision, you would automatically
+gain access to the account of the other person with your same key pair.
+It isn't anything like discovering someone else picked the same username
+as you, because in that case you would still need to guess the password,
+and most people would not do that.
+
+But what about the minority of people who would be so forgetful that
+they would suspect they had signed up for an account at the web site in
+question, and had just forgotten about it?  (I've probably done this at
+least once in my life, and my username isn't particularly common.)
+Suppose this happens in around 1% of all username collisions, and
+suppose the username space is around 2^33, with a population of 2^18.
+That would imply an average of around four collisions, or 0.04
+inadvertent password guesses.  With a password space of around 2^37,
+there would be an average of about 1/2^41.6 accidental successful
+guesses, ever, for a site with 2^18 or roughly 262 thousand users.
+
+The same population, using 1024-bit RSA keys, would average 1/2^468
+collisions.  [Now I'm getting 1/2^989, but to err on the side of
+caution, I'll assume my earlier, more "dangerous" estimate was correct.]
+
+In other words, it would happen roughly 221,813,575,529,665,188,075,207,
+000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,
+000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+times more often that someone would accidentally log in to someone
+else's account on a system with usernames and passwords than on a system
+using 1024-bit RSA keys for identity and authentication.  In light of
+this number, my 1% guess is really an irrelevant term.  Clearly,
+usernames and passwords are unacceptably risky, and yet I use them all
+the time without a second thought.  [Even schemes like texting someone a
+one-time passcode to use in conjunction with their password won't help,
+unless the one-time passcode is as long as the above big number.  In
+fact, anything relying on a manually-entered secret is going to be
+inadequate, unless the secret is so voluminous nobody would even enter
+it once, let alone on every login.]
+
+And 1024-bit RSA keys are already pretty much passé.
+
+Considering deliberate attempts to break into someone else's account,
+the argument in favor of using RSA keys is even stronger.
+
+And though I continue to feel strongly tempted to use some sort of
+shared secret as a second step in establishing identity, it's impossible
+to justify such a scheme mathematically.  With less effort, the default
+key size could be upped by more than would be needed to create the same
+improvement in security.
+
+I wonder whether Clojure, now that it can compile code AOT, could be
+self-hosted.  I would think it should be, but it would need some way of
+declaring things synchronized.  I haven't seen that anywhere.
 

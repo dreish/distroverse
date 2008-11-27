@@ -9,7 +9,6 @@ package org.distroverse.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import org.distroverse.dvtp.DvtpExternalizable;
 
@@ -74,6 +73,23 @@ public final class Util
       public Pair( A init_a, B init_b )  { a = init_a; b = init_b; }
       public A a;
       public B b;
+      @Override
+      
+      public boolean equals( Object o )
+         {
+         if ( o instanceof Pair )
+            {
+            return    ((Pair< ?, ? >) o).a.equals( a )
+                   && ((Pair< ?, ? >) o).b.equals( b );
+            }
+         return false;
+         }
+      
+      @Override
+      public int hashCode()
+         {
+         return a.hashCode() ^ b.hashCode();
+         }
       }
 
    /**

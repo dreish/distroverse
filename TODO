@@ -44,10 +44,38 @@
       > Which one will depend on how the map will be used most often
       > Break out RemoteHost/id as its own type?
         > Not necessary; just make those identity fields define equality
-    - Request identity
+    + Create WorldServer in Lisp; otherwise this is going to be a major
+      bummer
+      x All the node management will be in Java, but the response/
+        callback structure will be a major pain in Java.  Java no likey
+        callbacks
+	> Actually node management, as state shared by multiple
+	  threads, is the strongest argument for using Clojure
+      + Get and install Clojure
+      + Enjoy the consing for a few minutes
+      > http://en.wikibooks.org/wiki/Clojure_Programming demonstrates
+        how to call a Clojure function from Java
+        > (The docs give the reverse case, which is trivial)
+      + Install Emacs for OS X
+      + Install Clojure support for Emacs
+    + Request identity
+      + Clojure macro (async) for weaving a do-like construct into a
+        series of messages and callbacks
+        x Gotcha: all callbacks will need to be removed at the end of
+          the pseudo-function
+        > (async) always returns nil
+        > Actually, just a simple let-like macro
+        + Figure out how the end-result code should actually look
+        + Write it as an async macro call
+        + Then write a macro that goes from B to A
     - Create new user if needed (from skeleton user)
       > Has default starting location
   - Would be nice to know why TextArea causes OpenGL exceptions
+  - Dict is not immutable; should it be?
+  + Get rid of KNOCK command
+    > A DVTP proxy will be allowed to connect to any server, at any
+      time, on any port except SMTP, which is always forbidden
+    + Remove handleKnock()
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
     > Also nice because it avoids having system dialogs swallow a stray
@@ -216,6 +244,10 @@
       is offered under; also whether he wrote FengJME, and what
       license for that as well
       > Was released under a compatible BSD license
+  + Replace all GPL copyright banners with the one currently in
+    WorldSession.java; LGPL files do not need to change
+    > (To allow gradual conversion to Clojure, including the contrib
+      library)
 
 ------------------------------------------------------------------------
 - To do for 0.03:
@@ -260,6 +292,24 @@
 
 ------------------------------------------------------------------------
 - Future:
+  - Server for mass-audience events:
+    - Performance recorded on a short delay in an arena with no audience
+    - Performance encoded into a series of semi-large packages of
+      actions and their times
+      > (DList Real:time DvtpExt:event Real:time DvtpExt:event ...)
+    - Packages compressed and signed
+    - Packages distributed peer-to-peer
+    - Proxies receive them, unpack, and send each event to the client at
+      the time at which it is scheduled to occur
+    - Audience can interact with nearby audience members, or other
+      people in the private box, for example; rest of audience simulated
+      algorithmically in such a way as to appear the same to everyone
+      (except those near enough to see the real audience)
+    - Audience members can enter stage, but ideally they should appear
+      to go through a tunnel that might take some time, explaining the
+      delay
+    - Audience member returning to the seats would need to be delayed to
+      avoid appearing in two places at once
   - Sleep mode (suspend all proxy threads and stop rendering)
     > In a menu item, not a button; this is not something someone is
       going to need to hit in a moment of frustration like the mute
@@ -296,6 +346,7 @@
     > Maybe the architecture is:
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
+    > Looks like I'm going with Clojure
   - Proxy: short-range chat:
     - Nearest N people (six or seven -- what a person can normally keep
       track of in conversation) appear along the bottom and scroll up,
