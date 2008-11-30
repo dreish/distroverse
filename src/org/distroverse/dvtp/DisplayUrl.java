@@ -12,6 +12,8 @@ import java.io.InputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * Sent by a proxy to a client to tell it to show a different URL in the
  * location widget.  The URL contained in this object must be part of
@@ -49,21 +51,6 @@ public final class DisplayUrl extends Str implements ProxySendable
     */
    public String getUrl()
       {  return toString();  }
-
-//   @SuppressWarnings("cast")
-//   @Override
-//   public boolean equals( Object o )
-//      {
-//      return (o instanceof DisplayUrl
-//              && ((DisplayUrl) o).getUrl()
-//                                 .equals( getUrl() ) );
-//      }
-
-//   @Override
-//   public int hashCode()
-//      {
-//      return super.hashCode() ^ DisplayUrl.class.hashCode();
-//      }
 
    @Override
    public String prettyPrint()

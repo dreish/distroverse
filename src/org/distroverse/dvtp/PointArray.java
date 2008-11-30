@@ -17,6 +17,8 @@ import org.distroverse.core.Util;
 import com.jme.math.Vector3f;
 import com.jme.util.geom.BufferUtils;
 
+//immutable
+
 /**
  * The external format begins with the number of tuples, followed by
  * those tuples of double-precision IEEE 754 numbers.  This
@@ -37,6 +39,7 @@ public final class PointArray implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private PointArray()
       {
       super();

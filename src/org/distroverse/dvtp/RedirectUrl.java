@@ -12,6 +12,8 @@ import java.io.InputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * Sent by a proxy to a client to tell it to go to a URL at a different
  * site.  The URL contained in this object must NOT be part of the site
@@ -33,7 +35,7 @@ public final class RedirectUrl extends Str implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
-   @SuppressWarnings("unused")
+   @SuppressWarnings( "unused" )
    private RedirectUrl()
       {  super( "" );  }
    public RedirectUrl( String url )
@@ -52,7 +54,7 @@ public final class RedirectUrl extends Str implements ProxySendable
    public String getUrl()
       {  return toString();  }
 
-   @SuppressWarnings("cast")
+   @SuppressWarnings( "cast" )
    @Override
    public boolean equals( Object o )
       {

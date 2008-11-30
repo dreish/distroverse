@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * Takes an object ID and a MoveSeq, and moves it.
  * @author dreish
@@ -30,6 +32,7 @@ public final class MoveObject implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private MoveObject()
       {
       super();

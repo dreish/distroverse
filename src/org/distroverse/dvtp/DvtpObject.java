@@ -13,9 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
-import org.distroverse.core.Log;
 import org.distroverse.core.Util;
 
 /**
@@ -78,7 +76,7 @@ public final class DvtpObject
         FunCall.class,          // 129
         FunRet.class,           // 130
         Err.class,              // 131
-        ConPerm.class,          // 132
+        SetVisible.class,       // 132
         ProxySpec.class,        // 133
         AskInv.class,           // 134
         ReplyInv.class,         // 135
@@ -86,7 +84,7 @@ public final class DvtpObject
         WarpObject.class,       // 137
         ReparentObject.class,   // 138
         ClearShape.class,       // 139
-        SetVisible.class,       // 140
+        CTrans.class,           // 140
 
         null
         };

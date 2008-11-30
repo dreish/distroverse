@@ -10,7 +10,7 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.distroverse.core.Util;
+//immutable
 
 /**
  * A list of arbitrary DvtpExternalizable objects.
@@ -34,7 +34,7 @@ public class FunRet extends DList
       super( (DvtpExternalizable) null );
       }
    
-   public FunRet( DvtpExternalizable[] f )
+   public FunRet( DvtpExternalizable... f )
       {
       super( f );
       }
@@ -46,7 +46,6 @@ public class FunRet extends DList
    @Override
    public String prettyPrint()
       {
-      return "(FunRet " 
-             + Util.prettyPrintList( (Object[]) getContents() ) + ")";
+      return "(FunRet " + prettyPrintContents() + ")";
       }
    }

@@ -9,6 +9,8 @@ package org.distroverse.dvtp;
 
 import java.io.InputStream;
 
+//immutable
+
 /**
  * Falsity.
  * @author dreish

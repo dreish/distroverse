@@ -16,33 +16,27 @@ import java.util.HashMap;
 import org.distroverse.dvtp.AddObject;
 import org.distroverse.dvtp.AskInv;
 import org.distroverse.dvtp.Blob;
+import org.distroverse.dvtp.CTrans;
 import org.distroverse.dvtp.ClearShape;
 import org.distroverse.dvtp.Click;
 import org.distroverse.dvtp.Click2;
 import org.distroverse.dvtp.Cookie;
+import org.distroverse.dvtp.DList;
 import org.distroverse.dvtp.DLong;
 import org.distroverse.dvtp.DNode;
 import org.distroverse.dvtp.DNodeRef;
-import org.distroverse.dvtp.Dict;
-import org.distroverse.dvtp.DvtpObject;
-import org.distroverse.dvtp.Frac;
-import org.distroverse.dvtp.GetCookie;
-import org.distroverse.dvtp.Real;
-import org.distroverse.dvtp.ReparentObject;
-import org.distroverse.dvtp.ReplyInv;
-import org.distroverse.dvtp.SetShape;
-import org.distroverse.dvtp.SetVisible;
-import org.distroverse.dvtp.ULong;
-import org.distroverse.dvtp.ConPerm;
-import org.distroverse.dvtp.DList;
 import org.distroverse.dvtp.DeleteObject;
+import org.distroverse.dvtp.Dict;
 import org.distroverse.dvtp.DisplayUrl;
 import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.False;
 import org.distroverse.dvtp.Flo;
+import org.distroverse.dvtp.Frac;
 import org.distroverse.dvtp.FunCall;
 import org.distroverse.dvtp.FunRet;
+import org.distroverse.dvtp.GetCookie;
 import org.distroverse.dvtp.KeyDown;
 import org.distroverse.dvtp.KeyUp;
 import org.distroverse.dvtp.Keystroke;
@@ -54,11 +48,17 @@ import org.distroverse.dvtp.Pair;
 import org.distroverse.dvtp.PointArray;
 import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.Quat;
+import org.distroverse.dvtp.Real;
 import org.distroverse.dvtp.RedirectUrl;
+import org.distroverse.dvtp.ReparentObject;
+import org.distroverse.dvtp.ReplyInv;
+import org.distroverse.dvtp.SetShape;
 import org.distroverse.dvtp.SetUrl;
+import org.distroverse.dvtp.SetVisible;
 import org.distroverse.dvtp.Shape;
 import org.distroverse.dvtp.Str;
 import org.distroverse.dvtp.True;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.Vec;
 import org.distroverse.dvtp.Warp;
 import org.distroverse.dvtp.WarpObject;
@@ -149,7 +149,7 @@ public class TestExternalization
          case 129: testFunCall();        break;
          case 130: testFunRet();         break;
          case 131: testErr();            break;
-         case 132: testConPerm();        break;
+         case 132: testSetVisible();     break;
          case 133: testProxySpec();      break;
          case 134: testAskInv();         break;
          case 135: testReplyInv();       break;
@@ -157,7 +157,7 @@ public class TestExternalization
          case 137: testWarpObject();     break;
          case 138: testReparentObject(); break;
          case 139: testClearShape();     break;
-         case 140: testSetVisible();     break;
+         case 140: testCTrans();         break;
 
          default:
             throw new ClassNotFoundException( "No test case for "
@@ -292,12 +292,18 @@ public class TestExternalization
    private static AddObject[] addObjectExamples()
       {
       MoveSeq[] msex = moveSeqExamples();
-      // FIXME Test AddObjects with shapes
+      Shape[]   sex = shapeExamples();
       return new AddObject[]
          {
          new AddObject( new ULong( 10 ),
                         new ULong( 100 ),
                         msex[ 0 ] ),
+         new AddObject( true,
+                        sex[ 0 ],
+                        new ULong( 15 ),
+                        new ULong( 171 ),
+                        msex[ 1 ],
+                        new WarpSeq() ),
          };
       }
 
@@ -482,9 +488,10 @@ public class TestExternalization
    private static void testDNodeRef()
    throws IOException, ClassNotFoundException
       {
-      tryBeamObject( new DNodeRef( "0", 123L, new Real( 123.45, 2 ) ) );
+      tryBeamObject( new DNodeRef( "0", 123L, new Real( 123.45, 2 ),
+                                   null ) );
       tryBeamObject( new DNodeRef( "example.com", 456L,
-                                   new Real( 12.777, 7 ) ) );
+                                   new Real( 12.777, 7 ), null ) );
       }
 
    private static void testDNode()
@@ -493,8 +500,8 @@ public class TestExternalization
       AddObject[] aoex = addObjectExamples();
       tryBeamObject(
          new DNode( aoex[ 0 ], 2.0f,
-            new DNodeRef( "0", 123L, new Real( 123.45, 2 ) ),
-            new DNodeRef( "0", 125L, new Real( 123.45, 2 ) ),
+            new DNodeRef( "0", 123L, new Real( 123.45, 2 ), null ),
+            new DNodeRef( "0", 125L, new Real( 123.45, 2 ), null ),
             new DNodeRef[] {}
          ) );
       }
@@ -597,14 +604,6 @@ public class TestExternalization
       tryBeamObject( new Err( "fooness not found", 404 ) );
       }
 
-   private static void testConPerm()
-   throws IOException, ClassNotFoundException
-      {
-      tryBeamObject( new ConPerm( true,  "0" ) );
-      tryBeamObject( new ConPerm( false, "dvtp://www.example.com/" ) );
-      tryBeamObject( new ConPerm( false, "" ) );
-      }
-
    private static void testProxySpec()
    throws IOException, ClassNotFoundException
       {
@@ -673,6 +672,16 @@ public class TestExternalization
          tryBeamObject( new SetVisible( i, true ) );
          tryBeamObject( new SetVisible( i, false ) );
          }
+      }
+   
+   private static void testCTrans()
+   throws IOException, ClassNotFoundException
+      {
+      AddObject[] aoex = addObjectExamples();
+      tryBeamObject( new CTrans( aoex[ 0 ] ) );
+      tryBeamObject( new CTrans( aoex ) );
+      tryBeamObject( new CTrans( aoex[ 0 ], aoex[ 1 ],
+                                 new SetVisible( 125, true ) ) );
       }
 
    /**

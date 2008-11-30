@@ -32,6 +32,7 @@ public class ClearShape implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private ClearShape()
       {
       mId = 0;

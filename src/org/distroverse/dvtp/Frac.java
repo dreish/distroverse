@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * Compact fractional part class. Range is 0.0 to just less than 1. The
  * number is any nonnegative long divided by the next highest power of
@@ -37,6 +39,7 @@ public final class Frac implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Frac()
       {
       mNumerator       = 0;

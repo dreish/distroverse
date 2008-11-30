@@ -64,11 +64,20 @@ public final class AddObject implements ProxySendable
       mWarpSeq = null;
       }
 
-   public AddObject( InputStream in, boolean b )
+   public AddObject( InputStream in,
+                     @SuppressWarnings( "unused" ) boolean b )
    throws IOException, ClassNotFoundException
       {
       super();
       readWithoutId( in );
+      }
+   
+   public AddObject assocIds( ULong id, ULong pid )
+      {
+      if ( mHasShape )
+         return new AddObject( mVisible, mShape, id, pid,
+                               mMoveSeq, mWarpSeq );
+      return new AddObject( id, pid, mMoveSeq );
       }
 
    public int getClassNumber()

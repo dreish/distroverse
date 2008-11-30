@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -33,6 +35,7 @@ public final class WarpObject implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private WarpObject()
       {
       super();

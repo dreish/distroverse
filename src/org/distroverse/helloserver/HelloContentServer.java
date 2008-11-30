@@ -43,12 +43,11 @@ import org.distroverse.distroplane.lib.PrimFactory;
 import org.distroverse.distroplane.lib.SUtil;
 import org.distroverse.distroplane.lib.PrimFactory.PrimShape;
 import org.distroverse.dvtp.AddObject;
-import org.distroverse.dvtp.ULong;
-import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.ProxySpec;
 import org.distroverse.dvtp.Shape;
+import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.WarpSeq;
 import org.distroverse.viewer.VUtil;
 

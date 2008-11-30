@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * Compact ulong (unsigned long) class.  Range is 0 to 2^63-1, so this
  * is compatible with a Java long.  Externalization breaks the number
@@ -42,6 +44,7 @@ public final class ULong implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private ULong()
       {
       mVal = 0;

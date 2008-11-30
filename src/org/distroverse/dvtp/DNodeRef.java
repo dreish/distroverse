@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -33,6 +35,7 @@ public final class DNodeRef implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private DNodeRef()
       {
       super();
@@ -47,14 +50,15 @@ public final class DNodeRef implements DvtpExternalizable
     * @param host
     * @param id
     * @param lct
+    * @param n - not externalized, so this can be null
     */
-   public DNodeRef( String host, long id, Real lct )
+   public DNodeRef( String host, long id, Real lct, DNode n )
       {
       super();
       mRemoteHost = host;
       mId = id;
       mLastChangeTime = lct;
-      mDNode = null;
+      mDNode = n;
       }
 
    /* (non-Javadoc)
@@ -66,10 +70,14 @@ public final class DNodeRef implements DvtpExternalizable
    public DNode getNode()
       {  return mDNode;  }
    
-   public DNodeRef setNode( DNode n )
+   public DNodeRef assocNode( DNode n )
       {
-      mDNode = n;
-      return this;
+      return new DNodeRef( mRemoteHost, mId, mLastChangeTime, n );
+      }
+
+   public DNodeRef assocLCT( Real lct )
+      {
+      return new DNodeRef( mRemoteHost, mId, lct, mDNode );
       }
 
    /**

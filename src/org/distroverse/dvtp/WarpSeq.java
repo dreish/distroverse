@@ -14,6 +14,8 @@ import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  */
@@ -34,14 +36,14 @@ public final class WarpSeq implements DvtpExternalizable
    public WarpSeq()
       {
       super();
-      mWarps      = null;
+      mWarps      = NO_WARPS;
       mRepeatType = RepeatType.ONCE;
       }
 
    public WarpSeq( Warp[] warps, RepeatType repeat_type )
       {
       super();
-      mWarps      = warps;
+      mWarps      = warps.clone();
       mRepeatType = repeat_type;
       }
 
@@ -110,6 +112,8 @@ public final class WarpSeq implements DvtpExternalizable
       DvtpObject.writeArray( out, mWarps );
       ULong.longAsExternal( out, mRepeatType.ordinal() );
       }
+
+   private static Warp[] NO_WARPS = new Warp[ 0 ];
 
    private Warp[] mWarps;
    private RepeatType mRepeatType;

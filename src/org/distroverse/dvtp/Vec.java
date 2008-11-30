@@ -15,6 +15,8 @@ import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
+//immutable
+
 public final class Vec implements DvtpExternalizable
    {
    public Vec( InputStream in ) throws IOException
@@ -27,6 +29,7 @@ public final class Vec implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Vec()
       {
       super();
@@ -58,7 +61,7 @@ public final class Vec implements DvtpExternalizable
 
    public Vector3f asVector3f()
       {
-      return mVec;
+      return mVec.clone();
       }
 
    private void readExternal( InputStream in ) throws IOException
@@ -77,8 +80,7 @@ public final class Vec implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Vec "
-             + Util.prettyPrintList( mVec ) + ")";
+      return "(Vec " + Util.prettyPrintList( mVec ) + ")";
       }
 
    private Vector3f mVec;

@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -32,6 +34,7 @@ public class Real implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Real()
       {
       mIntegerPart  = 0;

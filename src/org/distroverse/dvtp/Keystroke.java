@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 public class Keystroke implements ClientSendable
    {
    public Keystroke( InputStream in ) throws IOException

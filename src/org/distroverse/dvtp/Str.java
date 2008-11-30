@@ -16,6 +16,8 @@ import java.nio.charset.Charset;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * N.B.: A Str is prefixed with the length of the UTF-8 encoded version
  * of the string in bytes, not the number of characters in the string.
@@ -35,6 +37,7 @@ public class Str implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Str()
       {  mVal = null;  }
 

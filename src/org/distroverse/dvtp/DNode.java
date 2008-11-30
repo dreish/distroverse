@@ -14,6 +14,8 @@ import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -34,6 +36,7 @@ public final class DNode implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private DNode()
       {
       mBeing = null;
@@ -50,7 +53,7 @@ public final class DNode implements DvtpExternalizable
       mRadius = r;
       mThis = t;
       mParent = p;
-      mChildren = c;
+      mChildren = c.clone();
       }
 
    /* (non-Javadoc)

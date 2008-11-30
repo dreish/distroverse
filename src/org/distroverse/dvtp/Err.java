@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * Provides a numeric error code, and a string for an optional
  * explanatory message.  The string need not describe the error code; it
@@ -39,6 +41,7 @@ public class Err implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Err()
       {
       super();

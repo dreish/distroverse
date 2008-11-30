@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * A pair of DvtpExternalizable objects.  They get externalized
  * together.  No provision is made for skipping a pair without parsing
@@ -36,6 +38,7 @@ public final class Pair implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Pair()
       {  mFirst = mSecond = null;  }
 

@@ -20,6 +20,8 @@ import com.jme.renderer.ColorRGBA;
 import com.jme.scene.TriMesh;
 import com.jme.util.geom.BufferUtils;
 
+//immutable
+
 /**
  * This class is part of the DVTP protocol.  It defines how shapes
  * are transmitted from the proxy to the client.  Shape includes
@@ -41,6 +43,7 @@ public final class Shape implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Shape()
       {
       super();

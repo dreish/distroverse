@@ -10,6 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
+//immutable
+
 public class KeyDown extends Keystroke
    {
    public KeyDown( InputStream in ) throws IOException

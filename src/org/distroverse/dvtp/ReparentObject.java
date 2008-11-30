@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -21,8 +23,7 @@ public final class ReparentObject implements ProxySendable
    /**
     *
     */
-   public ReparentObject( InputStream in )
-   throws IOException, ClassNotFoundException
+   public ReparentObject( InputStream in ) throws IOException
       {
       super();
       readExternal( in );
@@ -32,6 +33,7 @@ public final class ReparentObject implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private ReparentObject()
       {
       mId = mParentId = 0;
@@ -81,8 +83,7 @@ public final class ReparentObject implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
+   private void readExternal( InputStream in ) throws IOException
       {
       mId       = ULong.externalAsLong( in );
       mParentId = ULong.externalAsLong( in );

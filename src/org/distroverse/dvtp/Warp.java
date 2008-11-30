@@ -14,6 +14,8 @@ import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -34,27 +36,24 @@ public class Warp implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Warp()
       {
-      mDegree     = 0;
-      mPolyWarps  = null;
-      mSins       = 0;
-      mSinWarps   = null;
-      mSinPeriods = null;
-      mSinOffsets = null;
-      mDuration   = null;
+      super();
       }
 
    public Warp( PointArray[] pw )
       {
       mDegree     = pw.length;
-      mPolyWarps  = pw;
+      mPolyWarps  = pw.clone();
       mSins       = 0;
       mSinWarps   = new PointArray[ 0 ];
       mSinPeriods = new Flo[ 0 ];
       mSinOffsets = new Flo[ 0 ];
       mDuration   = new Flo( -1 );
       }
+   
+   // XXX Needs a full constructor.
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()

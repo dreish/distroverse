@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -36,6 +38,7 @@ public final class Dict implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Dict()
       {
       mDict = null;

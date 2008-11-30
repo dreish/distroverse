@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * A float is just sent in IEEE 754 format, which is trivial enough in
  * Java.

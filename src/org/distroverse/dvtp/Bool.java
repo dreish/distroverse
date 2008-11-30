@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-//subclasses are immutable
+//immutable
 
 /**
  * A superclass for the two Boolean types, so that they're actually

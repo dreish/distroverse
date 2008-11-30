@@ -10,6 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
+//immutable
+
 public class KeyUp extends Keystroke
    {
    public KeyUp( InputStream in ) throws IOException

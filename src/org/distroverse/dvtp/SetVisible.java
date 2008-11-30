@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * Turns visibility for an object (and its subobjects) on or off.
  * @author dreish
@@ -31,6 +33,7 @@ public class SetVisible implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private SetVisible()
       {
       mId   = 0;
@@ -47,7 +50,7 @@ public class SetVisible implements ProxySendable
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
     */
    public int getClassNumber()
-      {  return 140;  }
+      {  return 132;  }
 
    public long getId()
       {  return mId;  }

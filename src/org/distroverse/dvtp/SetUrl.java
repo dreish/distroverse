@@ -10,6 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
+//immutable
+
 /**
  * Sent by a client to a proxy to request that it switch to a
  * different URL.  If the proxy agrees, it will send back a DisplayUrl

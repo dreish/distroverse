@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * This class is the only valid non-error response to a LOCATION query.
  * It gives the URL of a proxy to use to connect to this site at the
@@ -35,6 +37,7 @@ public class ProxySpec implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private ProxySpec()
       {
       mProxyUrl = mResourceRegexp = null;

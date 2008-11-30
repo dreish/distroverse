@@ -31,7 +31,7 @@ public class Blob implements DvtpExternalizable
     * @param bytes
     * @param n_read
     * @param resource
-    * @param pos
+    * @param pos - blob's position within the larger resource
     * @param file_length
     * @throws ProtocolException
     */
@@ -64,6 +64,7 @@ public class Blob implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private Blob()
       {
       super();

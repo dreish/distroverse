@@ -14,6 +14,8 @@ import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 public class DList implements DvtpExternalizable
    {
    public DList( InputStream in )
@@ -27,17 +29,17 @@ public class DList implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
-   @SuppressWarnings("unused")
+   @SuppressWarnings( "unused" )
    private DList()
       {
       super();
       mContents = null;
       }
 
-   public DList( DvtpExternalizable[] f )
+   public DList( DvtpExternalizable... f )
       {
       super();
-      mContents = f;
+      mContents = f.clone();
       }
 
    public DList( DvtpExternalizable f )
@@ -68,9 +70,6 @@ public class DList implements DvtpExternalizable
    public DvtpExternalizable getContents( int n )
       {  return mContents[ n ];  }
 
-   protected DvtpExternalizable[] getContents()
-      {  return mContents;  }
-
    private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
@@ -87,10 +86,14 @@ public class DList implements DvtpExternalizable
          DvtpObject.writeInnerObject( out, o );
       }
 
+   protected String prettyPrintContents()
+      {
+      return Util.prettyPrintList( (Object[]) mContents );
+      }
+
    public String prettyPrint()
       {
-      return "(DList "
-             + Util.prettyPrintList( (Object[]) mContents ) + ")";
+      return "(DList " + prettyPrintContents() + ")";
       }
 
    private DvtpExternalizable[] mContents;

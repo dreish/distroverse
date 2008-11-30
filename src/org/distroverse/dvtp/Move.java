@@ -16,6 +16,8 @@ import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
+//immutable
+
 /**
  * Defines movement and rotation in three dimensions:
  * - Move
@@ -51,24 +53,10 @@ public class Move implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings("unused")
    private Move()
       {
       super();
-      mMoveDegree = 0;
-      mMovePolyVecs = new Vec[ 0 ];
-      mMoveSins = 0;
-      mMoveSinVecs = new Vec[ 0 ];
-
-      mRotSinPeriods = mRotSinOffsets
-         = mMoveSinPeriods = mMoveSinOffsets
-         = new Flo[ 0 ];
-      mRotSins = 0;
-
-      mRotDegree = 0;
-      mRotPolyQuats = new Quat[ 0 ];
-      mRotSinQuats = new Quat[ 0 ];
-
-      mDuration = new Flo( -1.0f );
       }
 
    /**

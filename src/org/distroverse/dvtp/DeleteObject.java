@@ -25,6 +25,7 @@ public final class DeleteObject implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings("unused")
    private DeleteObject()
       {
       // (Leaving ID null)

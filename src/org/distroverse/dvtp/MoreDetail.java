@@ -10,6 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
+//immutable
+
 /**
  * A signal from the client that it is rendering quickly and can handle
  * a more detailed scene, or (for values less than 1) that it is

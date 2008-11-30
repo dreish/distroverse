@@ -6307,3 +6307,205 @@ I wonder whether Clojure, now that it can compile code AOT, could be
 self-hosted.  I would think it should be, but it would need some way of
 declaring things synchronized.  I haven't seen that anywhere.
 
+2008-11-27
+
+I think I still have non-trivial problems to solve with concurrency on
+the server, even using Clojure.  It might be more of a problem on the
+client actually, but this is the issue I'm thinking of: maybe the
+server, and certainly the client, will need to be able to view a
+consistent snapshot of the entire world tree.  I don't _think_ a tree
+woven out of nodes with Refs to other nodes would behave that way.  A
+single giant hash _would_, but I think it would either have contention
+issues or race conditions, depending on whether alter or commute were
+used.
+
+I want to investigate how dosync and Refs actually work, just in case it
+takes a magical snapshot of the entire Ref universe, because I think
+that would solve my problem for me.
+
+It appears to be maximally magical.
+
+I should probably ask, though.  This is all right around the edge of my
+ability to comprehend.
+
+I think I got it now.
+
+A giant tree of Refs should work exactly as I want it to.
+
+It would be great for the client, too, because the render thread could
+operate while the proxy simultaneously sends modifying messages.  This
+shouldn't hurt performance at all, since the renderer would just be
+reading things.
+
+2008-11-28
+
+Stop the presses.  I may be about to use ... a Design Pattern [gasp,
+horror].  I don't think there's any avoiding it.  I want to interoperate
+with Clojure hash maps, but I don't want the core DVTP protocol classes
+to require Clojure.  So I want Dict to take any Map interface, but
+Clojure's hashes don't implement the Map interface.  (There's probably a
+really good reason for this, and I'm probably about to discover it the
+hard way.)  So I'm going to have to use an adapter pattern.
+
+It might be an incomplete adapter -- I only need to iterate over the
+entries in the hash.
+
+Receiving, though ... how's that going to work?
+
+Either I'll have to build a Java hash and then translate it to a Clojure
+hash, or I'll have to add a class member containing an object that
+builds some sort of object implementing Map, which in my case would be
+the adapter, with a Clojure hash behind it.
+
+Map.entrySet() will just return some kind of view of the underlying
+hash.
+
+Here's one problem I might have to sleep on.  I might have to make an
+independent immutable Map implementation and standardize on that for
+Dict.  If I take any Map and make that the contents of Dict, how do I
+stop a malicious proxy from sending a Cookie with a Dict as the key,
+keeping a reference to said Dict, and then modifying it later to corrupt
+the cookie table?
+
+Merde.
+
+I might find it easiest to just throw out the whole Dict class and use
+lists instead.  These things are supposed to be used for communications,
+anyway, not processing.  If there's a layer of translation on one end,
+it wouldn't be the end of the world.
+
+That reminds me, though: I've got arrays all over the place that aren't
+really immutable.  I take an array of Move objects in the MoveSeq
+constructor, and while Move objects are themselves immutable, nothing
+prevents the creator of the MoveSeq from holding a reference to the
+array and replacing members of it.
+
+The safest answer, of course, would be to run every object through a
+write/read cycle before using it.
+
+Maybe only some classes would need to be reconstituted in this way.
+
+Ironically, if I were writing the whole thing in Clojure, including the
+protocol classes, I could use Clojure data structures without having to
+license any of my code under the CPL, or build in exceptions.
+
+I still see Clojure as an implementation detail, not an appropriate part
+of the protocol specification.  The fact that I'm having these problems
+suggests to me I got on the wrong track somewhere.
+
+Write/read might be the best solution, and with a list of exempt
+classes, rather than a list of subjected classes.  The Seq classes could
+easily be made exempt by copying their arrays, the way Move does.
+
+And I probably do want to keep Dict.  But I probably also want to have
+an optional Dict builder.  Moving Dicts through the proxy/client barrier
+will be a little more expensive, but the overwhelming majority of
+messages are going to be of these classes:
+
+    AddObject
+    DeleteObject
+    KeyDown
+    Keystroke
+    KeyUp
+    MoreDetail
+    MoveObject
+    ReparentObject
+    SetShape
+    SetVisible
+    WarpObject
+    Blob
+
+Blitting memory isn't the worst thing in the world.  Sometimes it just
+has to be done.
+
+I might decide to exempt certain resource-heavy classes like sound and
+possibly video, since the worst that can be done with those is not
+noticeably bad.
+
+I'll sleep on it.  It'll probably all make more sense tomorrow morning
+over a cup of coffee.
+
+2008-11-29
+
+I have some ideas.  I'm sure the situation isn't hopeless. I might even
+extend FloatBuffer with my own lockable implementation.
+
+Yes, that looks very feasible.
+
+I can't fully duplicate array functionality because I can't overload the
+[] operator, but I can make a LockableArray class.  And as long as it's
+just an array of DvtpExternalizable objects, it can safely make a
+shallow copy.
+
+While I'm on the subject of removing implementation details from the
+protocol specification, why do I have so much jME junk in my DVTP
+classes?
+
+This is not going to work at all.  I want to extend ByteBuffer, but
+ByteBuffer, while abstract, is not without implementation details.
+Without the source, how can I know which superclass constructor to
+invoke?  Even if I figured it out, I'd be carrying around an extra
+ByteBuffer for no reason.
+
+I want to be able to guarantee immutability of the DVTP classes without
+having to do a write/read, so I guess I'm back to making local copies of
+buffers and arrays.
+
+At least the arrays can still be shallow.
+
+I'm crazy!  I don't construct PointArrays from float buffers anyway.
+They're already immutable.  Just to be sure, though, I made all the
+methods that create float buffers in PointArray also call
+asReadOnlyBuffer().
+
+Really all I need to do is go through my various DVTP classes and make
+sure I'm making adequate copies of any mutable objects I take in
+constructors.
+
+Dict is still the ugliest case.  I might end up making a LockableMap
+class.  For now, though, I'll just copy the parameter.
+
+It occurs to me readExternal() is more-or-less incompatible with the
+idea of immutability.
+
+I could try to make objects refuse to readExternal() more than once, and
+then only if they've been called with a default constructor, but this is
+still problematic.  An object could be made with the default
+constructor, then passed through the proxy/client barrier, and then
+read.
+
+This could be painfully tedious.  I think the only answer is to use
+constructors or factory methods to read these things rather than making
+them self-reading.
+
+It might not be as much work as I'm thinking, though.  It could just be
+a matter of making all the readExternal() methods private, and adding
+constructors that take an InputStream.  That part I could do with Perl
+in a few minutes.  I could probably also automate replacing most of the
+
+   (mSomething = new Something()).readExternal( in );
+
+reader functions with the more concise
+
+   mSomething = new Something( in );
+
+I think my idea to use AddObject in DNode might have been misguided,
+though.  I'll have to reexamine that.
+
+As a reminder, the reason I care about this whole exercise is that, for
+example, a proxy could add a cookie, the client could add it to its own
+internal hash table, and then the proxy could change the cookie's key,
+possibly causing undefined behavior in the client.
+
+I don't want proxies to be able to crash the client.  That's one of my
+core design principles.
+
+I don't see any way to replace what is currently being done by getNew()
+without writing a ridiculously long switch statement.  I might end up
+just generating a lot of this repetitive source code with Perl.
+
+Okay, got that licked.
+
+This _almost_ feels like real work, but I know it's just wading through
+formalities.
+

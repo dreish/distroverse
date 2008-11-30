@@ -1,19 +1,5 @@
 
 - To do for 0.02:
-  - Fix mutability problems in DVTP classes
-    + Make Dict copy a map rather than adopting one
-    + Make all readExternal() methods private
-    + Add constructors with InputStream to all classes
-    + Rewrite DvtpObject reading code
-      + Using reflection to look up the constructors each time would be
-        slow, but storing them and calling them should not be
-    + Rewrite all DVTP classes built out of other DVTP classes that use
-      readExternal()
-    + Remove all set methods
-      > Except in DNodeRef, but much of that design might go away
-    - DNode can't use part of AddObject, since there's no way to set the
-      ID after reading; it needs to be a separate class (DObject)
-      factored out of AddObject
   - Add a FengGUI location bar
   - Begin implementing WorldServer (extends DvtpServer)
     + Add DVTP messages:
@@ -84,7 +70,7 @@
         + Then write a macro that goes from B to A
     - Create new user if needed (from skeleton user)
       > Has default starting location
-    - Plug into database
+  - Plug server into database
   - Would be nice to know why TextArea causes OpenGL exceptions
   - Dict is not immutable; it should be
     - Also, change implementation to use any Map; change hashCode to
@@ -265,6 +251,22 @@
     WorldSession.java; LGPL files do not need to change
     > (To allow gradual conversion to Clojure, including the contrib
       library)
+  + CTrans class - Client Transaction; list of ProxySendables
+  + Fix mutability problems in DVTP classes
+    + Make Dict copy a map rather than adopting one
+    + Make all readExternal() methods private
+    + Add constructors with InputStream to all classes
+    + Rewrite DvtpObject reading code
+      + Using reflection to look up the constructors each time would be
+        slow, but storing them and calling them should not be
+    + Rewrite all DVTP classes built out of other DVTP classes that use
+      readExternal()
+    + Remove all set methods
+      > Except in DNodeRef, but much of that design might go away
+    + DNode can't use part of AddObject, since there's no way to set the
+      ID after reading; it needs to be a separate class (DObject)
+      factored out of AddObject
+      + Unless I made a withId() method returning a new object ...
 
 ------------------------------------------------------------------------
 - To do for 0.03:

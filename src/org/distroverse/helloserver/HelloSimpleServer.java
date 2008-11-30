@@ -39,7 +39,6 @@ import org.distroverse.core.net.NetSession;
 import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.distroplane.lib.SUtil;
-import org.distroverse.dvtp.ConPerm;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.ProxySpec;
 

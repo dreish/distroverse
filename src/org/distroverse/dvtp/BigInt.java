@@ -15,10 +15,7 @@ import java.util.Random;
 
 import org.distroverse.core.Util;
 
-/*
- * Caution: immutability of this class is dependent on the
- * implementation of BigInteger.
- */
+//immutable
 
 /**
  * This class adds externalization to BigInteger.  The format is very

@@ -16,6 +16,8 @@ import org.distroverse.core.Util;
 
 import com.jme.math.Vector3f;
 
+//immutable
+
 public final class MoveSeq implements DvtpExternalizable
    {
    public enum RepeatType { ONCE, LOOP, BOUNCE };
@@ -31,6 +33,7 @@ public final class MoveSeq implements DvtpExternalizable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private MoveSeq()
       {
       super();
@@ -42,7 +45,7 @@ public final class MoveSeq implements DvtpExternalizable
       if ( moves.length == 0 )
          throw new IllegalArgumentException( "A MoveSeq must contain"
                                              + " at least one Move" );
-      mMoves      = moves;
+      mMoves      = moves.clone();
       mRepeatType = repeat_type;
       }
 
@@ -69,8 +72,8 @@ public final class MoveSeq implements DvtpExternalizable
              ^ Arrays.hashCode( mMoves );
       }
 
-   public Move[] getMoves()
-      {  return mMoves;  }
+   public Move getMove( int n )
+      {  return mMoves[ n ];  }
    public RepeatType getRepeatType()
       {  return mRepeatType;  }
 

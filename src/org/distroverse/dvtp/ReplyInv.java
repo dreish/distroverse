@@ -10,6 +10,7 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 
+//immutable
 
 /**
  * @author dreish

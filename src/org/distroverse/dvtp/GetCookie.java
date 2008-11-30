@@ -13,6 +13,7 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
 
 /**
  * Sent by a proxy to a client to request a cookie from the client's
@@ -35,6 +36,7 @@ public final class GetCookie implements ProxySendable
     * Default constructor is disallowed and useless, since this is an
     * immutable class.
     */
+   @SuppressWarnings( "unused" )
    private GetCookie()
       {
       mKey = null;
