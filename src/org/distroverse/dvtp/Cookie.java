@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -22,7 +24,19 @@ public class Cookie implements ClientSendable
    /**
     *
     */
-   public Cookie()
+   public Cookie( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private Cookie()
       {
       mKey    = null;
       mExists = false;
@@ -63,7 +77,7 @@ public class Cookie implements ClientSendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mKey    = DvtpObject.parseObject( in );

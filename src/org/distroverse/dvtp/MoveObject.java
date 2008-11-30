@@ -19,7 +19,18 @@ import org.distroverse.core.Util;
  */
 public final class MoveObject implements ProxySendable
    {
-   public MoveObject()
+   public MoveObject( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private MoveObject()
       {
       super();
       }
@@ -55,11 +66,11 @@ public final class MoveObject implements ProxySendable
    public long    getId()       {  return mId;       }
    public MoveSeq getMoveSeq()  {  return mMoveSeq;  }
 
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mId = ULong.externalAsLong( in );
-      (mMoveSeq = new MoveSeq()).readExternal( in );
+      mMoveSeq = new MoveSeq( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException

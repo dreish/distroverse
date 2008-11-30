@@ -40,7 +40,18 @@ import com.jme.math.Vector3f;
  */
 public class Move implements DvtpExternalizable
    {
-   public Move()
+   public Move( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Move()
       {
       super();
       mMoveDegree = 0;
@@ -197,30 +208,32 @@ public class Move implements DvtpExternalizable
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mMoveDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
       mMovePolyVecs
-         = DvtpObject.readArray( in, mMoveDegree, Vec.class );
+         = DvtpObject.readArray( in, mMoveDegree, Vec.class, 11 );
       mMoveSins =  Util.safeInt( ULong.externalAsLong( in ) );
-      mMoveSinVecs = DvtpObject.readArray( in, mMoveSins, Vec.class );
+      mMoveSinVecs 
+         = DvtpObject.readArray( in, mMoveSins, Vec.class, 11 );
       mMoveSinPeriods
-         = DvtpObject.readArray( in, mMoveSins, Flo.class );
+         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
       mMoveSinOffsets
-         = DvtpObject.readArray( in, mMoveSins, Flo.class );
+         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
 
       mRotDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
       mRotPolyQuats
-         = DvtpObject.readArray( in, mRotDegree, Quat.class );
+         = DvtpObject.readArray( in, mRotDegree, Quat.class, 16 );
       mRotSins =  Util.safeInt( ULong.externalAsLong( in ) );
-      mRotSinQuats = DvtpObject.readArray( in, mRotSins, Quat.class );
+      mRotSinQuats
+         = DvtpObject.readArray( in, mRotSins, Quat.class, 16 );
       mRotSinPeriods
-         = DvtpObject.readArray( in, mRotSins, Flo.class );
+         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
       mRotSinOffsets
-         = DvtpObject.readArray( in, mRotSins, Flo.class );
+         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
 
-      (mDuration = new Flo()).readExternal( in );
+      mDuration = new Flo( in );
       }
 
    /* (non-Javadoc)

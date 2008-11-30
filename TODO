@@ -1,5 +1,19 @@
 
 - To do for 0.02:
+  - Fix mutability problems in DVTP classes
+    + Make Dict copy a map rather than adopting one
+    + Make all readExternal() methods private
+    + Add constructors with InputStream to all classes
+    + Rewrite DvtpObject reading code
+      + Using reflection to look up the constructors each time would be
+        slow, but storing them and calling them should not be
+    + Rewrite all DVTP classes built out of other DVTP classes that use
+      readExternal()
+    + Remove all set methods
+      > Except in DNodeRef, but much of that design might go away
+    - DNode can't use part of AddObject, since there's no way to set the
+      ID after reading; it needs to be a separate class (DObject)
+      factored out of AddObject
   - Add a FengGUI location bar
   - Begin implementing WorldServer (extends DvtpServer)
     + Add DVTP messages:
@@ -70,8 +84,11 @@
         + Then write a macro that goes from B to A
     - Create new user if needed (from skeleton user)
       > Has default starting location
+    - Plug into database
   - Would be nice to know why TextArea causes OpenGL exceptions
-  - Dict is not immutable; should it be?
+  - Dict is not immutable; it should be
+    - Also, change implementation to use any Map; change hashCode to
+      the sum of the hashes of keys * 852403729 ^ hashes of values
   + Get rid of KNOCK command
     > A DVTP proxy will be allowed to connect to any server, at any
       time, on any port except SMTP, which is always forbidden
@@ -285,10 +302,8 @@
     - Inventory system with remote object browser integration
   - Proxy
     - Obviously these need to be loaded
-    - Client asks server for permission to let proxy connect to it
+    - Forbid connecting to SMTP
   - Server
-    - Darc
-    - OpenID
 
 ------------------------------------------------------------------------
 - Future:

@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * A signal from the client that it is rendering quickly and can handle
  * a more detailed scene, or (for values less than 1) that it is
@@ -19,9 +22,19 @@ package org.distroverse.dvtp;
  */
 public class MoreDetail extends Flo implements ClientSendable
    {
-   public MoreDetail()
+   public MoreDetail( InputStream in ) throws IOException
       {
-      super();
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private MoreDetail()
+      {
+      super( 0 );
       }
 
    public MoreDetail( float f )

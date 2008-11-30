@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -22,7 +24,19 @@ public class AskInv implements ProxySendable
    /**
     *
     */
-   public AskInv()
+   public AskInv( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings( "unused" )
+   private AskInv()
       {
       mType = null;
       mKey  = null;
@@ -75,7 +89,7 @@ public class AskInv implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mType = Str.externalAsString( in );

@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 
 /**
  * @author dreish
@@ -15,11 +18,23 @@ package org.distroverse.dvtp;
 public class ReplyInv extends Cookie
    {
    /**
+    * @throws ClassNotFoundException 
     *
     */
-   public ReplyInv()
+   public ReplyInv( InputStream in )
+   throws IOException, ClassNotFoundException
       {
-      super();
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private ReplyInv()
+      {
+      super( (DvtpExternalizable) null );
       }
 
    public ReplyInv( DvtpExternalizable key )

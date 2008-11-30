@@ -20,7 +20,18 @@ public class SetVisible implements ProxySendable
    /**
     *
     */
-   public SetVisible()
+   public SetVisible( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private SetVisible()
       {
       mId   = 0;
       mFlag = false;
@@ -70,7 +81,7 @@ public class SetVisible implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mId   = ULong.externalAsLong( in );

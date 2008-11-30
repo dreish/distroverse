@@ -22,7 +22,17 @@ public class Real implements DvtpExternalizable
    /**
     *
     */
-   public Real()
+   public Real( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Real()
       {
       mIntegerPart  = 0;
       mFractionPart = null;
@@ -90,10 +100,10 @@ public class Real implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mIntegerPart = DLong.externalAsLong( in );
-      (mFractionPart = new Frac()).readExternal( in );
+      mFractionPart = new Frac( in );
       }
 
    /* (non-Javadoc)

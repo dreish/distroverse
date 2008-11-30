@@ -35,33 +35,37 @@ import java.net.InetSocketAddress;
 
 import org.distroverse.core.net.NetSession;
 
-import clojure.lang.RT;
-import clojure.lang.Var;
-
 public class WorldSession
    {
    public WorldSession( NetSession< Object > ns )
       {
       mNetSession = ns;
+      mPayload = null;
       }
 
-   /**
-    * @throws Exception 
-    *
-    */
-   public void start() throws Exception
-      {
-      Var init_session = RT.var( "user", "init-session!" );
-      // Down the rabbit hole.
-      init_session.invoke( this );
-      }
-   
    public String getPeerAddress()
       {
       InetSocketAddress addr = mNetSession.getNetOutQueue()
                                           .getPeerAddress();
       return (addr.getHostName() + ":" + addr.getPort());
       }
+   
+   public Object setPayload( Object p )
+      {
+      synchronized ( mPayload )
+         {
+         if ( mPayload == null )
+            mPayload = p;
+         else
+            throw new UnsupportedOperationException( "Cannot change a"
+                                  + " WorldSession payload once set" );
+         }
+      return p;
+      }
+   
+   public Object getPayload()
+      {  return mPayload;  }
 
    private NetSession< Object > mNetSession;
+   private Object mPayload; 
    }

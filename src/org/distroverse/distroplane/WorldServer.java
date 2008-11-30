@@ -32,12 +32,14 @@ package org.distroverse.distroplane;
 
 import java.io.IOException;
 
+import org.distroverse.core.Log;
 import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
 
 import clojure.lang.RT;
+import clojure.lang.Var;
 
 /**
  * @author dreish
@@ -45,7 +47,6 @@ import clojure.lang.RT;
  */
 public class WorldServer extends DvtpServer
    {
-
    /**
     * @param listener
     */
@@ -83,10 +84,24 @@ public class WorldServer extends DvtpServer
    @Override
    public void handleProxyObject( Object net_in_object,
                                   NetSession< Object > session )
-   throws IOException
       {
-      // TODO Auto-generated method stub
-
+      WorldSession ws
+         = session.getAttachmentOrNull( WorldSession.class );
+      if ( ws == null )
+         session.close();
+      else
+         try
+            {
+            mHandleObjectBang.invoke( ws, net_in_object );
+            }
+         catch ( Exception e )
+            {
+            Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+            Log.p( "(handle-object!) must not throw exceptions",
+                   Log.SERVER | Log.UNHANDLED, 100 );
+            e.printStackTrace();
+            session.close();
+            }
       }
 
    /* (non-Javadoc)
@@ -102,7 +117,8 @@ public class WorldServer extends DvtpServer
                                          new WorldSession( ns ) );
       try
          {
-         ws.start();
+         // Down the rabbit hole.
+         mInitSessionBang.invoke( ws, token );
          }
       catch ( Exception e )
          {
@@ -117,7 +133,11 @@ public class WorldServer extends DvtpServer
    public static void main( String[] args )
       {
       try
-         {  RT.loadResourceScript( "world-server.clj" );  }
+         {
+         RT.loadResourceScript( "world-server.clj" );
+         mInitSessionBang  = RT.var( "user", "init-session!" );
+         mHandleObjectBang = RT.var( "user", "handle-object!" );
+         }
       catch ( Exception e )
          {
          e.printStackTrace();
@@ -126,4 +146,7 @@ public class WorldServer extends DvtpServer
       createServer( WorldServer.class,
                     "DVTP/0.01 WorldServer 0.02" );
       }
+
+   private static Var mInitSessionBang;
+   private static Var mHandleObjectBang;
    }

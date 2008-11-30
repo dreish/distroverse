@@ -11,14 +11,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//subclasses are immutable
+
 /**
  * A superclass for the two Boolean types, so that they're actually
- * useful programmatically.  This class has no real relevance to the
- * specification of DVTP the protocol.
+ * useful programmatically.
  * @author dreish
  */
 public abstract class Bool implements DvtpExternalizable
    {
+   public Bool( InputStream in )
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
    public Bool()
       {  super();  }
    
@@ -47,8 +58,8 @@ public abstract class Bool implements DvtpExternalizable
       DvtpObject.writeInnerObject( out, Bool.newInstance( b ) );
       }
 
-   public void readExternal( @SuppressWarnings("unused")
-                             InputStream in )
+   private void readExternal( @SuppressWarnings("unused")
+                              InputStream in )
       {  /* Do nothing. */  }
    public void writeExternal( @SuppressWarnings("unused")
                               OutputStream out )

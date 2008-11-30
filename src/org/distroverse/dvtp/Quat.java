@@ -15,7 +15,17 @@ import com.jme.math.Quaternion;
 
 public final class Quat implements DvtpExternalizable
    {
-   public Quat()
+   public Quat( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Quat()
       {
       super();
       }
@@ -63,7 +73,7 @@ public final class Quat implements DvtpExternalizable
       Flo.floatAsExternal( out, q.w );
       }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mQuat = Quat.externalAsQuaternion( in );
       }

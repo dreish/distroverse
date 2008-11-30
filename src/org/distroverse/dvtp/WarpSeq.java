@@ -24,6 +24,13 @@ public final class WarpSeq implements DvtpExternalizable
    /**
     *
     */
+   public WarpSeq( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
    public WarpSeq()
       {
       super();
@@ -76,11 +83,11 @@ public final class WarpSeq implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       int num_warps = Util.safeInt( ULong.externalAsLong( in ) );
-      mWarps = DvtpObject.readArray( in, num_warps, Warp.class );
+      mWarps = DvtpObject.readArray( in, num_warps, Warp.class, 34 );
       int repeat_int
          = Util.safeInt( ULong.externalAsLong( in ) );
       checkRepeatType( repeat_int );

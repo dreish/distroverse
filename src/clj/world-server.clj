@@ -93,9 +93,6 @@
    (if (new-user? id)
      (let [new-id (get-new-userid)]
        (do
-         ; TODO riddle me this: do I need to use alter here, instead
-         ; of commute, to guarantee that only one thread will ever see
-         ; that the user doesn't exist and add the user?
 	 (alter *key-to-id* conj {(id :pubkey) new-id})
 	 (alter *userdata* conj {new-id skel-user})
 	 (db-query :insert :into "userdata"
@@ -107,7 +104,7 @@
   (let [val (.getVal dvtp-id)]
     {:pubkey (val (Str. "pubkey"))}))
 
-(defn init-connection! [session]
+(defn init-connection! [session token]
   "Performs basic new-connection setup: getting and verifying the
   user's identity, looking up the user's position, and adding the
   user's avatar to the visible world.  Side effects: plenty, including
@@ -121,8 +118,10 @@
 	(if (valid-id? id challenge id-response)
 	  (do (if (new-user? id)
 		(setup-new-user! session id))
-	      (.setID session id)
+	      (.setPayload session {:id id})
 	      (add-self-to-world! session))
 	  (reject-id! session))))))
 
-
+(defn handle-object! [session ob]
+  "Handle an object received from a proxy."
+  )

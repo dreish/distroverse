@@ -32,7 +32,17 @@ public final class ULong implements DvtpExternalizable
    /**
     * Default constructor: value is zero.
     */
-   public ULong()
+   public ULong( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private ULong()
       {
       mVal = 0;
       }
@@ -121,7 +131,7 @@ public final class ULong implements DvtpExternalizable
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mVal = externalAsLong( in );
       }

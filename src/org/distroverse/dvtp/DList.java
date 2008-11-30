@@ -16,7 +16,19 @@ import org.distroverse.core.Util;
 
 public class DList implements DvtpExternalizable
    {
-   public DList()
+   public DList( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private DList()
       {
       super();
       mContents = null;
@@ -59,7 +71,7 @@ public class DList implements DvtpExternalizable
    protected DvtpExternalizable[] getContents()
       {  return mContents;  }
 
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       int length = Util.safeInt( ULong.externalAsLong( in ) );

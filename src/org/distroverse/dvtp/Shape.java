@@ -13,6 +13,7 @@ import java.nio.IntBuffer;
 import java.util.*;
 
 import org.distroverse.core.Util;
+
 import com.jme.bounding.BoundingBox;
 import com.jme.math.Vector3f;
 import com.jme.renderer.ColorRGBA;
@@ -29,7 +30,18 @@ import com.jme.util.geom.BufferUtils;
  */
 public final class Shape implements DvtpExternalizable
    {
-   public Shape()
+   public Shape( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Shape()
       {
       super();
       }
@@ -45,7 +57,7 @@ public final class Shape implements DvtpExternalizable
       Vector3f[] vectors_arr
          = vectors.toArray( new Vector3f[ vectors.size() ] );
       mPoints = new PointArray( vectors_arr );
-      mVertexCounts = vertex_counts;
+      mVertexCounts = vertex_counts.clone();
       }
 
    public int getClassNumber()
@@ -126,12 +138,12 @@ public final class Shape implements DvtpExternalizable
       return ret;
       }
 
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      (mPoints = new PointArray()).readExternal( in );
+      mPoints = new PointArray( in );
       int num_vcs = Util.safeInt( ULong.externalAsLong( in ) );
-      ULong[] vcs = DvtpObject.readArray( in, num_vcs, ULong.class );
+      ULong[] vcs = DvtpObject.readArray( in, num_vcs, ULong.class, 0 );
       mVertexCounts = new int[ num_vcs ];
       for ( int i = 0; i < vcs.length; ++i )
          mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );

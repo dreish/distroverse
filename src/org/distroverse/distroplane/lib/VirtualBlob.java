@@ -32,6 +32,8 @@
  */
 package org.distroverse.distroplane.lib;
 
+import java.io.IOException;
+
 import org.distroverse.dvtp.Blob;
 
 public class VirtualBlob extends Blob
@@ -43,11 +45,12 @@ public class VirtualBlob extends Blob
     * @param resource - unused
     * @param pos - unused
     * @param file_length - unused
+    * @throws IOException 
     */
    public VirtualBlob( byte[] bytes, int n_read, String resource,
-                       long pos, long file_length )
+                       long pos, long file_length ) throws IOException
       {
-      super();
+      super( null );
       throw new IllegalArgumentException( "VirtualBlobs can only be"
                    + " constructed from filenames, not file contents" );
       }

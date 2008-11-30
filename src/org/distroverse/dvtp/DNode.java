@@ -23,7 +23,18 @@ public final class DNode implements DvtpExternalizable
    /**
     *
     */
-   public DNode()
+   public DNode( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private DNode()
       {
       mBeing = null;
       mRadius = 0;
@@ -88,20 +99,20 @@ public final class DNode implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
-      (mBeing = new AddObject()).readWithoutId( in );
+      mBeing = new AddObject( in, false );
       mRadius = Flo.externalAsFloat( in );
-      (mThis = new DNodeRef()).readExternal( in );
+      mThis = new DNodeRef( in );
       boolean has_parent = Bool.externalAsBoolean( in );
       if ( has_parent )
-         (mParent = new DNodeRef()).readExternal( in );
+         mParent = new DNodeRef( in );
       else
          mParent = null;
       int num_children = Util.safeInt( ULong.externalAsLong( in ) );
       mChildren = DvtpObject.readArray( in, num_children,
-                                        DNodeRef.class );
+                                        DNodeRef.class, 29 );
       }
 
    /* (non-Javadoc)

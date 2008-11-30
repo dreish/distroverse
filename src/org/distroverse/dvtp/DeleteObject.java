@@ -11,9 +11,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 public final class DeleteObject implements ProxySendable
    {
-   public DeleteObject()
+   public DeleteObject( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private DeleteObject()
       {
       // (Leaving ID null)
       }
@@ -40,7 +52,7 @@ public final class DeleteObject implements ProxySendable
    public Long getId()
       {  return mId;  }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mId = ULong.externalAsLong( in );
       }

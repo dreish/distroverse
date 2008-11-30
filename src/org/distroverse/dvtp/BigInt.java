@@ -15,6 +15,11 @@ import java.util.Random;
 
 import org.distroverse.core.Util;
 
+/*
+ * Caution: immutability of this class is dependent on the
+ * implementation of BigInteger.
+ */
+
 /**
  * This class adds externalization to BigInteger.  The format is very
  * simple: a length/sign byte -- the &128 bit indicates sign, and &127
@@ -33,6 +38,8 @@ public class BigInt implements DvtpExternalizable,
       {  mVal = BigInteger.valueOf( longVal );  }
    public BigInt( BigInteger bi )
       {  mVal = bi;  }
+   public BigInt( InputStream in ) throws IOException
+      {  readExternal( in );  }
 
    // Pass-through constructors from BigInteger.
    public BigInt( byte[] val )
@@ -50,7 +57,6 @@ public class BigInt implements DvtpExternalizable,
    
    // Basic get and set methods.
    public BigInteger get()  {  return mVal;  }
-   public void set( BigInteger v )  {  mVal = v;  }
    
    /* Pass-through methods.  I'd love to inherit from MutableBigInteger,
     * but for some reason my Java is broken -- it claims there's no such
@@ -66,7 +72,7 @@ public class BigInt implements DvtpExternalizable,
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       int length = in.read();
       int sign   = 1;

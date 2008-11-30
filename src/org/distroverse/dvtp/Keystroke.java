@@ -15,7 +15,18 @@ import org.distroverse.core.Util;
 
 public class Keystroke implements ClientSendable
    {
-   public Keystroke()
+   public Keystroke( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private Keystroke()
       {
       super();
       mKeyNum = 0;
@@ -45,10 +56,8 @@ public class Keystroke implements ClientSendable
 
    public int getKey()
       {  return mKeyNum;  }
-   public void setKey( int kn )
-      {  mKeyNum = kn;  }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mKeyNum = Util.safeInt( ULong.externalAsLong( in ) );
       }

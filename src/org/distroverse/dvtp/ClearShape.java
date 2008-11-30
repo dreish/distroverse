@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+//immutable
+
 /**
  * @author dreish
  *
@@ -20,7 +22,17 @@ public class ClearShape implements ProxySendable
    /**
     *
     */
-   public ClearShape()
+   public ClearShape( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private ClearShape()
       {
       mId = 0;
       }
@@ -63,7 +75,7 @@ public class ClearShape implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mId = ULong.externalAsLong( in );
       }

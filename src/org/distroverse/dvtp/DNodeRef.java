@@ -23,7 +23,17 @@ public final class DNodeRef implements DvtpExternalizable
    /**
     *
     */
-   public DNodeRef()
+   public DNodeRef( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private DNodeRef()
       {
       super();
       mRemoteHost = null;
@@ -55,6 +65,7 @@ public final class DNodeRef implements DvtpExternalizable
 
    public DNode getNode()
       {  return mDNode;  }
+   
    public DNodeRef setNode( DNode n )
       {
       mDNode = n;
@@ -101,11 +112,11 @@ public final class DNodeRef implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mRemoteHost = Str.externalAsString( in );
       mId = ULong.externalAsLong( in );
-      (mLastChangeTime = new Real()).readExternal( in );
+      mLastChangeTime = new Real( in );
       }
 
    /* (non-Javadoc)

@@ -25,7 +25,17 @@ import org.distroverse.core.Util;
  */
 public class ProxySpec implements DvtpExternalizable
    {
-   public ProxySpec()
+   public ProxySpec( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private ProxySpec()
       {
       mProxyUrl = mResourceRegexp = null;
       }
@@ -77,12 +87,12 @@ public class ProxySpec implements DvtpExternalizable
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassCastException
       {
-      (mProxyUrl = new Str()).readExternal( in );
-      (mResourceRegexp = new Str()).readExternal( in );
-      (mProxyName = new Str()).readExternal( in );
+      mProxyUrl = new Str( in );
+      mResourceRegexp = new Str( in );
+      mProxyName = new Str( in );
       }
 
    /* (non-Javadoc)

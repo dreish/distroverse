@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * A mouseclick with the primary (index finger) mouse button, or a
  * one-fingered touch.  Typically represents a touch, grab, or pull.
@@ -20,7 +22,18 @@ import org.distroverse.core.Util;
  */
 public class Click implements ClientSendable
    {
-   public Click()
+   public Click( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private Click()
       {
       super();
       }
@@ -59,16 +72,11 @@ public class Click implements ClientSendable
       {  return mDirection;  }
    public Flo getForce()
       {  return mForce;  }
-   public void setDirForce( Vec dir, Flo force )
-      {
-      mDirection = dir;
-      mForce = force;
-      }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
-      (mDirection = new Vec()).readExternal( in );
-      (mForce = new Flo()).readExternal( in );
+      mDirection = new Vec( in );
+      mForce = new Flo( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException

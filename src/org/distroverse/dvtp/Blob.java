@@ -15,6 +15,8 @@ import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * The current maximum blob size is 65,536 bytes, though this limit
  * could easily be increased in the future if appropriate, up to 2^63
@@ -52,7 +54,17 @@ public class Blob implements DvtpExternalizable
       mFileLength = file_length;
       }
 
-   public Blob()
+   public Blob( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Blob()
       {
       super();
       }
@@ -92,7 +104,7 @@ public class Blob implements DvtpExternalizable
    public long getFileLength()
       {  return mFileLength;  }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       int bytes_len = Util.safeInt( ULong.externalAsLong( in ) );
       if ( bytes_len > 65536 )
@@ -101,7 +113,7 @@ public class Blob implements DvtpExternalizable
       if ( in.read( mBytes ) != bytes_len )
          throw new ProtocolException( "End of file while reading"
                                       + " Blob" );
-      (mResource = new Str()).readExternal( in );
+      mResource = new Str( in );
       mPos = ULong.externalAsLong( in );
       mFileLength = ULong.externalAsLong( in );
       }

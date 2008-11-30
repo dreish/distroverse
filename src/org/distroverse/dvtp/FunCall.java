@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.distroverse.core.Util;
 
 /**
@@ -20,9 +23,20 @@ import org.distroverse.core.Util;
  */
 public class FunCall extends DList
    {
-   public FunCall()
+   public FunCall( InputStream in )
+   throws IOException, ClassNotFoundException
       {
-      super();
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private FunCall()
+      {
+      super( (DvtpExternalizable) null );
       }
 
    public FunCall( DvtpExternalizable... f )

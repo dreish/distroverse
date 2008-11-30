@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.distroverse.dvtp.AddObject;
 import org.distroverse.dvtp.AskInv;
@@ -23,6 +24,7 @@ import org.distroverse.dvtp.DLong;
 import org.distroverse.dvtp.DNode;
 import org.distroverse.dvtp.DNodeRef;
 import org.distroverse.dvtp.Dict;
+import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.Frac;
 import org.distroverse.dvtp.GetCookie;
 import org.distroverse.dvtp.Real;
@@ -36,7 +38,6 @@ import org.distroverse.dvtp.DList;
 import org.distroverse.dvtp.DeleteObject;
 import org.distroverse.dvtp.DisplayUrl;
 import org.distroverse.dvtp.DvtpExternalizable;
-import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.False;
 import org.distroverse.dvtp.Flo;
@@ -160,7 +161,7 @@ public class TestExternalization
 
          default:
             throw new ClassNotFoundException( "No test case for "
-                                + DvtpObject.getNew( i ).getClass()
+                                + DvtpObject.getClassByNumber( i )
                                 + " (" + i + ")" );
          }
       }
@@ -469,12 +470,13 @@ public class TestExternalization
    private static void testDict()
    throws IOException, ClassNotFoundException
       {
-      Dict d = new Dict();
-      tryBeamObject( d );
-      d.put( new Str( "foo" ), new Str( "bar" ) );
-      tryBeamObject( d );
-      d.put( new Flo( 1.23f ), new GetCookie( new Str( "bleh" ) ) );
-      tryBeamObject( d );
+      HashMap< DvtpExternalizable, DvtpExternalizable > m
+         = new HashMap< DvtpExternalizable, DvtpExternalizable >();
+      tryBeamObject( new Dict( m ) );
+      m.put( new Str( "foo" ), new Str( "bar" ) );
+      tryBeamObject( new Dict( m ) );
+      m.put( new Flo( 1.23f ), new GetCookie( new Str( "bleh" ) ) );
+      tryBeamObject( new Dict( m ) );
       }
 
    private static void testDNodeRef()

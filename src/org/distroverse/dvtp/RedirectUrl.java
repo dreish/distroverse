@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.distroverse.core.Util;
 
 /**
@@ -21,8 +24,18 @@ import org.distroverse.core.Util;
  */
 public final class RedirectUrl extends Str implements ProxySendable
    {
-   public RedirectUrl()
-      {  super();  }
+   public RedirectUrl( InputStream in ) throws IOException
+      {
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private RedirectUrl()
+      {  super( "" );  }
    public RedirectUrl( String url )
       {  super( url );  }
 

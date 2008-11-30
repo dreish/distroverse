@@ -23,7 +23,18 @@ public class Warp implements DvtpExternalizable
    /**
     *
     */
-   public Warp()
+   public Warp( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Warp()
       {
       mDegree     = 0;
       mPolyWarps  = null;
@@ -95,21 +106,21 @@ public class Warp implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mDegree = Util.safeInt( ULong.externalAsLong( in ) );
       mPolyWarps
-         = DvtpObject.readArray( in, mDegree, PointArray.class );
+         = DvtpObject.readArray( in, mDegree, PointArray.class, 4 );
       mSins = Util.safeInt( ULong.externalAsLong( in ) );
       mSinWarps
-         = DvtpObject.readArray( in, mSins, PointArray.class );
+         = DvtpObject.readArray( in, mSins, PointArray.class, 4 );
       mSinPeriods
-         = DvtpObject.readArray( in, mSins, Flo.class );
+         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
       mSinOffsets
-         = DvtpObject.readArray( in, mSins, Flo.class );
+         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
 
-      (mDuration = new Flo()).readExternal( in );
+      mDuration = new Flo( in );
       }
 
    /* (non-Javadoc)

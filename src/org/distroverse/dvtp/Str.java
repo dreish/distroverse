@@ -25,7 +25,17 @@ public class Str implements DvtpExternalizable
    {
    public Str( String s )
       {  mVal = s;  }
-   public Str()
+   public Str( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Str()
       {  mVal = null;  }
 
    /**
@@ -75,7 +85,7 @@ public class Str implements DvtpExternalizable
       return mVal.hashCode() ^ getClass().hashCode();
       }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mVal = externalAsString( in );
       }

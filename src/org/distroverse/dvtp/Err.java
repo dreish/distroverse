@@ -29,7 +29,17 @@ public class Err implements DvtpExternalizable
       mCode = code;
       }
 
-   public Err()
+   public Err( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Err()
       {
       super();
       }
@@ -60,7 +70,7 @@ public class Err implements DvtpExternalizable
    public int getCode()
       {  return mCode;  }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mMessage = Str.externalAsString( in );
       mCode    = Util.safeInt( ULong.externalAsLong( in ) );

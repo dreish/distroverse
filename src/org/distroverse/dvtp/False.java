@@ -7,12 +7,23 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.InputStream;
+
 /**
  * Falsity.
  * @author dreish
  */
 public final class False extends Bool
    {
+   public False( @SuppressWarnings( "unused" ) InputStream in )
+      {
+      super();
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
    public False()
       {  /* Do nothing. */  }
 

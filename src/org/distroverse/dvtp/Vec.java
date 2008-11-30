@@ -17,7 +17,17 @@ import com.jme.math.Vector3f;
 
 public final class Vec implements DvtpExternalizable
    {
-   public Vec()
+   public Vec( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Vec()
       {
       super();
       mVec = new Vector3f();
@@ -51,7 +61,7 @@ public final class Vec implements DvtpExternalizable
       return mVec;
       }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       mVec = new Vector3f( Flo.externalAsFloat( in ),
                            Flo.externalAsFloat( in ),

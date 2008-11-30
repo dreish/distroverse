@@ -18,9 +18,18 @@ import java.io.OutputStream;
  */
 public class Flo implements DvtpExternalizable
    {
-   public Flo()           { mF = 0; }
-   public Flo( float f )  { mF = f; }
+   public Flo( InputStream in ) throws IOException
+      {
+      super();
+      readExternal( in );
+      }
 
+   @SuppressWarnings("unused")
+   private Flo()
+      {  super();  }
+
+   public Flo( float f )  { mF = f; }
+   
    public float asFloat()  {  return mF;  }
 
    public int getClassNumber()
@@ -63,7 +72,7 @@ public class Flo implements DvtpExternalizable
       out.write( float_buf );
       }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {  mF = externalAsFloat( in );  }
 
    public void writeExternal( OutputStream out ) throws IOException

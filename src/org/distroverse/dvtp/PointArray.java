@@ -10,10 +10,7 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-
-import javax.vecmath.Point3d;
 
 import org.distroverse.core.Util;
 
@@ -30,36 +27,20 @@ import com.jme.util.geom.BufferUtils;
  */
 public final class PointArray implements DvtpExternalizable
    {
-   public PointArray()
+   public PointArray( InputStream in ) throws IOException
       {
       super();
-      allocate( 0 );
+      readExternal( in );
       }
 
-   /**
-    * Constructor with the size of the array, in points (not floats).
-    * @param n - capacity in number of (x,y,z) tuples
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
     */
-   public PointArray( int n )
+   private PointArray()
       {
       super();
-      allocate( n );
-      }
-
-   /**
-    * Constructor with an existing array of Point3ds.  I've deprecated
-    * this because I want to prefer using Vector3fs wherever possible.
-    * @param ap
-    */
-   @Deprecated
-   public PointArray( Point3d[] ap )
-      {
-      Vector3f[] ap_f = new Vector3f[ ap.length ];
-      for ( int i = 0; i < ap.length; ++i )
-         ap_f[ i ] = new Vector3f( (float)ap[i].x,
-                                   (float)ap[i].y,
-                                   (float)ap[i].z );
-      mFb = BufferUtils.createFloatBuffer( ap_f );
+      mFb = null;
       }
 
    /**
@@ -68,19 +49,11 @@ public final class PointArray implements DvtpExternalizable
     */
    public PointArray( Vector3f[] ap )
       {
-      mFb = BufferUtils.createFloatBuffer( ap );
+      mFb = BufferUtils.createFloatBuffer( ap ).asReadOnlyBuffer();
       }
-
-   private void allocate( int n_points )
-      {
-      mFb = ByteBuffer.allocateDirect( (n_points * 3) * 4 )
-                     .asFloatBuffer();
-      }
-
-   private static final long serialVersionUID = 1;
 
    public FloatBuffer asFloatBuffer()
-      {  return mFb;  }
+      {  return mFb.asReadOnlyBuffer();  }
 
    /**
     * @return - the number of points
@@ -104,7 +77,7 @@ public final class PointArray implements DvtpExternalizable
       return mFb.hashCode();
       }
 
-   public void readExternal( InputStream in ) throws IOException
+   private void readExternal( InputStream in ) throws IOException
       {
       int len = Util.safeInt( ULong.externalAsLong( in ) );
       Vector3f[] ap_f = new Vector3f[ len ];
@@ -112,7 +85,7 @@ public final class PointArray implements DvtpExternalizable
          ap_f[ i ] = new Vector3f( Flo.externalAsFloat( in ),
                                    Flo.externalAsFloat( in ),
                                    Flo.externalAsFloat( in ) );
-      mFb = BufferUtils.createFloatBuffer( ap_f );
+      mFb = BufferUtils.createFloatBuffer( ap_f ).asReadOnlyBuffer();
       }
 
    public void writeExternal( OutputStream out ) throws IOException

@@ -22,7 +22,18 @@ public final class SetShape implements ProxySendable
    /**
     *
     */
-   public SetShape()
+   public SetShape( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private SetShape()
       {
       mId      = 0;
       mShape   = null;
@@ -75,12 +86,12 @@ public final class SetShape implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mId = ULong.externalAsLong( in );
-      (mShape = new Shape()).readExternal( in );
-      (mWarpSeq = new WarpSeq()).readExternal( in );
+      mShape = new Shape( in );
+      mWarpSeq = new WarpSeq( in );
       }
 
    /* (non-Javadoc)

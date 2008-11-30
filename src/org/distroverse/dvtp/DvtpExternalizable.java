@@ -8,7 +8,6 @@
 package org.distroverse.dvtp;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -19,8 +18,6 @@ public interface DvtpExternalizable
    {
    public abstract int getClassNumber();
    public abstract String prettyPrint();
-   public abstract void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException;
    public abstract void writeExternal( OutputStream out )
    throws IOException;
    public boolean equals( Object o );

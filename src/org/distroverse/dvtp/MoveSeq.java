@@ -20,7 +20,18 @@ public final class MoveSeq implements DvtpExternalizable
    {
    public enum RepeatType { ONCE, LOOP, BOUNCE };
 
-   public MoveSeq()
+   public MoveSeq( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private MoveSeq()
       {
       super();
       }
@@ -68,13 +79,13 @@ public final class MoveSeq implements DvtpExternalizable
       return mMoves[ 0 ].initialPosition();
       }
 
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       int num_moves = Util.safeInt( ULong.externalAsLong( in ) );
       if ( num_moves == 0 )
          throw new IOException( "Malformed MoveSeq in input" );
-      mMoves = DvtpObject.readArray( in, num_moves, Move.class );
+      mMoves = DvtpObject.readArray( in, num_moves, Move.class, 13 );
       int repeat_int
          = Util.safeInt( ULong.externalAsLong( in ) );
       checkRepeatType( repeat_int );

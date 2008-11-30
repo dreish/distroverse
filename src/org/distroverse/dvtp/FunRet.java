@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.distroverse.core.Util;
 
 /**
@@ -15,9 +18,20 @@ import org.distroverse.core.Util;
  */
 public class FunRet extends DList
    {
-   public FunRet()
+   public FunRet( InputStream in )
+   throws IOException, ClassNotFoundException
       {
-      super();
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private FunRet()
+      {
+      super( (DvtpExternalizable) null );
       }
    
    public FunRet( DvtpExternalizable[] f )

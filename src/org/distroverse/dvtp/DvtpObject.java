@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util;
@@ -89,7 +91,18 @@ public final class DvtpObject
         null
         };
 
-   public static final int mSerializedClassNumber = 0xB00BAD;
+   public static Class< ? > getClassByNumber( int class_number )
+   throws ClassNotFoundException
+      {
+      if ( class_number < mClassList.length )
+         return mClassList[ class_number ];
+      else if ( class_number >= 128
+                &&  class_number - 128 < mExtendedConstructors.length )
+         return mExtendedClassList[ class_number - 128 ];
+      else
+         throw new ClassNotFoundException( "No such DvtpExternalizable"
+                                           + "class: " + class_number );
+      }
 
    /**
     * Returns a new object (constructed with the default constructor) of
@@ -97,46 +110,75 @@ public final class DvtpObject
     * @param class_number
     * @return
     * @throws ClassNotFoundException
+    * @throws IOException
     */
    @SuppressWarnings("unchecked")
-   public static DvtpExternalizable getNew( int class_number )
-   throws ClassNotFoundException
+   public static DvtpExternalizable getNew( int class_number,
+                                            InputStream in )
+   throws ClassNotFoundException, IOException
       {
-      Class< ? extends DvtpExternalizable > newclass;
-      if ( class_number < mClassList.length - 1
-            &&  class_number >= 0 )
-         {
-         newclass = (Class< ? extends DvtpExternalizable >)
-                    mClassList[ class_number ];
-         }
-      else if ( class_number < mExtendedClassList.length + 127
-                &&  class_number >= 128 )
-         {
-         newclass = (Class< ? extends DvtpExternalizable >)
-                    mExtendedClassList[ class_number - 128 ];
-         }
-      else if ( class_number == mSerializedClassNumber )
-         return new Any();
+      if ( mConstructors == null )
+         initConstructors();
+
+      Constructor< ? extends DvtpExternalizable > ctor;
+      if ( class_number < mConstructors.length )
+         ctor = mConstructors[ class_number ];
+      else if ( class_number >= 128
+                &&  class_number - 128 < mExtendedConstructors.length )
+         ctor = mExtendedConstructors[ class_number - 128 ];
       else
-         throw new ClassNotFoundException( "No such"
-             + " DvtpExternalizable class number: " + class_number );
+         throw new ClassNotFoundException( "No such DvtpExternalizable"
+                                           + "class: " + class_number );
 
       DvtpExternalizable ret;
-      try  {  ret = newclass.newInstance();  }
+      try
+         {
+         ret = ctor.newInstance( in );
+         }
       catch ( Exception e )
          {
-         Log.p( "Impossible exception: " + e,
-                Log.DVTP | Log.UNHANDLED, 100 );
-         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-         System.exit( 42 );
-         return null;   // I have to do this to avoid an error?
+         throw new IOException( e.getMessage() );
          }
+
       assert( ret.getClassNumber() == class_number );
       return ret;
       }
 
-   public static int getSerializedClassNumber()
-      {  return mSerializedClassNumber;  }
+   @SuppressWarnings("unchecked")
+   private static void initConstructors()
+      {
+      mConstructors = new Constructor[ mClassList.length ];
+      mExtendedConstructors
+         = new Constructor[ mExtendedClassList.length ];
+      for ( int i = 0; i < mClassList.length - 1; ++i )
+         {
+         mConstructors[ i ] =
+            getConstructor( (Class< ? extends DvtpExternalizable >)
+                            mClassList[ i ] );
+         }
+      for ( int i = 0; i < mExtendedClassList.length - 1; ++i )
+         {
+         mExtendedConstructors[ i ] =
+            getConstructor( (Class< ? extends DvtpExternalizable >)
+                            mExtendedClassList[ i ] );
+         }
+      mConstructors[ mConstructors.length - 1 ] = null;
+      mExtendedConstructors[ mExtendedConstructors.length - 1 ] = null;
+      }
+
+   private static Constructor< ? extends DvtpExternalizable >
+   getConstructor( Class< ? extends DvtpExternalizable > c )
+      {
+      try
+         {
+         return c.getConstructor( InputStream.class );
+         }
+      catch ( Exception e )
+         {
+         e.printStackTrace();
+         }
+      return null;
+      }
 
    /**
     * This class parses everything except an initial NUL and length:
@@ -165,18 +207,18 @@ public final class DvtpObject
                                                  int class_number )
    throws IOException, ClassNotFoundException
       {
-      DvtpExternalizable ob = getNew( class_number );
-      try
-         {
-         if ( ob != null )
-            ob.readExternal( in );
-         }
-      catch ( ClassNotFoundException e )
-         {
-         Log.p( "Exception while parsing external object: " + e,
-                Log.DVTP | Log.UNHANDLED, 100 );
-         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-         }
+      DvtpExternalizable ob = getNew( class_number, in );
+//      try
+//         {
+//         if ( ob != null )
+//            ob.readExternal( in );
+//         }
+//      catch ( ClassNotFoundException e )
+//         {
+//         Log.p( "Exception while parsing external object: " + e,
+//                Log.DVTP | Log.UNHANDLED, 100 );
+//         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+//         }
       return ob;
       }
 
@@ -231,29 +273,25 @@ public final class DvtpObject
     */
    @SuppressWarnings("unchecked")
    public static <T extends DvtpExternalizable>
-   T[] readArray( InputStream in, int n, Class<T> t )
+   T[] readArray( InputStream in, int n, Class<T> t, int class_number )
    throws IOException, ClassNotFoundException
       {
       T[] ret = (T[]) Array.newInstance( t, n );
       for ( int i = 0; i < n; ++i )
          {
-         try
-            {
-            ret[ i ] = t.newInstance();
-            }
-         catch ( InstantiationException e )
-            {
-            Log.p( "Impossible exception: " + e,
-                   Log.DVTP | Log.UNHANDLED, 100 );
-            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-            }
-         catch ( IllegalAccessException e )
-            {
-            Log.p( "Impossible exception: " + e,
-                   Log.DVTP | Log.UNHANDLED, 100 );
-            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-            }
-         ret[ i ].readExternal( in );
+         ret[ i ] = (T) getNew( class_number, in );
+//         catch ( InstantiationException e )
+//            {
+//            Log.p( "Impossible exception: " + e,
+//                   Log.DVTP | Log.UNHANDLED, 100 );
+//            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+//            }
+//         catch ( IllegalAccessException e )
+//            {
+//            Log.p( "Impossible exception: " + e,
+//                   Log.DVTP | Log.UNHANDLED, 100 );
+//            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
+//            }
          }
 
       return ret;
@@ -280,4 +318,8 @@ public final class DvtpObject
     */
    private DvtpObject() { /* Nothing */ }
 
+   private static Constructor< ? extends DvtpExternalizable >[]
+      mConstructors;
+   private static Constructor< ? extends DvtpExternalizable >[]
+      mExtendedConstructors;
    }

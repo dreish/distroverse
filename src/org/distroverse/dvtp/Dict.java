@@ -10,10 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.distroverse.core.Util;
 
@@ -27,23 +25,27 @@ public final class Dict implements DvtpExternalizable
    /**
     *
     */
-   public Dict()
+   public Dict( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Dict()
+      {
+      mDict = null;
+      }
+
+   public Dict( Map< DvtpExternalizable, DvtpExternalizable > d )
       {
       mDict = new LinkedHashMap< DvtpExternalizable,
                                  DvtpExternalizable >();
-      }
-
-   /**
-    * It is probably better to build up a dict using new Dict() and
-    * Dict.put() rather than building up a LinkedHashMap and using this
-    * constructor, in case the internal representation is changed and
-    * this constructor imposes a translation performance penalty.
-    * @param d
-    */
-   public Dict( LinkedHashMap< DvtpExternalizable,
-                               DvtpExternalizable > d )
-      {
-      mDict = d;
+      mDict.putAll( d );
       }
 
    /* (non-Javadoc)
@@ -52,11 +54,7 @@ public final class Dict implements DvtpExternalizable
    public int getClassNumber()
       {  return 28;  }
 
-   synchronized public DvtpExternalizable
-   put( DvtpExternalizable key, DvtpExternalizable value )
-      {  return mDict.put( key, value );  }
-
-   synchronized public DvtpExternalizable get( DvtpExternalizable key )
+   public DvtpExternalizable get( DvtpExternalizable key )
       {
       return mDict.get( key );
       }
@@ -86,12 +84,12 @@ public final class Dict implements DvtpExternalizable
       if ( o instanceof Dict
            &&  ((Dict) o).mDict.size() == mDict.size() )
          {
-         Iterator< Entry< DvtpExternalizable,
-                          DvtpExternalizable >> other_iter
-            = ((Dict) o).mDict.entrySet().iterator();
+         Dict d = (Dict) o;
          for ( Map.Entry< DvtpExternalizable, DvtpExternalizable > pair
                : mDict.entrySet() )
-            if ( ! pair.equals( other_iter.next() ) )
+            if ( ! d.mDict.containsKey( pair.getKey() )
+                 ||  ! d.mDict.get( pair.getKey() )
+                              .equals( pair.getValue() ) )
                return false;
          return true;
          }
@@ -105,8 +103,8 @@ public final class Dict implements DvtpExternalizable
       for ( Map.Entry< DvtpExternalizable, DvtpExternalizable > pair
             : mDict.entrySet() )
          {
-         ret ^= pair.hashCode();
-         ret *= 852403729;
+         ret += pair.getKey().hashCode() * 852403729
+                ^ pair.getValue().hashCode();
          }
 
       return ret;
@@ -115,10 +113,12 @@ public final class Dict implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   synchronized public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       int num_pairs = Util.safeInt( ULong.externalAsLong( in ) );
+      mDict = new LinkedHashMap< DvtpExternalizable,
+                                 DvtpExternalizable >();
       for ( int i = 0; i < num_pairs; ++i )
          mDict.put( DvtpObject.parseObject( in ),
                     DvtpObject.parseObject( in ) );
@@ -127,7 +127,7 @@ public final class Dict implements DvtpExternalizable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
-   synchronized public void writeExternal( OutputStream out )
+   public void writeExternal( OutputStream out )
    throws IOException
       {
       ULong.longAsExternal( out, mDict.size() );
@@ -139,6 +139,5 @@ public final class Dict implements DvtpExternalizable
          }
       }
 
-   private LinkedHashMap< DvtpExternalizable,
-                          DvtpExternalizable > mDict;
+   private Map< DvtpExternalizable, DvtpExternalizable > mDict;
    }

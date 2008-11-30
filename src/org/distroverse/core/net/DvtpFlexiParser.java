@@ -39,9 +39,9 @@ import java.nio.ByteBuffer;
 
 import org.distroverse.core.Log;
 import org.distroverse.core.Util;
+import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.DvtpExternalizable;
-import org.distroverse.dvtp.DvtpObject;
 
 public class DvtpFlexiParser extends ObjectParser< Object >
    {

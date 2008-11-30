@@ -13,6 +13,8 @@ import java.io.OutputStream;
 
 import org.distroverse.core.Util;
 
+//immutable
+
 /**
  * Adds an object, with initial movement sequence and shape warp
  * sequence.  The latter may be empty, the former not.
@@ -20,7 +22,19 @@ import org.distroverse.core.Util;
  */
 public final class AddObject implements ProxySendable
    {
-   public AddObject()
+   public AddObject( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private AddObject()
       {
       super();
       }
@@ -48,6 +62,13 @@ public final class AddObject implements ProxySendable
       mParentId = pid;
       mMoveSeq = m;
       mWarpSeq = null;
+      }
+
+   public AddObject( InputStream in, boolean b )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readWithoutId( in );
       }
 
    public int getClassNumber()
@@ -121,15 +142,15 @@ public final class AddObject implements ProxySendable
    public MoveSeq getMoveSeq()   {  return mMoveSeq;   }
    public WarpSeq getWarpSeq()   {  return mWarpSeq;   }
 
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mHasShape = Bool.externalAsBoolean( in );
       if ( mHasShape )
          {
          mVisible = Bool.externalAsBoolean( in );
-         (mShape = new Shape()).readExternal( in );
-         (mWarpSeq = new WarpSeq()).readExternal( in );
+         mShape = new Shape( in );
+         mWarpSeq = new WarpSeq( in );
          }
       else
          {
@@ -137,9 +158,9 @@ public final class AddObject implements ProxySendable
          mShape = null;
          mWarpSeq = null;
          }
-      (mId = new ULong()).readExternal( in );
-      (mParentId = new ULong()).readExternal( in );
-      (mMoveSeq = new MoveSeq()).readExternal( in );
+      mId = new ULong( in );
+      mParentId = new ULong( in );
+      mMoveSeq = new MoveSeq( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
@@ -156,15 +177,15 @@ public final class AddObject implements ProxySendable
       mMoveSeq.writeExternal( out );
       }
 
-   public void readWithoutId( InputStream in )
+   private void readWithoutId( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mHasShape = Bool.externalAsBoolean( in );
       if ( mHasShape )
          {
          mVisible = Bool.externalAsBoolean( in );
-         (mShape = new Shape()).readExternal( in );
-         (mWarpSeq = new WarpSeq()).readExternal( in );
+         mShape = new Shape( in );
+         mWarpSeq = new WarpSeq( in );
          }
       else
          {
@@ -174,7 +195,7 @@ public final class AddObject implements ProxySendable
          }
       mId       = new ULong( 0 );
       mParentId = new ULong( 0 );
-      (mMoveSeq = new MoveSeq()).readExternal( in );
+      mMoveSeq = new MoveSeq( in );
       }
 
    public void writeWithoutId( OutputStream out ) throws IOException

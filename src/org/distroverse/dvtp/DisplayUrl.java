@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.distroverse.core.Util;
 
 /**
@@ -19,8 +22,18 @@ import org.distroverse.core.Util;
  */
 public final class DisplayUrl extends Str implements ProxySendable
    {
-   public DisplayUrl()
-      {  super();  }
+   public DisplayUrl( InputStream in ) throws IOException
+      {
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private DisplayUrl()
+      {  super( (String) null );  }
    public DisplayUrl( String url )
       {  super( url );  }
 

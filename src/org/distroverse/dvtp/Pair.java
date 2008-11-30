@@ -25,7 +25,18 @@ public final class Pair implements DvtpExternalizable
     * This default constructor is pretty much only useful in conjunction
     * with readExternal().
     */
-   public Pair()
+   public Pair( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private Pair()
       {  mFirst = mSecond = null;  }
 
    public Pair( DvtpExternalizable first,
@@ -68,7 +79,7 @@ public final class Pair implements DvtpExternalizable
    /* (non-Javadoc)
     * @see java.io.Externalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mFirst  = DvtpObject.parseObject( in );

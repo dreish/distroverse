@@ -7,6 +7,9 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Sent by a client to a proxy to request that it switch to a
  * different URL.  If the proxy agrees, it will send back a DisplayUrl
@@ -18,8 +21,18 @@ package org.distroverse.dvtp;
  */
 public final class SetUrl extends Str implements ClientSendable
    {
-   public SetUrl()
-      {  super();  }
+   public SetUrl( InputStream in ) throws IOException
+      {
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private SetUrl()
+      {  super( "" );  }
    public SetUrl( String url )
       {  super( url );  }
 

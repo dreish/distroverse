@@ -22,7 +22,18 @@ public final class WarpObject implements ProxySendable
    /**
     *
     */
-   public WarpObject()
+   public WarpObject( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private WarpObject()
       {
       super();
       mId      = 0;
@@ -72,11 +83,11 @@ public final class WarpObject implements ProxySendable
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
     */
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mId = ULong.externalAsLong( in );
-      (mWarpSeq = new WarpSeq()).readExternal( in );
+      mWarpSeq = new WarpSeq( in );
       }
 
    /* (non-Javadoc)

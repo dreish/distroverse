@@ -7,10 +7,23 @@
  */
 package org.distroverse.dvtp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class KeyDown extends Keystroke
    {
-   public KeyDown()
-      {  super();  }
+   public KeyDown( InputStream in ) throws IOException
+      {
+      super( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   @SuppressWarnings("unused")
+   private KeyDown()
+      {  super( 0 );  }
 
    public KeyDown( int kn )
       {  super( kn );  }

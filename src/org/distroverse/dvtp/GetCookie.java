@@ -24,7 +24,18 @@ public final class GetCookie implements ProxySendable
    /**
     *
     */
-   public GetCookie()
+   public GetCookie( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private GetCookie()
       {
       mKey = null;
       }
@@ -68,7 +79,7 @@ public final class GetCookie implements ProxySendable
       return mKey.hashCode() ^ GetCookie.class.hashCode();
       }
 
-   public void readExternal( InputStream in ) throws IOException,
+   private void readExternal( InputStream in ) throws IOException,
                                              ClassNotFoundException
       {
       mKey = DvtpObject.parseObject( in );

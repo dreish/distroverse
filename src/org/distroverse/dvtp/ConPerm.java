@@ -24,9 +24,21 @@ import org.distroverse.core.Util;
  * that is loaded.
  * @author dreish
  */
+@Deprecated
 public class ConPerm implements DvtpExternalizable
    {
-   public ConPerm()
+   public ConPerm( InputStream in )
+   throws IOException, ClassNotFoundException
+      {
+      super();
+      readExternal( in );
+      }
+
+   /*
+    * Default constructor is disallowed and useless, since this is an
+    * immutable class.
+    */
+   private ConPerm()
       {
       super();
       }
@@ -70,11 +82,11 @@ public class ConPerm implements DvtpExternalizable
    public Str getPermitRegexp()
       {  return mPermitRegexp;  }
 
-   public void readExternal( InputStream in )
+   private void readExternal( InputStream in )
    throws IOException, ClassNotFoundException
       {
       mMayConnect = Bool.externalAsBoolean( in );
-      (mPermitRegexp = new Str()).readExternal( in );
+      mPermitRegexp = new Str( in );
       }
 
    public void writeExternal( OutputStream out ) throws IOException
