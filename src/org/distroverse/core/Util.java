@@ -75,6 +75,9 @@ public final class Util
       public B b;
       @Override
       
+      /* This is wrong.  Two different pairs cannot be value-equal
+       * because no pair is an immutable value, as currently coded.
+       */
       public boolean equals( Object o )
          {
          if ( o instanceof Pair )

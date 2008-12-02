@@ -58,13 +58,13 @@
 (defn get-position! [session]
   "Load the previous position for the given identity and add it to
   this session."
-  
+  ; XXX
   )
 
 (defn add-self-to-world! [session]
   ""
   (let [pos (get-position! session)]
-    
+    ; XXX
     )
   )
 
@@ -72,12 +72,14 @@
   "Does the given identity dict exist as a user account?"
   (not (@*key-to-id* (id :pubkey))))
 
-(defn db-query [& args]
+(defn db-run [& args]
   "TODO turn the given syntaxey arguments into an SQL query and send it
   off to the *db* agent, guarding against the possibility that the
   server is being shut down."
   (if @*shutdown-mode*
-    (throw (Exception. "db-query while in shutdown-mode"))))
+    (throw (Exception. "db-run while in shutdown-mode")))
+  ; XXX
+  )
 
 (defn shutdown [t]
   "Shut down the server, and flush all database queries.  t: timeout in ms"
@@ -95,14 +97,19 @@
        (do
 	 (alter *key-to-id* conj {(id :pubkey) new-id})
 	 (alter *userdata* conj {new-id skel-user})
-	 (db-query :insert :into "userdata"
-		   :object (*userdata* new-id))
-	 (db-query :insert :into "userids"
-		   :object {:pubkey (id :pubkey) :userid new-id}))))))
+	 (db-run :insert :into "userdata"
+		 :object (*userdata* new-id))
+	 (db-run :insert :into "userids"
+		 :object {:pubkey (id :pubkey) :userid new-id}))))))
 
 (defn get-id [dvtp-id]
   (let [val (.getVal dvtp-id)]
     {:pubkey (val (Str. "pubkey"))}))
+
+(defn new-session-payload [id]
+  "Return a new session payload object."
+  (ref {:callbacks (ref {})
+	:id        id}))
 
 (defn init-connection! [session token]
   "Performs basic new-connection setup: getting and verifying the
@@ -116,12 +123,33 @@
 	  challenge (gen-id-challenge id session)]
       (ac! [id-response (fun-call ("challenge" "id" challenge))]
 	(if (valid-id? id challenge id-response)
-	  (do (if (new-user? id)
+	  (do (.setPayload session (new-session-payload id))
+	      (if (new-user? id)
 		(setup-new-user! session id))
-	      (.setPayload session {:id id})
 	      (add-self-to-world! session))
 	  (reject-id! session))))))
 
-(defn handle-object! [session ob]
-  "Handle an object received from a proxy."
+(defn handle-callback! [session ob]
+  "Look for the given ob in the given session's callback map, and if
+  it is found, call the callback with the object.  If the callback
+  returns true, remove it from the map and return true.  Otherwise,
+  return false."
+  (let [matcher   (trim-to-matcher ob)
+	callbacks @(@(.getPayload session) :callbacks)]
+    (if-let callback (callbacks matcher)
+      (if (callback)
+	
+					;XXX
+  )))
+
+(defn handle-standard! [session ob]
+  "Handle the given message using a standard, fixed code map, and
+  return true."
+  ; XXX
   )
+
+(defn handle-object! [session ob]
+  "Handle an object received from a proxy.  TODO log unhandled messages?"
+  (or (handle-callback! session ob)
+      (handle-standard! session ob)))
+

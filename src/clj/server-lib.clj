@@ -83,11 +83,36 @@
 	  false))
 
 (defmacro lookup-response [message]
-  "Lookup the response matcher to the given message, at compile time
+  "Look up the response matcher to the given message, at compile time
   if possible, or else at runtime."
   (if (const-message? message)
     (lookup-response-func (eval message))
     `(lookup-response-func ~message)))
+
+(defn do-or [& args]
+  "(or) as a function, evaluating all its arguments, but returning the
+  first true one just as (or) does."
+  (reduce #(or %1 %2) args))
+
+(defn add-callback! [session matcher callback]
+  "Add the given callback to the session so that if, later, a message
+  matching matcher is received in session, callback will be called
+  (through handle-object!)."
+  (let [callbacks-ref (@(.getPayload session) :callbacks)]
+    (dosync
+     (let [new-callback
+	   (if (@callbacks-ref matcher)
+	     ; Add the new callback after any existing ones
+	     #(do-or (@callbacks-ref matcher)
+		     callback)
+	     callback)]
+       (alter callbacks-ref assoc matcher new-callback)))))
+
+(defn dvtp-send! [#^WorldSession session message]
+  "Send message in session."
+  (let [net-session (.getNetSession session)
+	out-queue   (.getNetOutQueue net-session)]
+    (.add out-queue message)))
 
 (defmacro async-call! [session [assign-var message] code]
   "Send message in session, asynchronously bind the result to
@@ -100,13 +125,13 @@
      (add-callback! ~session
 		    ~(lookup-response message)
 		    (fn (~assign-var) ~@code))
-     (dvtp-send ~session ~message)))
+     (dvtp-send! ~session ~message)))
 
 (defn gmt-time-string []
   (. (java.util.Date.) toGMTString))
 
 (let [rng (java.security.SecureRandom.)]
   (defn random []
-    "Get a pseudorandom 32-bit int.  TODO: seed with secure random bytes."
+    "Get a pseudorandom 32-bit int.  FIXME seed with secure random bytes."
     (.nextInt rng)))
 

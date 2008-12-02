@@ -30,8 +30,6 @@
  */
 package org.distroverse.distroplane;
 
-import java.io.IOException;
-
 import org.distroverse.core.Log;
 import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.core.net.NetSession;
@@ -60,10 +58,18 @@ public class WorldServer extends DvtpServer
     */
    @Override
    public void handleGet( String url, NetOutQueue< Object > noq )
-   throws IOException
       {
-      // TODO Auto-generated method stub
-
+      try
+         {
+         mHandleGetBang.invoke( noq, url );
+         }
+      catch ( Exception e )
+         {
+         Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+         Log.p( "(handle-get!) must not throw exceptions",
+                Log.SERVER | Log.UNHANDLED, 100 );
+         e.printStackTrace();
+         }
       }
 
    /* (non-Javadoc)
@@ -72,10 +78,18 @@ public class WorldServer extends DvtpServer
    @Override
    public void handleLocation( String location,
                                NetOutQueue< Object > noq )
-   throws IOException
       {
-      // TODO Auto-generated method stub
-
+      try
+         {
+         mHandleLocationBang.invoke( noq, location );
+         }
+      catch ( Exception e )
+         {
+         Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+         Log.p( "(handle-location!) must not throw exceptions",
+                Log.SERVER | Log.UNHANDLED, 100 );
+         e.printStackTrace();
+         }
       }
 
    /* (non-Javadoc)
@@ -135,8 +149,10 @@ public class WorldServer extends DvtpServer
       try
          {
          RT.loadResourceScript( "world-server.clj" );
-         mInitSessionBang  = RT.var( "user", "init-session!" );
-         mHandleObjectBang = RT.var( "user", "handle-object!" );
+         mInitSessionBang    = RT.var( "user", "init-session!" );
+         mHandleObjectBang   = RT.var( "user", "handle-object!" );
+         mHandleGetBang      = RT.var( "user", "handle-get!" );
+         mHandleLocationBang = RT.var( "user", "handle-location!" );
          }
       catch ( Exception e )
          {
@@ -149,4 +165,6 @@ public class WorldServer extends DvtpServer
 
    private static Var mInitSessionBang;
    private static Var mHandleObjectBang;
+   private static Var mHandleGetBang;
+   private static Var mHandleLocationBang;
    }

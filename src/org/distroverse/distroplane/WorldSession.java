@@ -65,6 +65,8 @@ public class WorldSession
    
    public Object getPayload()
       {  return mPayload;  }
+   public NetSession< Object > getNetSession()
+      {  return mNetSession;  }
 
    private NetSession< Object > mNetSession;
    private Object mPayload; 

@@ -72,13 +72,6 @@
       > Has default starting location
   - Plug server into database
   - Would be nice to know why TextArea causes OpenGL exceptions
-  - Dict is not immutable; it should be
-    - Also, change implementation to use any Map; change hashCode to
-      the sum of the hashes of keys * 852403729 ^ hashes of values
-  + Get rid of KNOCK command
-    > A DVTP proxy will be allowed to connect to any server, at any
-      time, on any port except SMTP, which is always forbidden
-    + Remove handleKnock()
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
     > Also nice because it avoids having system dialogs swallow a stray
@@ -267,6 +260,13 @@
       ID after reading; it needs to be a separate class (DObject)
       factored out of AddObject
       + Unless I made a withId() method returning a new object ...
+  + Dict is not immutable; it should be
+    + Also, change implementation to use any Map; change hashCode to
+      the sum of the hashes of keys * 852403729 ^ hashes of values
+  + Get rid of KNOCK command
+    > A DVTP proxy will be allowed to connect to any server, at any
+      time, on any port except SMTP, which is always forbidden
+    + Remove handleKnock()
 
 ------------------------------------------------------------------------
 - To do for 0.03:
