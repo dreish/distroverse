@@ -55,15 +55,11 @@
        " # "
        (random)))
 
-(defn get-position! [session]
-  "Load the previous position for the given identity and add it to
-  this session."
-  ; XXX
-  )
-
 (defn add-self-to-world! [session]
   ""
-  (let [pos (get-position! session)]
+  (let [payload (.getPayload session)
+	userid (payload :userid)
+	pos (payload :lastpos)]
     ; XXX
     )
   )
@@ -88,19 +84,27 @@
    (send *db* #(identity nil)))
   (or (await-for t *db*)
       (throw (Exception. "Database flush timed out."))))
-  
+
+(defn skel-user [id userid]
+  "Return the skeleton user account, with the given ID"
+  (let [skel-userid (get-userid-by-name "skel")]
+    (assoc (@*userdata* skel-userid)
+      :pubkey (id :pubkey)
+      :userid userid)))
+
 (defn setup-new-user! [session id]
   "Sets up a new user."
   (dosync
    (if (new-user? id)
-     (let [new-id (get-new-userid)]
+     (let [new-userid (get-new-userid)]
        (do
-	 (alter *key-to-id* conj {(id :pubkey) new-id})
-	 (alter *userdata* conj {new-id skel-user})
+	 (alter *key-to-id* conj {(id :pubkey) new-userid})
+	 (alter *userdata* conj {new-userid (skel-user id new-userid)})
+	 (alter (.getPayload session) assoc :userid new-userid)
 	 (db-run :insert :into "userdata"
-		 :object (*userdata* new-id))
+		 :object (@*userdata* new-userid))
 	 (db-run :insert :into "userids"
-		 :object {:pubkey (id :pubkey) :userid new-id}))))))
+		 :object {:pubkey (id :pubkey) :userid new-userid}))))))
 
 (defn get-id [dvtp-id]
   (let [val (.getVal dvtp-id)]
@@ -135,17 +139,18 @@
   returns true, remove it from the map and return true.  Otherwise,
   return false."
   (let [matcher   (trim-to-matcher ob)
-	callbacks @(@(.getPayload session) :callbacks)]
-    (if-let callback (callbacks matcher)
+	callbacks (@(.getPayload session) :callbacks)]
+    (if-let callback (@callbacks matcher)
       (if (callback)
-	
-					;XXX
-  )))
+	(dosync
+	 (alter callbacks dissoc matcher)
+	 true)
+	false))))
 
 (defn handle-standard! [session ob]
   "Handle the given message using a standard, fixed code map, and
   return true."
-  ; XXX
+  ; XXX something with multimethods?
   )
 
 (defn handle-object! [session ob]
