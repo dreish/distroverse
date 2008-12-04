@@ -35,7 +35,7 @@
   "Map of userid numbers to other account data.")
 
 (defmacro fun-call [rform]
-  `(FunCall. (.genFunCallId ~'session) ~rform))
+  `(FunCall. (.genFunCallId ~'session) ~@rform))
 
 (defmacro ac! [& args]
   "Abbreviation for (async-call! session args...)"
@@ -55,11 +55,10 @@
        " # "
        (random)))
 
-(defn add-self-to-world! [session]
+(defn add-self-to-world! [att]
   ""
-  (let [payload (.getPayload session)
-	userid (payload :userid)
-	pos (payload :lastpos)]
+  (let [userid (att :userid)
+	pos (att :lastpos)]
     ; XXX
     )
   )
@@ -92,7 +91,7 @@
       :pubkey (id :pubkey)
       :userid userid)))
 
-(defn setup-new-user! [session id]
+(defn setup-new-user! [session att id]
   "Sets up a new user."
   (dosync
    (if (new-user? id)
@@ -100,7 +99,7 @@
        (do
 	 (alter *key-to-id* conj {(id :pubkey) new-userid})
 	 (alter *userdata* conj {new-userid (skel-user id new-userid)})
-	 (alter (.getPayload session) assoc :userid new-userid)
+	 (alter att assoc :userid new-userid)
 	 (db-run :insert :into "userdata"
 		 :object (@*userdata* new-userid))
 	 (db-run :insert :into "userids"
@@ -110,9 +109,10 @@
   (let [val (.getVal dvtp-id)]
     {:pubkey (val (Str. "pubkey"))}))
 
-(defn new-session-payload [id]
-  "Return a new session payload object."
+(defn new-session-attachment [session id]
+  "Return a new session attachment object."
   (ref {:callbacks (ref {})
+	:session   session
 	:id        id}))
 
 (defn init-connection! [session token]
@@ -127,19 +127,21 @@
 	  challenge (gen-id-challenge id session)]
       (ac! [id-response (fun-call ("challenge" "id" challenge))]
 	(if (valid-id? id challenge id-response)
-	  (do (.setPayload session (new-session-payload id))
+	  (let [att (new-session-attachment session id)]
+	    (do
+	      (.setAttachment session (class att) att)
 	      (if (new-user? id)
-		(setup-new-user! session id))
-	      (add-self-to-world! session))
+		(setup-new-user! session att id))
+	      (add-self-to-world! att)))
 	  (reject-id! session))))))
 
-(defn handle-callback! [session ob]
+(defn handle-callback! [session att ob]
   "Look for the given ob in the given session's callback map, and if
   it is found, call the callback with the object.  If the callback
   returns true, remove it from the map and return true.  Otherwise,
   return false."
   (let [matcher   (trim-to-matcher ob)
-	callbacks (@(.getPayload session) :callbacks)]
+	callbacks (@att :callbacks)]
     (if-let callback (@callbacks matcher)
       (if (callback)
 	(dosync
@@ -147,14 +149,23 @@
 	 true)
 	false))))
 
-(defn handle-standard! [session ob]
+(defn handle-standard! [session att ob]
   "Handle the given message using a standard, fixed code map, and
   return true."
   ; XXX something with multimethods?
   )
 
-(defn handle-object! [session ob]
+(defn handle-object! [session att ob]
   "Handle an object received from a proxy.  TODO log unhandled messages?"
-  (or (handle-callback! session ob)
-      (handle-standard! session ob)))
+  (or (handle-callback! session att ob)
+      (handle-standard! session att ob)))
 
+
+(defn handle-location [noq loc]
+  "Handle an anonymous LOCATION request."
+  (.offer noq (Str. "http://www.distroverse.org/proxies/WorldProxy.jar"))
+
+(defn handle-get [noq url]
+  "Handle an anonymous GET request."
+  ; XXX
+  )

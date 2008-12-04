@@ -61,7 +61,7 @@ public class WorldServer extends DvtpServer
       {
       try
          {
-         mHandleGetBang.invoke( noq, url );
+         mHandleGet.invoke( noq, url );
          }
       catch ( Exception e )
          {
@@ -81,7 +81,7 @@ public class WorldServer extends DvtpServer
       {
       try
          {
-         mHandleLocationBang.invoke( noq, location );
+         mHandleLocation.invoke( noq, location );
          }
       catch ( Exception e )
          {
@@ -99,23 +99,20 @@ public class WorldServer extends DvtpServer
    public void handleProxyObject( Object net_in_object,
                                   NetSession< Object > session )
       {
-      WorldSession ws
-         = session.getAttachmentOrNull( WorldSession.class );
-      if ( ws == null )
+      try
+         {
+         mHandleObjectBang.invoke( session,
+                                   session.getAttachment(),
+                                   net_in_object );
+         }
+      catch ( Exception e )
+         {
+         Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+         Log.p( "(handle-object!) must not throw exceptions",
+                Log.SERVER | Log.UNHANDLED, 100 );
+         e.printStackTrace();
          session.close();
-      else
-         try
-            {
-            mHandleObjectBang.invoke( ws, net_in_object );
-            }
-         catch ( Exception e )
-            {
-            Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
-            Log.p( "(handle-object!) must not throw exceptions",
-                   Log.SERVER | Log.UNHANDLED, 100 );
-            e.printStackTrace();
-            session.close();
-            }
+         }
       }
 
    /* (non-Javadoc)
@@ -126,13 +123,12 @@ public class WorldServer extends DvtpServer
                                 NetOutQueue< Object > noq )
       {
       NetSession< Object > ns = noq.getSession();
-      WorldSession ws =
-         noq.getSession().setAttachment( WorldSession.class,
-                                         new WorldSession( ns ) );
+//      WorldSession ws = ns.setAttachment( WorldSession.class,
+//                                          new WorldSession( ns ) );
       try
          {
          // Down the rabbit hole.
-         mInitSessionBang.invoke( ws, token );
+         mInitSessionBang.invoke( ns, token );
          }
       catch ( Exception e )
          {
@@ -149,10 +145,10 @@ public class WorldServer extends DvtpServer
       try
          {
          RT.loadResourceScript( "world-server.clj" );
-         mInitSessionBang    = RT.var( "user", "init-session!" );
-         mHandleObjectBang   = RT.var( "user", "handle-object!" );
-         mHandleGetBang      = RT.var( "user", "handle-get!" );
-         mHandleLocationBang = RT.var( "user", "handle-location!" );
+         mInitSessionBang  = RT.var( "user", "init-session!" );
+         mHandleObjectBang = RT.var( "user", "handle-object!" );
+         mHandleGet        = RT.var( "user", "handle-get" );
+         mHandleLocation   = RT.var( "user", "handle-location" );
          }
       catch ( Exception e )
          {
@@ -165,6 +161,6 @@ public class WorldServer extends DvtpServer
 
    private static Var mInitSessionBang;
    private static Var mHandleObjectBang;
-   private static Var mHandleGetBang;
-   private static Var mHandleLocationBang;
+   private static Var mHandleGet;
+   private static Var mHandleLocation;
    }
