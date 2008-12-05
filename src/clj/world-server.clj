@@ -55,13 +55,48 @@
        " # "
        (random)))
 
-(defn add-self-to-world! [att]
-  ""
+(defn load-node [nodeid]
+  "Load the given node from the database and add it to the node tree."
+  ;; Implementation note: I believe it's safe to commute the
+  ;; *id-to-node* hash here, because I'm altering the parent node's
+  ;; children vector.  If another thread were adding a mapping from
+  ;; the same id to a different node object in *id-to-node*, it would
+  ;; also be altering the parent node.  Only one can win.
+  (dosync
+   (let [node-data (db-query :select :* :from "nodes"
+			     :where {"nodeid" nodeid})]
+     
+  
+  ; XXX
+  
+  )
+
+(defn get-node [nodeid]
+  "Return the node with the given id (a serial number).  If it is not
+  already in the node table, load it from the database and return it."
+  (dosync
+   (if-let node (*id-to-node* nodeid)
+     node
+     (do
+       (load-node nodeid)
+       (*id-to-node* nodeid)))))
+
+(defn add-object [node move shape]
+  "Add shape as a child of node, with move move."
+  (dosync
+   
+  )
+
+(defn add-self-to-world [att]
+  "Add the session's avatar to the world.  This has side effects in a
+  sense, but since they all happen inside a dosync, no bang is needed."
   (let [userid (att :userid)
 	pos (att :lastpos)]
-    ; XXX
-    )
-  )
+    (dosync
+     (alter att assoc
+	    :avatar (add-object (get-node (pos :node))
+				(pos :move)
+				(att :avatarshape))))))
 
 (defn new-user? [id]
   "Does the given identity dict exist as a user account?"
@@ -132,7 +167,7 @@
 	      (.setAttachment session (class att) att)
 	      (if (new-user? id)
 		(setup-new-user! session att id))
-	      (add-self-to-world! att)))
+	      (add-self-to-world att)))
 	  (reject-id! session))))))
 
 (defn handle-callback! [session att ob]
@@ -142,8 +177,8 @@
   return false."
   (let [matcher   (trim-to-matcher ob)
 	callbacks (@att :callbacks)]
-    (if-let callback (@callbacks matcher)
-      (if (callback)
+    (if-let callback! (@callbacks matcher)
+      (if (callback!)
 	(dosync
 	 (alter callbacks dissoc matcher)
 	 true)
@@ -163,7 +198,9 @@
 
 (defn handle-location [noq loc]
   "Handle an anonymous LOCATION request."
-  (.offer noq (Str. "http://www.distroverse.org/proxies/WorldProxy.jar"))
+  (.offer noq (Str. "http://www.distroverse.org/proxies/WorldProxy.jar"
+		    ".*"
+		    "org.distroverse.proxy.WorldProxy")))
 
 (defn handle-get [noq url]
   "Handle an anonymous GET request."
