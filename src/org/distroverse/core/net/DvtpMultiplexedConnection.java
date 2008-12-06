@@ -267,7 +267,7 @@ extends Thread
             parser,   DEFAULT_QUEUE_SIZE, mSelector, remote, this );
       NetOutQueue< O > noqs = new NetOutQueue< O >(
             streamer, DEFAULT_QUEUE_SIZE, mSelector, remote, this );
-      NetSession< O > ret = new NetSession< O >( niqs, noqs );
+      NetSession< O > ret = new NetSession< O >( niqs, noqs, remote );
       mWatcher.addQueue( niqs );
       /* activateNetworkReader() creates a SelectionKey and attaches
        * niqs to it, so all three of the above objects survive at least

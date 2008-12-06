@@ -1,9 +1,5 @@
 
 - To do for 0.02:
-  - Remove WorldSession class
-    - Put getPeerAddress() in NetSession class
-    + Rewrite server code to take a session and an attachment
-    + Look up attachment in handler methods in WorldServer; pass them
   - Add a FengGUI location bar
   - Begin implementing WorldServer (extends DvtpServer)
     + Add DVTP messages:
@@ -271,6 +267,10 @@
     > A DVTP proxy will be allowed to connect to any server, at any
       time, on any port except SMTP, which is always forbidden
     + Remove handleKnock()
+  + Remove WorldSession class
+    + Put getPeerAddress() in NetSession class
+    + Rewrite server code to take a session and an attachment
+    + Look up attachment in handler methods in WorldServer; pass them
 
 ------------------------------------------------------------------------
 - To do for 0.03:

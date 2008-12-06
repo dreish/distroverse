@@ -32,6 +32,10 @@
  */
 package org.distroverse.core.net;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+
 /**
  * Bundles an input queue and an output queue of some type, and holds
  * arbitrary state information about the session in the form of a
@@ -42,13 +46,15 @@ package org.distroverse.core.net;
 public class NetSession< T >
    {
    public NetSession( NetInQueue < T > niqs,
-                      NetOutQueue< T > noqs )
+                      NetOutQueue< T > noqs,
+                      SocketChannel peer )
       {
       super();
       niqs.setSession( this );
       noqs.setSession( this );
       mNetInQueue  = niqs;
       mNetOutQueue = noqs;
+      mPeer = peer;
       mProxyMode = false;
       }
 
@@ -96,13 +102,19 @@ public class NetSession< T >
    public Object getAttachment()
       {  return mAttachment;  }
 
+   public String getPeerAddress()
+      {
+      InetSocketAddress addr = getNetOutQueue().getPeerAddress();
+      return (addr.getHostName() + ":" + addr.getPort());
+      }
+
    /**
     * Close the socket associated with this connection
+    * @throws IOException 
     */
-   public void close()
+   public void close() throws IOException
       {
-      // FIXME Auto-generated method stub
-
+      mPeer.close();
       }
 
    private NetInQueue< T >  mNetInQueue;
@@ -110,4 +122,5 @@ public class NetSession< T >
    private Object           mAttachment;
    private Class< ? >       mAttachmentClass;
    private boolean          mProxyMode;
+   private SocketChannel    mPeer;
    }

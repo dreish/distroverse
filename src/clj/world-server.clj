@@ -67,6 +67,11 @@
   ; XXX
   )
 
+(defn db-query [& args]
+  ""
+  ; XXX
+  )
+
 (defn load-node [nodeid]
   "Load the given node from the database and add it to the node tree."
   ;; Implementation note: I believe it's safe to commute the

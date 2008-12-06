@@ -30,6 +30,8 @@
  */
 package org.distroverse.distroplane;
 
+import java.io.IOException;
+
 import org.distroverse.core.Log;
 import org.distroverse.core.net.NetOutQueue;
 import org.distroverse.core.net.NetSession;
@@ -111,7 +113,17 @@ public class WorldServer extends DvtpServer
          Log.p( "(handle-object!) must not throw exceptions",
                 Log.SERVER | Log.UNHANDLED, 100 );
          e.printStackTrace();
-         session.close();
+         try
+            {
+            session.close();
+            }
+         catch ( IOException e2 )
+            {
+            Log.p( e2, Log.SERVER | Log.UNHANDLED, 100 );
+            Log.p( "(handle-object!) exception: got another exception"
+                   + "while closing the channel!",
+                   Log.SERVER | Log.UNHANDLED, 100 );
+            }
          }
       }
 
@@ -133,7 +145,21 @@ public class WorldServer extends DvtpServer
       catch ( Exception e )
          {
          e.printStackTrace();
-         ns.close();
+         try
+            {
+            Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+            Log.p( "(init-session!) must not throw exceptions",
+                   Log.SERVER | Log.UNHANDLED, 100 );
+            ns.close();
+            }
+         catch ( IOException e2 )
+            {
+            Log.p( e2, Log.SERVER | Log.UNHANDLED, 100 );
+            Log.p( "(init-session!) exception: got another exception"
+                   + "while closing the channel!",
+                   Log.SERVER | Log.UNHANDLED, 100 );
+            e2.printStackTrace();
+            }
          }
       }
 
