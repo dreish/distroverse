@@ -30,15 +30,22 @@
 ;; </copyleft>
 
 (def *key-to-id* (ref {})
-  "Map of public keys to userid numbers.")
+  "Map of public keys to userid numbers")
 (def *userdata* (ref {})
-  "Map of userid numbers to other account data.")
+  "Map of userid numbers to other account data")
+(def *avatars* (ref #{})
+  "Set of all avatars")
+(def *db* (agent (db-open))
+  "Global database connection")
 
 (defmacro fun-call [rform]
-  `(FunCall. (.genFunCallId ~'session) ~@rform))
+  "Generates a FunCall constructor.  Assumes 'session is bound to a
+  session."
+  `(FunCall. (gen-fun-call-id ~'session) ~@rform))
 
 (defmacro ac! [& args]
-  "Abbreviation for (async-call! session args...)"
+  "Abbreviation for (async-call! session args...).  Assumes 'session
+  is bound to a session."
   `(async-call! ~'session ~@args))
 
 (defn valid-id? [id challenge response]
@@ -55,6 +62,11 @@
        " # "
        (random)))
 
+(defn replace-child [parent nodeid child]
+  "Make the node ref for nodeid under parent point to child."
+  ; XXX
+  )
+
 (defn load-node [nodeid]
   "Load the given node from the database and add it to the node tree."
   ;; Implementation note: I believe it's safe to commute the
@@ -64,12 +76,9 @@
   ;; also be altering the parent node.  Only one can win.
   (dosync
    (let [node-data (db-query :select :* :from "nodes"
-			     :where {"nodeid" nodeid})]
-     
-  
-  ; XXX
-  
-  )
+			     :where {"nodeid" nodeid})
+	 parent (get-node (node-data :parent))]
+     (replace-child parent (node-data :nodeid) node-data))))
 
 (defn get-node [nodeid]
   "Return the node with the given id (a serial number).  If it is not
@@ -84,19 +93,20 @@
 (defn add-object [node move shape]
   "Add shape as a child of node, with move move."
   (dosync
-   
+   ; XXX
   )
 
-(defn add-self-to-world [att]
+(defn add-self-to-world [att session]
   "Add the session's avatar to the world.  This has side effects in a
   sense, but since they all happen inside a dosync, no bang is needed."
   (let [userid (att :userid)
 	pos (att :lastpos)]
     (dosync
-     (alter att assoc
-	    :avatar (add-object (get-node (pos :node))
-				(pos :move)
-				(att :avatarshape))))))
+     (let [avatar (add-object (get-node (pos :node))
+			      (pos :move)
+			      (att :avatarshape))]
+       (commute *avatars* conj {:object avatar :session session})
+       (alter att assoc :avatar avatar))))
 
 (defn new-user? [id]
   "Does the given identity dict exist as a user account?"
@@ -108,7 +118,7 @@
   server is being shut down."
   (if @*shutdown-mode*
     (throw (Exception. "db-run while in shutdown-mode")))
-  ; XXX
+    ; XXX
   )
 
 (defn shutdown [t]
@@ -138,7 +148,8 @@
 	 (db-run :insert :into "userdata"
 		 :object (@*userdata* new-userid))
 	 (db-run :insert :into "userids"
-		 :object {:pubkey (id :pubkey) :userid new-userid}))))))
+		 :object {:pubkey (id :pubkey)
+			  :userid new-userid}))))))
 
 (defn get-id [dvtp-id]
   (let [val (.getVal dvtp-id)]
@@ -167,7 +178,7 @@
 	      (.setAttachment session (class att) att)
 	      (if (new-user? id)
 		(setup-new-user! session att id))
-	      (add-self-to-world att)))
+	      (add-self-to-world att session)))
 	  (reject-id! session))))))
 
 (defn handle-callback! [session att ob]
