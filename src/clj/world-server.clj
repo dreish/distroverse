@@ -29,6 +29,8 @@
 
 ;; </copyleft>
 
+(use 'server-lib)
+
 (def *key-to-id* (ref {})
   "Map of public keys to userid numbers")
 (def *userdata* (ref {})
@@ -37,6 +39,13 @@
   "Set of all avatars")
 (def *db* (agent (db-open))
   "Global database connection")
+
+(defn gen-fun-call-id [session]
+  "Return a fun-call serial number unique within the given session."
+  (dosync
+   (let [ret @(session :funcall-counter)]
+     (alter (session :funcall-counter) (inc ret))
+     ret)))
 
 (defmacro fun-call [rform]
   "Generates a FunCall constructor.  Assumes 'session is bound to a
@@ -162,9 +171,10 @@
 
 (defn new-session-attachment [session id]
   "Return a new session attachment object."
-  (ref {:callbacks (ref {})
-	:session   session
-	:id        id}))
+  (ref {:callbacks       (ref {})
+	:session         session
+	:id              id
+	:funcall-counter (ref 0)}))
 
 (defn init-connection! [session token]
   "Performs basic new-connection setup: getting and verifying the
