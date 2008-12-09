@@ -1,5 +1,6 @@
 
 - To do for 0.02:
+  - Make all private DVTP-message fields final and debug
   - Add a FengGUI location bar
   - Begin implementing WorldServer (extends DvtpServer)
     + Add DVTP messages:
@@ -356,6 +357,8 @@
       2, 10, 100, maximum that will fit in memory
     - Test that a sequence of objects inserted into a NetOutQueue are
       all received at the other end
+  - For paranoid security, suspend all untrusted threads while
+    performing public-key computations
   - Switch to a better language targeting the JVM, once something mature
     emerges
     > Probably Rhino
