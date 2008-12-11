@@ -20,10 +20,9 @@ import java.io.OutputStream;
  */
 public abstract class Bool implements DvtpExternalizable
    {
-   public Bool( InputStream in )
+   public Bool( @SuppressWarnings("unused") InputStream in )
       {
       super();
-      readExternal( in );
       }
 
    /*
@@ -58,9 +57,6 @@ public abstract class Bool implements DvtpExternalizable
       DvtpObject.writeInnerObject( out, Bool.newInstance( b ) );
       }
 
-   private void readExternal( @SuppressWarnings("unused")
-                              InputStream in )
-      {  /* Do nothing. */  }
    public void writeExternal( @SuppressWarnings("unused")
                               OutputStream out )
       {  /* Do nothing. */  }

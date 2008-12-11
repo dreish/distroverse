@@ -32,7 +32,13 @@ public final class PointArray implements DvtpExternalizable
    public PointArray( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      int len = Util.safeInt( ULong.externalAsLong( in ) );
+      Vector3f[] ap_f = new Vector3f[ len ];
+      for ( int i = 0; i < len; ++i )
+         ap_f[ i ] = new Vector3f( Flo.externalAsFloat( in ),
+                                   Flo.externalAsFloat( in ),
+                                   Flo.externalAsFloat( in ) );
+      mFb = BufferUtils.createFloatBuffer( ap_f ).asReadOnlyBuffer();
       }
 
    /*
@@ -80,17 +86,6 @@ public final class PointArray implements DvtpExternalizable
       return mFb.hashCode();
       }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      int len = Util.safeInt( ULong.externalAsLong( in ) );
-      Vector3f[] ap_f = new Vector3f[ len ];
-      for ( int i = 0; i < len; ++i )
-         ap_f[ i ] = new Vector3f( Flo.externalAsFloat( in ),
-                                   Flo.externalAsFloat( in ),
-                                   Flo.externalAsFloat( in ) );
-      mFb = BufferUtils.createFloatBuffer( ap_f ).asReadOnlyBuffer();
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       ULong.longAsExternal( out, length() );
@@ -128,5 +123,5 @@ public final class PointArray implements DvtpExternalizable
       return ret.toString();
       }
 
-   private FloatBuffer mFb;
+   private final FloatBuffer mFb;
    }

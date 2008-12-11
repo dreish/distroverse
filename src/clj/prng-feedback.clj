@@ -30,11 +30,14 @@
 ;; </copyleft>
 
 
-; Trivial convenience functions for interactive with the Java
-; implementation of a linear feedback shift register: better
-; statistical properties than a linear congruential PRNG, but with
-; zero setup cost.  For my application, I need to go from new seed to
-; a short stream of PRNs many times every second.
+; Trivial convenience functions for interacting with the Java
+; implementation of a self-shrinking linear feedback shift register,
+; which has better statistical properties than a linear congruential
+; PRNG, but with much less state and somewhat less startup cost than a
+; Mersenne twister.  For my application, I need to go from new seed to
+; a short stream of PRNs many times every second, and since I use
+; immutable data structures, I don't want copy-modification to entail
+; copying large amounts of state.
 
 (import '(org.distroverse.core PRNGFeedback))
 (use 'clojure.contrib.def)
@@ -45,7 +48,8 @@
 
 (defn get-prng-real [reg-ref]
   "Return a new double between 0 and just under 1, and update the
-  register referred to by reg-ref."
+  register referred to by reg-ref, having taken 52-60 bits from the
+  output stream."
   (dosync
    (let [new-reg (.advance @reg-ref 52)]
      (ref-set reg-ref new-reg)
@@ -55,15 +59,32 @@
 
 
 
-(def myrng (ref (PRNGFeedback. (long 1))))
+; -------------------- 8< -------------------- 8< --------------------
 
-(PRNGFeedback/nextRegister (long -1))
-; 9223372036854775807 wrong?
-(PRNGFeedback/nextRegister (long 1))
-; -2147483648 wrong?
+(comment
+  ; For REPL
+
+  (def myrng (ref (PRNGFeedback. (long 1))))
+
+  (PRNGFeedback/nextRegister (long -1))
+  ; 9223372036854775807
+  (PRNGFeedback/nextRegister (long 1))
+  ; -9223372036854775808
 
 
-(dorun (map (fn [x] (println (get-prng-real myrng)
-			     (.getRegister @myrng)))
-	    (range 40)))
+  (dorun (map (fn [x] (println (get-prng-real myrng)
+			       (.getRegister @myrng)))
+	      (range 40)))
+
+  (dosync (ref-set myrng (PRNGFeedback. (long 16))))
+
+  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 15)))))
+  
+  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 16)))))
+
+  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 17)))))
+  
+  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 18)))))
+
+  )
 

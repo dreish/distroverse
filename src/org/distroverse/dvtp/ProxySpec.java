@@ -30,7 +30,9 @@ public class ProxySpec implements DvtpExternalizable
    public ProxySpec( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mProxyUrl       = new Str( in );
+      mResourceRegexp = new Str( in );
+      mProxyName      = new Str( in );
       }
 
    /*
@@ -40,7 +42,7 @@ public class ProxySpec implements DvtpExternalizable
    @SuppressWarnings( "unused" )
    private ProxySpec()
       {
-      mProxyUrl = mResourceRegexp = null;
+      mProxyUrl = mResourceRegexp = mProxyName = null;
       }
 
    public ProxySpec( Str proxy_url, Str resource_regexp,
@@ -88,17 +90,6 @@ public class ProxySpec implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in )
-   throws IOException, ClassCastException
-      {
-      mProxyUrl = new Str( in );
-      mResourceRegexp = new Str( in );
-      mProxyName = new Str( in );
-      }
-
-   /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -115,11 +106,11 @@ public class ProxySpec implements DvtpExternalizable
                                      mProxyName ) + ")";
       }
 
-   public Str getProxyUrl()  {  return mProxyUrl;  }
+   public Str getProxyUrl()        {  return mProxyUrl;  }
    public Str getResourceRegexp()  {  return mResourceRegexp;  }
-   public Str getProxyName()  {  return mProxyName;  }
+   public Str getProxyName()       {  return mProxyName;  }
 
-   private Str mProxyUrl;
-   private Str mResourceRegexp;
-   private Str mProxyName;
+   private final Str mProxyUrl;
+   private final Str mResourceRegexp;
+   private final Str mProxyName;
    }

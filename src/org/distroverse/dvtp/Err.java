@@ -28,13 +28,14 @@ public class Err implements DvtpExternalizable
       {
       super();
       mMessage = message;
-      mCode = code;
+      mCode    = code;
       }
 
    public Err( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mMessage = Str.externalAsString( in );
+      mCode    = Util.safeInt( ULong.externalAsLong( in ) );
       }
 
    /*
@@ -45,6 +46,8 @@ public class Err implements DvtpExternalizable
    private Err()
       {
       super();
+      mMessage = null;
+      mCode    = 0;
       }
 
    public int getClassNumber()
@@ -73,12 +76,6 @@ public class Err implements DvtpExternalizable
    public int getCode()
       {  return mCode;  }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mMessage = Str.externalAsString( in );
-      mCode    = Util.safeInt( ULong.externalAsLong( in ) );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       Str.stringAsExternal( out, mMessage );
@@ -90,6 +87,6 @@ public class Err implements DvtpExternalizable
       return "(Err " + Util.prettyPrintList( mMessage, mCode ) + ")";
       }
 
-   private String mMessage;
-   private int    mCode;
+   private final String mMessage;
+   private final int    mCode;
    }

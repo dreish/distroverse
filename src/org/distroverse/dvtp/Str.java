@@ -30,7 +30,7 @@ public class Str implements DvtpExternalizable
    public Str( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mVal = externalAsString( in );
       }
 
    /*
@@ -88,11 +88,6 @@ public class Str implements DvtpExternalizable
       return mVal.hashCode() ^ getClass().hashCode();
       }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mVal = externalAsString( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       stringAsExternal( out, mVal );
@@ -104,5 +99,5 @@ public class Str implements DvtpExternalizable
              + Util.prettyPrintList( mVal ) + ")";
       }
 
-   private String mVal;
+   private final String mVal;
    }

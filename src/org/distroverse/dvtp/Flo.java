@@ -23,12 +23,15 @@ public class Flo implements DvtpExternalizable
    public Flo( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mF = externalAsFloat( in );
       }
 
    @SuppressWarnings("unused")
    private Flo()
-      {  super();  }
+      {  
+      super();
+      mF = 0;
+      }
 
    public Flo( float f )  { mF = f; }
    
@@ -74,9 +77,6 @@ public class Flo implements DvtpExternalizable
       out.write( float_buf );
       }
 
-   private void readExternal( InputStream in ) throws IOException
-      {  mF = externalAsFloat( in );  }
-
    public void writeExternal( OutputStream out ) throws IOException
       {  floatAsExternal( out, mF );  }
 
@@ -85,5 +85,5 @@ public class Flo implements DvtpExternalizable
       return "(Flo " + mF + ")";
       }
 
-   private float mF;
+   private final float mF;
    }

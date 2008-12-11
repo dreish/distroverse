@@ -46,5 +46,4 @@ public final class True extends Bool
       {
       return True.class.hashCode();
       }
-
    }

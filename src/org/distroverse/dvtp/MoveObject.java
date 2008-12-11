@@ -25,7 +25,8 @@ public final class MoveObject implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mId = ULong.externalAsLong( in );
+      mMoveSeq = new MoveSeq( in );
       }
 
    /*
@@ -36,6 +37,8 @@ public final class MoveObject implements ProxySendable
    private MoveObject()
       {
       super();
+      mId = 0;
+      mMoveSeq = null;
       }
 
    public MoveObject( long id, MoveSeq m )
@@ -69,13 +72,6 @@ public final class MoveObject implements ProxySendable
    public long    getId()       {  return mId;       }
    public MoveSeq getMoveSeq()  {  return mMoveSeq;  }
 
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mId = ULong.externalAsLong( in );
-      mMoveSeq = new MoveSeq( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       ULong.longAsExternal( out, mId );
@@ -88,6 +84,6 @@ public final class MoveObject implements ProxySendable
              + Util.prettyPrintList( mId, mMoveSeq ) + ")";
       }
 
-   private long mId;
-   private MoveSeq mMoveSeq;
+   private final long mId;
+   private final MoveSeq mMoveSeq;
    }

@@ -28,7 +28,8 @@ public class AskInv implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mType = Str.externalAsString( in );
+      mKey  = DvtpObject.parseObject( in );
       }
 
    /*
@@ -87,16 +88,6 @@ public class AskInv implements ProxySendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mType = Str.externalAsString( in );
-      mKey  = DvtpObject.parseObject( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -105,6 +96,6 @@ public class AskInv implements ProxySendable
       DvtpObject.writeInnerObject( out, mKey );
       }
 
-   String             mType;
-   DvtpExternalizable mKey;
+   private final String             mType;
+   private final DvtpExternalizable mKey;
    }

@@ -31,7 +31,8 @@ public final class Pair implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mFirst  = DvtpObject.parseObject( in );
+      mSecond = DvtpObject.parseObject( in );
       }
 
    /*
@@ -80,16 +81,6 @@ public final class Pair implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mFirst  = DvtpObject.parseObject( in );
-      mSecond = DvtpObject.parseObject( in );
-      }
-
-   /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -104,6 +95,6 @@ public final class Pair implements DvtpExternalizable
              + Util.prettyPrintList( mFirst, mSecond ) + ")";
       }
 
-   private DvtpExternalizable mFirst;
-   private DvtpExternalizable mSecond;
+   private final DvtpExternalizable mFirst;
+   private final DvtpExternalizable mSecond;
    }

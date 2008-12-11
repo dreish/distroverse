@@ -32,7 +32,21 @@ public final class Frac implements DvtpExternalizable
    public Frac( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      byte b = 0;
+      long num = 0;
+      int denom_bits = 0;
+
+      while ( (b & 128) != 128 )
+         {
+         if ( denom_bits == 63 )
+            throw new IOException( "Malformed Frac in input" );
+         b = (byte) in.read();
+         num |= (((long) (b & 127)) << denom_bits);
+         denom_bits += 7;
+         }
+      
+      mNumerator = num;
+      mDenominatorBits = denom_bits;
       }
 
    /*
@@ -53,11 +67,6 @@ public final class Frac implements DvtpExternalizable
     */
    public Frac( long numerator, int denominator_bits )
       {
-      init( numerator, denominator_bits );
-      }
-
-   private void init( long numerator, int denominator_bits )
-      {
       if ( numerator < 0 )
          throw new IllegalArgumentException(
                                            "Frac must be nonnegative" );
@@ -67,23 +76,25 @@ public final class Frac implements DvtpExternalizable
       if ( numerator >> denominator_bits > 0 )
          throw new IllegalArgumentException(
                      "numerator must be less than 2^denominator_bits" );
-      mNumerator       = numerator;
-      mDenominatorBits = denominator_bits;
-      if ( denominator_bits % 7 != 0 )
+      long num = numerator;
+      int denom_bits = denominator_bits;
+      if ( denom_bits % 7 != 0 )
          {
-         mNumerator       <<= 7 - (denominator_bits % 7);
-         mDenominatorBits +=  7 - (denominator_bits % 7);
+         num        <<= 7 - (denominator_bits % 7);
+         denom_bits +=  7 - (denominator_bits % 7);
          }
+      mNumerator       = num;
+      mDenominatorBits = denom_bits;
       }
 
-   public Frac( double x, int denominator_bits )
+   public static Frac getNew( double x, int denominator_bits )
       {
       if ( x >= 1.0 || x < 0.0 )
          throw new IllegalArgumentException( "double out of range in"
                                              + " Frac constructor" );
       long numerator
          = (long) (x * (1L << (denominator_bits - 1)));
-      init( numerator, denominator_bits );
+      return new Frac( numerator, denominator_bits );
       }
 
    /* (non-Javadoc)
@@ -119,25 +130,6 @@ public final class Frac implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mDenominatorBits = 0;
-
-      while ( true )
-         {
-         byte b = (byte) in.read();
-         mNumerator |= (((long) (b & 127)) << mDenominatorBits);
-         mDenominatorBits += 7;
-         if ( (b & 128) == 128 )
-            return;
-         if ( mDenominatorBits == 63 )
-            throw new IOException( "Malformed Frac in input" );
-         }
-      }
-
-   /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -165,6 +157,6 @@ public final class Frac implements DvtpExternalizable
       return "(Frac " + mNumerator + " " + mDenominatorBits + ")";
       }
 
-   private long mNumerator;
-   private int  mDenominatorBits;
+   private final long mNumerator;
+   private final int  mDenominatorBits;
    }

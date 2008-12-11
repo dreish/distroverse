@@ -18,7 +18,7 @@ public final class DeleteObject implements ProxySendable
    public DeleteObject( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mId = ULong.externalAsLong( in );
       }
 
    /*
@@ -28,7 +28,7 @@ public final class DeleteObject implements ProxySendable
    @SuppressWarnings("unused")
    private DeleteObject()
       {
-      // (Leaving ID null)
+      mId = 0;
       }
 
    public DeleteObject( long id )
@@ -41,22 +41,17 @@ public final class DeleteObject implements ProxySendable
    public boolean equals( Object o )
       {
       return (o instanceof DeleteObject
-              &&  mId.equals( ((DeleteObject) o).mId ));
+              &&  mId == ((DeleteObject) o).mId);
       }
 
    @Override
    public int hashCode()
       {
-      return mId.hashCode() ^ DeleteObject.class.hashCode();
+      return (int) mId ^ DeleteObject.class.hashCode();
       }
 
    public Long getId()
       {  return mId;  }
-
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mId = ULong.externalAsLong( in );
-      }
 
    public void writeExternal( OutputStream out ) throws IOException
       {
@@ -68,5 +63,5 @@ public final class DeleteObject implements ProxySendable
       return "(DeleteObject " + mId + ")";
       }
 
-   private Long mId;
+   private final long mId;
    }

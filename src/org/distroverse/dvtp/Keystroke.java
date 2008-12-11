@@ -20,7 +20,7 @@ public class Keystroke implements ClientSendable
    public Keystroke( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mKeyNum = Util.safeInt( ULong.externalAsLong( in ) );
       }
 
    /*
@@ -59,11 +59,6 @@ public class Keystroke implements ClientSendable
    public int getKey()
       {  return mKeyNum;  }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mKeyNum = Util.safeInt( ULong.externalAsLong( in ) );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       ULong.longAsExternal( out, mKeyNum );
@@ -74,5 +69,5 @@ public class Keystroke implements ClientSendable
       return "(KeyStroke " + mKeyNum + ")";
       }
 
-   private int mKeyNum;
+   private final int mKeyNum;
    }

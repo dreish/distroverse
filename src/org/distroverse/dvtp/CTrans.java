@@ -25,7 +25,18 @@ public class CTrans implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      int length = Util.safeInt( ULong.externalAsLong( in ) );
+      mContents = new ProxySendable[ length ];
+      for ( int i = 0; i < length; ++i )
+         try
+            {
+            mContents[ i ]
+               = (ProxySendable) DvtpObject.parseObject( in );
+            }
+         catch ( ClassCastException e )
+            {
+            throw new ClassNotFoundException( e.getMessage() );
+            }
       }
 
    /*
@@ -35,7 +46,7 @@ public class CTrans implements ProxySendable
    @SuppressWarnings( "unused" )
    private CTrans()
       {
-      // nothing
+      mContents = null;
       }
 
    public CTrans( ProxySendable... f )
@@ -80,23 +91,6 @@ public class CTrans implements ProxySendable
          DvtpObject.writeInnerObject( out, o );
       }
 
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      int length = Util.safeInt( ULong.externalAsLong( in ) );
-      mContents = new ProxySendable[ length ];
-      for ( int i = 0; i < length; ++i )
-         try
-            {
-            mContents[ i ]
-               = (ProxySendable) DvtpObject.parseObject( in );
-            }
-         catch ( ClassCastException e )
-            {
-            throw new ClassNotFoundException( e.getMessage() );
-            }
-      }
-
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
     */
@@ -106,5 +100,5 @@ public class CTrans implements ProxySendable
              + Util.prettyPrintList( (Object[]) mContents ) + ")";
       }
 
-   private ProxySendable[] mContents;
+   private final ProxySendable[] mContents;
    }

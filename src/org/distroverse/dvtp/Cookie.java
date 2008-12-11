@@ -28,7 +28,12 @@ public class Cookie implements ClientSendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mKey    = DvtpObject.parseObject( in );
+      mExists = Bool.externalAsBoolean( in );
+      if ( mExists )
+         mValue  = DvtpObject.parseObject( in );
+      else
+         mValue  = new False();
       }
 
    /*
@@ -75,20 +80,6 @@ public class Cookie implements ClientSendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mKey    = DvtpObject.parseObject( in );
-      mExists = Bool.externalAsBoolean( in );
-      if ( mExists )
-         mValue  = DvtpObject.parseObject( in );
-      else
-         mValue  = new False();
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -120,7 +111,7 @@ public class Cookie implements ClientSendable
               ^ mValue.hashCode()) * (mExists ? 13 : 17);
       }
 
-   private DvtpExternalizable mKey;
-   private boolean            mExists;
-   private DvtpExternalizable mValue;
+   private final DvtpExternalizable mKey;
+   private final boolean            mExists;
+   private final DvtpExternalizable mValue;
    }

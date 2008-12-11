@@ -32,30 +32,47 @@ package org.distroverse.core;
 
 /**
  * @author dreish
- * Implements a linear feedback shift register PRNG.  This has better
- * statistical properties than a linear congruential PRNG, and unlike a
- * Mersenne twister, can go from seed to random stream with no startup
- * cost.
+ * An immutable self-shrinking linear feedback shift register PRNG.
+ * This has better statistical properties than a linear congruential
+ * PRNG, and requires orders of magnitude less state than a Mersenne
+ * twister.  It has a period of roughly 2^62.  The exact period is not
+ * known.
  * 
- * For anyone who has trouble reading Wikipedia articles, THIS IS NOT
- * SUITABLE FOR CRYPTOGRAPHY.  Thank you.
+ * For anyone who has trouble reading Wikipedia articles, THIS IS STILL
+ * NOT SUITABLE FOR CRYPTOGRAPHY because it is relatively vulnerable to
+ * a clock attack and the feedback polynomial is not secret.
  * 
  * This implementation is immutable.  State is changed by returning a
  * new object.
  * 
- * I am hardcoding taps for a maximum-cycle 64-bit PRNG.
+ * I am hardcoding taps for a maximum-cycle 64-bit PRNG.  The cycle
+ * length is roughly 1/4 that of a non-shrinking LFSR.
  */
 public final class PRNGFeedback
    {
+   /**
+    * Initializes a new {@link PRNGFeedback} generator.  Note that only
+    * the low 63 bits of the seed are used.  The high (sign) bit is
+    * ignored.
+    * @param seed
+    */
    public PRNGFeedback( long seed )
       {
-      long register = seed;
+      long register = seed | (1 << 63);
 
-      /* 4610 found by experimentation to produce a decent run of
-       * numbers not obviously correlated with the seed.
+      /* From looking at streams generated with some small seeds, the
+       * first 104 to 156 output bits appear to have too many zeros.
        */ 
-      for ( int i = 0; i < 4610; ++i )
+      for ( int i = 0; i < 156; ++i )
+         {
          register = nextRegister( register );
+         while ( (register & 1) == 0 )
+            {
+            register = nextRegister( register );
+            register = nextRegister( register );
+            }
+         register = nextRegister( register );
+         }
 
       mRegister = register;
       mCollectedBits = 0;
@@ -83,6 +100,12 @@ public final class PRNGFeedback
       
       for ( int i = 0; i < n_bits; ++i )
          {
+         register = nextRegister( register );
+         while ( (register & 1) == 0 )
+            {
+            register = nextRegister( register );
+            register = nextRegister( register );
+            }
          register = nextRegister( register );
          collected_bits |= ((register & 1) << i); 
          }

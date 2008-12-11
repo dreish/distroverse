@@ -46,7 +46,29 @@ public class Move implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mMoveDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
+      mMovePolyVecs
+         = DvtpObject.readArray( in, mMoveDegree, Vec.class, 11 );
+      mMoveSins =  Util.safeInt( ULong.externalAsLong( in ) );
+      mMoveSinVecs 
+         = DvtpObject.readArray( in, mMoveSins, Vec.class, 11 );
+      mMoveSinPeriods
+         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
+      mMoveSinOffsets
+         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
+      
+      mRotDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
+      mRotPolyQuats
+         = DvtpObject.readArray( in, mRotDegree, Quat.class, 16 );
+      mRotSins =  Util.safeInt( ULong.externalAsLong( in ) );
+      mRotSinQuats
+         = DvtpObject.readArray( in, mRotSins, Quat.class, 16 );
+      mRotSinPeriods
+         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
+      mRotSinOffsets
+         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
+      
+      mDuration = new Flo( in );
       }
 
    /*
@@ -57,6 +79,21 @@ public class Move implements DvtpExternalizable
    private Move()
       {
       super();
+      mMoveDegree = 0;
+      mMovePolyVecs = null;
+      mMoveSins = 0;
+      mMoveSinVecs = null;
+      
+      mRotSinPeriods = mRotSinOffsets
+         = mMoveSinPeriods = mMoveSinOffsets
+         = null;
+      mRotSins = 0;
+      
+      mRotDegree = 1;
+      mRotPolyQuats = null;
+      mRotSinQuats = null;
+      
+      mDuration = null;
       }
 
    /**
@@ -64,10 +101,9 @@ public class Move implements DvtpExternalizable
     * @param pos
     * @param rot
     */
-   public Move( Vec pos, Quat rot )
+   public static Move getNew( Vec pos, Quat rot )
       {
-      super();
-      short_init( pos, rot, new Flo( -1 ) );
+      return new Move( pos, rot, new Flo( -1 ) );
       }
 
    /**
@@ -78,27 +114,22 @@ public class Move implements DvtpExternalizable
    public Move( Vec pos, Quat rot, Flo dur )
       {
       super();
-      short_init( pos, rot, dur );
-      }
-
-   void short_init( Vec pos, Quat rot, Flo dur )
-      {
       mMoveDegree = 1;
       mMovePolyVecs = new Vec[ 1 ];
       mMovePolyVecs[ 0 ] = pos;
       mMoveSins = 0;
       mMoveSinVecs = new Vec[ 0 ];
-
+      
       mRotSinPeriods = mRotSinOffsets
          = mMoveSinPeriods = mMoveSinOffsets
          = new Flo[ 0 ];
       mRotSins = 0;
-
+      
       mRotDegree = 1;
       mRotPolyQuats = new Quat[ 1 ];
       mRotPolyQuats[ 0 ] = rot;
       mRotSinQuats = new Quat[ 0 ];
-
+      
       mDuration = dur;
       }
 
@@ -179,6 +210,72 @@ public class Move implements DvtpExternalizable
       }
 
    // XXX needs accessors
+   
+   
+   public int getMoveDegree()
+      {
+      return mMoveDegree;
+      }
+
+   public Vec getMovePolyVecs( int n )
+      {
+      return mMovePolyVecs[ n ];
+      }
+
+   public int getMoveSins()
+      {
+      return mMoveSins;
+      }
+
+   public Vec getMoveSinVecs( int n )
+      {
+      return mMoveSinVecs[ n ];
+      }
+
+   public Flo getMoveSinPeriods( int n )
+      {
+      return mMoveSinPeriods[ n ];
+      }
+
+   public Flo getMoveSinOffsets( int n )
+      {
+      return mMoveSinOffsets[ n ];
+      }
+
+   public int getRotDegree()
+      {
+      return mRotDegree;
+      }
+
+   public Quat getRotPolyQuats( int n )
+      {
+      return mRotPolyQuats[ n ];
+      }
+
+   public int getRotSins()
+      {
+      return mRotSins;
+      }
+
+   public Quat getRotSinQuats( int n )
+      {
+      return mRotSinQuats[ n ];
+      }
+
+   public Flo getRotSinPeriods( int n )
+      {
+      return mRotSinPeriods[ n ];
+      }
+
+   public Flo getRotSinOffsets( int n )
+      {
+      return mRotSinOffsets[ n ];
+      }
+
+   public Flo getDuration()
+      {
+      return mDuration;
+      }
 
    public Vector3f initialPosition()
       {
@@ -191,37 +288,6 @@ public class Move implements DvtpExternalizable
                                         .mult( coefficient ) );
          }
       return ret;
-      }
-
-   /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mMoveDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
-      mMovePolyVecs
-         = DvtpObject.readArray( in, mMoveDegree, Vec.class, 11 );
-      mMoveSins =  Util.safeInt( ULong.externalAsLong( in ) );
-      mMoveSinVecs 
-         = DvtpObject.readArray( in, mMoveSins, Vec.class, 11 );
-      mMoveSinPeriods
-         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
-      mMoveSinOffsets
-         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
-
-      mRotDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
-      mRotPolyQuats
-         = DvtpObject.readArray( in, mRotDegree, Quat.class, 16 );
-      mRotSins =  Util.safeInt( ULong.externalAsLong( in ) );
-      mRotSinQuats
-         = DvtpObject.readArray( in, mRotSins, Quat.class, 16 );
-      mRotSinPeriods
-         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
-      mRotSinOffsets
-         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
-
-      mDuration = new Flo( in );
       }
 
    /* (non-Javadoc)
@@ -259,19 +325,19 @@ public class Move implements DvtpExternalizable
 
    // Here and below, "degree" is actually the degree of the polynomial
    // plus one.
-   private int mMoveDegree;
-   private Vec[] mMovePolyVecs;
-   private int mMoveSins;
-   private Vec[] mMoveSinVecs;
-   private Flo[] mMoveSinPeriods;
-   private Flo[] mMoveSinOffsets;
+   private final int mMoveDegree;
+   private final Vec[] mMovePolyVecs;
+   private final int mMoveSins;
+   private final Vec[] mMoveSinVecs;
+   private final Flo[] mMoveSinPeriods;
+   private final Flo[] mMoveSinOffsets;
 
-   private int mRotDegree;
-   private Quat[] mRotPolyQuats;
-   private int mRotSins;
-   private Quat[] mRotSinQuats;
-   private Flo[] mRotSinPeriods;
-   private Flo[] mRotSinOffsets;
+   private final int mRotDegree;
+   private final Quat[] mRotPolyQuats;
+   private final int mRotSins;
+   private final Quat[] mRotSinQuats;
+   private final Flo[] mRotSinPeriods;
+   private final Flo[] mRotSinOffsets;
 
-   private Flo mDuration;
+   private final Flo mDuration;
    }

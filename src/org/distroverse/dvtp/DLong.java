@@ -43,7 +43,7 @@ public final class DLong implements DvtpExternalizable
    public DLong( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mVal = externalAsLong( in );
       }
 
    /*
@@ -156,14 +156,6 @@ public final class DLong implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mVal = externalAsLong( in );
-      }
-
-   /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -176,5 +168,5 @@ public final class DLong implements DvtpExternalizable
       return "(DLong " + mVal + ")";
       }
 
-   long mVal;
+   private final long mVal;
    }

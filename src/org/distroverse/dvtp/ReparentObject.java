@@ -26,7 +26,8 @@ public final class ReparentObject implements ProxySendable
    public ReparentObject( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mId       = ULong.externalAsLong( in );
+      mParentId = ULong.externalAsLong( in );
       }
 
    /*
@@ -81,15 +82,6 @@ public final class ReparentObject implements ProxySendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mId       = ULong.externalAsLong( in );
-      mParentId = ULong.externalAsLong( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -98,6 +90,6 @@ public final class ReparentObject implements ProxySendable
       ULong.longAsExternal( out, mParentId );
       }
 
-   private long mId;
-   private long mParentId;
+   private final long mId;
+   private final long mParentId;
    }

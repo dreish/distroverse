@@ -28,7 +28,10 @@ public final class DNodeRef implements DvtpExternalizable
    public DNodeRef( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mRemoteHost = Str.externalAsString( in );
+      mId = ULong.externalAsLong( in );
+      mLastChangeTime = new Real( in );
+      mDNode = null;
       }
 
    /*
@@ -118,16 +121,6 @@ public final class DNodeRef implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mRemoteHost = Str.externalAsString( in );
-      mId = ULong.externalAsLong( in );
-      mLastChangeTime = new Real( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -137,8 +130,8 @@ public final class DNodeRef implements DvtpExternalizable
       mLastChangeTime.writeExternal( out );
       }
 
-   private String mRemoteHost;
-   private long   mId;
-   private Real   mLastChangeTime;
-   private DNode  mDNode;                   // Not externalized
+   private final String mRemoteHost;
+   private final long   mId;
+   private final Real   mLastChangeTime;
+   private final DNode  mDNode;                   // Not externalized
    }

@@ -26,7 +26,8 @@ public class SetVisible implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mId   = ULong.externalAsLong( in );
+      mFlag = Bool.externalAsBoolean( in );
       }
 
    /*
@@ -82,16 +83,6 @@ public class SetVisible implements ProxySendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mId   = ULong.externalAsLong( in );
-      mFlag = Bool.externalAsBoolean( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -100,6 +91,6 @@ public class SetVisible implements ProxySendable
       Bool.booleanAsExternal( out, mFlag );
       }
 
-   private long    mId;
-   private boolean mFlag;
+   private final long    mId;
+   private final boolean mFlag;
    }

@@ -28,7 +28,8 @@ public final class WarpObject implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mId = ULong.externalAsLong( in );
+      mWarpSeq = new WarpSeq( in );
       }
 
    /*
@@ -84,16 +85,6 @@ public final class WarpObject implements ProxySendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mId = ULong.externalAsLong( in );
-      mWarpSeq = new WarpSeq( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -102,6 +93,6 @@ public final class WarpObject implements ProxySendable
       mWarpSeq.writeExternal( out );
       }
 
-   private long mId;
-   private WarpSeq mWarpSeq;
+   private final long mId;
+   private final WarpSeq mWarpSeq;
    }

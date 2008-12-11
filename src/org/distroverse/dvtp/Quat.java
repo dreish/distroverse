@@ -20,7 +20,7 @@ public final class Quat implements DvtpExternalizable
    public Quat( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mQuat = Quat.externalAsQuaternion( in );
       }
 
    /*
@@ -31,11 +31,12 @@ public final class Quat implements DvtpExternalizable
    private Quat()
       {
       super();
+      mQuat = null;
       }
 
    public Quat( Quaternion q )
       {
-      mQuat = q;
+      mQuat = new Quaternion( q );
       }
 
    public Quaternion asQuaternion()
@@ -76,11 +77,6 @@ public final class Quat implements DvtpExternalizable
       Flo.floatAsExternal( out, q.w );
       }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mQuat = Quat.externalAsQuaternion( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       Quat.quaternionAsExternal( out, mQuat );
@@ -91,5 +87,5 @@ public final class Quat implements DvtpExternalizable
       return "(Quat " + mQuat + ")";
       }
 
-   private Quaternion mQuat;
+   private final Quaternion mQuat;
    }

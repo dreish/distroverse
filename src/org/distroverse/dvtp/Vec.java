@@ -22,7 +22,9 @@ public final class Vec implements DvtpExternalizable
    public Vec( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mVec = new Vector3f( Flo.externalAsFloat( in ),
+      Flo.externalAsFloat( in ),
+      Flo.externalAsFloat( in ) );
       }
 
    /*
@@ -39,7 +41,7 @@ public final class Vec implements DvtpExternalizable
    public Vec( Vector3f v )
       {
       super();
-      mVec = v;
+      mVec = v.clone();
       }
 
    public int getClassNumber()
@@ -64,13 +66,6 @@ public final class Vec implements DvtpExternalizable
       return mVec.clone();
       }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mVec = new Vector3f( Flo.externalAsFloat( in ),
-                           Flo.externalAsFloat( in ),
-                           Flo.externalAsFloat( in ) );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       Flo.floatAsExternal( out, mVec.x );
@@ -83,5 +78,5 @@ public final class Vec implements DvtpExternalizable
       return "(Vec " + Util.prettyPrintList( mVec ) + ")";
       }
 
-   private Vector3f mVec;
+   private final Vector3f mVec;
    }

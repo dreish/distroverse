@@ -26,7 +26,14 @@ public final class MoveSeq implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      int num_moves = Util.safeInt( ULong.externalAsLong( in ) );
+      if ( num_moves == 0 )
+         throw new IOException( "Malformed MoveSeq in input" );
+      mMoves = DvtpObject.readArray( in, num_moves, Move.class, 13 );
+      int repeat_int
+         = Util.safeInt( ULong.externalAsLong( in ) );
+      checkRepeatType( repeat_int );
+      mRepeatType = RepeatType.values()[ repeat_int ];
       }
 
    /*
@@ -37,6 +44,8 @@ public final class MoveSeq implements DvtpExternalizable
    private MoveSeq()
       {
       super();
+      mMoves = null;
+      mRepeatType = null;
       }
 
    public MoveSeq( Move[] moves, RepeatType repeat_type )
@@ -82,19 +91,6 @@ public final class MoveSeq implements DvtpExternalizable
       return mMoves[ 0 ].initialPosition();
       }
 
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      int num_moves = Util.safeInt( ULong.externalAsLong( in ) );
-      if ( num_moves == 0 )
-         throw new IOException( "Malformed MoveSeq in input" );
-      mMoves = DvtpObject.readArray( in, num_moves, Move.class, 13 );
-      int repeat_int
-         = Util.safeInt( ULong.externalAsLong( in ) );
-      checkRepeatType( repeat_int );
-      mRepeatType = RepeatType.values()[ repeat_int ];
-      }
-
    private void checkRepeatType( int r ) throws ClassNotFoundException
       {
       if ( r < 0  ||  r >= RepeatType.values().length )
@@ -117,6 +113,6 @@ public final class MoveSeq implements DvtpExternalizable
              + Util.prettyPrintList( mMoves, mRepeatType ) + ")";
       }
 
-   private Move[] mMoves;
-   private RepeatType mRepeatType;
+   private final Move[] mMoves;
+   private final RepeatType mRepeatType;
    }

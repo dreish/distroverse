@@ -25,7 +25,7 @@ public class ClearShape implements ProxySendable
    public ClearShape( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mId = ULong.externalAsLong( in );
       }
 
    /*
@@ -74,14 +74,6 @@ public class ClearShape implements ProxySendable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mId = ULong.externalAsLong( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -89,5 +81,5 @@ public class ClearShape implements ProxySendable
       ULong.longAsExternal( out, mId );
       }
 
-   private long mId;
+   private final long mId;
    }

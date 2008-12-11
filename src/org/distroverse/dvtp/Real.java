@@ -27,7 +27,8 @@ public class Real implements DvtpExternalizable
    public Real( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mIntegerPart = DLong.externalAsLong( in );
+      mFractionPart = new Frac( in );
       }
 
    /*
@@ -55,7 +56,7 @@ public class Real implements DvtpExternalizable
       {
       mIntegerPart  = (long) Math.floor( x );
       double fraction_part = x - mIntegerPart;
-      mFractionPart = new Frac( fraction_part, denomionator_bits );
+      mFractionPart = Frac.getNew( fraction_part, denomionator_bits );
       }
 
    /* (non-Javadoc)
@@ -101,15 +102,6 @@ public class Real implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mIntegerPart = DLong.externalAsLong( in );
-      mFractionPart = new Frac( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -118,6 +110,6 @@ public class Real implements DvtpExternalizable
       mFractionPart.writeExternal( out );
       }
 
-   private long mIntegerPart;
-   private Frac mFractionPart;
+   private final long mIntegerPart;
+   private final Frac mFractionPart;
    }

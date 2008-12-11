@@ -36,7 +36,25 @@ public class BigInt implements DvtpExternalizable,
    public BigInt( BigInteger bi )
       {  mVal = bi;  }
    public BigInt( InputStream in ) throws IOException
-      {  readExternal( in );  }
+      {
+      int length = in.read();
+      int sign   = 1;
+      if ( length == 0 )
+         {
+         mVal = BigInteger.ZERO;
+         }
+      else
+         {
+         if ( length < 0 )
+            {
+            length = -length;
+            sign   = -1;
+            }
+         byte[] data = new byte[length];
+         in.read( data );
+         mVal = new BigInteger( sign, data ); 
+         }
+      }
 
    // Pass-through constructors from BigInteger.
    public BigInt( byte[] val )
@@ -67,30 +85,6 @@ public class BigInt implements DvtpExternalizable,
       {  return mVal.intValue();  }
 
    /* (non-Javadoc)
-    * @see java.io.Externalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException
-      {
-      int length = in.read();
-      int sign   = 1;
-      if ( length == 0 )
-         {
-         mVal = BigInteger.ZERO;
-         }
-      else
-         {
-         if ( length < 0 )
-            {
-            length = -length;
-            sign   = -1;
-            }
-         byte[] data = new byte[length];
-         in.read( data );
-         mVal = new BigInteger( sign, data ); 
-         }
-      }
-
-   /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -113,5 +107,5 @@ public class BigInt implements DvtpExternalizable,
       return "(BigInt " + Util.prettyPrintList( mVal ) + ")";
       }
 
-   BigInteger mVal;
+   private final BigInteger mVal;
    }

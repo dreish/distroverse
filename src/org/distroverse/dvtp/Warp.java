@@ -29,7 +29,18 @@ public class Warp implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mDegree = Util.safeInt( ULong.externalAsLong( in ) );
+      mPolyWarps
+         = DvtpObject.readArray( in, mDegree, PointArray.class, 4 );
+      mSins = Util.safeInt( ULong.externalAsLong( in ) );
+      mSinWarps
+         = DvtpObject.readArray( in, mSins, PointArray.class, 4 );
+      mSinPeriods
+         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
+      mSinOffsets
+         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
+      
+      mDuration = new Flo( in );
       }
 
    /*
@@ -40,10 +51,18 @@ public class Warp implements DvtpExternalizable
    private Warp()
       {
       super();
+      mDegree     = 0;
+      mPolyWarps  = null;
+      mSins       = 0;
+      mSinWarps   = null;
+      mSinPeriods = null;
+      mSinOffsets = null;
+      mDuration   = null;
       }
 
    public Warp( PointArray[] pw )
       {
+      super();
       mDegree     = pw.length;
       mPolyWarps  = pw.clone();
       mSins       = 0;
@@ -53,7 +72,9 @@ public class Warp implements DvtpExternalizable
       mDuration   = new Flo( -1 );
       }
    
-   // XXX Needs a full constructor.
+   // XXX Needs a full constructor
+
+   // XXX Needs accessors
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#getClassNumber()
@@ -103,26 +124,6 @@ public class Warp implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mDegree = Util.safeInt( ULong.externalAsLong( in ) );
-      mPolyWarps
-         = DvtpObject.readArray( in, mDegree, PointArray.class, 4 );
-      mSins = Util.safeInt( ULong.externalAsLong( in ) );
-      mSinWarps
-         = DvtpObject.readArray( in, mSins, PointArray.class, 4 );
-      mSinPeriods
-         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
-      mSinOffsets
-         = DvtpObject.readArray( in, mSins, Flo.class, 15 );
-
-      mDuration = new Flo( in );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -137,12 +138,12 @@ public class Warp implements DvtpExternalizable
       mDuration.writeExternal( out );
       }
 
-   private int mDegree;
-   private PointArray[] mPolyWarps;
-   private int mSins;
-   private PointArray[] mSinWarps;
-   private Flo[] mSinPeriods;
-   private Flo[] mSinOffsets;
+   private final int mDegree;
+   private final PointArray[] mPolyWarps;
+   private final int mSins;
+   private final PointArray[] mSinWarps;
+   private final Flo[] mSinPeriods;
+   private final Flo[] mSinOffsets;
 
-   private Flo mDuration;
+   private final Flo mDuration;
    }

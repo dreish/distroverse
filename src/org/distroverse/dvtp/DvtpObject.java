@@ -189,9 +189,8 @@ public final class DvtpObject
    public static DvtpExternalizable parseObject( InputStream in )
    throws IOException, ClassNotFoundException
       {
-      int class_number
-         = Util.safeInt( ULong.externalAsLong( in ) );
-      return parseObject( in, class_number );
+      int class_number = Util.safeInt( ULong.externalAsLong( in ) );
+      return getNew( class_number, in );
       }
 
    /**
@@ -205,19 +204,7 @@ public final class DvtpObject
                                                  int class_number )
    throws IOException, ClassNotFoundException
       {
-      DvtpExternalizable ob = getNew( class_number, in );
-//      try
-//         {
-//         if ( ob != null )
-//            ob.readExternal( in );
-//         }
-//      catch ( ClassNotFoundException e )
-//         {
-//         Log.p( "Exception while parsing external object: " + e,
-//                Log.DVTP | Log.UNHANDLED, 100 );
-//         Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-//         }
-      return ob;
+      return getNew( class_number, in );
       }
 
    /**
@@ -278,18 +265,6 @@ public final class DvtpObject
       for ( int i = 0; i < n; ++i )
          {
          ret[ i ] = (T) getNew( class_number, in );
-//         catch ( InstantiationException e )
-//            {
-//            Log.p( "Impossible exception: " + e,
-//                   Log.DVTP | Log.UNHANDLED, 100 );
-//            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-//            }
-//         catch ( IllegalAccessException e )
-//            {
-//            Log.p( "Impossible exception: " + e,
-//                   Log.DVTP | Log.UNHANDLED, 100 );
-//            Log.p( e, Log.DVTP | Log.UNHANDLED, 100 );
-//            }
          }
 
       return ret;

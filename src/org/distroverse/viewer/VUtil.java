@@ -53,7 +53,7 @@ public final class VUtil
    public static MoveSeq simpleMove( Vector3f pos,
                                      Quaternion rot )
       {
-      Move init = new Move( new Vec( pos ), new Quat( rot ) );
+      Move init = Move.getNew( new Vec( pos ), new Quat( rot ) );
       Move[] seq = { init };
       return new MoveSeq( seq, RepeatType.LOOP );
       }

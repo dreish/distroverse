@@ -31,7 +31,12 @@ public final class Dict implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      int num_pairs = Util.safeInt( ULong.externalAsLong( in ) );
+      mDict = new LinkedHashMap< DvtpExternalizable,
+                                 DvtpExternalizable >();
+      for ( int i = 0; i < num_pairs; ++i )
+         mDict.put( DvtpObject.parseObject( in ),
+                    DvtpObject.parseObject( in ) );
       }
 
    /*
@@ -114,20 +119,6 @@ public final class Dict implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      int num_pairs = Util.safeInt( ULong.externalAsLong( in ) );
-      mDict = new LinkedHashMap< DvtpExternalizable,
-                                 DvtpExternalizable >();
-      for ( int i = 0; i < num_pairs; ++i )
-         mDict.put( DvtpObject.parseObject( in ),
-                    DvtpObject.parseObject( in ) );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out )
@@ -142,5 +133,5 @@ public final class Dict implements DvtpExternalizable
          }
       }
 
-   private Map< DvtpExternalizable, DvtpExternalizable > mDict;
+   private final Map< DvtpExternalizable, DvtpExternalizable > mDict;
    }

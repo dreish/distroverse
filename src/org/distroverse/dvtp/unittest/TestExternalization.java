@@ -523,11 +523,11 @@ public class TestExternalization
       double[] to_try = { 0.1, 0.3, 0.5, 0.7, 0.9 };
       for ( double d : to_try )
          {
-         tryBeamObject( new Frac( d, 3  ) );
-         tryBeamObject( new Frac( d, 7  ) );
-         tryBeamObject( new Frac( d, 10 ) );
-         tryBeamObject( new Frac( d, 14 ) );
-         tryBeamObject( new Frac( d, 63 ) );
+         tryBeamObject( Frac.getNew( d, 3  ) );
+         tryBeamObject( Frac.getNew( d, 7  ) );
+         tryBeamObject( Frac.getNew( d, 10 ) );
+         tryBeamObject( Frac.getNew( d, 14 ) );
+         tryBeamObject( Frac.getNew( d, 63 ) );
          }
       }
 

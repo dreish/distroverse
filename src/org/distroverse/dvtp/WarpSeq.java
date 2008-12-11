@@ -30,7 +30,12 @@ public final class WarpSeq implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      int num_warps = Util.safeInt( ULong.externalAsLong( in ) );
+      mWarps = DvtpObject.readArray( in, num_warps, Warp.class, 34 );
+      int repeat_int
+         = Util.safeInt( ULong.externalAsLong( in ) );
+      checkRepeatType( repeat_int );
+      mRepeatType = RepeatType.values()[ repeat_int ];
       }
 
    public WarpSeq()
@@ -82,20 +87,6 @@ public final class WarpSeq implements DvtpExternalizable
              + Util.prettyPrintList( mWarps, mRepeatType ) + ")";
       }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      int num_warps = Util.safeInt( ULong.externalAsLong( in ) );
-      mWarps = DvtpObject.readArray( in, num_warps, Warp.class, 34 );
-      int repeat_int
-         = Util.safeInt( ULong.externalAsLong( in ) );
-      checkRepeatType( repeat_int );
-      mRepeatType = RepeatType.values()[ repeat_int ];
-      }
-
    private void checkRepeatType( int r ) throws ClassNotFoundException
       {
       if ( r < 0  ||  r >= RepeatType.values().length )
@@ -113,8 +104,8 @@ public final class WarpSeq implements DvtpExternalizable
       ULong.longAsExternal( out, mRepeatType.ordinal() );
       }
 
-   private static Warp[] NO_WARPS = new Warp[ 0 ];
+   private static final Warp[] NO_WARPS = new Warp[ 0 ];
 
-   private Warp[] mWarps;
-   private RepeatType mRepeatType;
+   private final Warp[] mWarps;
+   private final RepeatType mRepeatType;
    }

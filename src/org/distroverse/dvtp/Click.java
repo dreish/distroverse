@@ -25,7 +25,8 @@ public class Click implements ClientSendable
    public Click( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      mDirection = new Vec( in );
+      mForce = new Flo( in );
       }
 
    /*
@@ -36,6 +37,8 @@ public class Click implements ClientSendable
    private Click()
       {
       super();
+      mDirection = null;
+      mForce = null;
       }
 
    public Click( Vec dir, Flo force )
@@ -73,12 +76,6 @@ public class Click implements ClientSendable
    public Flo getForce()
       {  return mForce;  }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      mDirection = new Vec( in );
-      mForce = new Flo( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       mDirection.writeExternal( out );
@@ -91,6 +88,6 @@ public class Click implements ClientSendable
              + Util.prettyPrintList( mDirection, mForce ) + ")";
       }
 
-   private Vec mDirection;
-   private Flo mForce;
+   private final Vec mDirection;
+   private final Flo mForce;
    }

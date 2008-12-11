@@ -36,7 +36,12 @@ public final class Shape implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mPoints = new PointArray( in );
+      int num_vcs = Util.safeInt( ULong.externalAsLong( in ) );
+      ULong[] vcs = DvtpObject.readArray( in, num_vcs, ULong.class, 0 );
+      mVertexCounts = new int[ num_vcs ];
+      for ( int i = 0; i < vcs.length; ++i )
+         mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
       }
 
    /*
@@ -47,6 +52,8 @@ public final class Shape implements DvtpExternalizable
    private Shape()
       {
       super();
+      mVertexCounts = null;
+      mPoints = null;
       }
 
    /**
@@ -141,17 +148,6 @@ public final class Shape implements DvtpExternalizable
       return ret;
       }
 
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mPoints = new PointArray( in );
-      int num_vcs = Util.safeInt( ULong.externalAsLong( in ) );
-      ULong[] vcs = DvtpObject.readArray( in, num_vcs, ULong.class, 0 );
-      mVertexCounts = new int[ num_vcs ];
-      for ( int i = 0; i < vcs.length; ++i )
-         mVertexCounts[ i ] = Util.safeInt( vcs[ i ].toLong() );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       mPoints.writeExternal( out );
@@ -177,6 +173,6 @@ public final class Shape implements DvtpExternalizable
       }
 
    // TODO Add texture fields and methods.
-   private PointArray mPoints;
-   private int[]      mVertexCounts;
+   private final PointArray mPoints;
+   private final int[]      mVertexCounts;
    }

@@ -29,7 +29,17 @@ public final class DNode implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mBeing = new AddObject( in, false );
+      mRadius = Flo.externalAsFloat( in );
+      mThis = new DNodeRef( in );
+      boolean has_parent = Bool.externalAsBoolean( in );
+      if ( has_parent )
+         mParent = new DNodeRef( in );
+      else
+         mParent = null;
+      int num_children = Util.safeInt( ULong.externalAsLong( in ) );
+      mChildren = DvtpObject.readArray( in, num_children,
+                                        DNodeRef.class, 29 );
       }
 
    /*
@@ -100,25 +110,6 @@ public final class DNode implements DvtpExternalizable
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpExternalizable#readExternal(java.io.InputStream)
-    */
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mBeing = new AddObject( in, false );
-      mRadius = Flo.externalAsFloat( in );
-      mThis = new DNodeRef( in );
-      boolean has_parent = Bool.externalAsBoolean( in );
-      if ( has_parent )
-         mParent = new DNodeRef( in );
-      else
-         mParent = null;
-      int num_children = Util.safeInt( ULong.externalAsLong( in ) );
-      mChildren = DvtpObject.readArray( in, num_children,
-                                        DNodeRef.class, 29 );
-      }
-
-   /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#writeExternal(java.io.OutputStream)
     */
    public void writeExternal( OutputStream out ) throws IOException
@@ -137,9 +128,9 @@ public final class DNode implements DvtpExternalizable
       DvtpObject.writeArray( out, mChildren );
       }
 
-   private AddObject  mBeing;
-   private float      mRadius;
-   private DNodeRef   mThis;
-   private DNodeRef   mParent;
-   private DNodeRef[] mChildren;
+   private final AddObject  mBeing;
+   private final float      mRadius;
+   private final DNodeRef   mThis;
+   private final DNodeRef   mParent;
+   private final DNodeRef[] mChildren;
    }

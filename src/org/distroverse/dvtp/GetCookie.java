@@ -29,7 +29,7 @@ public final class GetCookie implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mKey = DvtpObject.parseObject( in );
       }
 
    /*
@@ -81,16 +81,10 @@ public final class GetCookie implements ProxySendable
       return mKey.hashCode() ^ GetCookie.class.hashCode();
       }
 
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      mKey = DvtpObject.parseObject( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       DvtpObject.writeInnerObject( out, mKey );
       }
 
-   private DvtpExternalizable mKey;
+   private final DvtpExternalizable mKey;
    }

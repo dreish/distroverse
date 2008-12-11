@@ -57,7 +57,16 @@ public class Blob implements DvtpExternalizable
    public Blob( InputStream in ) throws IOException
       {
       super();
-      readExternal( in );
+      int bytes_len = Util.safeInt( ULong.externalAsLong( in ) );
+      if ( bytes_len > 65536 )
+         throw new ProtocolException( "Blob above legal maximum size" );
+      mBytes = new byte[ bytes_len ];
+      if ( in.read( mBytes ) != bytes_len )
+         throw new ProtocolException( "End of file while reading"
+                                      + " Blob" );
+      mResource = new Str( in );
+      mPos = ULong.externalAsLong( in );
+      mFileLength = ULong.externalAsLong( in );
       }
 
    /*
@@ -68,6 +77,10 @@ public class Blob implements DvtpExternalizable
    private Blob()
       {
       super();
+      mBytes = null;
+      mResource = null;
+      mPos = 0;
+      mFileLength = 0;
       }
 
    public int getClassNumber()
@@ -105,20 +118,6 @@ public class Blob implements DvtpExternalizable
    public long getFileLength()
       {  return mFileLength;  }
 
-   private void readExternal( InputStream in ) throws IOException
-      {
-      int bytes_len = Util.safeInt( ULong.externalAsLong( in ) );
-      if ( bytes_len > 65536 )
-         throw new ProtocolException( "Blob above legal maximum size" );
-      mBytes = new byte[ bytes_len ];
-      if ( in.read( mBytes ) != bytes_len )
-         throw new ProtocolException( "End of file while reading"
-                                      + " Blob" );
-      mResource = new Str( in );
-      mPos = ULong.externalAsLong( in );
-      mFileLength = ULong.externalAsLong( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       ULong.longAsExternal( out, mBytes.length );
@@ -134,8 +133,8 @@ public class Blob implements DvtpExternalizable
                                               mPos, mFileLength ) + ")";
       }
 
-   private byte[] mBytes;
-   private Str mResource;
-   private long mPos;
-   private long mFileLength;
+   private final byte[] mBytes;
+   private final Str mResource;
+   private final long mPos;
+   private final long mFileLength;
    }

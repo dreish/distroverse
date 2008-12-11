@@ -26,7 +26,22 @@ public final class AddObject implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      mHasShape = Bool.externalAsBoolean( in );
+      if ( mHasShape )
+         {
+         mVisible = Bool.externalAsBoolean( in );
+         mShape = new Shape( in );
+         mWarpSeq = new WarpSeq( in );
+         }
+      else
+         {
+         mVisible = false;
+         mShape = null;
+         mWarpSeq = null;
+         }
+      mId = new ULong( in );
+      mParentId = new ULong( in );
+      mMoveSeq = new MoveSeq( in );
       }
 
    /*
@@ -37,6 +52,13 @@ public final class AddObject implements ProxySendable
    private AddObject()
       {
       super();
+      mHasShape = false;
+      mVisible = false;
+      mShape = null;
+      mId = null;
+      mParentId = null;
+      mMoveSeq = null;
+      mWarpSeq = null;
       }
 
    public AddObject( boolean v, Shape s, ULong id, ULong pid,
@@ -69,10 +91,25 @@ public final class AddObject implements ProxySendable
    throws IOException, ClassNotFoundException
       {
       super();
-      readWithoutId( in );
+      mHasShape = Bool.externalAsBoolean( in );
+      if ( mHasShape )
+         {
+         mVisible = Bool.externalAsBoolean( in );
+         mShape = new Shape( in );
+         mWarpSeq = new WarpSeq( in );
+         }
+      else
+         {
+         mVisible = false;
+         mShape = null;
+         mWarpSeq = null;
+         }
+      mId       = new ULong( 0 );
+      mParentId = new ULong( 0 );
+      mMoveSeq = new MoveSeq( in );
       }
    
-   public AddObject assocIds( ULong id, ULong pid )
+   public AddObject setIds( ULong id, ULong pid )
       {
       if ( mHasShape )
          return new AddObject( mVisible, mShape, id, pid,
@@ -151,27 +188,6 @@ public final class AddObject implements ProxySendable
    public MoveSeq getMoveSeq()   {  return mMoveSeq;   }
    public WarpSeq getWarpSeq()   {  return mWarpSeq;   }
 
-   private void readExternal( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mHasShape = Bool.externalAsBoolean( in );
-      if ( mHasShape )
-         {
-         mVisible = Bool.externalAsBoolean( in );
-         mShape = new Shape( in );
-         mWarpSeq = new WarpSeq( in );
-         }
-      else
-         {
-         mVisible = false;
-         mShape = null;
-         mWarpSeq = null;
-         }
-      mId = new ULong( in );
-      mParentId = new ULong( in );
-      mMoveSeq = new MoveSeq( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       Bool.booleanAsExternal( out, mHasShape );
@@ -186,28 +202,7 @@ public final class AddObject implements ProxySendable
       mMoveSeq.writeExternal( out );
       }
 
-   private void readWithoutId( InputStream in )
-   throws IOException, ClassNotFoundException
-      {
-      mHasShape = Bool.externalAsBoolean( in );
-      if ( mHasShape )
-         {
-         mVisible = Bool.externalAsBoolean( in );
-         mShape = new Shape( in );
-         mWarpSeq = new WarpSeq( in );
-         }
-      else
-         {
-         mVisible = false;
-         mShape = null;
-         mWarpSeq = null;
-         }
-      mId       = new ULong( 0 );
-      mParentId = new ULong( 0 );
-      mMoveSeq = new MoveSeq( in );
-      }
-
-   public void writeWithoutId( OutputStream out ) throws IOException
+    public void writeWithoutId( OutputStream out ) throws IOException
       {
       Bool.booleanAsExternal( out, mHasShape );
       if ( mHasShape )
@@ -226,11 +221,11 @@ public final class AddObject implements ProxySendable
                                      mMoveSeq ) + ")";
       }
 
-   private boolean mHasShape;
-   private boolean mVisible;
-   private Shape   mShape;
-   private ULong   mId;
-   private ULong   mParentId;
-   private MoveSeq mMoveSeq;
-   private WarpSeq mWarpSeq;
+   private final boolean mHasShape;
+   private final boolean mVisible;
+   private final Shape   mShape;
+   private final ULong   mId;
+   private final ULong   mParentId;
+   private final MoveSeq mMoveSeq;
+   private final WarpSeq mWarpSeq;
    }

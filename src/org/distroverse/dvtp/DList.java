@@ -22,7 +22,10 @@ public class DList implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      readExternal( in );
+      int length = Util.safeInt( ULong.externalAsLong( in ) );
+      mContents = new DvtpExternalizable[ length ];
+      for ( int i = 0; i < length; ++i )
+         mContents[ i ] = DvtpObject.parseObject( in );
       }
 
    /*
@@ -70,15 +73,6 @@ public class DList implements DvtpExternalizable
    public DvtpExternalizable getContents( int n )
       {  return mContents[ n ];  }
 
-   private void readExternal( InputStream in ) throws IOException,
-                                             ClassNotFoundException
-      {
-      int length = Util.safeInt( ULong.externalAsLong( in ) );
-      mContents = new DvtpExternalizable[ length ];
-      for ( int i = 0; i < length; ++i )
-         mContents[ i ] = DvtpObject.parseObject( in );
-      }
-
    public void writeExternal( OutputStream out ) throws IOException
       {
       ULong.longAsExternal( out, mContents.length );
@@ -96,5 +90,5 @@ public class DList implements DvtpExternalizable
       return "(DList " + prettyPrintContents() + ")";
       }
 
-   private DvtpExternalizable[] mContents;
+   private final DvtpExternalizable[] mContents;
    }
