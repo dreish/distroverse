@@ -1,6 +1,5 @@
 
 - To do for 0.02:
-  - Make all private DVTP-message fields final and debug
   - Add a FengGUI location bar
   - Begin implementing WorldServer (extends DvtpServer)
     + Add DVTP messages:
@@ -71,6 +70,15 @@
         + Then write a macro that goes from B to A
     - Create new user if needed (from skeleton user)
       > Has default starting location
+    - Ephemeral universe generation
+      + universe-spec
+      - gen-fractalplace
+      - Node seed to child node seed
+        - Node has a seed-mutation-shift
+        - Child node's seed-mutation-shift is parent's (+ 1) (rem 60)
+        - Node's seed is:
+          - First long generated from rand sequence using parent's seed
+	  - bit-xor (node-index << seed-mutation-shift)
   - Plug server into database
   - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -272,6 +280,7 @@
     + Put getPeerAddress() in NetSession class
     + Rewrite server code to take a session and an attachment
     + Look up attachment in handler methods in WorldServer; pass them
+  + Make all private DVTP-message fields final and debug
 
 ------------------------------------------------------------------------
 - To do for 0.03:

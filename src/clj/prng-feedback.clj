@@ -46,6 +46,20 @@
   "The sign and exponent constants for IEEE 754 doubles between 1 and
   just under 2.  Just trust me on that.")
 
+(defvar- hex3f800000 (int 1065353216)
+  "The sign and exponent constants for IEEE 754 floats between 1 and
+  just under 2.")
+
+(defn- bits-to-double [l]
+  "Convert a 52-bit integer to a number between 0.0 and just under 1."
+  (- (Double/longBitsToDouble (bit-or hex3ff0000000000000 l))
+     1.0))
+
+(defn- bits-to-float [i]
+  "Convert a 23-bit integer to a number between 0.0 and just under 1."
+  (- (Float/intBitsToFloat (bit-or hex3f800000 i))
+     (float 1.0)))
+
 (defn get-prng-real [reg-ref]
   "Return a new double between 0 and just under 1, and update the
   register referred to by reg-ref, having taken 52-60 bits from the
@@ -53,10 +67,42 @@
   (dosync
    (let [new-reg (.advance @reg-ref 52)]
      (ref-set reg-ref new-reg)
-     (- (Double/longBitsToDouble (bit-or hex3ff0000000000000
-					 (.getCollectedBits new-reg)))
-	1.0))))
+     (bits-to-double (.getCollectedBits new-reg)))))
 
+(defn prng-real-seq [reg]
+  "Returns a lazy sequence of pseudorandom doubles between 0 and just
+  under 1 using the given generator."
+  (lazy-cons (bits-to-double (.getCollectedBits reg))
+	     (prng-real-seq (.advance reg 52))))
+
+(defn feedback-real-seq [seed]
+  "Returns a lazy sequence of pseudorandom doubles between 0 and just
+  under 1 from the given long integer seed, using a PRNGFeedback
+  generator."
+  (prng-real-seq (.advance (PRNGFeedback. (long seed)) 52)))
+
+(defn prng-long-seq [reg]
+  "Returns a lazy sequence of pseudorandom longs using the given
+  generator."
+  (lazy-cons (.getCollectedBits reg)
+	     (prng-real-seq (.advance reg 64))))
+
+(defn feedback-long-seq [seed]
+  "Returns a lazy sequence of pseudorandom longs from the given long
+  integer seed, using a PRNGFeedback generator."
+  (prng-long-seq (.advance (PRNGFeedback. (long seed)) 64)))
+
+(defn prng-float-seq [reg]
+  "Returns a lazy sequence of pseudorandom floats between 0 and just
+  under 1 using the given generator."
+  (lazy-cons (bits-to-float (.getCollectedBits reg))
+	     (prng-float-seq (.advance reg 23))))
+
+(defn feedback-float-seq [seed]
+  "Returns a lazy sequence of pseudorandom floats between 0 and just
+  under 1 from the given long integer seed, using a PRNGFeedback
+  generator."
+  (prng-float-seq (.advance (PRNGFeedback. (long seed)) 23)))
 
 
 ; -------------------- 8< -------------------- 8< --------------------

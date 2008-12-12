@@ -43,18 +43,16 @@
   ;XXX
   )
 
-(defn pseudorandom-pos [coord-scalars seedchange parent-seed]
-  "Returns a list: (x y z seed)."
+(defn pseudorandom-pos [coord-scalars skew structure radius prng-seq]
+  "Returns a list: (x y z)."
   (let [new-seed (bit-xor seedchange (bit-shift-left parent-seed 3))]
-    (concat (map * (take 3 (prng-float-seq new-seed))
-		   coord-scalars)
-	    (list new-seed))))
-;XXX doesn't use :dim-skew
-;XXX doesn't scale properly
-;XXX Nothing about picking a normally-distributed size
+    (map (fn [& args] (apply map * args))
+	 (groups-of 3 prng-seq)
+	 (repeat skew)
+	 coord-scalars)))
 
 (defn gen-fractalplace [parent spec]
-  "Returns a vector of 8 subnodes for the given parent node."
+  "Returns a sequence of 8 subnodes for the given parent node."
   (let [parent-layer (parent :layer)
 	parent-rad   (parent :radius)
 	layer-spec   (spec parent-layer)
@@ -64,13 +62,17 @@
 	next-layer?  (< my-radius (layer-spec :subscale))
 	subnode-gen
 	  (if next-layer?
-	    #(new-topnode (spec (dec parent-layer)) %)
-	    #(new-subnode layer-spec % my-radius))]
-    (map (comp subnode-gen pseudorandom-pos)
-	 (for [xo [-1 1] yo [-1 1] zo [-1 1]]
-	   (list xo yo zo))
-	 (range 8)
-	 (repeat (parent :prng-seed)))))
+	    #(new-topnode parent (spec (dec parent-layer)) %1 %2)
+	    #(new-subnode parent layer-spec %1 %2 my-radius))]
+    (map subnode-gen
+	 (map pseudorandom-pos
+	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]
+		(list xo yo zo))
+	      (repeat (or (parent :dim-skew) [1 1 1]))
+	      (repeat strucure)
+	      (repeat parent-rad)
+	      (feedback-float-seq (parent :seed)))
+	 (range 1 9))))
 
 
 (defvar universe-spec
@@ -80,10 +82,12 @@
     :log-max-size  60.56,            ; ~ 21.14 bln light years
     :log-avg-size  60.56,
     :log-std-dev   0,
-    :structure     [0.4 0.5 0.4],    ; Each subnode is 2/5 parent's
-                                     ; size, offset is half parent's
-                                     ; size + random factor of up to
-                                     ; 0.3 * parent's size.
+    :structure     [0.4 0.2 0.25],   ; Each subnode is 2/5 parent's
+                                     ; size, offset is 1/5 parent's
+                                     ; radius + random factor of up to
+                                     ; 1/4 * parent's radius.  The sum
+                                     ; of these three numbers must
+                                     ; always be at most 1.
     }
 
    {:term          "supercluster",
@@ -92,7 +96,7 @@
     :log-max-size  56.87148,         ; just under (log 5e24)
     :log-avg-size  55.955,           ; ~ 211.36 mln light years
     :log-std-dev   1.0,
-    :structure     [0.45 0.5 0.4],   ; Denser than above
+    :structure     [0.45 0.2 0.25],  ; Denser than above
     }
 
    {:term          "cluster",
@@ -101,7 +105,7 @@
     :log-max-size  54.08633,         ; just under (log 3.086e23)
     :log-avg-size  52.93494,         ; ~ 10.31 mln light years
     :log-std-dev   0.8,
-    :structure     [0.5 0.5 0.4],    ; Denser still
+    :structure     [0.5 0.2 0.25],   ; Denser still
     }
 
    {:term          "galaxy",
@@ -113,7 +117,7 @@
     :rot-axis      [1 0 1],
     :avg-rot-speed 8.732015e-16      ; radians per second
     :dim-skew      [1 0.1 1],        ; y-dim is 1/10 x- and z-dims
-    :structure     [0.499 0.5 0.4],
+    :structure     [0.499 0.25 0.25],
     }
 
    {:term          "starsystem",
