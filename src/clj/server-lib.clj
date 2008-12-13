@@ -142,3 +142,4 @@
   (if s
     (lazy-cons (take n s)
 	       (groups-of n (drop n s)))))
+

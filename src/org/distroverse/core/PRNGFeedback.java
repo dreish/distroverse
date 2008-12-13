@@ -86,7 +86,7 @@ public final class PRNGFeedback
     * @param collected_bits
     * @param n_bits
     */
-   private PRNGFeedback( long seed, long collected_bits, int n_bits )
+   public PRNGFeedback( long seed, long collected_bits, int n_bits )
       {
       mRegister = seed;
       mCollectedBits = collected_bits;
@@ -111,6 +111,34 @@ public final class PRNGFeedback
          }
       
       return new PRNGFeedback( register, collected_bits, n_bits );
+      }
+
+   /**
+    * Consumes any number of zeros, followed by a one.  This can be
+    * useful for generating random floating-point numbers in base 2,
+    * providing both an even distribution, and full use of all .
+    * @return The advanced 
+    */
+   public PRNGFeedback advanceToOne()
+      {
+      long collected_bits = 0;
+      long register       = mRegister;
+
+      int i = 0;
+      while ( collected_bits == 0 )
+         {
+         register = nextRegister( register );
+         while ( (register & 1) == 0 )
+            {
+            register = nextRegister( register );
+            register = nextRegister( register );
+            }
+         register = nextRegister( register );
+         collected_bits |= ((register & 1) << i);
+         ++i;
+         }
+
+      return new PRNGFeedback( register, collected_bits, i );
       }
    
    public int getNumCollectedBits()

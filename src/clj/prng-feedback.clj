@@ -50,17 +50,25 @@
   "The sign and exponent constants for IEEE 754 floats between 1 and
   just under 2.")
 
-(defn- bits-to-double [l]
-  "Convert a 52-bit integer to a number between 0.0 and just under 1."
-  (- (Double/longBitsToDouble (bit-or hex3ff0000000000000 l))
-     1.0))
+(defn- bits-to-double
+  "Convert a 52-bit integer to a number between 0.0 and just under 1.
+  Optional second argument provides the exponent bits; 1 will give
+  results from 0.5 to 1; 2 will give results from 0.25 to 0.5; etc."
+  ([l] (- (Double/longBitsToDouble (bit-or hex3ff0000000000000 l))
+	  1.0))
+  ([l e] (Double/longBitsToDouble
+	  (bit-or l (bit-shift-left (- 1023 e) 52)))))
 
-(defn- bits-to-float [i]
-  "Convert a 23-bit integer to a number between 0.0 and just under 1."
-  (- (Float/intBitsToFloat (bit-or hex3f800000 i))
-     (float 1.0)))
+(defn- bits-to-float
+  "Convert a 23-bit integer to a number between 0.0 and just under 1.
+  Optional second argument provides the exponent bits; 1 will give
+  results from 0.5 to 1; 2 will give results from 0.25 to 0.5; etc."
+  ([i] (- (Float/intBitsToFloat (bit-or hex3f800000 i))
+	  (float 1.0)))
+  ([i e] (Float/intBitsToFloat
+	  (bit-or i (bit-shift-left (- 127 e) 23)))))
 
-(defn get-prng-real [reg-ref]
+(defn get-prng-double [reg-ref]
   "Return a new double between 0 and just under 1, and update the
   register referred to by reg-ref, having taken 52-60 bits from the
   output stream."
@@ -69,21 +77,39 @@
      (ref-set reg-ref new-reg)
      (bits-to-double (.getCollectedBits new-reg)))))
 
-(defn prng-real-seq [reg]
+(defn prng-double-seq [#^PRNGFeedback reg]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
-  under 1 using the given generator."
+  under 1 using the given generator, which should have been advanced
+  by 52 bits."
   (lazy-cons (bits-to-double (.getCollectedBits reg))
-	     (prng-real-seq (.advance reg 52))))
+	     (prng-double-seq (.advance reg 52))))
 
-(defn feedback-real-seq [seed]
+(defn feedback-double-seq [seed]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
   under 1 from the given long integer seed, using a PRNGFeedback
   generator."
-  (prng-real-seq (.advance (PRNGFeedback. (long seed)) 52)))
+  (prng-double-seq (.advance (PRNGFeedback. (long seed)) 52)))
 
-(defn prng-long-seq [reg]
+(defn prng-perfect-double-seq [#^PRNGFeedback reg]
+  "Returns a lazy sequence of pseudorandom doubles between 0 and just
+  under 1 using the given generator, which should have been advanced
+  to one.  Because of the increased accuracy in low numbers, this
+  sequence will almost surely not include any exact zeros."
+  (let [reg2 (.advance reg 52)]
+    (lazy-cons (bits-to-double (.getCollectedBits reg2)
+			       (.getNumCollectedBits reg))
+	       (prng-perfect-double-seq (.advanceToOne reg2)))))
+
+(defn feedback-perfect-double-seq [seed]
+  "Returns a lazy sequence of pseudorandom doubles between 0 and just
+  under 1 from the given long integer seed, using a PRNGFeedback
+  generator.  Because of the increased accuracy in low numbers, this
+  sequence will almost surely not include any exact zeros."
+  (prng-perfect-double-seq (.advanceToOne (PRNGFeedback. (long seed)))))
+
+(defn prng-long-seq [#^PRNGFeedback reg]
   "Returns a lazy sequence of pseudorandom longs using the given
-  generator."
+  generator, which should have been advanced by 64 bits."
   (lazy-cons (.getCollectedBits reg)
 	     (prng-long-seq (.advance reg 64))))
 
@@ -92,9 +118,10 @@
   integer seed, using a PRNGFeedback generator."
   (prng-long-seq (.advance (PRNGFeedback. (long seed)) 64)))
 
-(defn prng-float-seq [reg]
+(defn prng-float-seq [#^PRNGFeedback reg]
   "Returns a lazy sequence of pseudorandom floats between 0 and just
-  under 1 using the given generator."
+  under 1 using the given generator, which should have been advanced
+  by 23 bits."
   (lazy-cons (bits-to-float (.getCollectedBits reg))
 	     (prng-float-seq (.advance reg 23))))
 
@@ -118,7 +145,7 @@
   ; -9223372036854775808
 
 
-  (dorun (map (fn [x] (println (get-prng-real myrng)
+  (dorun (map (fn [x] (println (get-prng-double myrng)
 			       (.getRegister @myrng)))
 	      (range 40)))
 
