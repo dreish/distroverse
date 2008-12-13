@@ -85,7 +85,7 @@
   "Returns a lazy sequence of pseudorandom longs using the given
   generator."
   (lazy-cons (.getCollectedBits reg)
-	     (prng-real-seq (.advance reg 64))))
+	     (prng-long-seq (.advance reg 64))))
 
 (defn feedback-long-seq [seed]
   "Returns a lazy sequence of pseudorandom longs from the given long

@@ -30,26 +30,29 @@
 ;; </copyleft>
 
 
-(defn new-topnode [spec [x y z seed]]
+(defn new-topnode [parent spec [x y z] subnode-index]
+  (let [r (pick-radius spec)
+	]
+    ;XXX
+    ))
+
+(defn new-subnode [parent spec [x y z] subnode-index r]
   ;XXX
   )
 
-(defn new-subnode [spec [x y z seed] r]
-  ;XXX
-  )
-
-(defn prng-float-seq [seed]
-  ""
-  ;XXX
-  )
-
-(defn pseudorandom-pos [coord-scalars skew structure radius prng-seq]
+(defn pseudorandom-pos [coord-scalars skews
+			[unused-size offset-factor rand-factor]
+			radius prngs]
   "Returns a list: (x y z)."
-  (let [new-seed (bit-xor seedchange (bit-shift-left parent-seed 3))]
-    (map (fn [& args] (apply map * args))
-	 (groups-of 3 prng-seq)
-	 (repeat skew)
-	 coord-scalars)))
+  (let [offset (* offset-factor radius)
+	rand-scale (* rand-factor radius)]
+    (map (fn [rng scalar skew]
+	   (-> offset (* scalar skew)
+	              (+ (* rng rand-scale))
+		      (- (/ rand-scale 2))))
+	 prngs
+	 coord-scalars
+	 skews)))
 
 (defn gen-fractalplace [parent spec]
   "Returns a sequence of 8 subnodes for the given parent node."
@@ -71,9 +74,22 @@
 	      (repeat (or (parent :dim-skew) [1 1 1]))
 	      (repeat strucure)
 	      (repeat parent-rad)
-	      (feedback-float-seq (parent :seed)))
+	      (groups-of 3 (feedback-float-seq (parent :seed))))
 	 (range 1 9))))
 
+(defn- check-strucure [s]
+  "Throws an exception if the structure constants would violate the
+  rule that all subnodes of a parent node must fit within the parent
+  node."
+  (let [[size offset randfactor] s
+	totaloffset (+ offset (/ randfactor 2))
+	maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
+		       size)]
+    (if (> maxdistance 1.0)
+      (throw (Exception. (str "Structure too big by a factor of "
+			      maxdistance ", try "
+			      (with-out-str
+			       (prn (map #(/ % maxdistance) s)))))))))
 
 (defvar universe-spec
   [{:term          "universe",
@@ -96,7 +112,7 @@
     :log-max-size  56.87148,         ; just under (log 5e24)
     :log-avg-size  55.955,           ; ~ 211.36 mln light years
     :log-std-dev   1.0,
-    :structure     [0.45 0.2 0.25],  ; Denser than above
+    :structure     [0.44 0.19 0.24], ; Denser than above
     }
 
    {:term          "cluster",
@@ -105,7 +121,7 @@
     :log-max-size  54.08633,         ; just under (log 3.086e23)
     :log-avg-size  52.93494,         ; ~ 10.31 mln light years
     :log-std-dev   0.8,
-    :structure     [0.5 0.2 0.25],   ; Denser still
+    :structure     [0.47 0.188 0.235], ; Denser still
     }
 
    {:term          "galaxy",
@@ -117,7 +133,7 @@
     :rot-axis      [1 0 1],
     :avg-rot-speed 8.732015e-16      ; radians per second
     :dim-skew      [1 0.1 1],        ; y-dim is 1/10 x- and z-dims
-    :structure     [0.499 0.25 0.25],
+    :structure     [0.4344 0.2177 0.2177],
     }
 
    {:term          "starsystem",

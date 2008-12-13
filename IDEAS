@@ -6509,3 +6509,192 @@ Okay, got that licked.
 This _almost_ feels like real work, but I know it's just wading through
 formalities.
 
+2008-12-02
+
+I was thinking last night about how my WorldSession class now seems
+completely superfluous -- even counterproductive.  It's an attachment to
+a NetSession, but its only purpose is to point back to the NetSession,
+and to hold an attachment of its own -- a Clojure Var.  So I'm going to
+get rid of it.  First, I'll rewrite all the functions so it is
+completely bypassed, and then I'll delete it.
+
+Ah, there is one method I put in WorldSession: getPeerAddress().  It
+probably belongs in NetSession, though.
+
+2008-12-06
+
+I've got some ideas, the implementation of which I'm unsure of.  It's
+the general, vague idea I've had for more than a year, but now I'm at
+the point of actually implementing it, so I need some concrete plans:
+how do I integrate a fractal world calculated independently on the
+server and proxy and not stored persistently anywhere, with, for
+example, avatars and persistently-stored buildings?
+
+My current idea is that when a universe is first created, it consists of
+nothing but fractal parameters that guide the generation of
+superclusters, clusters, galaxies, star systems, planets, landmasses,
+vegetation, branches and fern leaves and the like, and surface textures.
+None of those things would initially be stored anywhere -- only the
+random seed used to generate it all.
+
+The problem I'm puzzling over right now is: When an avatar is standing
+on a planet with nothing but fractal-generated features, when that user
+logs out, the temporary nodes would be deleted, so what is that avatar's
+location as stored in the database for the next login?
+
+Would it be a chain of node indices?  I don't think that would work,
+because if an ancestor node were changed, the indices would no longer be
+valid.
+
+What about a chain of vector offsets from the root node?  (A single
+vector would not have the necessary precision.)  That wouldn't work, but
+a chain of MoveSeqs would solve the problem I was about to cite: a
+position on an orbiting planet would be somewhere in space on the next
+login.  The only situation where a chain of Moves would break down would
+be when a planet or star's orbit was changed, which probably means
+something previously ephemeral (my term for fractal-generated nodes that
+aren't stored in the database) was made concrete, persistent, and no
+longer generated, in which case I don't think there's any more "right"
+way to handle it.  It's simply the case that if you're going to screw
+around with orbits for planets users have already visited and logged out
+from while they were ephemeral, they're going to get stuck in deep
+space.  So it would be preferable not to do that.  (I don't anticipate
+mere mortal users visiting ephemeral planets anyway, but maybe I'll want
+to open that up at some point.)
+
+I think this is workable.  I just need to define what an ephemeral node
+_is_, and how exactly it goes about generating galaxies, stars, planets,
+and so forth.  It might be a matter of having the root node (which maybe
+ought to always be persistent -- maybe that's where the root fractal
+generator gets stored) have some property that says, "I'm a universe!"
+and another dimensional property such that every subnode larger than
+that dimension is just an empty subdivision of the universe, while the
+first generation of subnodes smaller than that dimension represents a
+supercluster with a different dimensional threshold below which its
+subnodes then represent clusters, and so forth.
+
+So then a stored position on an ephemeral planet would be a root node
+(or just the root-most concrete node) and a series of MoveSeqs.  (There
+could be more than one root node, after all, corresponding to multiple
+non-intersecting universes served from the same URL.)
+
+One limitation of sorts that I just bumped into is the topology of my
+universe: it's Euclidean.  I can't justify spending time doing it any
+differently.  I guess it would be pretty easy to make it toroidal, but
+as long as I start things out near the center of it, it shouldn't
+matter.  So for now, yes, the universe will have a center (though no one
+but me is likely to know where that center really is), and edges beyond
+which there will just be infinite empty space.
+
+I guess that's room for expansion, but at 21 billion light years across,
+I can't imagine it'll ever be necessary.
+
+2008-12-08
+
+I'm looking at writing a linear feedback shift register PRNG.  I was
+going to do it in Clojure, but I think Java might actually be more
+appropriate.  I'm going to make it immutable, though.  So it'll have an
+advance( n_bits ) method that returns a new object, and a collect()
+method that gets however many bits were just consumed by the last
+advance() call.
+
+I don't think it's really necessary, but it's good exercise.  It
+shouldn't be expensive enough to justify _not_ doing it this way.
+
+Oh, of course, that's why I want to make it immutable: at some point
+I'll generate numbers inside a transaction, which will need to be
+repeatable.  (The whole point of this is to generate deterministic
+streams of pseudo-random numbers that can be duplicated on the peer
+computer, simulating the transmission of huge amounts of shared data
+that are actually just output from a PRNG using a shared seed.)
+
+Ahh.  Good ol' HotSpot.  My PRNGFeedback class generates 60.6 million
+random bits per second.
+
+And this is mostly just going to run on the client side.  I _think_,
+though I'm not sure yet, that the server won't need to generate these
+nodes very often.
+
+I think it'll do it when a node is concretized, but otherwise I don't
+think there will be a need.  I let the client compute collisions and
+I'll just trust that, with some minor limitations to prevent griefing.
+Only an avatar's own client can report collisions between that avatar
+and an ephemeral object, and the collision will have to conserve energy,
+and, what the hell, I'll probably go ahead and compute the movement of
+the colliding object to verify at least _some_ part of the calculation.
+I'm actually having a hard time imagining how it could be abused, but
+I'm sure someone will figure it out.
+
+I think an object occupying an ephemeral room will have to report its
+parent node as a chain of indices from the next highest concrete node,
+along with, of course, that concrete node's ID.
+
+2008-12-09
+
+Normally, that chain would not be too long, and the concrete node not
+too high-level, because most of the action will happen around concrete
+nodes.  After the worlds get generated, all this ephemeral stuff is just
+expensive scenery.  But, it was one of my main reasons for doing all
+this -- one of my earliest daydreams that led to the idea for the design
+of Distroverse as a whole -- and I'm still enjoying it.
+
+Persistent would be a better antonym for ephemeral -- persistent node,
+specifically -- but the word is already overloaded with meanings in a
+project that uses Clojure _and_ a database.  The word "ephemeral" in the
+context of Clojure mostly just comes up when rhickey is selling the idea
+that immutable objects work well in Java because ephemeral garbage is
+cheap.  I've apparently fully bought into that pitch, because the only
+Java class I've created since I drank the Clojure Kool-Aid has 100%
+final instance members, and I'm about to do the same thing to all the
+foundational DVTP message classes that are the heart of the whole
+project.  (Even though theoretically the classes should already all be
+immutable.)
+
+As I feared might be the case, Java doesn't do some sort of crazy code-
+path analysis to determine whether functions called from constructors
+fulfull the requirements that every constructor initialize every final
+field, nor does it figure out that functions that attempt to assign to
+final fields are in fact only called from constructors and therefore not
+really breaking that rule.
+
+So I just have to get rid of my readExternal methods and stick that code
+into the constructor-with-InputStream.  This seems like a reasonable
+defactoring, but a little piece of me always dies when I do that.
+
+Eclipse of course has a keystroke to inline all calls to a method and
+delete the method itself: Cmd-Opt-I.  That might seem cool to someone
+who wants to believe that being a Java programmer is the best career a
+programmer can have, but the only reason I even _need_ to inline this
+code is because of the rigorous demands of static typing.
+
+I'm making all fields final for two reasons: one, because it sounded
+like a good idea when rhickey described how all his data structures were
+written that way, and two, because of something I read from Sun about
+how another thread could theoretically see a half-constructed object,
+but by making fields final the JVM guarantees this can't happen.
+
+2008-12-11
+
+I'm tempted to create some sort of zone cache to avoid having to query
+the entire universe every time someone moves or changes their detail
+level.  I think this might be a premature optimization, though.  I don't
+even have any code that sends nodes back and forth.
+
+The solution might be more along the lines of having the tree go both
+ways, though, so a node would have a parent node, as well as a vector of
+nodes at the parent level that could also contain it.  I'm not sure that
+helps. ...
+
+One thing I do want to do is add the PRNG as metainformation attached to
+the numbers it generates, if I can do that.  I'm not sure I can.
+
+No, can't do it.  Of course, it has to be a Clojure object.  Being a
+relatively low-level Lisp, if there is such a thing, Clojure doesn't
+wrap all values in some sort of fat wrapper with room for a metadata
+hash.
+
+I guess I'll try actually instantiating a universe, next.
+
+Oops.  I think my structure constants still cause subnodes to sometimes
+poke outside their parent nodes.
+
