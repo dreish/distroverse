@@ -69,7 +69,7 @@
        " t "
        (gmt-time-string)
        " # "
-       (random)))
+       (sec-random)))
 
 (defn replace-child [parent nodeid child]
   "Make the node ref for nodeid under parent point to child."

@@ -57,6 +57,13 @@ public final class MoveSeq implements DvtpExternalizable
       mMoves      = moves.clone();
       mRepeatType = repeat_type;
       }
+   
+   public MoveSeq( Move m )
+      {
+      super();
+      mMoves      = new Move[] { m };
+      mRepeatType = RepeatType.LOOP;
+      }
 
    public int getClassNumber()
       {  return 18;  }

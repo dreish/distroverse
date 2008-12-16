@@ -30,11 +30,59 @@
 ;; </copyleft>
 
 
+(defn subseed [parent subnode-index]
+  "Return a new seed for the node described by parent and
+  subnode-index."
+  (let [pshift   (parent :seed-mutation-shift)
+	sshift   (-> pshift inc (rem 60))
+	pseed    (parent :seed)
+	mutation (bit-shift-left (+ 1 subnode-index) sshift)
+	seedseed (bit-xor pseed mutation)]
+    (long (first (prng-long-seq seedseed)))))
+
+(defn lognormal-rand
+  "Takes a normal sequence and a couple of base-e scale
+  parameters (and an optional ln max) and returns a lognormal
+  sequence."
+
+  ([randseq log-avg log-std-dev]
+     (map #(-> % (* log-std-dev) (+ log-avg) Math/exp float)
+	  randseq))
+
+  ([randseq log-avg log-std-dev log-max]
+     (if log-max
+       (let [max (float (Math/exp log-max))]
+	 (map #(if (> % max) max %)
+	      (lognormal-rand randseq log-avg log-std-dev)))
+       (lognormal-rand randseq log-avg log-std-dev))))
+
+(defn pick-radius [spec seed]
+  (apply lognormal-rand (feedback-normal-seq seed)
+	 (map spec '(:log-avg-size :log-std-dev :log-max-size))))
+
+(defn random-quat [seed]
+  (let [[x y z] (take 3 (feedback-normal-seq seed))
+	rot (first (feedback-float-seq (inc seed)))
+	theta (* rot 2 Math/PI)
+	vec (if (= 0 x y z)
+	      (Vector3f. 1 1 1)
+	      (Vector3f. x y z))]
+    (doto (Quaternion.)
+      (fromAngleAxis theta vec))))
+
 (defn new-topnode [parent spec [x y z] subnode-index]
-  (let [r (pick-radius spec)
-	]
-    ;XXX
-    ))
+  "Returns a new highest-level node for a given layer spec."
+  (let [seed (subseed parent subnode-index)
+	r    (pick-radius spec (inc seed))]
+    {:name (spec :name)
+     :generator (spec :generator)
+     :radius r
+     :seed seed
+     :move (pos-quat-to-moveseq [x y z] (random-quat (+ seed 2)))
+     :ephemeral true
+     :seed-mutation-shift (-> (parent :seed-mutation-shift)
+			      inc (rem 60))
+     }))
 
 (defn new-subnode [parent spec [x y z] subnode-index r]
   ;XXX
@@ -43,7 +91,7 @@
 (defn pseudorandom-pos [coord-scalars skews
 			[unused-size offset-factor rand-factor]
 			radius prngs]
-  "Returns a list: (x y z)."
+  "Returns coordinates as a sequence: (x y z)."
   (let [offset (* offset-factor radius)
 	rand-scale (* rand-factor radius)]
     (map (fn [rng scalar skew]
@@ -77,7 +125,7 @@
 	      (groups-of 3 (feedback-float-seq (parent :seed))))
 	 (range 1 9))))
 
-(defn- check-strucure [s]
+(defn- check-structure [s]
   "Throws an exception if the structure constants would violate the
   rule that all subnodes of a parent node must fit within the parent
   node."
@@ -91,8 +139,18 @@
 			      (with-out-str
 			       (prn (map #(/ % maxdistance) s)))))))))
 
+(defn new-universe-spec [& layer-specs]
+  "Returns a vector containing the given layer specs, each one a hash,
+  adding a :subspec key in each spec that maps to the one after it (or
+  nil in the last layer spec)."
+  (map #(do
+	  (check-structure ((first %) :structure))
+	  (assoc (first %) :subspec (second %)))
+       (rests layer-specs)))
+
 (defvar universe-spec
-  [{:term          "universe",
+  (new-universe-spec
+   {:name          "universe",
     :generator     gen-fractalplace,
     :subscale      5e24,             ; ~ 528.5 mln light years
     :log-max-size  60.56,            ; ~ 21.14 bln light years
@@ -101,12 +159,10 @@
     :structure     [0.4 0.2 0.25],   ; Each subnode is 2/5 parent's
                                      ; size, offset is 1/5 parent's
                                      ; radius + random factor of up to
-                                     ; 1/4 * parent's radius.  The sum
-                                     ; of these three numbers must
-                                     ; always be at most 1.
+                                     ; 1/4 * parent's radius.
     }
 
-   {:term          "supercluster",
+   {:name          "supercluster",
     :generator     gen-fractalplace,
     :subscale      3.086e23,         ; ~ 32.62 mln light years
     :log-max-size  56.87148,         ; just under (log 5e24)
@@ -115,7 +171,7 @@
     :structure     [0.44 0.19 0.24], ; Denser than above
     }
 
-   {:term          "cluster",
+   {:name          "cluster",
     :generator     gen-fractalplace,
     :subscale      3.086e21,         ; ~ 326,200 light years
     :log-max-size  54.08633,         ; just under (log 3.086e23)
@@ -124,7 +180,7 @@
     :structure     [0.47 0.188 0.235], ; Denser still
     }
 
-   {:term          "galaxy",
+   {:name          "galaxy",
     :generator     gen-fractalplace,
     :subscale      4.73e16,          ; ~ 5 light years
     :log-max-size  49.48105,         ; just under (log 3.086e21)
@@ -136,11 +192,11 @@
     :structure     [0.4344 0.2177 0.2177],
     }
 
-   {:term          "starsystem",
+   {:name          "starsystem",
     :generator     gen-starsystem,
     :log-avg-size  38.39528,         ; just under (log 4.73e16)
     :log-std-dev   0,
     }
-   ]
+   )
   "Parameters defining how universes are generated.")
 

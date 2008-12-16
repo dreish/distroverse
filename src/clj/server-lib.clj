@@ -29,9 +29,51 @@
 
 ;; </copyleft>
 
+(import '(com.jme.math Quaternion Vector3f))
+(import '(org.distroverse.dvtp Quat Vec Move MoveSeq))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;; Communications functions ;;;;;;;;;;;;;;;;;;;;;;;
+
+; General sequence functions
+
+(defn groups-of [n s]
+  "Return a lazy sequence of n groups of items from s.  If the given
+  sequence is finite, the returned sequence may end with a group of
+  fewer than n items."
+  (if s
+    (lazy-cons (take n s)
+	       (groups-of n (drop n s)))))
+
+(defn rests [coll]
+  "Returns a lazy sequence of successive rests of coll, beginning with
+  the entire collection and ending with a collection of count 1."
+  (take-while identity (iterate rest coll)))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Miscellaneous general functions
+
+(defn do-or [& args]
+  "(or) as a function, evaluating all its arguments, but returning the
+  first true one just as (or) does."
+  (reduce #(or %1 %2) args))
+
+(defn gmt-time-string []
+  (. (java.util.Date.) toGMTString))
+
+(let [rng (java.security.SecureRandom.)]
+  (defn sec-random []
+    "Get a pseudorandom 32-bit int.  FIXME seed with secure random
+  bytes, such as from /dev/urandom."
+    (locking rng
+      (.nextInt rng))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Communications functions
 
 (def response-map
   "Defines the classes that are expected in response to each message
@@ -89,15 +131,13 @@
     (lookup-response-func (eval message))
     `(lookup-response-func ~message)))
 
-(defn do-or [& args]
-  "(or) as a function, evaluating all its arguments, but returning the
-  first true one just as (or) does."
-  (reduce #(or %1 %2) args))
-
 (defn add-callback! [session matcher callback]
   "Add the given callback to the session so that if, later, a message
   matching matcher is received in session, callback will be called
   (through handle-object!)."
+  ; XXX I think this needs to be rewritten due to my removal of
+  ; WorldSession.  For example, there's no longer a .getPayload method
+  ; anywhere.
   (let [callbacks-ref (@(.getPayload session) :callbacks)]
     (dosync
      (let [new-callback
@@ -108,11 +148,10 @@
 	     callback)]
        (alter callbacks-ref assoc matcher new-callback)))))
 
-(defn dvtp-send! [#^WorldSession session message]
+(defn dvtp-send! [#^NetSession session message]
   "Send message in session."
-  (let [net-session (.getNetSession session)
-	out-queue   (.getNetOutQueue net-session)]
-    (.add out-queue message)))
+  (.add (.getNetOutQueue session)
+	message))
 
 (defmacro async-call! [session [assign-var message] code]
   "Send message in session, asynchronously bind the result to
@@ -127,19 +166,29 @@
 		    (fn (~assign-var) ~@code))
      (dvtp-send! ~session ~message)))
 
-(defn gmt-time-string []
-  (. (java.util.Date.) toGMTString))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(let [rng (java.security.SecureRandom.)]
-  (defn random []
-    "Get a pseudorandom 32-bit int.  FIXME seed with secure random bytes."
-    (.nextInt rng)))
+; Convenience constructors for DVTP objects
 
-(defn groups-of [n s]
-  "Return a lazy sequence of n groups of items from s.  If the given
-  sequence is finite, the returned sequence may end with a group of
-  fewer than n items."
-  (if s
-    (lazy-cons (take n s)
-	       (groups-of n (drop n s)))))
+(defn pos-to-moveseq
+  "Creates a stationary MoveSeq for the given coordinates, which may
+  be given as three arguments, or as a list of three numbers, or two
+  lists, the second one being four numbers defining a quaternion."
+
+  ([[x y z] [qw qx qy qz]]
+     (MoveSeq. (Move. (Vec. (Vector3f. x y z))
+		      (Quat. (Quaternion. qw qx qy qz)))))
+
+  ([s]
+     (pos-to-moveseq s [0 0 0 1]))
+
+  ([x y z]
+     (pos-to-moveseq [x y z])))
+
+(defn pos-quat-to-moveseq
+  "Creates a stationary MoveSeq for the given coordinates and
+  Quaternion."
+  ([[x y z] #^Quaternion q]
+     (MoveSeq. (Move. (Vec. (Vector3f x y z))
+		      (Quat. q)))))
 

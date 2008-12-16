@@ -131,6 +131,29 @@
   generator."
   (prng-float-seq (.advance (PRNGFeedback. (long seed)) 23)))
 
+(defn box-muller [[u1 u2]]
+  "Takes a collection of two uniformly distributed numbers in the
+  interval (0,1] and returns a list of two normally distributed
+  numbers."
+  ; I'm using the terminology from
+  ; http://en.wikipedia.org/wiki/Box-Muller_transform as of
+  ; 2008-12-13, so I'm returning (Z0 Z1).
+  (let [u1term (-> (Math/log u1) (* -2) Math/sqrt)
+	u2term (* u2 2 Math/PI)]
+    (list (float (* u1term (Math/cos u2term)))
+	  (float (* u1term (Math/sin u2term))))))
+
+(defn prng-normal-seq [reg]
+  "Returns a lazy sequence of pseudorandom normally distributed
+  floats.  Register should have been advanced 23 bits."
+  (mapcat box-muller
+	  (groups-of 2 (map #(if (zero? %) 1 %)
+			    (prng-float-seq reg)))))
+
+(defn feedback-normal-seq [seed]
+  "Returns a lazy sequence of pseudorandom normally distributed
+  floats."
+  (prng-normal-seq (.advance (PRNGFeedback. (long seed)) 23)))
 
 ; -------------------- 8< -------------------- 8< --------------------
 

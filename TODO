@@ -73,12 +73,18 @@
     - Ephemeral universe generation
       + universe-spec
       - gen-fractalplace
+        - new-topnode
+	  - Problem: This generates nodes with a radius larger than
+	    those made with new-subnode; they will exceed the bounds
+  	    of their parent nodes
+	- new-subnode
       - Node seed to child node seed
         - Node has a seed-mutation-shift
         - Child node's seed-mutation-shift is parent's (+ 1) (rem 60)
         - Node's seed is:
-          - First long generated from rand sequence using parent's seed
-	  - bit-xor (node-index << seed-mutation-shift)
+          x First long generated from rand sequence using parent's seed
+	  x bit-xor (node-index << seed-mutation-shift)
+	  > xoring the parent's seed instead
   - Plug server into database
   - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
