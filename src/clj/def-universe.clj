@@ -29,6 +29,8 @@
 
 ;; </copyleft>
 
+(use 'server-lib)
+(use 'prng-feedback)
 
 (defn subseed [parent subnode-index]
   "Return a new seed for the node described by parent and
@@ -61,6 +63,8 @@
 	 (map spec '(:log-avg-size :log-std-dev :log-max-size))))
 
 (defn random-quat [seed]
+  "Returns a uniformly-distributed random orientation, as a
+  Quaternion."
   (let [[x y z] (take 3 (feedback-normal-seq seed))
 	rot (first (feedback-float-seq (inc seed)))
 	theta (* rot 2 Math/PI)
@@ -68,30 +72,37 @@
 	      (Vector3f. 1 1 1)
 	      (Vector3f. x y z))]
     (doto (Quaternion.)
-      (fromAngleAxis theta vec))))
+      (.fromAngleAxis theta vec))))
 
-(defn new-topnode [parent spec [x y z] subnode-index]
+(defn new-gen-node [parent spec [x y z] subnode-index seed r move]
+  {:name (spec :name)
+   :generator (spec :generator)
+   :radius r
+   :seed seed
+   :move move
+   :ephemeral true
+   :seed-mutation-shift (-> (parent :seed-mutation-shift)
+			    inc (rem 60))
+   })
+
+(defn new-top-gen-node [parent spec [x y z] subnode-index]
   "Returns a new highest-level node for a given layer spec."
   (let [seed (subseed parent subnode-index)
 	r    (pick-radius spec (inc seed))]
-    {:name (spec :name)
-     :generator (spec :generator)
-     :radius r
-     :seed seed
-     :move (pos-quat-to-moveseq [x y z] (random-quat (+ seed 2)))
-     :ephemeral true
-     :seed-mutation-shift (-> (parent :seed-mutation-shift)
-			      inc (rem 60))
-     }))
+    (new-gen-node parent spec [x y z] subnode-index seed r
+		  (pos-quat-to-moveseq [x y z] (random-quat (+ seed 2))))))
 
-(defn new-subnode [parent spec [x y z] subnode-index r]
-  ;XXX
-  )
+(defn new-sub-gen-node [parent spec [x y z] subnode-index r]
+  "Returns a new highest-level node for a given layer spec."
+  (let [seed (subseed parent subnode-index)]
+    (new-gen-node parent spec [x y z] subnode-index seed r
+		  (pos-to-moveseq [x y z]))))
 
 (defn pseudorandom-pos [coord-scalars skews
 			[unused-size offset-factor rand-factor]
 			radius prngs]
-  "Returns coordinates as a sequence: (x y z)."
+  "Generate a reproduceable pseudorandom location for a new subnode.
+  Returns coordinates as a sequence: (x y z)."
   (let [offset (* offset-factor radius)
 	rand-scale (* rand-factor radius)]
     (map (fn [rng scalar skew]
@@ -113,8 +124,8 @@
 	next-layer?  (< my-radius (layer-spec :subscale))
 	subnode-gen
 	  (if next-layer?
-	    #(new-topnode parent (spec (dec parent-layer)) %1 %2)
-	    #(new-subnode parent layer-spec %1 %2 my-radius))]
+	    #(new-top-gen-node parent (spec (dec parent-layer)) %1 %2)
+	    #(new-sub-gen-node parent layer-spec %1 %2 my-radius))]
     (map subnode-gen
 	 (map pseudorandom-pos
 	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]
