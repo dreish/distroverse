@@ -145,14 +145,17 @@
   nil in the last layer spec)."
   (map #(do
 	  (check-structure ((first %) :structure))
-	  (assoc (first %) :subspec (second %)))
+	  (assoc (first %)
+	    :subspec (second %)
+	    :subscale (if (second %)
+			(* (Math/exp (:log-max-size (second %)))
+			   ((:structure (first %)) 0)))))
        (rests layer-specs)))
 
 (defvar universe-spec
   (new-universe-spec
    {:name          "universe",
     :generator     gen-fractalplace,
-    :subscale      5e24,             ; ~ 528.5 mln light years
     :log-max-size  60.56,            ; ~ 21.14 bln light years
     :log-avg-size  60.56,
     :log-std-dev   0,
@@ -164,8 +167,7 @@
 
    {:name          "supercluster",
     :generator     gen-fractalplace,
-    :subscale      3.086e23,         ; ~ 32.62 mln light years
-    :log-max-size  56.87148,         ; just under (log 5e24)
+    :log-max-size  56.87148,         ; ~ 528.5 mln light years
     :log-avg-size  55.955,           ; ~ 211.36 mln light years
     :log-std-dev   1.0,
     :structure     [0.44 0.19 0.24], ; Denser than above
@@ -173,8 +175,7 @@
 
    {:name          "cluster",
     :generator     gen-fractalplace,
-    :subscale      3.086e21,         ; ~ 326,200 light years
-    :log-max-size  54.08633,         ; just under (log 3.086e23)
+    :log-max-size  54.08633,         ; ~ 32.62 mln light years
     :log-avg-size  52.93494,         ; ~ 10.31 mln light years
     :log-std-dev   0.8,
     :structure     [0.47 0.188 0.235], ; Denser still
@@ -182,8 +183,7 @@
 
    {:name          "galaxy",
     :generator     gen-fractalplace,
-    :subscale      4.73e16,          ; ~ 5 light years
-    :log-max-size  49.48105,         ; just under (log 3.086e21)
+    :log-max-size  49.48105,         ; ~ 326,200 light years
     :log-avg-size  47.17847,         ; ~ 32,620 light years
     :log-std-dev   1.3,
     :rot-axis      [1 0 1],
@@ -194,7 +194,8 @@
 
    {:name          "starsystem",
     :generator     gen-starsystem,
-    :log-avg-size  38.39528,         ; just under (log 4.73e16)
+    :log-max-size  38.39528,         ; ~ 5 light years
+    :log-avg-size  38.39528,
     :log-std-dev   0,
     }
    )
