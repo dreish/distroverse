@@ -133,7 +133,7 @@
 	      (repeat (or (parent :dim-skew) [1 1 1]))
 	      (repeat strucure)
 	      (repeat parent-rad)
-	      (groups-of 3 (feedback-float-seq (parent :seed))))
+	      (partition 3 (feedback-float-seq (parent :seed))))
 	 (range 1 9))))
 
 (defn- check-structure [s]

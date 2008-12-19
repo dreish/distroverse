@@ -37,14 +37,6 @@
 
 ; General sequence functions
 
-(defn groups-of [n s]
-  "Return a lazy sequence of n groups of items from s.  If the given
-  sequence is finite, the returned sequence may end with a group of
-  fewer than n items."
-  (if s
-    (lazy-cons (take n s)
-	       (groups-of n (drop n s)))))
-
 (defn rests [coll]
   "Returns a lazy sequence of successive rests of coll, beginning with
   the entire collection and ending with a collection of count 1."

@@ -85,6 +85,7 @@ public final class DvtpObject
         ReparentObject.class,   // 138
         ClearShape.class,       // 139
         CTrans.class,           // 140
+        SetFora.class,          // 141
 
         null
         };

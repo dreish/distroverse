@@ -39,7 +39,7 @@
 ; immutable data structures, I don't want copy-modification to entail
 ; copying large amounts of state.
 
-(import '(org.distroverse.core PRNGFeedback))
+(import '(org.distroverse.core PrngSslfsr))
 (use 'clojure.contrib.def)
 
 (defvar- hex3ff0000000000000 (long 4607182418800017408)
@@ -77,7 +77,7 @@
      (ref-set reg-ref new-reg)
      (bits-to-double (.getCollectedBits new-reg)))))
 
-(defn prng-double-seq [#^PRNGFeedback reg]
+(defn prng-double-seq [#^PrngSslfsr reg]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
   under 1 using the given generator, which should have been advanced
   by 52 bits."
@@ -86,11 +86,11 @@
 
 (defn feedback-double-seq [seed]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
-  under 1 from the given long integer seed, using a PRNGFeedback
+  under 1 from the given long integer seed, using a PrngSslfsr
   generator."
-  (prng-double-seq (.advance (PRNGFeedback. (long seed)) 52)))
+  (prng-double-seq (.advance (PrngSslfsr. (long seed)) 52)))
 
-(defn prng-perfect-double-seq [#^PRNGFeedback reg]
+(defn prng-perfect-double-seq [#^PrngSslfsr reg]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
   under 1 using the given generator, which should have been advanced
   to one.  Because of the increased accuracy in low numbers, this
@@ -102,12 +102,12 @@
 
 (defn feedback-perfect-double-seq [seed]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
-  under 1 from the given long integer seed, using a PRNGFeedback
+  under 1 from the given long integer seed, using a PrngSslfsr
   generator.  Because of the increased accuracy in low numbers, this
   sequence will almost surely not include any exact zeros."
-  (prng-perfect-double-seq (.advanceToOne (PRNGFeedback. (long seed)))))
+  (prng-perfect-double-seq (.advanceToOne (PrngSslfsr. (long seed)))))
 
-(defn prng-long-seq [#^PRNGFeedback reg]
+(defn prng-long-seq [#^PrngSslfsr reg]
   "Returns a lazy sequence of pseudorandom longs using the given
   generator, which should have been advanced by 64 bits."
   (lazy-cons (.getCollectedBits reg)
@@ -115,10 +115,10 @@
 
 (defn feedback-long-seq [seed]
   "Returns a lazy sequence of pseudorandom longs from the given long
-  integer seed, using a PRNGFeedback generator."
-  (prng-long-seq (.advance (PRNGFeedback. (long seed)) 64)))
+  integer seed, using a PrngSslfsr generator."
+  (prng-long-seq (.advance (PrngSslfsr. (long seed)) 64)))
 
-(defn prng-float-seq [#^PRNGFeedback reg]
+(defn prng-float-seq [#^PrngSslfsr reg]
   "Returns a lazy sequence of pseudorandom floats between 0 and just
   under 1 using the given generator, which should have been advanced
   by 23 bits."
@@ -127,9 +127,9 @@
 
 (defn feedback-float-seq [seed]
   "Returns a lazy sequence of pseudorandom floats between 0 and just
-  under 1 from the given long integer seed, using a PRNGFeedback
+  under 1 from the given long integer seed, using a PrngSslfsr
   generator."
-  (prng-float-seq (.advance (PRNGFeedback. (long seed)) 23)))
+  (prng-float-seq (.advance (PrngSslfsr. (long seed)) 23)))
 
 (defn box-muller [[u1 u2]]
   "Takes a collection of two uniformly distributed numbers in the
@@ -147,24 +147,24 @@
   "Returns a lazy sequence of pseudorandom normally distributed
   floats.  Register should have been advanced 23 bits."
   (mapcat box-muller
-	  (groups-of 2 (map #(if (zero? %) 1 %)
+	  (partition 2 (map #(if (zero? %) 1 %)
 			    (prng-float-seq reg)))))
 
 (defn feedback-normal-seq [seed]
   "Returns a lazy sequence of pseudorandom normally distributed
   floats."
-  (prng-normal-seq (.advance (PRNGFeedback. (long seed)) 23)))
+  (prng-normal-seq (.advance (PrngSslfsr. (long seed)) 23)))
 
 ; -------------------- 8< -------------------- 8< --------------------
 
 (comment
   ; For REPL
 
-  (def myrng (ref (PRNGFeedback. (long 1))))
+  (def myrng (ref (PrngSslfsr. (long 1))))
 
-  (PRNGFeedback/nextRegister (long -1))
+  (PrngSslfsr/nextRegister (long -1))
   ; 9223372036854775807
-  (PRNGFeedback/nextRegister (long 1))
+  (PrngSslfsr/nextRegister (long 1))
   ; -9223372036854775808
 
 
@@ -172,15 +172,15 @@
 			       (.getRegister @myrng)))
 	      (range 40)))
 
-  (dosync (ref-set myrng (PRNGFeedback. (long 16))))
+  (dosync (ref-set myrng (PrngSslfsr. (long 16))))
 
-  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 15)))))
+  (dosync (ref-set myrng (PrngSslfsr. (long (discrete-** 2 15)))))
   
-  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 16)))))
+  (dosync (ref-set myrng (PrngSslfsr. (long (discrete-** 2 16)))))
 
-  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 17)))))
+  (dosync (ref-set myrng (PrngSslfsr. (long (discrete-** 2 17)))))
   
-  (dosync (ref-set myrng (PRNGFeedback. (long (discrete-** 2 18)))))
+  (dosync (ref-set myrng (PrngSslfsr. (long (discrete-** 2 18)))))
 
   )
 

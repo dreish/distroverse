@@ -48,15 +48,15 @@ package org.distroverse.core;
  * I am hardcoding taps for a maximum-cycle 64-bit PRNG.  The cycle
  * length is roughly 1/4 that of a non-shrinking LFSR.
  */
-public final class PRNGFeedback
+public final class PrngSslfsr
    {
    /**
-    * Initializes a new {@link PRNGFeedback} generator.  Note that only
+    * Initializes a new {@link PrngSslfsr} generator.  Note that only
     * the low 63 bits of the seed are used.  The high (sign) bit is
     * ignored.
     * @param seed
     */
-   public PRNGFeedback( long seed )
+   public PrngSslfsr( long seed )
       {
       long register = seed | (1 << 63);
 
@@ -86,14 +86,14 @@ public final class PRNGFeedback
     * @param collected_bits
     * @param n_bits
     */
-   public PRNGFeedback( long seed, long collected_bits, int n_bits )
+   public PrngSslfsr( long seed, long collected_bits, int n_bits )
       {
       mRegister = seed;
       mCollectedBits = collected_bits;
       mNumCollectedBits = n_bits;
       }
    
-   public PRNGFeedback advance( int n_bits )
+   public PrngSslfsr advance( int n_bits )
       {
       long collected_bits = 0;
       long register       = mRegister;
@@ -110,7 +110,7 @@ public final class PRNGFeedback
          collected_bits |= ((register & 1) << i); 
          }
       
-      return new PRNGFeedback( register, collected_bits, n_bits );
+      return new PrngSslfsr( register, collected_bits, n_bits );
       }
 
    /**
@@ -119,7 +119,7 @@ public final class PRNGFeedback
     * providing both an even distribution, and full use of all .
     * @return The advanced 
     */
-   public PRNGFeedback advanceToOne()
+   public PrngSslfsr advanceToOne()
       {
       long collected_bits = 0;
       long register       = mRegister;
@@ -138,7 +138,7 @@ public final class PRNGFeedback
          ++i;
          }
 
-      return new PRNGFeedback( register, collected_bits, i );
+      return new PrngSslfsr( register, collected_bits, i );
       }
    
    public int getNumCollectedBits()

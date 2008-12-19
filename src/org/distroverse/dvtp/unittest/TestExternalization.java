@@ -52,6 +52,7 @@ import org.distroverse.dvtp.Real;
 import org.distroverse.dvtp.RedirectUrl;
 import org.distroverse.dvtp.ReparentObject;
 import org.distroverse.dvtp.ReplyInv;
+import org.distroverse.dvtp.SetFora;
 import org.distroverse.dvtp.SetShape;
 import org.distroverse.dvtp.SetUrl;
 import org.distroverse.dvtp.SetVisible;
@@ -158,6 +159,7 @@ public class TestExternalization
          case 138: testReparentObject(); break;
          case 139: testClearShape();     break;
          case 140: testCTrans();         break;
+         case 141: testSetFORA();        break;
 
          default:
             throw new ClassNotFoundException( "No test case for "
@@ -682,6 +684,14 @@ public class TestExternalization
       tryBeamObject( new CTrans( aoex ) );
       tryBeamObject( new CTrans( aoex[ 0 ], aoex[ 1 ],
                                  new SetVisible( 125, true ) ) );
+      }
+
+   private static void testSetFORA()
+   throws IOException, ClassNotFoundException
+      {
+      MoveSeq[] msex = moveSeqExamples();
+      for ( MoveSeq ms : msex )
+         tryBeamObject( new SetFora( ms ) );
       }
 
    /**
