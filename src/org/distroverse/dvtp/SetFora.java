@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2007-2008 Dan Reish.
+ *
+ * For license details, see the file COPYING-L in your distribution,
+ * or the <a href="http://www.gnu.org/copyleft/lgpl.html">GNU
+ * Lesser General Public License (LGPL) version 3 or later</a>
+ */
 package org.distroverse.dvtp;
 
 import java.io.IOException;
@@ -10,23 +17,23 @@ import java.io.OutputStream;
  * move.
  * @author dreish
  */
-public final class SetFORA implements ProxySendable
+public final class SetFora implements ProxySendable
    {
-   public SetFORA( InputStream in ) 
+   public SetFora( InputStream in )
    throws IOException, ClassNotFoundException
       {
       super();
       mMS = new MoveSeq( in );
       }
-   
-   public SetFORA( MoveSeq ms )
+
+   public SetFora( MoveSeq ms )
       {
       super();
       mMS = ms;
       }
-   
+
    @SuppressWarnings("unused")
-   private SetFORA()
+   private SetFora()
       {
       mMS = null;
       }
@@ -39,14 +46,14 @@ public final class SetFORA implements ProxySendable
 
    public String prettyPrint()
       {  return "(SetFora " + mMS.prettyPrint() + ")";  }
-   
+
    @Override
    public boolean equals( Object o )
       {
       return (o instanceof SetFora)
              &&  ((SetFora) o).mMS.equals( mMS );
       }
-   
+
    @Override
    public int hashCode()
       {

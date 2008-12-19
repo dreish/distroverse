@@ -29,6 +29,7 @@
 
 ;; </copyleft>
 
+(import '(org.distroverse.dvtp Str Err))
 (use 'server-lib)
 
 (def *key-to-id* (ref {})
@@ -230,5 +231,4 @@
 
 (defn handle-get [noq url]
   "Handle an anonymous GET request."
-  ; XXX
-  )
+  (.offer noq (Err. "No GET resources at this site" 404)))

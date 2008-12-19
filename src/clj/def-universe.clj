@@ -74,7 +74,7 @@
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
-(defn new-gen-node [parent spec [x y z] subnode-index seed r move]
+(defn new-gen-node [parent spec subnode-index seed r move]
   {:name (spec :name)
    :generator (spec :generator)
    :radius r
@@ -85,18 +85,18 @@
 			    inc (rem 60))
    })
 
-(defn new-top-gen-node [parent spec [x y z] subnode-index]
+(defn new-top-gen-node [parent spec pos subnode-index]
   "Returns a new highest-level node for a given layer spec."
   (let [seed (subseed parent subnode-index)
 	r    (pick-radius spec (inc seed))]
-    (new-gen-node parent spec [x y z] subnode-index seed r
-		  (pos-quat-to-moveseq [x y z] (random-quat (+ seed 2))))))
+    (new-gen-node parent spec subnode-index seed r
+		  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
 
-(defn new-sub-gen-node [parent spec [x y z] subnode-index r]
+(defn new-sub-gen-node [parent spec pos subnode-index r]
   "Returns a new highest-level node for a given layer spec."
   (let [seed (subseed parent subnode-index)]
-    (new-gen-node parent spec [x y z] subnode-index seed r
-		  (pos-to-moveseq [x y z]))))
+    (new-gen-node parent spec subnode-index seed r
+		  (pos-to-moveseq pos))))
 
 (defn pseudorandom-pos [coord-scalars skews
 			[unused-size offset-factor rand-factor]
