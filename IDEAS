@@ -6202,7 +6202,7 @@ me to jump in and play until I started to really understand why Lisp was
 important.
 
 I'm not sure I would have got into Clojure if it hadn't been for my
-brief experience with Arc.  I'm having about as much solving Project
+brief experience with Arc.  I'm having about as much fun solving Project
 Euler puzzles in Clojure as I was having playing with Arc a few months
 ago.  It's hard for me to say why this is, though.  I _think_ it's
 because I'm getting so many of the problems right on the first try,
@@ -6233,8 +6233,8 @@ Common Lisp, but I'm not interested in it.]
 
 Clojure does seem a little like Arc, but not as aggressively terse, and
 with the addition of significantly practical features like the ability
-to compile to any arbitrary JVM bytecode, and access to Java's
-considerable libraries.
+to compile to any arbitrary JVM bytecode [not exactly], and access to
+Java's considerable libraries.
 
 I like it when Rich Hickey praises the JVM in the same breath that he
 dismisses Java as "goofy", because that was exactly the snap judgment I
@@ -6696,5 +6696,213 @@ hash.
 I guess I'll try actually instantiating a universe, next.
 
 Oops.  I think my structure constants still cause subnodes to sometimes
-poke outside their parent nodes.
+poke outside their parent nodes.  I forgot it's sqrt(x^2+y^2+z^2) I need
+to keep below the radius of the sphere.
+
+2008-12-13
+
+I should probably abstract away more of the SQLness of the database
+interaction code in my server.
+
+2008-12-19
+
+I achieved enlightement a few minutes ago on how the node tree would
+work, with its various detail levels, but I think I've lost it now.
+
+Oh, that's right.  There will be a node request, initiated where, I
+haven't yet figured out, from the avatar's position and with a given
+detail multiplier.  The server or proxy will start at some sort of root
+node (maybe not _the_ root node -- for that matter, I'm not certain
+there will be a unique root node for a given server -- almost surely
+there won't be), and get that node's position (a MoveSeq) and radius,
+and from those, determine the detail level at which it can see that
+node.
+
+I can't remember why any of this seemed like an epiphany.  I hate it
+when that happens.  Did I really have any particular insight?  If so,
+I'd hate to forget it -- I want to try as hard as I can to remember what
+it was.  If not, I could waste an hour getting frustrated over this.
+
+2008-12-20
+
+I don't think this is going to be beautifully simple or elegant.
+Rendering a world at multiple levels of detail simultaneously is an
+inherently messy problem, mainly due to the effect I want to avoid where
+the far edge of something that was visible at a lower detail level,
+using the simplest and most obvious method, would become invisible at a
+higher detail level.
+
+I think I can solve that problem with just a little extra information:
+a collection of objects with a lower-detail representation will have a
+least-detail attribute, and whenever that object would be visible at
+that detail level, some entire representation must be visible, whatever
+the detail level.
+
+Take for example (and this is the example I always have in mind) a city
+with a low-detail representation -- a bitmap image of the skyline, such
+as might be seen from a distant mountain -- and a slightly higher detail
+representation where the larger buildings are rendered as boxes.  The
+problem in this case would be that as a viewer approached the city on a
+straight road toward it, a tall skyscraper at the center of the city
+would be the most prominent feature of the skyline bitmap at the lowest
+detail level.  As soon as the outside edge of the node containing that
+bitmap crossed into the next higher detail zone of the approaching
+viewer, though, the city would no longer be displayed as a single
+bitmap, and the higher-detail representation would be used instead, but
+only a few (if any) buildings nearest the viewer would initially be
+visible.  There would be an ugly donut zone around the city where the
+tallest buildings downtown would temporarily be invisible.
+
+So instead, the city would have :least-detail -4, a single subnode with
+a bitmap for the -4 detail representation, and a tree of subnodes with
+boxes for the -3 detail representation.  When the nearest point of the
+top node would be within the detail -3 zone, the node query would use
+the tree of subnodes of boxes, but with any object within the -4 detail
+zone rendered in at least some way.
+
+One thing to watch out for: this least-detail attribute must only
+propagate downward to representations of the city, not things within it,
+like avatars, lampposts, etc.  It will probably make sense to have
+spatial nodes within object nodes -- for example, rooms within a
+building -- so least-detail just wouldn't propagate down to spatial
+nodes.  A spatial node is one that any object can be added to (possibly
+having to call some permission check), whereas adding an object to an
+object node is more like a group-together operation -- something that
+would need to be done explicitly, not just by dropping the object, and
+would usually be restricted to the owner(s) of the object.
+
+It might be a good idea to allow subnodes smaller than the minimum size
+for a given detail level to have a separate representation for that
+detail level if they're part of a larger object with a least-detail at
+least that low.
+
+2008-12-21
+
+I think my "durable maps" idea falls apart on consistency.  Consider the
+following scenario:
+
+Thread A                                Thread B
+
+Gets node 1, which includes a list of
+current children, 2-9.  The read cache
+now contains just node 1.
+                                        Gets node 1 and moves node 6 so
+                                        that it is no longer under 1.
+                                        Node 6 is now incidentally in
+                                        both the read and write caches.
+Gets nodes 2-9 and gets confused,
+because node 6 is no longer a child of
+node 1.
+
+Fine, that's pretty elementary: thread A needs to do its reading in a
+transaction so it sees a consistent snapshot of the world.  But is this
+an STM transaction, or an SQL transaction?  Or both?
+
+I don't think there's any facility for providing _both_.
+
+So there's really no way for thread A to say it wants a consistent
+snapshot of the whole world, in memory and on the database.  Is there?
+
+I think this idea is not so much half-baked as completely baked.
+
+It might be a matter of bulk-loading a set of rows in one step, and then
+doing a transaction with them in a later step, but then I get into
+sticky questions about how I guarantee the rows stay in memory while
+having a means to clean out the least recently used rows.
+
+All this would be so much easier if I did things the Second Life way:
+just don't scale.  Divide the world into regions, run each one on part
+of a server, and put hard caps on what each region can contain.
+
+That's exactly the kind of lame thing I set out to avoid, though, and I
+still believe it must be possible to do this.  It might just be really
+hard.
+
+At first the idea seems really simple: update a map in a transaction and
+send an agent an SQL query to update a table in a database; if the
+transaction succeeds, the query gets sent and the table and in-memory
+map both get updated.  If the transaction retries and the condition that
+led to the map change no longer holds, the query never gets sent.
+
+Mixing that simple idea with reads and with an incomplete representation
+in memory where parts of the table get deleted so they only exist on
+disk makes the problem much much harder.
+
+It could get to the point where I'm writing my own database server to
+talk to a database server.
+
+I'm compelled to keep trying by the fact that many of these problems
+that have seemed intractable when I began thinking about them have
+turned out to be really simple once I understood what I was doing.  So
+maybe this is just another one of those cases where I don't have a good
+enough mental model of the various pieces built yet, such that the whole
+thing could be intuitively obvious.
+
+Maybe the solution is just to sleep on it.
+
+(dmsync & exprs)
+
+First starts a thread-local database transaction, then a nested STM
+transaction.  All durable-map operations fail (INCLUDING select) if
+they're not in a dmsync.  (If possible, I might want an implicit dmsync,
+at least for select.)
+
+That probably can't work, because an STM transaction retry probably
+should happen in a new SQL transaction.  Unless it shouldn't.  Maybe if
+there were a rule that no value could be removed from a cache unless it
+is older than the oldest running dmsync transaction ...
+
+I think my nested-transaction idea could be made to work, but it would
+be bad for concurrency if I used it everywhere.  I need a separate
+library to represent a tree of nodes that are stored in a database.
+That would have much better concurrency.  I'd also like to have an
+additional modification operation, commutest, that would commute the
+given ref if the given function returns something non-nil, and would
+cause the transaction to fail if the function returns nil.
+
+Then I could write an assoc-new function that would return nil if the
+key already existed.
+
+But I could press ahead with this anyway, get it to work, and test it
+under load.  Correctness first, improved concurrency later.
+
+In fact, though I'll want to sketch out the durable-tree API to make
+sure it's something I can actually implement.  Actually, it'll be a
+different enough API that I'll want to use it from the start, but
+initially implement it simply in terms of durable-map.
+
+I think I want to use refs for the read cache, and just commute new
+values in, since the reads will need to be mutually consistent in some
+cases.  The problem is this could mean multiple SQL SELECTs for the same
+transaction, so maybe I need a per-dm-transaction atom for memoizing
+SELECT results.  (Or a thread-local variable.)
+
+This seems crazy.
+
+2008-12-22
+
+Within a dmsync, I can make a thread-local binding for select, to a
+memoized version of itself.
+
+I think this whole thing might not be as hairy as I thought it would be.
+
+One thing that might be a little tricky: I want reads to happen without
+a database transaction if at all possible, but as soon as a row is read
+that requires being loaded from the database, I'll need to begin an SQL
+transaction (I think), and the value I get will need to be consistent
+with the STM transaction, which I think means I'll need to hold writes-
+to-SQL until they are older than the oldest dmsync transaction.
+
+I think that will mean maintaining a sorted map of transactions, and
+perhaps having a low-priority thread that periodically wakes up, finds
+out the begin time of the oldest dmsync, and commits all writes older
+than that.
+
+I'll have to do this carefully to make sure the differing start times of
+my transactions and the STM transactions within them don't cause
+problems.
+
+I think I'm going to be spending much of this week away from the
+computer just writing out various scenarios and corner cases and
+figuring out how they'll work correctly.
 

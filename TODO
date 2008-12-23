@@ -1,91 +1,38 @@
+                                        -*- Text -*-
 
 - To do for 0.02:
   - Add a FengGUI location bar
-  - Begin implementing WorldServer (extends DvtpServer)
-    + Add DVTP messages:
-      + GetCookie (DvtpExt) (26)
-      + Cookie (DvtpExt Bool DvtpExt) (27)
-      + AskInv (Str DvtpExt) (134)
-      + ReplyInv (DvtpExt Bool DvtpExt) extends Cookie (135)
-    + Add DVTP Dict class (28)
-    + DLong (31)
-    + Frac (32)
-      + toFloat()
-      + toDouble()
-    + Real (33)
-      + toFloat()
-      + toDouble()
-    + DNodeRef class (29)
-      + Str RemoteHost
-        > 0 means sending host
-      + ULong id
-      + Real lastChangeTime
-        > Not compared
-      + DNode
-        > For convenience; not externalized or compared
-    + DNode class (not client<->proxy, as AddObject is) (30)
-      + AddObject being
-        + AddObject.readWithoutId( InputStream in )
-          > Sets Id and ParentId to 0
-          > Proxy will pick a locally unique ID and set it as it
-            receives the DNode
-        + AddObject.writeWithoutId( OutputStream out )
-        + Compare with AddObject.equalsWithoutId()
-        + Hash with AddObject.hashCodeWithoutId()
-      + Float radius
-      + DNodeRef this
-      x Boolean hasParent (parent != null)
-      + DNodeRef parent
-      + array of DNodeRefs, children
-    + Add all new classes to TestExternalization
-      + And implement equals()/hashCode() as required
-    > Proxy will need to maintain maps, both of RemoteHost/id and of
-      local id, to either DNodeRefs or DNodes
-      > Which one will depend on how the map will be used most often
-      > Break out RemoteHost/id as its own type?
-        > Not necessary; just make those identity fields define equality
-    + Create WorldServer in Lisp; otherwise this is going to be a major
-      bummer
-      x All the node management will be in Java, but the response/
-        callback structure will be a major pain in Java.  Java no likey
-        callbacks
-	> Actually node management, as state shared by multiple
-	  threads, is the strongest argument for using Clojure
-      + Get and install Clojure
-      + Enjoy the consing for a few minutes
-      > http://en.wikibooks.org/wiki/Clojure_Programming demonstrates
-        how to call a Clojure function from Java
-        > (The docs give the reverse case, which is trivial)
-      + Install Emacs for OS X
-      + Install Clojure support for Emacs
-    + Request identity
-      + Clojure macro (async) for weaving a do-like construct into a
-        series of messages and callbacks
-        x Gotcha: all callbacks will need to be removed at the end of
-          the pseudo-function
-        > (async) always returns nil
-        > Actually, just a simple let-like macro
-        + Figure out how the end-result code should actually look
-        + Write it as an async macro call
-        + Then write a macro that goes from B to A
-    - Create new user if needed (from skeleton user)
-      > Has default starting location
-    - Ephemeral universe generation
-      + universe-spec
-      - gen-fractalplace
-        - new-topnode
-	  - Problem: This generates nodes with a radius larger than
-	    those made with new-subnode; they will exceed the bounds
-  	    of their parent nodes
-	- new-subnode
-      - Node seed to child node seed
-        - Node has a seed-mutation-shift
-        - Child node's seed-mutation-shift is parent's (+ 1) (rem 60)
-        - Node's seed is:
-          x First long generated from rand sequence using parent's seed
-	  x bit-xor (node-index << seed-mutation-shift)
-	  > xoring the parent's seed instead
   - Plug server into database
+    - Need FIFO map (for db-query caching so they're
+      transaction-safe): 
+      - Created with a length limit, L
+      - Adding something new to it, if the (L+1)th thing, causes the
+        oldest one to disappear
+      - Would be handy to make a version where reading also updates
+        the place in the queue
+    - Pull out db stuff into its own package, wrapping the SQL
+      ugliness
+      - (table-map tablename key "*") => mapx
+        - (mapx "foo") does a select * from tablename where key =
+          "foo"
+      > I think this encapsulates the node caching stuff I was going
+        to do separately.  Why carry around two different objects in
+        my server code?
+        > Somewhat complicated, but worthwhile
+          > For example, the object can't be immutable because a
+            database table isn't, so it can't support conj or assoc
+          > Instead, there will be a real mutation function specific
+            to database tables, but it will only happen to the real
+            SQL table when an STM transaction succeeds
+            > But these will be visible within the transaction, which
+              means there will need to be key-value mappings that
+              can't time out until they are committed
+              > But that means different views of the same table won't
+                share the in-transaction changes (within a single
+                transaction), which seems awful
+              > Worse, they might cache out-of-date values
+              > Maybe the answer is to just allow a single view of
+                every table and intern table-map per tablename
   - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
@@ -287,6 +234,90 @@
     + Rewrite server code to take a session and an attachment
     + Look up attachment in handler methods in WorldServer; pass them
   + Make all private DVTP-message fields final and debug
+  + Begin implementing WorldServer (extends DvtpServer)
+    + Add DVTP messages:
+      + GetCookie (DvtpExt) (26)
+      + Cookie (DvtpExt Bool DvtpExt) (27)
+      + AskInv (Str DvtpExt) (134)
+      + ReplyInv (DvtpExt Bool DvtpExt) extends Cookie (135)
+    + Add DVTP Dict class (28)
+    + DLong (31)
+    + Frac (32)
+      + toFloat()
+      + toDouble()
+    + Real (33)
+      + toFloat()
+      + toDouble()
+    + DNodeRef class (29)
+      + Str RemoteHost
+        > 0 means sending host
+      + ULong id
+      + Real lastChangeTime
+        > Not compared
+      + DNode
+        > For convenience; not externalized or compared
+    + DNode class (not client<->proxy, as AddObject is) (30)
+      + AddObject being
+        + AddObject.readWithoutId( InputStream in )
+          > Sets Id and ParentId to 0
+          > Proxy will pick a locally unique ID and set it as it
+            receives the DNode
+        + AddObject.writeWithoutId( OutputStream out )
+        + Compare with AddObject.equalsWithoutId()
+        + Hash with AddObject.hashCodeWithoutId()
+      + Float radius
+      + DNodeRef this
+      x Boolean hasParent (parent != null)
+      + DNodeRef parent
+      + array of DNodeRefs, children
+    + Add all new classes to TestExternalization
+      + And implement equals()/hashCode() as required
+    > Proxy will need to maintain maps, both of RemoteHost/id and of
+      local id, to either DNodeRefs or DNodes
+      > Which one will depend on how the map will be used most often
+      > Break out RemoteHost/id as its own type?
+        > Not necessary; just make those identity fields define equality
+    + Create WorldServer in Lisp; otherwise this is going to be a major
+      bummer
+      x All the node management will be in Java, but the response/
+        callback structure will be a major pain in Java.  Java no likey
+        callbacks
+	> Actually node management, as state shared by multiple
+	  threads, is the strongest argument for using Clojure
+      + Get and install Clojure
+      + Enjoy the consing for a few minutes
+      > http://en.wikibooks.org/wiki/Clojure_Programming demonstrates
+        how to call a Clojure function from Java
+        > (The docs give the reverse case, which is trivial)
+      + Install Emacs for OS X
+      + Install Clojure support for Emacs
+    + Request identity
+      + Clojure macro (async) for weaving a do-like construct into a
+        series of messages and callbacks
+        x Gotcha: all callbacks will need to be removed at the end of
+          the pseudo-function
+        > (async) always returns nil
+        > Actually, just a simple let-like macro
+        + Figure out how the end-result code should actually look
+        + Write it as an async macro call
+        + Then write a macro that goes from B to A
+    + Create new user if needed (from skeleton user)
+      > Has default starting location
+    + Ephemeral universe generation
+      + universe-spec
+      + gen-fractalplace
+        + new-topnode
+	  + Problem: This generates nodes with a radius larger than
+	    those made with new-subnode; they will exceed the bounds
+  	    of their parent nodes
+	+ new-subnode
+      + Node seed to child node seed
+        + Node has a seed-mutation-shift
+        + Child node's seed-mutation-shift is parent's (+ 1) (rem 60)
+        + Node's seed is:
+          x First long generated from rand sequence using parent's seed
+	  x bit-xor (node-index << seed-mutation-shift)
+	  > xoring the parent's seed instead
 
 ------------------------------------------------------------------------
 - To do for 0.03:

@@ -80,6 +80,9 @@
 (defn db-query [& args]
   ""
   ; XXX
+  ; General idea: do this synchronously but cache the results in case
+  ; of retry.  The cache should be cleaned out using a FIFO queue of
+  ; length equal to the number of processors (?).
   )
 
 (defn load-node [nodeid]
@@ -91,7 +94,7 @@
   ;; also be altering the parent node.  Only one can win.
   (dosync
    (let [node-data (db-query :select :* :from "nodes"
-			     :where {"nodeid" nodeid})
+                             :where {"nodeid" nodeid})
 	 parent (get-node (node-data :parent))]
      (replace-child parent (node-data :nodeid) node-data))))
 
