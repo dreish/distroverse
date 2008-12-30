@@ -46,14 +46,15 @@
 ; ridiculous numbers by throwing money at the problem, though.
 
 (defvar- *tables* (atom {}))
-
+(defvar *dm-transaction-times* (atom (sorted-set)))
+(defvar *dm-transaction-level* 0)
 
 ; new-connection - set up a connection to whatever is storing the data
 
 
 ; create-map - create a new table
 
-(defn create-map [name]
+(defn dm-create-map [name]
   "Create a new table.  This is not guaranteed to be thread-safe."
   ; XXX
   )
@@ -68,7 +69,7 @@
     m
     (assoc m key value)))
 
-(defn- load-table [name]
+(defn- dm-load-table [name]
   "Load the given table into *tables*.  Returns nil."
   (swap! *tables* assoc-new name
          {:name name
@@ -76,12 +77,12 @@
           :write-queue (ref '())
           :read-hash (ref {})}))
 
-(defn get-map [name]
+(defn dm-get-map [name]
   "Return a named map, loading it if necessary.  The actual value
   returned is the function select closed over the map, so that it can
   be used as if it were an ordinary Clojure map."
   (when-not (@*tables* name)
-    (load-table name))
+    (dm-load-table name))
   (let [t (@*tables* name)]
     (fn [& args] (apply select t args))))
 
@@ -105,7 +106,10 @@
 ; get-map returns this function closed over a table handle so it can
 ; be used for lookup just like a regular Clojure map.
 
-(defn select
+(defn- database-select
+  )
+
+(defn dm-select
   "Look something up in a map.  With one argument, returns that
   argument."
   ([dmap key]
@@ -120,15 +124,20 @@
 
 ; dmsync
 
-(defmacro dmsync
+(defmacro dm-sync
   "Runs the exprs (in an implicit do) in a transaction that
   encompasses exprs and any nested calls.  The transaction provides a
-  consistent view of the durable-map universe, in addition to Clojure
-  refs.  Modifications, once successful, are queued for writing to
-  permanent storage."
+  consistent and complete view of the durable-map universe, in
+  addition to Clojure refs.  Modifications, once successful, are
+  queued for writing to permanent storage."
   [& body]
-  ; XXX
-  )
+  `(binding [*dm-transaction-level* (inc *dm-transaction-level*)
+             database-select (memoize database-select)]
+     (let [trans-time# (swap-in-time *dm-transaction-times*)]
+       (try
+         (dosync
+           ~@body)
+         (finally (swap! *dm-transaction-times* disj trans-time#))))))
 
 
 (defn dm-shutdown []
