@@ -49,18 +49,7 @@
 (defvar *dm-transaction-times* (atom (sorted-set)))
 (defvar *dm-transaction-level* 0)
 
-; new-connection - set up a connection to whatever is storing the data
-
-
-; create-map - create a new table
-
-(defn dm-create-map [name]
-  "Create a new table.  This is not guaranteed to be thread-safe."
-  ; XXX
-  )
-
-
-; get-map
+; misc
 
 (defn assoc-new [m key value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
@@ -68,6 +57,22 @@
   (if (m key)
     m
     (assoc m key value)))
+
+(defn- tm []
+  (System/currentTimeMillis))
+
+; dm-new-connection - set up a connection to whatever is storing the data
+
+
+; dm-create-map - create a new table
+
+(defn dm-create-map [name]
+  "Create a new table.  This is not guaranteed to be thread-safe."
+  ; XXX
+  )
+
+
+; dm-get-map
 
 (defn- dm-load-table [name]
   "Load the given table into *tables*.  Returns nil."
@@ -87,7 +92,7 @@
     (fn [& args] (apply select t args))))
 
 
-; insert - add a new map entry 
+; dm-insert - add a new map entry 
 
 ; CAUTION: This is the least concurrent action, because global tables
 ; are altered instead of commuted.  Use it only on maps where the keys
@@ -95,13 +100,13 @@
 ; guaranteed-unique serial numbers.
 
 
-; commute - add a new map entry assuming key collisions are impossible
+; dm-commute - add a new map entry assuming key collisions are impossible
 
 
-; update - modify an existing map entry
+; dm-update - modify an existing map entry
 
 
-; select - look up something in a map
+; dm-select - look up something in a map
 
 ; get-map returns this function closed over a table handle so it can
 ; be used for lookup just like a regular Clojure map.
@@ -122,7 +127,19 @@
      dmap))
 
 
-; dmsync
+; dm-sync
+
+(let [i (atom 0)]
+  (defn- new-trans-id []
+    (swap! i inc)))
+
+(defn swap-in-time [times]
+  "Create a vector with the current time and a unique transaction
+  identifier, swap-conj that into *dm-transaction-times*, and return
+  the vector."
+  (let [trans-time [(tm) (new-trans-id)]]
+    (swap! times conj trans-time)
+    trans-time))
 
 (defmacro dm-sync
   "Runs the exprs (in an implicit do) in a transaction that
