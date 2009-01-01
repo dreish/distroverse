@@ -141,6 +141,22 @@
     (swap! times conj trans-time)
     trans-time))
 
+(defn run-in-dm-transaction
+  "Runs the given no-argument function in a transaction that
+  encompasses exprs and any nested calls.  The transaction provides a
+  consistent and complete view of the durable-map universe, in
+  addition to Clojure refs.  Modifications, once successful, are
+  queued for writing to permanent storage."
+  [f]
+  (binding [database-select (if (pos? *dm-transaction-level*)
+                              database-select
+                              (memoize database-select))
+            *dm-transaction-level* (inc *dm-transaction-level*)]
+    (let [trans-time# (swap-in-time *dm-transaction-times*)]
+      (try
+       (dosync (f))
+       (finally (swap! *dm-transaction-times* disj trans-time#))))))
+
 (defmacro dm-sync
   "Runs the exprs (in an implicit do) in a transaction that
   encompasses exprs and any nested calls.  The transaction provides a
@@ -148,14 +164,7 @@
   addition to Clojure refs.  Modifications, once successful, are
   queued for writing to permanent storage."
   [& body]
-  `(binding [*dm-transaction-level* (inc *dm-transaction-level*)
-             database-select (memoize database-select)]
-     (let [trans-time# (swap-in-time *dm-transaction-times*)]
-       (try
-         (dosync
-           ~@body)
-         (finally (swap! *dm-transaction-times* disj trans-time#))))))
-
+  `(run-in-dm-transaction (fn [] ~@body)))
 
 (defn dm-shutdown []
   "Flushes all pending writes and shuts down the database connection.
@@ -163,3 +172,33 @@
   will result in null-pointer exceptions."
   ; XXX 
   )
+
+
+; Writer thread
+
+(defn flush-writes-older-than
+  "Flush writes older than the given time value.  Returns the number
+  of writes committed to permanent storage."
+  [t]
+  ; XXX
+  )
+
+(defvar- writer-thread
+  (Thread.
+     #(loop
+        (let [oldest-trans-time (or (ffirst @*dm-transaction-times*)
+                                    (tm))
+              number-written (flush-writes-older-than oldest-trans-time)]
+          (dosync
+           ; XXX  remove writes from queue (what var?) here
+           )
+          (Thread/sleep 5000)
+          (recur)))
+     "writer-thread")
+  "Thread that wakes every five seconds and polls for writes old
+  enough that they are no longer entangled in any ongoing
+  transactions, writing them to disk and removing them from the write
+  queue.")
+
+(.start writer-thread)
+

@@ -3,12 +3,12 @@
 - To do for 0.02:
   - Add a FengGUI location bar
   - Plug server into database
-    - Need FIFO map (for db-query caching so they're
+    x Need FIFO map (for db-query caching so they're
       transaction-safe): 
-      - Created with a length limit, L
-      - Adding something new to it, if the (L+1)th thing, causes the
+      x Created with a length limit, L
+      x Adding something new to it, if the (L+1)th thing, causes the
         oldest one to disappear
-      - Would be handy to make a version where reading also updates
+      x Would be handy to make a version where reading also updates
         the place in the queue
     - Pull out db stuff into its own package, wrapping the SQL
       ugliness
