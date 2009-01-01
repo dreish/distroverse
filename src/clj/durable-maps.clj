@@ -36,6 +36,14 @@
 ; DECIDEDLY MUTABLE, but only within transactions, and are NOT
 ; ITERABLE.
 
+; One important caveat with this library is that it does not provide
+; the same guarantee that SQL does, that at the end of a transaction,
+; the committed data will exist permanently on disk.  In the case of a
+; write to a durable map, the write to disk may happen an arbitrary
+; amount of time later than that.  (TODO provide an await function)
+; Programs using this library must call dm-shutdown before exiting, or
+; they will hang.
+
 ; I'm (ab)using SQL as an implementation detail.  I'm not really using
 ; the vast majority of features of SQL, so this could just as well be
 ; done with flat files.  Even worse, I'm hogging the tables for
@@ -46,6 +54,7 @@
 ; ridiculous numbers by throwing money at the problem, though.
 
 (defvar- *tables* (atom {}))
+(defvar- *dm-shutting-down* (atom nil))
 (defvar *dm-transaction-times* (atom (sorted-set)))
 (defvar *dm-transaction-level* 0)
 
@@ -86,10 +95,11 @@
   "Return a named map, loading it if necessary.  The actual value
   returned is the function select closed over the map, so that it can
   be used as if it were an ordinary Clojure map."
-  (when-not (@*tables* name)
-    (dm-load-table name))
-  (let [t (@*tables* name)]
-    (fn [& args] (apply select t args))))
+  (do
+    (when-not (@*tables* name)
+      (dm-load-table name))
+    (let [t (@*tables* name)]
+      (fn [& args] (apply select t args)))))
 
 
 ; dm-insert - add a new map entry 
@@ -112,7 +122,15 @@
 ; be used for lookup just like a regular Clojure map.
 
 (defn- database-select
+  ""
+  [dmap key]
   )
+
+(defn- local-select
+  "Look the key up in the given durable map, or return nil if it isn't
+  there."
+  [dmap key]
+  ((dmap :read) key))
 
 (defn dm-select
   "Look something up in a map.  With one argument, returns that
@@ -166,11 +184,14 @@
   [& body]
   `(run-in-dm-transaction (fn [] ~@body)))
 
-(defn dm-shutdown []
+(defn dm-shutdown
   "Flushes all pending writes and shuts down the database connection.
   Any attempts to write in any other thread after calling dm-shutdown
   will result in null-pointer exceptions."
-  ; XXX 
+  []
+  (do
+    (swap! @*dm-shutting-down* (fn [] true))
+    ; XXX what else?
   )
 
 
@@ -193,7 +214,8 @@
            ; XXX  remove writes from queue (what var?) here
            )
           (Thread/sleep 5000)
-          (recur)))
+          (when-not @*dm-shutting-down*
+            (recur))))
      "writer-thread")
   "Thread that wakes every five seconds and polls for writes old
   enough that they are no longer entangled in any ongoing
