@@ -31,7 +31,7 @@
  * </copyleft>
  */
 /**
- * 
+ *
  */
 package org.distroverse.viewer;
 import org.distroverse.core.Log;

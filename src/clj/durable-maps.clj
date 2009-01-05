@@ -29,8 +29,10 @@
 
 ;; </copyleft>
 
-(ns 'durable-maps)
-(use 'clojure.contrib.def)
+(ns durable-maps
+  (:use clojure.contrib.def
+;       clojure.contrib.sql :as sql
+        sql))
 
 ; Global, named maps that survive from one run to the next and are
 ; DECIDEDLY MUTABLE, but only within transactions, and are NOT
@@ -57,26 +59,92 @@
 (defvar- *dm-shutting-down* (atom nil))
 (defvar *dm-transaction-times* (atom (sorted-set)))
 (defvar *dm-transaction-level* 0)
+(defvar- *dm-db* (java.sql.DriverManager/getConnection
+                  "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
 
-; misc
 
-(defn assoc-new [m key value]
+; internal low-level functions
+
+(defn- assoc-new [m key value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to the m if and only if the key doesn't already exist."
   (if (m key)
     m
     (assoc m key value)))
 
+(defn- assoc-new-or-retry [m key value]
+  "Given a Clojure map, a key, and a value, add the key-value mapping
+  to the m if the key doesn't already exist; otherwise throw a
+  RetryEx."
+  (if (m key)
+    (clojure.lang.RetryTransaction/retry)
+    (assoc m key value)))
+
 (defn- tm []
+  "Return a time value such that each call to (tm) returns a number
+  greater than or equal to all numbers previously returned.  The units
+  of the time value are not specified."
   (System/currentTimeMillis))
 
-; dm-new-connection - set up a connection to whatever is storing the data
 
+(defn- get-row
+  "Get a single row from a table, given a primary key column, and a
+  value."
+  [table keycol keyval]
+  (first (:rows (get-query *dm-db*
+                           (str "SELECT * FROM " table " WHERE "
+                                keycol " = ?")
+                           keyval))))
+
+(defn- column-format
+  "Convert a spec map into a string suitable for putting between the
+  parentheses of a CREATE TABLE statement."
+  [spec]
+  (let [cols  (spec :cols)
+        name-type-seq  (map #(list (name (first %))
+                                   (first (second %)))
+                            cols)
+        name-type-clauses  ; XXX
+        key  (name (spec :key))
+        key-clause  (if key
+                      (str "PRIMARY KEY (" key ")"))
+        clause-seq  (if key
+                      (concat name-type-clauses (list key-clause))
+                      name-type-clauses)]
+    (apply str (interpose ", " clause-seq))))
+
+(defn- create-table
+  "Create a table, given a name and a :spec map.  An optional third
+  parameter, if true, specifies that the table should be create with
+  CREATE TABLE IF NEW."
+  ([name spec]
+     (create-table name spec false))
+
+  ([name spec if-new]
+     (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
+           cols (column-format spec)]
+       (run-stmt *dm-db*
+                 (apply str cmd " " name " (" cols ")")))))
 
 ; dm-create-map - create a new table
 
-(defn dm-create-map [name]
+(defn- get-table-map
+  "Given a table's raw SQL name, and a map defining the columns of the
+  table, return a durable map."
+  [name spec]
+  ())
+
+(defvar- *table-map*
+  ""
+  (get-table-map "mtables"
+                 {:cols {:inname ["VARCHAR(32)"  :str]
+                         :exname ["VARCHAR(256)" :str]
+                         :spec   ["BLOB"         :map]}
+                  :key :exname}))
+
+(defn dm-create-map
   "Create a new table.  This is not guaranteed to be thread-safe."
+  [name spec]
   ; XXX
   )
 
@@ -84,12 +152,14 @@
 ; dm-get-map
 
 (defn- dm-load-table [name]
-  "Load the given table into *tables*.  Returns nil."
+  "Load the given table into *tables*.  (This is stateless from SQL's
+  point of view.)  Returns nil."
   (swap! *tables* assoc-new name
          {:name name
-          :write-hash (ref {})
-          :write-queue (ref '())
-          :read-hash (ref {})}))
+          :table 
+          :write (ref {})
+          :write-queue (ref [])
+          :read (ref {})}))
 
 (defn dm-get-map [name]
   "Return a named map, loading it if necessary.  The actual value
@@ -122,15 +192,17 @@
 ; be used for lookup just like a regular Clojure map.
 
 (defn- database-select
-  ""
+  "Get the key from the database."
   [dmap key]
+  ; XXX
   )
 
 (defn- local-select
   "Look the key up in the given durable map, or return nil if it isn't
   there."
   [dmap key]
-  ((dmap :read) key))
+  (or ((dmap :read) key)
+      ((dmap :write) key)))
 
 (defn dm-select
   "Look something up in a map.  With one argument, returns that

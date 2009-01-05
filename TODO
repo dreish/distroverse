@@ -1,7 +1,6 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Add a FengGUI location bar
   - Plug server into database
     x Need FIFO map (for db-query caching so they're
       transaction-safe): 
@@ -10,8 +9,10 @@
         oldest one to disappear
       x Would be handy to make a version where reading also updates
         the place in the queue
+    + Set up Java MySQL driver
     - Pull out db stuff into its own package, wrapping the SQL
       ugliness
+      - dm-create-map
       - (table-map tablename key "*") => mapx
         - (mapx "foo") does a select * from tablename where key =
           "foo"
@@ -33,7 +34,8 @@
               > Worse, they might cache out-of-date values
               > Maybe the answer is to just allow a single view of
                 every table and intern table-map per tablename
-  - Would be nice to know why TextArea causes OpenGL exceptions
+  - Add a FengGUI location bar
+    - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
     > Also nice because it avoids having system dialogs swallow a stray
