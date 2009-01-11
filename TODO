@@ -13,17 +13,29 @@
     - Pull out db stuff into its own package, wrapping the SQL
       ugliness
       - dm-create-map
+      - get-row needs to return a column-name -> value hash
+        - And the in-memory table needs to wrap that hash in a Ref
+      - Need a global write queue, not per-table queues
+        - A write is an SQL stmt, the hash equivalent of the values
+          being set in the stmt, and a Ref to the in-memory version of
+          the row
+        - If the hash no longer equals what the Ref points to, cancel
+          the write
       - (table-map tablename key "*") => mapx
         - (mapx "foo") does a select * from tablename where key =
           "foo"
+      - init
+        - Create mtables and mvar
+        - Populate mvar with
+          - inname-num
       > I think this encapsulates the node caching stuff I was going
         to do separately.  Why carry around two different objects in
         my server code?
         > Somewhat complicated, but worthwhile
           > For example, the object can't be immutable because a
             database table isn't, so it can't support conj or assoc
-          > Instead, there will be a real mutation function specific
-            to database tables, but it will only happen to the real
+          > Instead, there will be real mutation functions specific
+            to database tables, but they will only happen to the real
             SQL table when an STM transaction succeeds
             > But these will be visible within the transaction, which
               means there will need to be key-value mappings that

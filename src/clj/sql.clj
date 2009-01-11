@@ -65,18 +65,27 @@
   [rs]
   (vec (resultset-seq rs (num-columns rs))))
 
+(defn column-names
+  [rs]
+  (let [rsmeta (.getMetaData rs)]
+    (vec (map #(.getColumnName rsmeta %)
+              (range 1 (inc (.getColumnCount rsmeta)))))))
+
 (defn get-query
   "Run a query with results, and return the results as a hash in
-  which :rows is a vector of row vectors.  The optional third argument
-  provides values to substitute for placeholders."
+  which :rows is a vector of row vectors, and :colnames is a vector of
+  column names.  The optional third argument provides values to
+  substitute for placeholders."
   ([conn q]
      (get-query conn q []))
 
   ([conn q pvals]
      (with-open [s (fill-placeholders conn q pvals)]
          (let [rs (.executeQuery s)
+               colnames (column-names rs)
                rs-vec (resultset-vec rs)]
-           {:rows rs-vec}))))
+           {:colnames colnames
+            :rows rs-vec}))))
 
 (defn run-stmt
   "Run a statement, returning the number of rows affected for INSERT,
