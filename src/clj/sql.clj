@@ -40,30 +40,32 @@
     (doseq [[index value] (map vector
                                (iterate inc 1)
                                values)]
-        (.setObject statement index value))))
+        (.setObject statement index value))
+    statement))
 
 (defn num-columns
   "Number of columns in the given ResultSet."
   [rs]
   (.. rs getMetaData getColumnCount))
 
-(defn resultset-row
+(defn rs-row
   [rs n-cols]
-  (doall (map #(.getObject (int %))
+  (doall (map #(.getObject rs (int %))
               (range 1 (inc n-cols)))))
 
-(defn resultset-seq
+(defn rs-seq
   "Return a sequence of results.  CAUTION: probably not safe to lazily
   evaluate this after closing an rs."
   [rs n-cols]
-  (lazy-cons (resultset-row rs n-cols)
-             (if (.next rs)
-               (resultset-seq rs n-cols))))
+  (if (.next rs)
+    (lazy-cons (rs-row rs n-cols)
+               (if (.next rs)
+                 (rs-seq rs n-cols)))))
 
-(defn resultset-vec
+(defn rs-vec
   "Return a vector of results."
   [rs]
-  (vec (resultset-seq rs (num-columns rs))))
+  (vec (rs-seq rs (num-columns rs))))
 
 (defn column-names
   [rs]
@@ -83,18 +85,19 @@
      (with-open [s (fill-placeholders conn q pvals)]
          (let [rs (.executeQuery s)
                colnames (column-names rs)
-               rs-vec (resultset-vec rs)]
+               rsv (rs-vec rs)]
            {:colnames colnames
-            :rows rs-vec}))))
+            :rows rsv}))))
 
-(defn run-stmt
+(defn run-stmt!
   "Run a statement, returning the number of rows affected for INSERT,
   UPDATE, or DELETE statements, or 0 for statements that return
   nothing.  The optional third argument provides values to substitute
   for placeholders."
   ([conn q]
-     (run-query conn q []))
+     (run-stmt! conn q []))
 
   ([conn q pvals]
+     (prn "Running query: " q "::" pvals)
      (with-open [s (fill-placeholders conn q pvals)]
          (.executeUpdate s))))

@@ -12,9 +12,56 @@
     + Set up Java MySQL driver
     - Pull out db stuff into its own package, wrapping the SQL
       ugliness
-      - dm-create-map
+      + dm-create-map!
+      + Outstanding issues with:
+        + Whether select returns a ref or a hash
+          > Almost surely a hash
+          + local-select and database-select return refs
+          + dm-select derefs it
+        + Implementation of dm-update based on the above
+          + Internal functions return the refs
+          + assoc-new-or-retry if the key wasn't already in writes
+          + Otherwise alter it in writes
+      + dm-init!
+        + Create (if not exists) mtables and mvar
+        + Getting a null pointer exception from run-stmt
+          > SQL commands look perfect
+      + Rename translate-val -- there are two directions of
+        translation
+      - Test
+        + Compile everything except the writer thread
+          > Will run writes manually
+        + Create a dmap
+          + (dm-create-map! "test1" {:cols {:mykey ["VARCHAR(32)"
+            :str] :myval ["BLOB" :obj]} :key :mykey})
+            + get-row must handle the empty set result case
+            + next-inname-num doesn't work at all
+              + Add an assoc in there
+            + On inserting a row, whether to :read (by
+              database-select), or to :write (by insert/update), the
+              val should be a ref to a hash
+            + Row should probably contain the key as well
+              x insert-query needs to get the key, obviously
+                > That's up to whomever calls dm-insert
+                > But I see dm-init! does need to create that var
+              + The update probably shouldn't try to set the key
+              + WHERE clause in update query has ":varname"
+              + Why is it an update?  Why no insert?
+                > Because I didn't insert it, dummy
+              x Don't add things to the write queue if they have nils
+            + Still not creating table
+              + inname-num gets added to (*var-map* :write) with key
+                equal to clojure.core/key
+        + Insert query for new table did not encode spec
+          > Also, insert query for new mvar did not encode val
+          + Remake tables using text instead of blob
+        - Add some stuff to it
+        - Flush writes
+        - Examine the database from a mysql prompt
+        - Reload library and attempt to read previously-written data
       - get-row needs to return a column-name -> value hash
         - And the in-memory table needs to wrap that hash in a Ref
+      - database-select doesn't return the row
       - Need a global write queue, not per-table queues
         - A write is an SQL stmt, the hash equivalent of the values
           being set in the stmt, and a Ref to the in-memory version of
@@ -28,6 +75,11 @@
         - Create mtables and mvar
         - Populate mvar with
           - inname-num
+      - Writer thread
+        - If :required, don't bother to check for a ref
+        - Else, if ref doesn't match row being inserted, cancel
+        - If a :callback, call it with true if query performed, false
+          if canceled
       > I think this encapsulates the node caching stuff I was going
         to do separately.  Why carry around two different objects in
         my server code?
