@@ -10,9 +10,9 @@
                         :myval ["TEXT" :obj]}
                  :key :mykey})
 
-(def test1-map (dm-get-map "test1"))
+(def my-test1 (dm-get-map "test1"))
 
-(dm-dosync (dm-insert test1-map {:mykey "foo" :myval 10}))
+(dm-dosync (dm-insert my-test1 {:mykey "foo" :myval 10}))
 
-(dm-dosync (test1-map "foo"))
+(dm-dosync (my-test1 "foo"))
 

@@ -312,7 +312,7 @@
   [[col val] cols]
   (let [colspec (cols col)
         [_ coltype] colspec]
-    (translate-type-in val coltype)))
+    [col (translate-type-in val coltype)]))
 
 (defn- translate-val-out
   [col val cols]
@@ -325,8 +325,9 @@
   parsed and marked-up hash that represents the row in memory."
   [raw-row spec]
   (let [cols (spec :cols)]
-    (assoc (map #(translate-val-in % cols) raw-row)
-      :__spec spec)))
+    (apply assoc {}
+           (apply concat (map #(translate-val-in % cols)
+                              raw-row)))))
 
 (defn- valify-row
   "Converts the given map into a sequence of vals that can be passed
@@ -402,9 +403,8 @@
     {:dmap dmap
      :row row
      :query query-str
-     :vals (concat (map row cols) (list keyval))
+     :vals (valify-row row spec (concat cols (list key)))
      :time (tm)
-     :required true
      :keyval keyval}))
 
 (defn dm-update
@@ -554,10 +554,10 @@
                (>= (q :time) t))
          nil
          (do
-           (alter @*write-queue* rest)
+           (alter *write-queue* pop)
            (if (or (q :required)
                    (= (q :row)
-                      ((q :dmap) (q :keyval))))
+                      @((-> q :dmap :write deref) (q :keyval))))
              q
              (recur))))))))
 
@@ -584,22 +584,23 @@
 (defvar- writer-thread
   (Thread.
      #(loop []
-        (let [current-time (tm)
-              ; Must call (tm) before checking *dm-transaction-times*
-              ; to ensure that oldest-trans-time will be before any
-              ; transaction started after *dm-transaction-times* is
-              ; checked.
-              oldest-trans-time (or (ffirst @*dm-transaction-times*)
-                                    current-time)]
-          (flush-writes-before! oldest-trans-time)
-          (Thread/sleep 5000)
-          (when-not @*dm-shutting-down*
-            (recur))))
+        (if (pos? (count @*write-queue*))
+          (let [current-time (tm)
+                ; Must call (tm) before checking
+                ; *dm-transaction-times* to ensure that
+                ; oldest-trans-time will be before any transaction
+                ; started after *dm-transaction-times* is checked.
+                oldest-trans-time (or (ffirst @*dm-transaction-times*)
+                                      current-time)]
+            (flush-writes-before! oldest-trans-time)))
+        (Thread/sleep 2000)
+        (when-not @*dm-shutting-down*
+          (recur)))
      "writer-thread")
-  "Thread that wakes every five seconds and polls for writes old
-  enough that they are no longer entangled in any ongoing
-  transactions, writing them to disk and removing them from the write
-  queue.  Thread exits when *dm-shutting-down* is true.")
+  "Thread that wakes every two seconds and polls for writes old enough
+  that they are no longer entangled in any ongoing transactions,
+  writing them to disk and removing them from the write queue.  Thread
+  exits when *dm-shutting-down* is true.")
 
 (.start writer-thread)
 

@@ -1,109 +1,19 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Plug server into database
-    x Need FIFO map (for db-query caching so they're
-      transaction-safe): 
-      x Created with a length limit, L
-      x Adding something new to it, if the (L+1)th thing, causes the
-        oldest one to disappear
-      x Would be handy to make a version where reading also updates
-        the place in the queue
-    + Set up Java MySQL driver
-    - Pull out db stuff into its own package, wrapping the SQL
-      ugliness
-      + dm-create-map!
-      + Outstanding issues with:
-        + Whether select returns a ref or a hash
-          > Almost surely a hash
-          + local-select and database-select return refs
-          + dm-select derefs it
-        + Implementation of dm-update based on the above
-          + Internal functions return the refs
-          + assoc-new-or-retry if the key wasn't already in writes
-          + Otherwise alter it in writes
-      + dm-init!
-        + Create (if not exists) mtables and mvar
-        + Getting a null pointer exception from run-stmt
-          > SQL commands look perfect
-      + Rename translate-val -- there are two directions of
-        translation
-      - Test
-        + Compile everything except the writer thread
-          > Will run writes manually
-        + Create a dmap
-          + (dm-create-map! "test1" {:cols {:mykey ["VARCHAR(32)"
-            :str] :myval ["BLOB" :obj]} :key :mykey})
-            + get-row must handle the empty set result case
-            + next-inname-num doesn't work at all
-              + Add an assoc in there
-            + On inserting a row, whether to :read (by
-              database-select), or to :write (by insert/update), the
-              val should be a ref to a hash
-            + Row should probably contain the key as well
-              x insert-query needs to get the key, obviously
-                > That's up to whomever calls dm-insert
-                > But I see dm-init! does need to create that var
-              + The update probably shouldn't try to set the key
-              + WHERE clause in update query has ":varname"
-              + Why is it an update?  Why no insert?
-                > Because I didn't insert it, dummy
-              x Don't add things to the write queue if they have nils
-            + Still not creating table
-              + inname-num gets added to (*var-map* :write) with key
-                equal to clojure.core/key
-        + Insert query for new table did not encode spec
-          > Also, insert query for new mvar did not encode val
-          + Remake tables using text instead of blob
-        - Add some stuff to it
-        - Flush writes
-        - Examine the database from a mysql prompt
-        - Reload library and attempt to read previously-written data
-      - get-row needs to return a column-name -> value hash
-        - And the in-memory table needs to wrap that hash in a Ref
-      - database-select doesn't return the row
-      - Need a global write queue, not per-table queues
-        - A write is an SQL stmt, the hash equivalent of the values
-          being set in the stmt, and a Ref to the in-memory version of
-          the row
-        - If the hash no longer equals what the Ref points to, cancel
-          the write
-      - (table-map tablename key "*") => mapx
-        - (mapx "foo") does a select * from tablename where key =
-          "foo"
-      - init
-        - Create mtables and mvar
-        - Populate mvar with
-          - inname-num
-      - Writer thread
-        - If :required, don't bother to check for a ref
-        - Else, if ref doesn't match row being inserted, cancel
-        - If a :callback, call it with true if query performed, false
-          if canceled
-      > I think this encapsulates the node caching stuff I was going
-        to do separately.  Why carry around two different objects in
-        my server code?
-        > Somewhat complicated, but worthwhile
-          > For example, the object can't be immutable because a
-            database table isn't, so it can't support conj or assoc
-          > Instead, there will be real mutation functions specific
-            to database tables, but they will only happen to the real
-            SQL table when an STM transaction succeeds
-            > But these will be visible within the transaction, which
-              means there will need to be key-value mappings that
-              can't time out until they are committed
-              > But that means different views of the same table won't
-                share the in-transaction changes (within a single
-                transaction), which seems awful
-              > Worse, they might cache out-of-date values
-              > Maybe the answer is to just allow a single view of
-                every table and intern table-map per tablename
+  - node_tree.clj (ns node-tree)
+    - durable-maps/dm-annotate
+      - Add impermanent things to a map val (without generating a
+        write)
+        - Verify that persistent fields are unchanged?  Or not?
+    - Child/parent nodes exist as ints, and get looked up and stored
+      in 
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
   - Use trusted path for dialog boxes that shouldn't be spoofed (f10?)
-    > Also nice because it avoids having system dialogs swallow a stray
-      enter key or spacebar
+    > Also nice because it avoids having system dialogs swallow a
+      stray enter key or spacebar
   - Add textures to Shape class
     - Specify color of each triangle
     - Include image
@@ -114,8 +24,8 @@
       > Shape must be topologically identical to the one it applies to
   - Add AddRef message
     > Object id and MoveSeq
-    > Creates a new object with the same shape as another object and its
-      children
+    > Creates a new object with the same shape as another object and
+      its children
     > Changes to the other object's shape affect referring objects
       > This includes texture
     > Changes to child shapes and their relative positions also affect
@@ -134,8 +44,8 @@
       as well as possibly being useful for other things
   - Add better logging facilities
   - Time out synchronous queries
-  - Show some sort of "loading in progress" status indicator when going
-    to a new URL, before the connection is fully established
+  - Show some sort of "loading in progress" status indicator when
+    going to a new URL, before the connection is fully established
   + Switch to latest jME
     + svn checkout http://jmonkeyengine.googlecode.com/svn/trunk/   \
       jmonkeyengine-read-only
@@ -153,8 +63,8 @@
     + ControllerPipeline should have the ProxyClientConnection, not
       ViewerWindow; otherwise there's no point to it
       + The ProxyClientConnection currently has a way back to the
-        ViewerWindow, and gives that to the ViewerDispatcher; this must
-        instead go through the pipeline (which should have the
+        ViewerWindow, and gives that to the ViewerDispatcher; this
+        must instead go through the pipeline (which should have the
         dispatcher)
   + Would be nice to know why everything renders with the wrong Z-order
     + Trace through rendering
@@ -384,6 +294,104 @@
           x First long generated from rand sequence using parent's seed
 	  x bit-xor (node-index << seed-mutation-shift)
 	  > xoring the parent's seed instead
+  + Plug server into database
+    x Need FIFO map (for db-query caching so they're
+      transaction-safe): 
+      x Created with a length limit, L
+      x Adding something new to it, if the (L+1)th thing, causes the
+        oldest one to disappear
+      x Would be handy to make a version where reading also updates
+        the place in the queue
+    + Set up Java MySQL driver
+    + Pull out db stuff into its own package, wrapping the SQL
+      ugliness
+      + dm-create-map!
+      + Outstanding issues with:
+        + Whether select returns a ref or a hash
+          > Almost surely a hash
+          + local-select and database-select return refs
+          + dm-select derefs it
+        + Implementation of dm-update based on the above
+          + Internal functions return the refs
+          + assoc-new-or-retry if the key wasn't already in writes
+          + Otherwise alter it in writes
+      + dm-init!
+        + Create (if not exists) mtables and mvar
+        + Getting a null pointer exception from run-stmt
+          > SQL commands look perfect
+      + Rename translate-val -- there are two directions of
+        translation
+      + Test
+        + Compile everything except the writer thread
+          > Will run writes manually
+        + Create a dmap
+          + (dm-create-map! "test1" {:cols {:mykey ["VARCHAR(32)"
+            :str] :myval ["BLOB" :obj]} :key :mykey})
+            + get-row must handle the empty set result case
+            + next-inname-num doesn't work at all
+              + Add an assoc in there
+            + On inserting a row, whether to :read (by
+              database-select), or to :write (by insert/update), the
+              val should be a ref to a hash
+            + Row should probably contain the key as well
+              x insert-query needs to get the key, obviously
+                > That's up to whomever calls dm-insert
+                > But I see dm-init! does need to create that var
+              + The update probably shouldn't try to set the key
+              + WHERE clause in update query has ":varname"
+              + Why is it an update?  Why no insert?
+                > Because I didn't insert it, dummy
+              x Don't add things to the write queue if they have nils
+            + Still not creating table
+              + inname-num gets added to (*var-map* :write) with key
+                equal to clojure.core/key
+        + Insert query for new table did not encode spec
+          > Also, insert query for new mvar did not encode val
+          + Remake tables using text instead of blob
+        + Add some stuff to it
+        + Flush writes
+        + Examine the database from a mysql prompt
+        + inname-num got written twice; the first shouldn't have
+          happened
+        + Update doesn't encode columns -- set or where clause
+        + Reload library and attempt to read previously-written data
+          + Table gets loaded with :table nil, :spec nil
+      + get-row needs to return a column-name -> value hash
+        + And the in-memory table needs to wrap that hash in a Ref
+      + Need a global write queue, not per-table queues
+        + A write is an SQL stmt, the hash equivalent of the values
+          being set in the stmt, and a Ref to the in-memory version of
+          the row
+        + If the hash no longer equals what the Ref points to, cancel
+          the write
+      x (table-map tablename key "*") => mapx
+        x (mapx "foo") does a select * from tablename where key =
+          "foo"
+      + init
+        + Create mtables and mvar
+        + Populate mvar with
+          + inname-num
+      + Writer thread
+        + If :required, don't bother to check for a ref
+        + Else, if ref doesn't match row being inserted, cancel
+      > I think this encapsulates the node caching stuff I was going
+        to do separately.  Why carry around two different objects in
+        my server code?
+        > Somewhat complicated, but worthwhile
+          > For example, the object can't be immutable because a
+            database table isn't, so it can't support conj or assoc
+          > Instead, there will be real mutation functions specific
+            to database tables, but they will only happen to the real
+            SQL table when an STM transaction succeeds
+            > But these will be visible within the transaction, which
+              means there will need to be key-value mappings that
+              can't time out until they are committed
+              > But that means different views of the same table won't
+                share the in-transaction changes (within a single
+                transaction), which seems awful
+              > Worse, they might cache out-of-date values
+              > Maybe the answer is to just allow a single view of
+                every table and intern table-map per tablename
 
 ------------------------------------------------------------------------
 - To do for 0.03:
@@ -428,6 +436,10 @@
 
 ------------------------------------------------------------------------
 - Future:
+  - Add callback handling in writer thread
+    - If write has a :callback, call it with true if query performed,
+      false if canceled
+      - send for :callback, send-off for :callback-off
   - Server for mass-audience events:
     - Performance recorded on a short delay in an arena with no audience
     - Performance encoded into a series of semi-large packages of
