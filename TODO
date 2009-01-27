@@ -2,12 +2,19 @@
 
 - To do for 0.02:
   - node_tree.clj (ns node-tree)
-    - durable-maps/dm-annotate
-      - Add impermanent things to a map val (without generating a
+    x durable-maps/dm-annotate
+      x Add impermanent things to a map val (without generating a
         write)
-        - Verify that persistent fields are unchanged?  Or not?
-    - Child/parent nodes exist as ints, and get looked up and stored
-      in 
+        x Verify that db-stored fields are unchanged?  Or not?
+        > Problem: this would cause the write to fail to happen
+          > Which happens to be the same reason this isn't necessary
+            for scalability
+    x Child/parent nodes exist as ints, and refs get looked up and
+      stored in a non-saved map
+      > Problem with this is that if I want to be able to clean out
+        the table, these refs might become invalid
+    > The answer for now is almost certainly to just not try to cache
+      anything
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -46,7 +53,7 @@
   - Time out synchronous queries
   - Show some sort of "loading in progress" status indicator when
     going to a new URL, before the connection is fully established
-  + Switch to latest jME
+  x Switch to latest jME
     + svn checkout http://jmonkeyengine.googlecode.com/svn/trunk/   \
       jmonkeyengine-read-only
     + git commit old version

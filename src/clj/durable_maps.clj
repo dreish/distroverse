@@ -108,10 +108,6 @@
   [row-result]
   (zipmap (map keyword (row-result :colnames))
           (first (row-result :rows))))
-;;   (apply hash
-;;          (interleave
-;;           (map keyword (row-result :colnames))
-;;           (first (row-result :rows)))))
 
 (defn- get-row
   "Get a single row from a table, given a primary key column, and a
@@ -376,6 +372,7 @@
     (let [dmap (dmap-c)
           writes (dmap :write)
           key (row (-> dmap :spec :key))
+          ; TODO delay (insert-query) for a slight performance ++
           write-query (insert-query dmap row)]
       (commute writes assoc-new-or-die key (ref row))
       (add-to-write-queue write-query))
@@ -422,6 +419,7 @@
         (throw (Exception.
                 (str "dm-update: No existing row for key " key))))
       (let [newrow (apply f oldrow args)
+            ; TODO delay (update-query); will not always be needed
             write-query (update-query dmap newrow)]
         (if in-writes
           (ref-set in-writes newrow)
@@ -555,6 +553,7 @@
          nil
          (do
            (alter *write-queue* pop)
+           ; Send/send-off callbacks here
            (if (or (q :required)
                    (= (q :row)
                       @((-> q :dmap :write deref) (q :keyval))))
@@ -578,21 +577,28 @@
                          (next-write :query)))
             (recur))))))
 
+
+(defn flush-ready-writes!
+  "Flush all database-writing commands that are eligible to be
+  executed."
+  []
+  (if (pos? (count @*write-queue*))
+    (let [current-time (tm)
+          ; Must call (tm) before checking
+          ; *dm-transaction-times* to ensure that
+          ; oldest-trans-time will be before any transaction
+          ; started after *dm-transaction-times* is checked.
+          oldest-trans-time (or (ffirst @*dm-transaction-times*)
+                                current-time)]
+      (flush-writes-before! oldest-trans-time))))
+
 (when false
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
 (defvar- writer-thread
   (Thread.
      #(loop []
-        (if (pos? (count @*write-queue*))
-          (let [current-time (tm)
-                ; Must call (tm) before checking
-                ; *dm-transaction-times* to ensure that
-                ; oldest-trans-time will be before any transaction
-                ; started after *dm-transaction-times* is checked.
-                oldest-trans-time (or (ffirst @*dm-transaction-times*)
-                                      current-time)]
-            (flush-writes-before! oldest-trans-time)))
+        (flush-ready-writes!)
         (Thread/sleep 2000)
         (when-not @*dm-shutting-down*
           (recur)))
