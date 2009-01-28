@@ -1,6 +1,12 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - Make the bad ideas go away in world-server.clj
+    - Get rid of load-node
+    - Pretty much any commute/alter is to be replaced
+      > Keeping *avatars* as it is, since it refers to a session
+        object
+    - And almost any dosync (except with *avatars*)
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a
@@ -14,7 +20,7 @@
       > Problem with this is that if I want to be able to clean out
         the table, these refs might become invalid
     > The answer for now is almost certainly to just not try to cache
-      anything
+      any links
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement

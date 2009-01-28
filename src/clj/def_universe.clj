@@ -29,6 +29,9 @@
 
 ;; </copyleft>
 
+
+; Generate a universe node tree from a random seed
+
 (use 'server-lib)
 (use 'prng-feedback)
 

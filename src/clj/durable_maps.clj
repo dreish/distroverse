@@ -407,20 +407,25 @@
 (defn dm-update
   "Update the row with the given key with the same concurrency
   behavior as alter, setting the value at col to (f oldrow), and
-  returning that new value.  The row must already exist."
+  returning that new value.  The row must already exist.  The key
+  column may not be changed."
   [dmap-c key f & args]
   (do
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
           in-writes (@writes key)
-          oldrow (dmap-c key)]
+          oldrow (dmap-c key)
+          keycol (-> dmap :spec :key)]
       (when-not oldrow
         (throw (Exception.
                 (str "dm-update: No existing row for key " key))))
       (let [newrow (apply f oldrow args)
             ; TODO delay (update-query); will not always be needed
             write-query (update-query dmap newrow)]
+        (if (not= (oldrow keycol) (newrow keycol))
+          (throw (Exception.
+                  "dm-update attempted to change key")))
         (if in-writes
           (ref-set in-writes newrow)
           (commute writes assoc-new-or-retry key (ref newrow)))

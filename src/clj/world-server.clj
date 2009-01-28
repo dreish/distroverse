@@ -31,15 +31,17 @@
 
 (import '(org.distroverse.dvtp Str Err))
 (use 'server-lib)
+(use 'clojure.contrib.def)
+(use 'durable-maps)
 
-(def *key-to-id* (ref {})
+(defvar *key-to-id* (dm-get-map "key-to-id")
   "Map of public keys to userid numbers")
-(def *userdata* (ref {})
+(defvar *userdata* (dm-get-map "userdata")
   "Map of userid numbers to other account data")
-(def *avatars* (ref #{})
+(defvar *avatars* (ref #{})
   "Set of all avatars")
-(def *db* (agent (db-open))
-  "Global database connection")
+(defvar *id-to-node* (dm-get-map "id-to-node")
+  "Maps node IDs to nodes.")
 
 (defn gen-fun-call-id [session]
   "Return a fun-call serial number unique within the given session."
@@ -72,41 +74,10 @@
        " # "
        (sec-random)))
 
-(defn replace-child [parent nodeid child]
-  "Make the node ref for nodeid under parent point to child."
-  ; XXX
-  )
-
-(defn db-query [& args]
-  ""
-  ; XXX
-  ; General idea: do this synchronously but cache the results in case
-  ; of retry.  The cache should be cleaned out using a FIFO queue of
-  ; length equal to the number of processors (?).
-  )
-
-(defn load-node [nodeid]
-  "Load the given node from the database and add it to the node tree."
-  ;; Implementation note: I believe it's safe to commute the
-  ;; *id-to-node* hash here, because I'm altering the parent node's
-  ;; children vector.  If another thread were adding a mapping from
-  ;; the same id to a different node object in *id-to-node*, it would
-  ;; also be altering the parent node.  Only one can win.
-  (dosync
-   (let [node-data (db-query :select :* :from "nodes"
-                             :where {"nodeid" nodeid})
-	 parent (get-node (node-data :parent))]
-     (replace-child parent (node-data :nodeid) node-data))))
-
 (defn get-node [nodeid]
-  "Return the node with the given id (a serial number).  If it is not
-  already in the node table, load it from the database and return it."
-  (dosync
-   (if-let node (*id-to-node* nodeid)
-     node
-     (do
-       (load-node nodeid)
-       (*id-to-node* nodeid)))))
+  "Return the node with the given id (a serial number)."
+  (dm-dosync
+   (*id-to-node* nodeid)))
 
 (defn add-object [node move shape]
   "Add shape as a child of node, with move move."
@@ -115,8 +86,7 @@
   )
 
 (defn add-self-to-world [att session]
-  "Add the session's avatar to the world.  This has side effects in a
-  sense, but since they all happen inside a dosync, no bang is needed."
+  "Add the session's avatar to the world."
   (let [userid (att :userid)
 	pos (att :lastpos)]
     (dosync
@@ -128,29 +98,17 @@
 
 (defn new-user? [id]
   "Does the given identity dict exist as a user account?"
-  (not (@*key-to-id* (id :pubkey))))
-
-(defn db-run [& args]
-  "TODO turn the given syntaxey arguments into an SQL query and send it
-  off to the *db* agent, guarding against the possibility that the
-  server is being shut down."
-  (if @*shutdown-mode*
-    (throw (Exception. "db-run while in shutdown-mode")))
-    ; XXX
-  )
+  (not (*key-to-id* (id :pubkey))))
 
 (defn shutdown [t]
   "Shut down the server, and flush all database queries.  t: timeout in ms"
-  (dosync
-   (set-var *shutdown-mode* true)
-   (send *db* #(identity nil)))
-  (or (await-for t *db*)
-      (throw (Exception. "Database flush timed out."))))
+  ; XXX
+  )
 
 (defn skel-user [id userid]
   "Return the skeleton user account, with the given ID"
   (let [skel-userid (get-userid-by-name "skel")]
-    (assoc (@*userdata* skel-userid)
+    (assoc (*userdata* skel-userid)
       :pubkey (id :pubkey)
       :userid userid)))
 
