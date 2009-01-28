@@ -83,7 +83,7 @@
   "Add shape as a child of node, with move move."
   (dosync
    ; XXX
-  )
+  ))
 
 (defn add-self-to-world [att session]
   "Add the session's avatar to the world."
@@ -94,16 +94,17 @@
 			      (pos :move)
 			      (att :avatarshape))]
        (commute *avatars* conj {:object avatar :session session})
-       (alter att assoc :avatar avatar))))
+       (alter att assoc :avatar avatar)))))
 
 (defn new-user? [id]
   "Does the given identity dict exist as a user account?"
-  (not (*key-to-id* (id :pubkey))))
+  (not (dm-dosync (*key-to-id* (id :pubkey)))))
 
-(defn shutdown [t]
+(defn shutdown! [t]
   "Shut down the server, and flush all database queries.  t: timeout in ms"
-  ; XXX
-  )
+  (disable-server-listener)
+  (disconnect-users)
+  (dm-shutdown!))
 
 (defn skel-user [id userid]
   "Return the skeleton user account, with the given ID"
@@ -114,11 +115,11 @@
 
 (defn setup-new-user! [session att id]
   "Sets up a new user."
-  (dosync
+  (dm-dosync
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-	 (alter *key-to-id* conj {(id :pubkey) new-userid})
+	 (dm-insert *key-to-id* {(id :pubkey) new-userid})  ; XXX
 	 (alter *userdata* conj {new-userid (skel-user id new-userid)})
 	 (alter att assoc :userid new-userid)
 	 (db-run :insert :into "userdata"

@@ -7,6 +7,8 @@
       > Keeping *avatars* as it is, since it refers to a session
         object
     - And almost any dosync (except with *avatars*)
+    - What will *key-to-id* look like?  If the public key goes into a
+      text field, it can't be a primary key
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a

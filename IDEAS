@@ -6906,3 +6906,35 @@ I think I'm going to be spending much of this week away from the
 computer just writing out various scenarios and corner cases and
 figuring out how they'll work correctly.
 
+2009-01-17
+
+I can no longer even remember why I have separate read and write caches.
+If there is a purpose to the write cache, it seems it is served by the
+global write queue.
+
+I thought it was solving some sort of concurrency problem, but I no
+longer see how that can be the case.
+
+It's just an internal implementation detail, though.  As long as it
+works and isn't terribly less efficient than it could be, I think I'll
+just leave it for another day.
+
+Okay, now I remember.  The idea was that entries in the write cache
+would be guaranteed to stick around until they were committed to disk.
+Entries in the read cache might be deleted at any time.
+
+Also, the database would only be loaded into the read cache, to
+guarantee that they would not erase writes due to a race condition if I
+used commute to add them.  I'm not certain this is a good idea, but I
+think I went over the possible scenarios.
+
+2009-01-27
+
+I was thinking about the inventory this evening.  It won't be very
+interesting if it can only contain AddObjects.  The idea I had, to keep
+it general, was that every object in the inventory should be arbitrary
+binary data paired with the URL and class name of a decoder class,
+implementing some interface.  I guess it would need one method:
+
+AddObject createObject( byte[] data, double detail_level )
+
