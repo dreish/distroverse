@@ -33,6 +33,7 @@
 (use 'server-lib)
 (use 'clojure.contrib.def)
 (use 'durable-maps)
+(use 'bigkey-dm)
 
 (defvar *key-to-id* (dm-get-map "key-to-id")
   "Map of public keys to userid numbers")
@@ -119,8 +120,8 @@
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-	 (dm-insert *key-to-id* {(id :pubkey) new-userid})  ; XXX
-	 (alter *userdata* conj {new-userid (skel-user id new-userid)})
+	 (dm-insert *key-to-id* {(id :pubkey) new-userid})  ; XXX problem
+	 (dm-insert *userdata* {new-userid (skel-user id new-userid)})
 	 (alter att assoc :userid new-userid)
 	 (db-run :insert :into "userdata"
 		 :object (@*userdata* new-userid))

@@ -74,28 +74,28 @@
 
 ; internal low-level functions
 
-(defn- assoc-new [m key value]
+(defn- assoc-new [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to m if and only if the key doesn't already exist.  Return m."
-  (if (m key)
+  (if (m mkey)
     m
-    (assoc m key value)))
+    (assoc m mkey value)))
 
-(defn- assoc-new-or-retry [m key value]
+(defn- assoc-new-or-retry [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to the m if the key doesn't already exist; otherwise throw a
   RetryEx."
-  (if (m key)
+  (if (m mkey)
     (clojure.lang.RetryTransaction/retry)
-    (assoc m key value)))
+    (assoc m mkey value)))
 
-(defn- assoc-new-or-die [m key value]
+(defn- assoc-new-or-die [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to the m if the key doesn't already exist; otherwise throw an
   Exception."
-  (if (m key)
-    (throw (Exception. (str "Key " key " already in map")))
-    (assoc m key value)))
+  (if (m mkey)
+    (throw (Exception. (str "Key " mkey " already in map")))
+    (assoc m mkey value)))
 
 (defn- tm []
   "Return a time value such that each call to (tm) returns a number
@@ -342,7 +342,7 @@
   (let [table (dmap :table)
         spec (dmap :spec)
         cols (keys (spec :cols))
-        key (spec :key)
+        keycol (spec :key)
         cols-str (apply str (interpose ", " (map name cols)))
         num-cols (count cols)
         val-?s (apply str (interpose ", " (take num-cols
@@ -355,7 +355,7 @@
      :vals (valify-row row spec cols)
      :time (tm)
      :required true
-     :keyval (row key)}))
+     :keyval (row keycol)}))
 
 (defn- add-to-write-queue
   [write-query]
@@ -371,10 +371,10 @@
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
-          key (row (-> dmap :spec :key))
+          rowkey (row (-> dmap :spec :key))
           ; TODO delay (insert-query) for a slight performance ++
           write-query (insert-query dmap row)]
-      (commute writes assoc-new-or-die key (ref row))
+      (commute writes assoc-new-or-die rowkey (ref row))
       (add-to-write-queue write-query))
     dmap-c))
 
@@ -388,19 +388,19 @@
   [dmap row]
   (let [table (dmap :table)
         spec (dmap :spec)
-        key (spec :key)
-        cols (filter #(not= key %)
+        keycol (spec :key)
+        cols (filter #(not= keycol %)
                      (keys (spec :cols)))
-        keyval (row key)
+        keyval (row keycol)
         col-sets-str (apply str (interpose ", " (map #(str % " = ?")
                                                      (map name cols))))
         num-cols (count cols)
         query-str (str "UPDATE " table " SET " col-sets-str
-                       " WHERE " (name key) " = ?")]
+                       " WHERE " (name keycol) " = ?")]
     {:dmap dmap
      :row row
      :query query-str
-     :vals (valify-row row spec (concat cols (list key)))
+     :vals (valify-row row spec (concat cols (list keycol)))
      :time (tm)
      :keyval keyval}))
 
@@ -409,17 +409,17 @@
   behavior as alter, setting the value at col to (f oldrow), and
   returning that new value.  The row must already exist.  The key
   column may not be changed."
-  [dmap-c key f & args]
+  [dmap-c keyval f & args]
   (do
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
-          in-writes (@writes key)
-          oldrow (dmap-c key)
+          in-writes (@writes keycol)
+          oldrow (dmap-c keyval)
           keycol (-> dmap :spec :key)]
       (when-not oldrow
         (throw (Exception.
-                (str "dm-update: No existing row for key " key))))
+                (str "dm-update: No existing row for key " keyval))))
       (let [newrow (apply f oldrow args)
             ; TODO delay (update-query); will not always be needed
             write-query (update-query dmap newrow)]
@@ -428,7 +428,7 @@
                   "dm-update attempted to change key")))
         (if in-writes
           (ref-set in-writes newrow)
-          (commute writes assoc-new-or-retry key (ref newrow)))
+          (commute writes assoc-new-or-retry keyval (ref newrow)))
         (add-to-write-queue write-query)
         newrow))))
 
@@ -476,18 +476,18 @@
 (defn- local-select
   "Look the key up in the given durable map, or return nil if it isn't
   there."
-  [dmap key]
-  (or (@(dmap :write) key)
-      (@(dmap :read) key)))
+  [dmap keyval]
+  (or (@(dmap :write) keyval)
+      (@(dmap :read) keyval)))
 
 (defn- dm-select
   "Look something up in a map, returning a row hash, or nil if it is
   not found.  Unlike with Refs, there are no flying reads on durable
   maps.  This function must always be called inside a transaction."
-  ([dmap key]
+  ([dmap keyval]
      (require-dmtrans)
-     (if-let [selected (or (local-select dmap key)
-                           (database-select dmap key))]
+     (if-let [selected (or (local-select dmap keyval)
+                           (database-select dmap keyval))]
          @selected
        nil)))
 
