@@ -35,7 +35,7 @@
 (use 'durable-maps)
 (use 'bigkey-dm)
 
-(defvar *key-to-id* (dm-get-map "key-to-id")
+(defvar *key-to-id* (bk-get-map "key-to-id")
   "Map of public keys to userid numbers")
 (defvar *userdata* (dm-get-map "userdata")
   "Map of userid numbers to other account data")
@@ -120,8 +120,9 @@
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-	 (dm-insert *key-to-id* {(id :pubkey) new-userid})  ; XXX problem
-	 (dm-insert *userdata* {new-userid (skel-user id new-userid)})
+	 (dm-insert *key-to-id* {:key (id :pubkey),
+                                 :id new-userid})
+	 (dm-insert *userdata* (skel-user id new-userid))
 	 (alter att assoc :userid new-userid)
 	 (db-run :insert :into "userdata"
 		 :object (@*userdata* new-userid))

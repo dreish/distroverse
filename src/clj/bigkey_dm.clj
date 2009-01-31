@@ -42,6 +42,7 @@
 (defvar- get-key-munger :key-munger)
 (defvar- get-abstract-keycol :abstract-keycol)
 (defvar- get-munged-keycol :munged-keycol)
+(defvar- get-munged-valcol :munged-valcol)
 
 (defn bk-select
   [bk k]
@@ -65,8 +66,22 @@
 (defn bk-insert
   [bkc row]
   (let [bk (bkc)
+        dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
+        k (row abstract-keycol)
         munged-key ((get-key-munger bk) k)]
+    (if-let [dm-row ((dmap munged-key) (get-munged-valcol bk))]
+      (if (dm-row (row abstract-keycol))
+        (throw (Exception. "Insert with already-existing key"))
+        (dm-update dmap (row abstract-keycol) assoc k row))
+      (dm-insert dmap {(get-munged-keycol bk) munged-key,
+                       (get-munged-valcol bk) {(row abstract-keycol)
+                                               row}}))))
+
+(defn bk-create-map!
+  "Create a new big-key table.  This cannot be done inside a
+  transaction."
+  [name spec]
+  (let [tname (name-transform name)]
     ; XXX
     ))
-

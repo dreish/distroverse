@@ -72,16 +72,14 @@
          dm-select
          flush-writes-before!)
 
-; internal low-level functions
-
-(defn- assoc-new [m mkey value]
+(defn assoc-new [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to m if and only if the key doesn't already exist.  Return m."
   (if (m mkey)
     m
     (assoc m mkey value)))
 
-(defn- assoc-new-or-retry [m mkey value]
+(defn assoc-new-or-retry [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to the m if the key doesn't already exist; otherwise throw a
   RetryEx."
@@ -89,13 +87,15 @@
     (clojure.lang.RetryTransaction/retry)
     (assoc m mkey value)))
 
-(defn- assoc-new-or-die [m mkey value]
+(defn assoc-new-or-die [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
   to the m if the key doesn't already exist; otherwise throw an
   Exception."
   (if (m mkey)
     (throw (Exception. (str "Key " mkey " already in map")))
     (assoc m mkey value)))
+
+; internal low-level functions
 
 (defn- tm []
   "Return a time value such that each call to (tm) returns a number
@@ -506,7 +506,7 @@
 (let [create-map-mutex 1]
   (defn dm-create-map!
     "Create a new table.  This cannot be done inside a transaction.
-    Does not check that column names, given as keywords, as legal SQL
+    Does not check that column names, given as keywords, are legal SQL
     column names.  Returns nil."
     [name spec]
     (locking create-map-mutex
