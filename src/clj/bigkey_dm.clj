@@ -33,25 +33,21 @@
   (:use clojure.contrib.def
         durable-maps))
 
-; Takes a spec defining how a pseudo-key column (which may be text or
-; blob) is to be transformed to something fixed-length, and returns a
-; durable-map-style interface on that (which participates in
+; Takes a name and a spec defining how a pseudo-key column (which may
+; be text or blob) is to be transformed to something fixed-length, and
+; returns a durable-map-style interface on that (which participates in
 ; durable-map transactions).
 
 (defvar- get-dmap :dmap)
 (defvar- get-key-munger :key-munger)
 (defvar- get-abstract-keycol :abstract-keycol)
-(defvar- get-munged-keycol :munged-keycol)
-(defvar- get-munged-valcol :munged-valcol)
 
 (defn bk-select
   [bk k]
-  (let [munged-key ((get-key-munger bk) k)
-        munged-keycol (get-munged-keycol bk)]
-    (if-let [row ((get-dmap bk) munged-key)]
-        (if-let [abstract-row (row k)]
-            (disj abstract-row
-                  (get-munged-keycol bk))))))
+  (let [munged-key ((get-key-munger bk) k)]
+    (if-let [dm-row ((get-dmap bk) munged-key)]
+        (let [valcol (dm-row :val_hash)]
+          (valcol k))))
 
 (defn- close-bk
   [bk]
@@ -70,18 +66,32 @@
         abstract-keycol (get-abstract-keycol bk)
         k (row abstract-keycol)
         munged-key ((get-key-munger bk) k)]
-    (if-let [dm-row ((dmap munged-key) (get-munged-valcol bk))]
-      (if (dm-row (row abstract-keycol))
-        (throw (Exception. "Insert with already-existing key"))
-        (dm-update dmap (row abstract-keycol) assoc k row))
-      (dm-insert dmap {(get-munged-keycol bk) munged-key,
-                       (get-munged-valcol bk) {(row abstract-keycol)
-                                               row}}))))
+    (if-let [dm-row ((dmap munged-key) :val_hash)]
+        (if (dm-row (row abstract-keycol))
+          (throw (Exception. "Insert with already-existing key"))
+          (dm-update dmap munged-key assoc k row))
+      (dm-insert dmap {:hashed_key munged-key,
+                       :val_hash {k row}}))))
 
+(defn bk-update
+  [bkc keyval f & args]
+  (let [bk (bkc)
+        dmap (get-dmap bk)
+        abstract-keycol (get-abstract-keycol bk)
+        k (row abstract-keycol)
+        munged-key ((get-key-munger bk) k)]
+    (if-let [dm-row ((dmap munged-key) :val_hash)]
+        (if-let [bk-row (dm-row k)]
+            (let [new-bk-row (apply f bk-row args)]
+              (dm-update dmap munged-key assoc k new-bk-row))
+          (throw (Exception. "Update on non-existent row")))
+      (throw (Exception. "Update on non-existent row")))))
+  
 (defn bk-create-map!
   "Create a new big-key table.  This cannot be done inside a
   transaction."
   [name spec]
   (let [tname (name-transform name)]
+    
     ; XXX
     ))

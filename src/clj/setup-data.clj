@@ -2,6 +2,8 @@
 
 (use :reload-all 'durable-maps)
 
+(use :reload-all 'bigkey-dm)
+
 ; Harmless to run this if it has already been run:
 (dm-init!)
 
@@ -16,3 +18,14 @@
 
 (dm-dosync (my-test1 "foo"))
 
+
+
+(bk-create-map! "bktest1"
+                {:abstract-keycol :key
+                 :key-munger `md5-munger
+                 :key-type "VARCHAR(40)"
+                 :val-type "MEDIUMTEXT"})
+
+(def bk-test1 (bk-get-map "bktest1"))
+
+(dm-dosync (bk-insert bk-test1 
