@@ -43,3 +43,30 @@
          (recur (conj q (first a)) (rest a))
          q))))
 
+(defn cinc
+  "inc for characters"
+  [#^Character c]
+  (-> c int inc char))
+
+(defn crange
+  "Given two characters, returns a character range.  Like range, the
+  end is not included."
+  [#^Character begin #^Character end]
+  (if (not= begin end)
+    (lazy-cons begin
+               (crange (cinc begin) end))))
+
+(let [nybs (vec (concat (crange \0 (cinc \9))
+                        (crange \a (cinc \f))))]
+  (defn hex-encode-bytes
+    "Takes a sequence of bytes and returns a sequence of hex
+    characters."
+    [bytes]
+    (if bytes
+      (let [fb (first bytes)
+            hn (quot (bit-and fb 240) 16)
+            ln (bit-and fb 15)]
+        (cons (nybs hn)
+              (lazy-cons (nybs ln)
+                         (hex-encode-bytes (rest bytes))))))))
+

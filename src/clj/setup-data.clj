@@ -14,18 +14,20 @@
 
 (def my-test1 (dm-get-map "test1"))
 
-(dm-dosync (dm-insert my-test1 {:mykey "foo" :myval 10}))
+(dm-dosync (dm-insert my-test1 {:mykey "foo", :myval 10}))
 
-(dm-dosync (my-test1 "foo"))
+(prn (dm-dosync (my-test1 "foo")))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bk-create-map! "bktest1"
                 {:abstract-keycol :key
-                 :key-munger `md5-munger
-                 :key-type "VARCHAR(40)"
-                 :val-type "MEDIUMTEXT"})
+                 :key-munger `(md5-munger 40)
+                 :key-type ["VARCHAR(40)" :str]
+                 :val-type ["MEDIUMTEXT" :obj]})
 
 (def bk-test1 (bk-get-map "bktest1"))
 
-(dm-dosync (bk-insert bk-test1 
+(dm-dosync (bk-insert bk-test1 {:key [1 1 2 3 5 8]
+                                :any-key "xyz"}))
+

@@ -31,23 +31,44 @@
 
 (ns bigkey-dm
   (:use clojure.contrib.def
-        durable-maps))
+        durable-maps
+        util))
 
 ; Takes a name and a spec defining how a pseudo-key column (which may
 ; be text or blob) is to be transformed to something fixed-length, and
 ; returns a durable-map-style interface on that (which participates in
-; durable-map transactions).
+; durable-map transactions).  Unlike durable-maps, a row hash need not
+; follow any particular column structure, and key names need not be
+; valid SQL column names.  Each row is any arbitrary printable and
+; readable Clojure hash-map.
+;
+; Reserves the use of all durable-maps with names beginning
+; "bigkey-dm/".
 
 (defvar- get-dmap :dmap)
-(defvar- get-key-munger :key-munger)
+(defvar- get-key-munger :key-munger-fn)
 (defvar- get-abstract-keycol :abstract-keycol)
+
+(defvar- *bk-maps* (dm-get-map "bigkey-dm/mbk-maps"))
+
+(defn bk-init!
+  "Initializes the permanent data structures used by bigkey-dm.
+  Compile and run this function separately before using bigkey-dm.
+  Like dm-init!, it can be run more than once, but it may not be
+  called from inside a transaction."
+  []
+  (when-not (dm-get-map "bigkey-dm/mbk-maps")
+    (dm-create-map! "bigkey-dm/mbk-maps"
+                    {:cols {:exname ["VARCHAR(256)" :str]
+                            :spec ["TEXT" :obj]}
+                     :key :exname})))
 
 (defn bk-select
   [bk k]
-  (let [munged-key ((get-key-munger bk) k)]
+  (let [munged-key ((get-key-munger bk) (pr-str k))]
     (if-let [dm-row ((get-dmap bk) munged-key)]
         (let [valcol (dm-row :val_hash)]
-          (valcol k))))
+          (valcol k)))))
 
 (defn- close-bk
   [bk]
@@ -57,7 +78,7 @@
 
 (defn- name-transform
   [name]
-  (str "bigkey-dm/" name))
+  (str "bigkey-dm/u" name))
 
 (defn bk-insert
   [bkc row]
@@ -65,7 +86,7 @@
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
         k (row abstract-keycol)
-        munged-key ((get-key-munger bk) k)]
+        munged-key ((get-key-munger bk) (pr-str k))]
     (if-let [dm-row ((dmap munged-key) :val_hash)]
         (if (dm-row (row abstract-keycol))
           (throw (Exception. "Insert with already-existing key"))
@@ -78,20 +99,53 @@
   (let [bk (bkc)
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
-        k (row abstract-keycol)
-        munged-key ((get-key-munger bk) k)]
-    (if-let [dm-row ((dmap munged-key) :val_hash)]
-        (if-let [bk-row (dm-row k)]
+        munged-key ((get-key-munger bk) (pr-str keyval))
+        ; Ultimate GOTO:
+        nonexist-err #(throw (Exception. "Update on non-existent row"))]
+    (if-let [dm-row (dmap munged-key)]
+        (if-let [bk-row ((dm-row :val_hash) keyval)]
             (let [new-bk-row (apply f bk-row args)]
-              (dm-update dmap munged-key assoc k new-bk-row))
-          (throw (Exception. "Update on non-existent row")))
-      (throw (Exception. "Update on non-existent row")))))
-  
+              (dm-update dmap munged-key assoc keyval new-bk-row))
+          (nonexist-err))
+      (nonexist-err))))
+
+(defvar- mem-eval
+  (memoize
+   (fn [form]
+     (eval form))))
+
+(defvar bk-get-map
+  (memoize
+   (fn
+     [name]
+     (if-let [bkm (*bk-maps* name)]
+         (close-bk (assoc bkm
+                     :key-munger-fn (mem-eval (bkm :key-munger)))))))
+  "Returns a named map, loading it if necessary.  Like dm-get-map,
+  this may be done inside or outside a transaction.")
+
 (defn bk-create-map!
-  "Create a new big-key table.  This cannot be done inside a
-  transaction."
+  "Creates a new big-key table.  This cannot be done inside a
+  transaction.  Returns nil."
   [name spec]
-  (let [tname (name-transform name)]
-    
-    ; XXX
-    ))
+  (do
+    (io!)
+    (let [tname (name-transform name)
+          dm-spec {:cols {:hashed_key (spec :key-type)
+                          :val_hash (spec :val-type)}
+                   :key :hashed_key}]
+      (dm-dosync
+       (dm-insert *bk-maps* {:exname name
+                             :spec spec})
+      (dm-create-map! tname dm-spec)))))
+
+(defn md5-munger
+  "Returns a function that maps a string of arbitrary length to the first
+  'width' characters of the hex-encoded MD5 sum of that string."
+  [width]
+  (fn [s]
+    (let [md (java.security.MessageDigest/getInstance "MD5")
+          dig (.digest md (.getBytes s))]
+      (apply str (take width (hex-encode-bytes (seq dig)))))))
+
+

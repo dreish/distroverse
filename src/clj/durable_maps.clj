@@ -106,8 +106,9 @@
 (defn- to-row-hash
   "Convert a result hash from sql/get-query to a hash for a single row."
   [row-result]
-  (zipmap (map keyword (row-result :colnames))
-          (first (row-result :rows))))
+  (if (pos? (count (row-result :rows)))
+    (zipmap (map keyword (row-result :colnames))
+            (first (row-result :rows)))))
 
 (defn- get-row
   "Get a single row from a table, given a primary key column, and a
@@ -261,7 +262,7 @@
   @*tables*.  If the table happens to be loaded, this function has no
   effect."
   [name]
-  (let [table-map-entry (dm-dosync (dm-select *table-map* name))]
+  (if-let [table-map-entry (dm-dosync (dm-select *table-map* name))]
     (swap! *tables* assoc-new name
            {:name name
             :table (table-map-entry :inname)
@@ -278,8 +279,8 @@
   (do
     (when-not (@*tables* name)
       (dm-load-table name))
-    (let [t (@*tables* name)]
-      (close-dmap t))))
+    (if-let [t (@*tables* name)]
+        (close-dmap t))))
 
 ; dm-insert - add a new map entry, failing if the entry already exists
 
@@ -320,10 +321,11 @@
   "Converts the key-value pairs pulled out of SQL for a row into the
   parsed and marked-up hash that represents the row in memory."
   [raw-row spec]
-  (let [cols (spec :cols)]
-    (apply assoc {}
-           (apply concat (map #(translate-val-in % cols)
-                              raw-row)))))
+  (if raw-row
+    (let [cols (spec :cols)]
+      (apply assoc {}
+             (apply concat (map #(translate-val-in % cols)
+                                raw-row))))))
 
 (defn- valify-row
   "Converts the given map into a sequence of vals that can be passed
@@ -414,7 +416,7 @@
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
-          in-writes (@writes keycol)
+          in-writes (@writes keyval)
           oldrow (dmap-c keyval)
           keycol (-> dmap :spec :key)]
       (when-not oldrow

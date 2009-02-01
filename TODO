@@ -11,13 +11,15 @@
       text field, it can't be a primary key
       - Primary key is md5/sha1 of public key, val is hash of public
         key to ID
-        - bigkey_dm.clj
+        + bigkey_dm.clj
+          + *bk-maps* is bigkey-dm/mbk-maps
+          + md5-munger
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a
         write)
         x Verify that db-stored fields are unchanged?  Or not?
-        > Problem: this would cause the write to fail to happen
+        > Problem: this would cause other writes to fail to happen
           > Which happens to be the same reason this isn't necessary
             for scalability
     x Child/parent nodes exist as ints, and refs get looked up and
@@ -451,6 +453,8 @@
       	in Clojure; try this for restricting proxy permissions
     - Forbid connecting to SMTP
   - Server
+    - Group dm transactions into SQL transactions
+    - Call dm callbacks after SQL transaction finishes
 
 ------------------------------------------------------------------------
 - Future:
