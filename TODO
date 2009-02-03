@@ -7,13 +7,20 @@
       > Keeping *avatars* as it is, since it refers to a session
         object
     - And almost any dosync (except with *avatars*)
-    - What will *key-to-id* look like?  If the public key goes into a
-      text field, it can't be a primary key
-      - Primary key is md5/sha1 of public key, val is hash of public
+    + What will *key-to-id* look like?  If the public key goes into a
+      text field, it can't be a primary key*
+      > *not without significant and annoying limitations, at least
+      + Primary key is md5/sha1 of public key, val is hash of public
         key to ID
         + bigkey_dm.clj
           + *bk-maps* is bigkey-dm/mbk-maps
           + md5-munger
+  - Test bkm further
+    + Test bk-update
+      + dm-update seems to make a complete mess of @:write
+    - Create a map with a contrived munger that guarantees everything
+      goes in the same row
+    - Verify that the above map still behaves correctly
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a

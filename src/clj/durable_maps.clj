@@ -512,13 +512,13 @@
     column names.  Returns nil."
     [name spec]
     (locking create-map-mutex
+      (io!)
       (if (dm-dosync (dm-select *table-map* name))
         (throw (Exception. (str "dm-create-map: Table exists: " name))))
       (let [safename (str "u"
                           (collapse-name name)
                           (next-inname-num))]
         (do
-          (io!)
           (create-table! safename spec)
           (dm-dosync
            (dm-insert (close-dmap *table-map*)
@@ -599,7 +599,7 @@
                                 current-time)]
       (flush-writes-before! oldest-trans-time))))
 
-(when false
+(when true
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
 (defvar- writer-thread

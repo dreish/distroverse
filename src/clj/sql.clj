@@ -98,6 +98,6 @@
      (run-stmt! conn q []))
 
   ([conn q pvals]
-     (prn "Running query: " q "::" pvals)
+     (prn (symbol "Running query:") q (symbol "::") pvals)
      (with-open [s (fill-placeholders conn q pvals)]
          (.executeUpdate s))))

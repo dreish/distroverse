@@ -47,7 +47,7 @@
 
 (defvar- get-dmap :dmap)
 (defvar- get-key-munger :key-munger-fn)
-(defvar- get-abstract-keycol :abstract-keycol)
+(defvar- get-abstract-keycol #(-> % :spec :abstract-keycol))
 
 (defvar- *bk-maps* (dm-get-map "bigkey-dm/mbk-maps"))
 
@@ -81,18 +81,23 @@
   (str "bigkey-dm/u" name))
 
 (defn bk-insert
+  "Add a new map entry, throwing an exception if an entry with the
+  given key already exists.  Returns bkc."
   [bkc row]
   (let [bk (bkc)
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
         k (row abstract-keycol)
         munged-key ((get-key-munger bk) (pr-str k))]
-    (if-let [dm-row ((dmap munged-key) :val_hash)]
-        (if (dm-row (row abstract-keycol))
-          (throw (Exception. "Insert with already-existing key"))
-          (dm-update dmap munged-key assoc k row))
+    (if-let [dm-row (dmap munged-key)]
+        (let [dm-row-val (dm-row :val_hash)]
+          (if (dm-row-val k)
+            (throw (Exception. "Insert with already-existing key"))
+            (dm-update dmap munged-key
+                       assoc-in [:val_hash k] row)))
       (dm-insert dmap {:hashed_key munged-key,
-                       :val_hash {k row}}))))
+                       :val_hash {k row}}))
+    bkc))
 
 (defn bk-update
   [bkc keyval f & args]
@@ -105,7 +110,8 @@
     (if-let [dm-row (dmap munged-key)]
         (if-let [bk-row ((dm-row :val_hash) keyval)]
             (let [new-bk-row (apply f bk-row args)]
-              (dm-update dmap munged-key assoc keyval new-bk-row))
+              (dm-update dmap munged-key
+                         assoc-in [:val_hash keyval] new-bk-row))
           (nonexist-err))
       (nonexist-err))))
 
@@ -120,9 +126,11 @@
      [name]
      (if-let [bkm (*bk-maps* name)]
          (close-bk (assoc bkm
-                     :key-munger-fn (mem-eval (bkm :key-munger)))))))
-  "Returns a named map, loading it if necessary.  Like dm-get-map,
-  this may be done inside or outside a transaction.")
+                     :key-munger-fn (mem-eval
+                                     (-> bkm :spec :key-munger))
+                     :dmap (dm-get-map (name-transform name)))))))
+  "Returns a named map, loading it if necessary.  Unlike dm-get-map,
+  this must be done inside a transaction.")
 
 (defn bk-create-map!
   "Creates a new big-key table.  This cannot be done inside a
@@ -136,8 +144,8 @@
                    :key :hashed_key}]
       (dm-dosync
        (dm-insert *bk-maps* {:exname name
-                             :spec spec})
-      (dm-create-map! tname dm-spec)))))
+                             :spec spec}))
+      (dm-create-map! tname dm-spec))))
 
 (defn md5-munger
   "Returns a function that maps a string of arbitrary length to the first
