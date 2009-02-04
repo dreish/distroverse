@@ -32,6 +32,16 @@
 (ns sql
   (:use clojure.contrib.def))
 
+(defvar- debug-prn prn)
+;(defn- debug-prn [& args] nil)
+
+(defn get-sql-conn
+  "Returns a new SQL connection object of unspecified type; only
+  guaranteed to be meaningful to sql procedures."
+  [conn-str]
+  (atom {:conn (java.sql.DriverManager/getConnection conn-str)
+         :str conn-str
+         :fails 0}))
 
 (defn fill-placeholders
   "Returns a Statement, which the caller is responsible for closing."
@@ -73,6 +83,23 @@
     (vec (map #(.getColumnName rsmeta %)
               (range 1 (inc (.getColumnCount rsmeta)))))))
 
+(defn- in-retry-loop
+  "Call f in a loop, bumping (conn :fails), attempting to reestablish
+  the connection, and recurring if :fails < 20, each time f throws an
+  exception, and returning if it doesn't."
+  [conn f]
+  (try
+   (f)
+   (catch Exception e
+     (swap! conn inc-in :fails)
+     (if (< (@conn :fails) 10)
+       (do
+         (swap! conn assoc
+                :conn (java.sql.DriverManager/getConnection
+                       (@conn :str)))
+         (recur conn f))
+       (throw e)))))
+
 (defn get-query
   "Run a query with results, and return the results as a hash in
   which :rows is a vector of row vectors, and :colnames is a vector of
@@ -82,12 +109,15 @@
      (get-query conn q []))
 
   ([conn q pvals]
-     (with-open [s (fill-placeholders conn q pvals)]
-         (let [rs (.executeQuery s)
-               colnames (column-names rs)
-               rsv (rs-vec rs)]
-           {:colnames colnames
-            :rows rsv}))))
+     (debug-prn (symbol "Getting query:") q (symbol "::") pvals)
+     (in-retry-loop
+        conn
+        #(with-open [s (fill-placeholders conn q pvals)]
+             (let [rs (.executeQuery s)
+                   colnames (column-names rs)
+                   rsv (rs-vec rs)]
+               {:colnames colnames
+                :rows rsv})))))
 
 (defn run-stmt!
   "Run a statement, returning the number of rows affected for INSERT,
@@ -98,6 +128,9 @@
      (run-stmt! conn q []))
 
   ([conn q pvals]
-     (prn (symbol "Running query:") q (symbol "::") pvals)
-     (with-open [s (fill-placeholders conn q pvals)]
-         (.executeUpdate s))))
+     (debug-prn (symbol "Running query:") q (symbol "::") pvals)
+     (in-retry-loop
+        conn
+        #(with-open [s (fill-placeholders conn q pvals)]
+             (.executeUpdate s)))))
+  

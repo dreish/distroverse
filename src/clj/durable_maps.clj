@@ -62,7 +62,7 @@
 (defvar- *write-queue* (ref (queue)))
 (defvar- *dm-shutting-down* (ref nil))
 (Class/forName "com.mysql.jdbc.Driver")
-(defvar- *dm-db* (java.sql.DriverManager/getConnection
+(defvar- *dm-db* (get-sql-conn
                   "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
 ; TODO An engine like SQLite might be ideal
 

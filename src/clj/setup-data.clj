@@ -37,3 +37,23 @@
 (dm-dosync (bk-test1 [1 1 2 3 5 8]))
 
 (dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :date))
+
+
+
+
+(bk-create-map! "bktest2"
+                {:abstract-keycol :key
+                  ; md5 is only 32 chars; oops
+                 :key-munger `#(md5-munger 1)
+                 :key-type ["CHAR(1)" :str]
+                 :val-type ["MEDIUMTEXT" :obj]})
+
+(def bk-test2 (dm-dosync (bk-get-map "bktest2")))
+
+(dm-dosync (bk-insert bk-test2 {:key [1 1 2 3 5 8]
+                                :any-key "xyz"}))
+
+(dm-dosync (bk-test2 [1 1 2 3 5 8]))
+
+(dm-dosync (bk-update bk-test2 [1 1 2 3 5 8] assoc :up :date))
+

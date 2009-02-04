@@ -1,6 +1,21 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  x durable-maps writer thread needs to handle being disconnected from
+    the server
+  - sql needs to handle being disconnected from the server
+    - sql/get-db to replace DriverManager/getConnection
+      - Returns a ref to a db handle for now
+    - In sql, catch any exception by trying once to reopen the
+      connection; if that fails, then die
+      > com.mysql.jdbc.CommunicationsException isa
+        java.sql.SQLException
+      + get-sql-conn => *db*
+      - Store number of failures in connection object
+        - inc-in
+      - Change run-stmt!
+        - Retry until number of failures > 20
+      - Change get-query
   - Make the bad ideas go away in world-server.clj
     - Get rid of load-node
     - Pretty much any commute/alter is to be replaced
