@@ -1,23 +1,10 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  x durable-maps writer thread needs to handle being disconnected from
-    the server
-  - sql needs to handle being disconnected from the server
-    - sql/get-db to replace DriverManager/getConnection
-      - Returns a ref to a db handle for now
-    - In sql, catch any exception by trying once to reopen the
-      connection; if that fails, then die
-      > com.mysql.jdbc.CommunicationsException isa
-        java.sql.SQLException
-      + get-sql-conn => *db*
-      - Store number of failures in connection object
-        - inc-in
-      - Change run-stmt!
-        - Retry until number of failures > 20
-      - Change get-query
+  - Try queries in setup-data again tomorrow; see whether connection
+    has been dropped
   - Make the bad ideas go away in world-server.clj
-    - Get rid of load-node
+    + Get rid of load-node
     - Pretty much any commute/alter is to be replaced
       > Keeping *avatars* as it is, since it refers to a session
         object
@@ -30,12 +17,6 @@
         + bigkey_dm.clj
           + *bk-maps* is bigkey-dm/mbk-maps
           + md5-munger
-  - Test bkm further
-    + Test bk-update
-      + dm-update seems to make a complete mess of @:write
-    - Create a map with a contrived munger that guarantees everything
-      goes in the same row
-    - Verify that the above map still behaves correctly
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a
@@ -434,6 +415,28 @@
               > Worse, they might cache out-of-date values
               > Maybe the answer is to just allow a single view of
                 every table and intern table-map per tablename
+  x durable-maps writer thread needs to handle being disconnected from
+    the server
+  + sql needs to handle being disconnected from the server
+    + sql/get-db to replace DriverManager/getConnection
+      + Returns a ref to a db handle for now
+    + In sql, catch any exception by trying once to reopen the
+      connection; if that fails, then die
+      > com.mysql.jdbc.CommunicationsException isa
+        java.sql.SQLException
+      + get-sql-conn => *db*
+      + Store number of failures in connection object
+        + inc-in
+      + Change run-stmt!
+        + Retry until number of failures > 10
+      + Change get-query
+  + Test bkm further
+    + Test bk-update
+      + dm-update seems to make a complete mess of @:write
+    + Create a map with a contrived munger that guarantees everything
+      goes in the same row
+      > Or 1/16 times
+    + Verify that the above map still behaves correctly
 
 ------------------------------------------------------------------------
 - To do for 0.03:

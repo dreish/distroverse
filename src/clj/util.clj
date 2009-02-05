@@ -64,9 +64,15 @@
     [bytes]
     (if bytes
       (let [fb (first bytes)
-            hn (quot (bit-and fb 240) 16)
-            ln (bit-and fb 15)]
-        (cons (nybs hn)
-              (lazy-cons (nybs ln)
+            high-nyb (quot (bit-and fb 240) 16)
+            low-nyb  (bit-and fb 15)]
+        (cons (nybs high-nyb)
+              (lazy-cons (nybs low-nyb)
                          (hex-encode-bytes (rest bytes))))))))
 
+
+(defn inc-in
+  "Return the given hash with the given field incremented."
+  [h field]
+  (assoc h
+    field (inc (h field))))

@@ -30,7 +30,8 @@
 ;; </copyleft>
 
 (ns sql
-  (:use clojure.contrib.def))
+  (:use clojure.contrib.def
+        util))
 
 (defvar- debug-prn prn)
 ;(defn- debug-prn [& args] nil)
@@ -83,22 +84,26 @@
     (vec (map #(.getColumnName rsmeta %)
               (range 1 (inc (.getColumnCount rsmeta)))))))
 
-(defn- in-retry-loop
+(defn- in-sql-retry-loop
   "Call f in a loop, bumping (conn :fails), attempting to reestablish
   the connection, and recurring if :fails < 20, each time f throws an
   exception, and returning if it doesn't."
   [conn f]
-  (try
-   (f)
-   (catch Exception e
-     (swap! conn inc-in :fails)
-     (if (< (@conn :fails) 10)
-       (do
-         (swap! conn assoc
-                :conn (java.sql.DriverManager/getConnection
-                       (@conn :str)))
-         (recur conn f))
-       (throw e)))))
+  (let [result (try
+                [(f)]
+                (catch Exception e
+                  e))]
+    (if (instance? Exception result)
+      (do
+        (swap! conn inc-in :fails)
+        (if (< (@conn :fails) 10)
+          (do
+            (swap! conn assoc
+                   :conn (java.sql.DriverManager/getConnection
+                          (@conn :str)))
+            (recur conn f))
+          (throw result)))
+      (first result))))
 
 (defn get-query
   "Run a query with results, and return the results as a hash in
@@ -110,9 +115,9 @@
 
   ([conn q pvals]
      (debug-prn (symbol "Getting query:") q (symbol "::") pvals)
-     (in-retry-loop
+     (in-sql-retry-loop
         conn
-        #(with-open [s (fill-placeholders conn q pvals)]
+        #(with-open [s (fill-placeholders (@conn :conn) q pvals)]
              (let [rs (.executeQuery s)
                    colnames (column-names rs)
                    rsv (rs-vec rs)]
@@ -129,8 +134,8 @@
 
   ([conn q pvals]
      (debug-prn (symbol "Running query:") q (symbol "::") pvals)
-     (in-retry-loop
+     (in-sql-retry-loop
         conn
-        #(with-open [s (fill-placeholders conn q pvals)]
+        #(with-open [s (fill-placeholders (@conn :conn) q pvals)]
              (.executeUpdate s)))))
   

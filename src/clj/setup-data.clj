@@ -41,19 +41,24 @@
 
 
 
-(bk-create-map! "bktest2"
+(bk-create-map! "bktest3"
                 {:abstract-keycol :key
                   ; md5 is only 32 chars; oops
-                 :key-munger `#(md5-munger 1)
+                 :key-munger `(md5-munger 1)
                  :key-type ["CHAR(1)" :str]
                  :val-type ["MEDIUMTEXT" :obj]})
 
-(def bk-test2 (dm-dosync (bk-get-map "bktest2")))
+(def bk-test3 (dm-dosync (bk-get-map "bktest3")))
 
-(dm-dosync (bk-insert bk-test2 {:key [1 1 2 3 5 8]
+(dm-dosync (bk-insert bk-test3 {:key [1 1 2 3 5 8]
                                 :any-key "xyz"}))
 
-(dm-dosync (bk-test2 [1 1 2 3 5 8]))
+(dm-dosync (bk-test3 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test2 [1 1 2 3 5 8] assoc :up :date))
+(dm-dosync (bk-update bk-test3 [1 1 2 3 5 8] assoc :up :date))
+
+(dm-dosync (bk-insert bk-test3 {:key [1 1 2 3 5 8 4]
+                                :any-key "xyz again"}))
+
+(dm-dosync (bk-test3 [1 1 2 3 5 8 4]))
 
