@@ -1,22 +1,6 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Try queries in setup-data again tomorrow; see whether connection
-    has been dropped
-  - Make the bad ideas go away in world-server.clj
-    + Get rid of load-node
-    - Pretty much any commute/alter is to be replaced
-      > Keeping *avatars* as it is, since it refers to a session
-        object
-    - And almost any dosync (except with *avatars*)
-    + What will *key-to-id* look like?  If the public key goes into a
-      text field, it can't be a primary key*
-      > *not without significant and annoying limitations, at least
-      + Primary key is md5/sha1 of public key, val is hash of public
-        key to ID
-        + bigkey_dm.clj
-          + *bk-maps* is bigkey-dm/mbk-maps
-          + md5-munger
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a
@@ -437,6 +421,22 @@
       goes in the same row
       > Or 1/16 times
     + Verify that the above map still behaves correctly
+  + Make the bad ideas go away in world-server.clj
+    + Get rid of load-node
+    + Pretty much any commute/alter is to be replaced
+      > Keeping *avatars* as it is, since it refers to a session
+        object
+    + And almost any dosync (except with *avatars*)
+    + What will *key-to-id* look like?  If the public key goes into a
+      text field, it can't be a primary key*
+      > *not without significant and annoying limitations, at least
+      + Primary key is md5/sha1 of public key, val is hash of public
+        key to ID
+        + bigkey_dm.clj
+          + *bk-maps* is bigkey-dm/mbk-maps
+          + md5-munger
+  + Try queries in setup-data again tomorrow; see whether connection
+    has been dropped
 
 ------------------------------------------------------------------------
 - To do for 0.03:

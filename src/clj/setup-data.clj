@@ -55,7 +55,7 @@
 
 (dm-dosync (bk-test3 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test3 [1 1 2 3 5 8] assoc :up :date))
+(dm-dosync (bk-update bk-test3 [1 1 2 3 5 8] assoc :up :down))
 
 (dm-dosync (bk-insert bk-test3 {:key [1 1 2 3 5 8 4]
                                 :any-key "xyz again"}))

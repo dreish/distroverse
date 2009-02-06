@@ -82,7 +82,7 @@
 
 (defn add-object [node move shape]
   "Add shape as a child of node, with move move."
-  (dosync
+  (dm-dosync
    ; XXX
   ))
 
@@ -123,12 +123,7 @@
 	 (dm-insert *key-to-id* {:key (id :pubkey),
                                  :id new-userid})
 	 (dm-insert *userdata* (skel-user id new-userid))
-	 (alter att assoc :userid new-userid)
-	 (db-run :insert :into "userdata"
-		 :object (@*userdata* new-userid))
-	 (db-run :insert :into "userids"
-		 :object {:pubkey (id :pubkey)
-			  :userid new-userid}))))))
+	 (alter att assoc :userid new-userid))))))
 
 (defn get-id [dvtp-id]
   (let [val (.getVal dvtp-id)]
@@ -168,12 +163,12 @@
   return false."
   (let [matcher   (trim-to-matcher ob)
 	callbacks (@att :callbacks)]
-    (if-let callback! (@callbacks matcher)
-      (if (callback!)
-	(dosync
-	 (alter callbacks dissoc matcher)
-	 true)
-	false))))
+    (if-let [callback! (@callbacks matcher)]
+        (if (callback!)
+          (dosync
+           (alter callbacks dissoc matcher)
+           true)
+          false))))
 
 (defn handle-standard! [session att ob]
   "Handle the given message using a standard, fixed code map, and
