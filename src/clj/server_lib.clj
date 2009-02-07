@@ -30,10 +30,13 @@
 ;; </copyleft>
 
 (ns server-lib
-  (:use util))
+  (:use util
+        clojure.contrib.def))
 
 (import '(com.jme.math Quaternion Vector3f))
-(import '(org.distroverse.dvtp Quat Vec Move MoveSeq))
+(import '(org.distroverse.dvtp Quat Vec Move MoveSeq AskInv ReplyInv
+                               GetCookie Cookie FunCall FunRet))
+(import '(org.distroverse.core.net NetSession))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,14 +73,14 @@
 
 ; Communications functions
 
-(def response-map
+(defvar response-map
+  {AskInv       #(ReplyInv. (.getKey %)),
+   GetCookie    #(Cookie. (.getKey %)),
+   FunCall      #(FunRet. (.getContents % 0))}
   "Defines the classes that are expected in response to each message
   class, and a vector of methods to call on the message object to
   build up a list of arguments to pass to a constructor for the
-  response class to make a matcher object."
-  {AskInv       #(ReplyInv. (.getKey %)),
-   GetCookie    #(Cookie. (.getKey %)),
-   FunCall      #(FunRet. (.getContents % 0))})
+  response class to make a matcher object.")
 
 (defn lookup-response-func [message]
   "Lookup a response matcher to the given message.  Throws an exception
@@ -87,11 +90,7 @@
       (response-code message)
       (throw (Exception. (str "No response to " (class message)))))))
 
-(def message-set
-  "Lists the constructors of DvtpExternalizable classes that either
-  are messages sent by this server, or are components of those
-  messages.  (Additional classes not included in this description may
-  also be listed.)"
+(defvar message-set
   #{'AddObject.	'AskInv.	'Blob.	'ClearShape.	'Click.
     'Click2.	'Cookie.	'DLong.	'DNode.	'DNodeRef.
     'Dict.	'Frac.	'GetCookie.	'Real.	'ReparentObject.
@@ -101,11 +100,16 @@
     'FunRet.	'KeyDown.	'KeyUp.	'Keystroke.	'MoreDetail.
     'Move.	'MoveObject.	'MoveSeq.	'Pair.	'PointArray.
     'ProxySpec.	'Quat.	'RedirectUrl.	'SetUrl.	'Shape.
-    'Str.	'True.	'Vec.	'Warp.	'WarpObject.	'WarpSeq.})
+    'Str.	'True.	'Vec.	'Warp.	'WarpObject.	'WarpSeq.}
+  "Lists the constructors of DvtpExternalizable classes that either
+  are messages sent by this server, or are components of those
+  messages.  (Additional classes not included in this description may
+  also be listed.)")
 
 (defmacro import-dvtp
   "Import all DVTP classes that might be used by the server."
-  (let [classes (map #(-> % name seq drop-last (apply str _) symbol)
+  []
+  (let [classes (map #(+> % name seq drop-last (apply str _) symbol)
                      message-set)]
     `(import '(org.distroverse.dvtp ~@classes))))
 
@@ -175,14 +179,16 @@
   "Creates a stationary MoveSeq for the given coordinates, which may
   be given as three arguments, or as a list of three numbers, or two
   lists, the second one being four numbers defining a quaternion."
-
   ([[x y z] [qw qx qy qz]]
-     (MoveSeq. (Move. (Vec. (Vector3f. x y z))
-		      (Quat. (Quaternion. qw qx qy qz)))))
-
+     (MoveSeq. (Move/getNew (Vec. (Vector3f. (float x)
+                                             (float y)
+                                             (float z)))
+                            (Quat. (Quaternion. (float qw)
+                                                (float qx)
+                                                (float qy)
+                                                (float qz))))))
   ([s]
      (pos-to-moveseq s [0 0 0 1]))
-
   ([x y z]
      (pos-to-moveseq [x y z])))
 
@@ -190,6 +196,6 @@
   "Creates a stationary MoveSeq for the given coordinates and
   Quaternion."
   ([[x y z] #^Quaternion q]
-     (MoveSeq. (Move. (Vec. (Vector3f x y z))
-		      (Quat. q)))))
+     (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
+                            (Quat. q)))))
 

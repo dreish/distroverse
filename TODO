@@ -1,6 +1,8 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - Get def-universe working
+    - Universe spec is a list; use rest, not :subspec
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible
@@ -441,6 +443,7 @@
           + md5-munger
   + Try queries in setup-data again tomorrow; see whether connection
     has been dropped
+  + Change custom -> to +>
 
 ------------------------------------------------------------------------
 - To do for 0.03:

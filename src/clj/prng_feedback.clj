@@ -39,8 +39,9 @@
 ; immutable data structures, I don't want copy-modification to entail
 ; copying large amounts of state.
 
+(ns prng-feedback
+  (:use clojure.contrib.def))
 (import '(org.distroverse.core PrngSslfsr))
-(use 'clojure.contrib.def)
 
 (defvar- hex3ff0000000000000 (long 4607182418800017408)
   "The sign and exponent constants for IEEE 754 doubles between 1 and

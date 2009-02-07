@@ -70,9 +70,26 @@
               (lazy-cons (nybs low-nyb)
                          (hex-encode-bytes (rest bytes))))))))
 
-
 (defn inc-in
   "Return the given hash with the given field incremented."
   [h field]
   (assoc h
     field (inc (h field))))
+
+(defmacro +>
+  "Threads the expr through the forms. Inserts x as the
+  second item in the first form, making a list of it if it is not a
+  list already. If there are more forms, inserts the first form as the
+  second item in second form, etc.  For any form containing an
+  underscore, the preceding form is inserted at that position."
+  ([x form]
+     (if (and (seq? form) (not= (first form) 'fn*))
+       (if (some #(= % '_) form)
+         `(~@(take-while #(not= % '_) form)
+           ~x
+           ~@(rest (drop-while #(not= % '_) form)))
+         `(~(first form) ~x ~@(rest form)))
+       (list form x)))
+  ([x form & more]
+     `(+> (+> ~x ~form) ~@more)))
+

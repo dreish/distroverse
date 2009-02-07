@@ -34,11 +34,16 @@
 
 (ns def-universe
   (:use server-lib
-        prng-feedback))
+        prng-feedback
+        clojure.contrib.def))
 
-(defn subseed [parent subnode-index]
+(import '(com.jme.math Quaternion Vector3f))
+
+
+(defn subseed
   "Return a new seed for the node described by parent and
   subnode-index."
+  [parent subnode-index]
   (let [pshift   (parent :seed-mutation-shift)
 	sshift   (-> pshift (+ 4) (rem 59))
 	pseed    (parent :seed)
@@ -64,9 +69,10 @@
   (apply lognormal-rand (feedback-normal-seq seed)
 	 (map spec '(:log-avg-size :log-std-dev :log-max-size))))
 
-(defn random-quat [seed]
+(defn random-quat
   "Returns a uniformly-distributed random orientation, as a
   Quaternion."
+  [seed]
   (let [[x y z] (take 3 (feedback-normal-seq seed))
 	rot (first (feedback-float-seq (inc seed)))
 	theta (* rot 2 Math/PI)
@@ -76,35 +82,39 @@
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
-(defn new-gen-node [parent spec subnode-index seed r move]
+(defn- new-gen-node [parent spec subnode-index seed r moveseq]
+  "Return a new ephemeral node for the given parameters."
   {:name (spec :name)
    :generator (spec :generator)
    :radius r
    :seed seed
-   :move move
+   :moveseq moveseq
    :ephemeral true
    :seed-mutation-shift (-> (parent :seed-mutation-shift)
-			    inc (rem 60))
+			    (+ 4)
+                            (rem 59))
    })
 
-(defn new-top-gen-node [parent spec pos subnode-index]
+(defn new-top-gen-node
   "Returns a new highest-level node for a given layer spec."
+  [parent spec pos subnode-index]
   (let [seed (subseed parent subnode-index)
 	r    (pick-radius spec (inc seed))]
     (new-gen-node parent spec subnode-index seed r
 		  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
 
-(defn new-sub-gen-node [parent spec pos subnode-index r]
+(defn new-sub-gen-node
   "Returns a new highest-level node for a given layer spec."
+  [parent spec pos subnode-index r]
   (let [seed (subseed parent subnode-index)]
     (new-gen-node parent spec subnode-index seed r
 		  (pos-to-moveseq pos))))
 
-(defn pseudorandom-pos [coord-scalars skews
-			[unused-size offset-factor rand-factor]
-			radius prngs]
+(defn pseudorandom-pos
   "Generate a reproduceable pseudorandom location for a new subnode.
   Returns coordinates as a sequence: (x y z)."
+  [coord-scalars [unused-size offset-factor rand-factor]
+   skews radius prngs]
   (let [offset (* offset-factor radius)
 	rand-scale (* rand-factor radius)]
     (map (fn [rng scalar skew]
@@ -115,8 +125,9 @@
 	 coord-scalars
 	 skews)))
 
-(defn gen-fractalplace [parent spec]
+(defn gen-fractalplace
   "Returns a sequence of 8 subnodes for the given parent node."
+  [parent spec]
   (let [parent-layer (parent :layer)
 	parent-rad   (parent :radius)
 	layer-spec   (spec parent-layer)
@@ -133,15 +144,22 @@
 	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]
 		(list xo yo zo))
 	      (repeat (or (parent :dim-skew) [1 1 1]))
-	      (repeat strucure)
+	      (repeat structure)
 	      (repeat parent-rad)
 	      (partition 3 (feedback-float-seq (parent :seed))))
 	 (range 1 9))))
 
-(defn- check-structure [s]
+(defn gen-starsystem
+  []
+  ""
+  ; XXX
+  )
+
+(defn- check-structure
   "Throws an exception if the structure constants would violate the
   rule that all subnodes of a parent node must fit within the parent
   node."
+  [s]
   (let [[size offset randfactor] s
 	totaloffset (+ offset (/ randfactor 2))
 	maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
@@ -152,18 +170,31 @@
 			      (with-out-str
 			       (prn (map #(/ % maxdistance) s)))))))))
 
-(defn new-universe-spec [& layer-specs]
+(defn new-universe-spec
   "Returns a vector containing the given layer specs, each one a hash,
   adding a :subspec key in each spec that maps to the one after it (or
   nil in the last layer spec)."
+  [& layer-specs]
   (map #(do
 	  (check-structure ((first %) :structure))
 	  (assoc (first %)
+            ; XXX I don't think this actually nests them all.
 	    :subspec (second %)
 	    :subscale (if (second %)
 			(* (Math/exp (:log-max-size (second %)))
 			   ((:structure (first %)) 0)))))
        (rests layer-specs)))
+
+(defn new-universe
+  "Generate a new top node for the given universe-spec and random
+  seed.  N.B.: returns an ephemeral node."
+  [spec seed]
+  (new-gen-node {:seed-mutation-shift 0}
+                (first spec)
+                0
+                seed
+                (-> (spec 0) :log-max-size Math/exp)
+                (pos-to-moveseq [0 0 0]))) 
 
 (defvar universe-spec
   (new-universe-spec
