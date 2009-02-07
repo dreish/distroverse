@@ -29,6 +29,9 @@
 
 ;; </copyleft>
 
+(ns server-lib
+  (:use util))
+
 (import '(com.jme.math Quaternion Vector3f))
 (import '(org.distroverse.dvtp Quat Vec Move MoveSeq))
 
@@ -99,6 +102,12 @@
     'Move.	'MoveObject.	'MoveSeq.	'Pair.	'PointArray.
     'ProxySpec.	'Quat.	'RedirectUrl.	'SetUrl.	'Shape.
     'Str.	'True.	'Vec.	'Warp.	'WarpObject.	'WarpSeq.})
+
+(defmacro import-dvtp
+  "Import all DVTP classes that might be used by the server."
+  (let [classes (map #(-> % name seq drop-last (apply str _) symbol)
+                     message-set)]
+    `(import '(org.distroverse.dvtp ~@classes))))
 
 (defn const-message? [mc]
   "Is the message object described by the given code completely

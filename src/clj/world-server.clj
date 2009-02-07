@@ -29,11 +29,12 @@
 
 ;; </copyleft>
 
-(import '(org.distroverse.dvtp Str Err))
 (use 'server-lib)
 (use 'clojure.contrib.def)
 (use 'durable-maps)
 (use 'bigkey-dm)
+(use 'def-universe)
+(import-dtvp)
 
 (defvar *key-to-id* (bk-get-map "key-to-id")
   "Map of public keys to userid numbers")

@@ -1,6 +1,10 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - Send surroundings from server to proxy
+    - Set initial detail level -- -10
+    - Starting from avatar's parent node, find and send all visible
+      nodes
   - node_tree.clj (ns node-tree)
     x durable-maps/dm-annotate
       x Add impermanent things to a map val (without generating a
@@ -480,6 +484,12 @@
   - Server
     - Group dm transactions into SQL transactions
     - Call dm callbacks after SQL transaction finishes
+    - Clean up idle nodes
+      - Maintain a separate map in memory of the last-read times for
+        each node; this could be a wrapper around dm
+      - Add is-loaded to the API; use that while hunting for nodes to
+        dump to avoid attempting to access (and thus load) unloaded
+        nodes
 
 ------------------------------------------------------------------------
 - Future:
@@ -487,6 +497,7 @@
     - If write has a :callback, call it with true if query performed,
       false if canceled
       - send for :callback, send-off for :callback-off
+  - Make dm-insert and bk-insert, etc., multimethods
   - Server for mass-audience events:
     - Performance recorded on a short delay in an arena with no audience
     - Performance encoded into a series of semi-large packages of

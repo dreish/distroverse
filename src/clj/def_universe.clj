@@ -32,14 +32,15 @@
 
 ; Generate a universe node tree from a random seed
 
-(use 'server-lib)
-(use 'prng-feedback)
+(ns def-universe
+  (:use server-lib
+        prng-feedback))
 
 (defn subseed [parent subnode-index]
   "Return a new seed for the node described by parent and
   subnode-index."
   (let [pshift   (parent :seed-mutation-shift)
-	sshift   (-> pshift inc (rem 60))
+	sshift   (-> pshift (+ 4) (rem 59))
 	pseed    (parent :seed)
 	mutation (bit-shift-left (+ 1 subnode-index) sshift)
 	seedseed (bit-xor pseed mutation)]
@@ -49,11 +50,9 @@
   "Takes a normal sequence and a couple of base-e scale
   parameters (and an optional ln max) and returns a lognormal
   sequence."
-
   ([randseq log-avg log-std-dev]
      (map #(-> % (* log-std-dev) (+ log-avg) Math/exp float)
 	  randseq))
-
   ([randseq log-avg log-std-dev log-max]
      (if log-max
        (let [max (float (Math/exp log-max))]
