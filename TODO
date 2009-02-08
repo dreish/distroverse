@@ -1,8 +1,8 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Get def-universe working
-    - Universe spec is a list; use rest, not :subspec
+  - Change references to CPL to cover any OSDL-approved license
+  - *avatars* should be permanent after all
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible
@@ -21,6 +21,8 @@
         the table, these refs might become invalid
     > The answer for now is almost certainly to just not try to cache
       any links
+    - (nodes-within relative-node-id pos radius)
+    - (nodes-touching relative-node-id pos radius)
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -444,6 +446,18 @@
   + Try queries in setup-data again tomorrow; see whether connection
     has been dropped
   + Change custom -> to +>
+  + Get def-universe working
+    + Universe spec is a list; use rest, not :subspec
+      + Which means universe-spec, aside from not being true to its
+        docstring, is now just a check-structure and an identity
+        + Actually, I do need to fill in :subscale
+      x Replace all references to subspec to rest
+        > Was not using it anywhere
+      + Actually, I am using it as a vector; return a vector
+      x Replace all references to spec to use first
+    + new-universe
+      + pick-radius is blowing up
+      + Spec needs a :layer
 
 ------------------------------------------------------------------------
 - To do for 0.03:

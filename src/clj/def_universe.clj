@@ -49,7 +49,7 @@
 	pseed    (parent :seed)
 	mutation (bit-shift-left (+ 1 subnode-index) sshift)
 	seedseed (bit-xor pseed mutation)]
-    (long (first (prng-long-seq seedseed)))))
+    (long (first (feedback-long-seq seedseed)))))
 
 (defn lognormal-rand
   "Takes a normal sequence and a couple of base-e scale
@@ -66,8 +66,9 @@
        (lognormal-rand randseq log-avg log-std-dev))))
 
 (defn pick-radius [spec seed]
-  (apply lognormal-rand (feedback-normal-seq seed)
-	 (map spec '(:log-avg-size :log-std-dev :log-max-size))))
+  (first
+   (apply lognormal-rand (feedback-normal-seq seed)
+          (map spec '(:log-avg-size :log-std-dev :log-max-size)))))
 
 (defn random-quat
   "Returns a uniformly-distributed random orientation, as a
@@ -86,6 +87,7 @@
   "Return a new ephemeral node for the given parameters."
   {:name (spec :name)
    :generator (spec :generator)
+   :layer (spec :layer)
    :radius r
    :seed seed
    :moveseq moveseq
@@ -137,7 +139,7 @@
 	next-layer?  (< my-radius (layer-spec :subscale))
 	subnode-gen
 	  (if next-layer?
-	    #(new-top-gen-node parent (spec (dec parent-layer)) %1 %2)
+	    #(new-top-gen-node parent (spec (inc parent-layer)) %1 %2)
 	    #(new-sub-gen-node parent layer-spec %1 %2 my-radius))]
     (map subnode-gen
 	 (map pseudorandom-pos
@@ -159,31 +161,36 @@
   "Throws an exception if the structure constants would violate the
   rule that all subnodes of a parent node must fit within the parent
   node."
-  [s]
+  [s name]
   (let [[size offset randfactor] s
 	totaloffset (+ offset (/ randfactor 2))
 	maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
 		       size)]
     (if (> maxdistance 1.0)
-      (throw (Exception. (str "Structure too big by a factor of "
+      (throw (Exception. (str name " structure too big by a factor of "
 			      maxdistance ", try "
 			      (with-out-str
 			       (prn (map #(/ % maxdistance) s)))))))))
 
 (defn new-universe-spec
-  "Returns a vector containing the given layer specs, each one a hash,
-  adding a :subspec key in each spec that maps to the one after it (or
-  nil in the last layer spec)."
+  "Returns a seq containing the given layer specs, each one a hash,
+  adding a :subscale key in each spec that gives the size threshhold
+  at which the next layer should be used (or 0 in the last layer
+  spec)."
   [& layer-specs]
-  (map #(do
-	  (check-structure ((first %) :structure))
-	  (assoc (first %)
-            ; XXX I don't think this actually nests them all.
-	    :subspec (second %)
-	    :subscale (if (second %)
-			(* (Math/exp (:log-max-size (second %)))
-			   ((:structure (first %)) 0)))))
-       (rests layer-specs)))
+  (do
+    (dorun (map #(if (= gen-fractalplace (% :generator))
+                   (check-structure (% :structure) (% :name)))
+                layer-specs))
+    (into []
+          (map #(assoc (first %1)
+                  :subscale (if (second %1)
+                              (* (Math/exp (:log-max-size (second %)))
+                                 ((:structure (first %1)) 0))
+                              0)
+                  :layer %2)
+               (rests layer-specs)
+               (iterate inc 0)))))
 
 (defn new-universe
   "Generate a new top node for the given universe-spec and random
@@ -193,8 +200,8 @@
                 (first spec)
                 0
                 seed
-                (-> (spec 0) :log-max-size Math/exp)
-                (pos-to-moveseq [0 0 0]))) 
+                (pick-radius (spec 0) (inc seed))
+                (pos-to-moveseq [0 0 0])))
 
 (defvar universe-spec
   (new-universe-spec
@@ -233,7 +240,7 @@
     :rot-axis      [1 0 1],
     :avg-rot-speed 8.732015e-16      ; radians per second
     :dim-skew      [1 0.1 1],        ; y-dim is 1/10 x- and z-dims
-    :structure     [0.4344 0.2177 0.2177],
+    :structure     [0.43439 0.21769 0.21769],
     }
 
    {:name          "starsystem",
