@@ -3,6 +3,8 @@
 - To do for 0.02:
   - Change references to CPL to cover any OSDL-approved license
   - *avatars* should be permanent after all
+    > Don't want a server reboot to leave a bunch of statues all over
+      the place
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible
@@ -21,6 +23,12 @@
         the table, these refs might become invalid
     > The answer for now is almost certainly to just not try to cache
       any links
+    - (search-nodes start-node include? descend? ascend?)
+      - Conditional needs to transform as the tree is traversed
+        - Or, conditionals get called with an accumulated
+          transformation to convert a vector relative to the
+          start-node to one relative to the current node
+      - Return child nodes first
     - (nodes-within relative-node-id pos radius)
     - (nodes-touching relative-node-id pos radius)
   - Add a FengGUI location bar
