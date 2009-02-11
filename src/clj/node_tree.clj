@@ -43,17 +43,21 @@
 (defvar *id-to-node* (dm-get-map "id-to-node")
   "Maps node IDs to nodes.")
 
+(def zero-vec (Vector3f. 0 0 0))
+
 (def get-node *id-to-node*)
 
+(def get-radius :radius)
+
 (defn parent-of
-  "Return the parent node of the given node"
+  "Returns the parent node of the given node"
   [n]
   (if (n :ephemeral)
     nil  ; XXX
     (get-node (n :parent))))
 
 (defn children-of
-  "Returns a lazy seq of the children of the given node"
+  "Returns a lazy seq of the immediate children of the given node."
   [n]
   (if (n :ephemeral)
     nil  ; XXX
@@ -70,7 +74,7 @@
   )
 
 (defn search-nodes
-  "Traverse nodes connected to the given start node, returning a lazy
+  "Traverses nodes connected to the given start node, returning a lazy
   sequence of search results, using the given conditional functions,
   called with the node in question and a transformation function to
   convert a vector relative to start-node to a vector relative to the
@@ -108,29 +112,33 @@
                              parent-transformer))))))))
 
 (defn is-within
-  "Return a function of two args, a node and a transformation
+  "Returns a function of two args, a node and a transformation
   function, that will return logical true for nodes that lie entirely
   within the sphere defined by the given position and radius."
   [pos radius]
   (fn [node transformation]
-    
-    ))
+    (let [my-pos (transformation pos)
+          node-radius (get-radius node)
+          distance (vec-abs my-pos)
+          covered-radius (- radius distance)]
+      (> covered-radius node-radius))))
 
 (defn is-intersecting
-  "Return a function of two args, a node and a transformation
+  "Returns a function of two args, a node and a transformation
   function, that will return logical true for nodes that overlap the
   sphere defined by the given position and radius."
   [pos radius]
   (fn [node transformation]
-    
-    ))
+    (let [my-pos (transformation pos)
+          node-radius (get-radius node)
+          distance (vec-abs my-pos)
+          reach (+ radius node-radius)]
+      (> reach distance))))
 
 (defn nodes-within
-  "Return a seq of IDs of nodes contained entirely within the area
+  "Returns a seq of IDs of nodes contained entirely within the area
   given as a vector offset relative to a given node, and a spherical
-  radius.  An optional fourth argument gives a node ID of one of the
-  children of rel-node-id, or the parent node, that should not be
-  searched."
+  radius."
   [rel-node-id #^Vector3f pos radius]
   (search-nodes
     (get-node rel-node-id)
@@ -139,15 +147,24 @@
     (constantly true)))
 
 (defn nodes-within-and-under
-  "Return a seq of IDs of nodes contained entirely within the area
+  "Returns a seq of IDs of nodes contained entirely within the area
   given as a vector offset relative to a given node, and a spherical
-  radius, that are children of or equal to that node.  An optional
-  fourth argument gives a node ID of one of the children of
-  rel-node-id, or the parent node, that should not be searched."
+  radius, that are children of or equal to that node."
   [rel-node-id #^Vector3f pos radius]
   (search-nodes
     (get-node rel-node-id)
     (is-within pos radius)
     (is-intersecting pos radius)
     (constantly false)))
+
+(defn nodes-touching
+  "Returns a seq of IDs of nodes contained partially or entirely
+  within the area given as a vector offset relative to a given node,
+  and a spherical radius."
+  [rel-node-id #^Vector3f pos radius]
+  (search-nodes
+    (get-node rel-node-id)
+    (is-intersecting pos radius)
+    (is-intersecting pos radius)
+    (constantly true)))
 
