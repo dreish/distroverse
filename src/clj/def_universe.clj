@@ -83,11 +83,12 @@
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
-(defn- new-gen-node [parent spec subnode-index seed r moveseq]
+(defn- new-gen-node [parent spec lspec subnode-index seed r moveseq]
   "Return a new ephemeral node for the given parameters."
-  {:name (spec :name)
-   :generator (spec :generator)
-   :layer (spec :layer)
+  {:name (lspec :name)
+   :generator (lspec :generator)
+   :layer (lspec :layer)
+   :spec spec
    :radius r
    :seed seed
    :moveseq moveseq
@@ -99,17 +100,17 @@
 
 (defn new-top-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent spec pos subnode-index]
+  [parent spec lspec pos subnode-index]
   (let [seed (subseed parent subnode-index)
-	r    (pick-radius spec (inc seed))]
-    (new-gen-node parent spec subnode-index seed r
+	r    (pick-radius lspec (inc seed))]
+    (new-gen-node parent spec lspec subnode-index seed r
 		  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
 
 (defn new-sub-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent spec pos subnode-index r]
+  [parent spec lspec pos subnode-index r]
   (let [seed (subseed parent subnode-index)]
-    (new-gen-node parent spec subnode-index seed r
+    (new-gen-node parent spec lspec subnode-index seed r
 		  (pos-to-moveseq pos))))
 
 (defn pseudorandom-pos
@@ -139,8 +140,8 @@
 	next-layer?  (< my-radius (layer-spec :subscale))
 	subnode-gen
 	  (if next-layer?
-	    #(new-top-gen-node parent (spec (inc parent-layer)) %1 %2)
-	    #(new-sub-gen-node parent layer-spec %1 %2 my-radius))]
+	    #(new-top-gen-node parent spec (spec (inc parent-layer)) %1 %2)
+	    #(new-sub-gen-node parent spec layer-spec %1 %2 my-radius))]
     (map subnode-gen
 	 (map pseudorandom-pos
 	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]
@@ -150,6 +151,13 @@
 	      (repeat parent-rad)
 	      (partition 3 (feedback-float-seq (parent :seed))))
 	 (range 1 9))))
+
+(defn gen-children
+  "Return a lazy seq of the children of the given ephemeral node."
+  [n]
+  (let [gen (n :generator)
+        spec (n :spec)]
+    (gen n spec)))
 
 (defn gen-starsystem
   []

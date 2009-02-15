@@ -36,7 +36,8 @@
   (:use server-lib
         clojure.contrib.def
         durable-maps
-        bigkey-dm))
+        bigkey-dm
+        def-universe))
 
 (import '(com.jme.math Quaternion Vector3f))
 
@@ -53,25 +54,33 @@
   "Returns the parent node of the given node"
   [n]
   (if (n :ephemeral)
-    nil  ; XXX
+    nil  ; XXX this might be hard
     (get-node (n :parent))))
 
 (defn children-of
   "Returns a lazy seq of the immediate children of the given node."
   [n]
   (if (n :ephemeral)
-    nil  ; XXX
+    (gen-children n)
     (map get-node (n :children))))
 
 (defn add-to-transformer
-  [n transformer]
-  ; XXX
-  )
+  "Add the position of the given node relative to its parent to the
+  given vector transformation function, returning a new vector
+  transformation function."
+  [transformer n]
+  (let [pos (node-pos n now)
+        pos-xformed (transformer pos)]
+    (new-transformer pos-xformed)))
 
 (defn sub-from-transformer
-  [n transformer]
-  ; XXX
-  )
+  "Subtract the position of the given node relative to its parent to
+  the given vector transformation function, returning a new vector
+  transformation function."
+  [transformer n]
+  (let [pos (node-pos n now)
+        pos-xformed (vec-rev (transformer (vec-rev pos)))]
+    (new-transformer pos-xformed)))
 
 (defn search-nodes
   "Traverses nodes connected to the given start node, returning a lazy
@@ -135,6 +144,34 @@
           reach (+ radius node-radius)]
       (> reach distance))))
 
+(defn is-containing
+  "Returns a function of two args, a node and a transformation
+  function, that will return logical true for nodes that overlap the
+  sphere defined by the given position and radius."
+  [pos radius]
+  (fn [node transformation]
+    (let [my-pos (transformation pos)
+          node-radius (get-radius node)
+          distance (vec-abs my-pos)
+          covered-radius (- node-radius distance)]
+      (> covered-radius radius))))
+
+(defn smallest-node
+  "Returns the node with the smallest size from the given seq of
+  nodes."
+  [node-seq]
+  ; Too tired to think of the one-liner.  I'm sure it's obvious.
+  (loop [s (rest node-seq)
+         smallest (first node-seq)
+         smallest-size (get-radius smallest)]
+    (if (nil? s)
+      smallest
+      (let [next (first s)
+            next-size (get-radius next)]
+        (if (< next-size smallest-size)
+          (recur (rest s) next next-size)
+          (recur (rest s) smallest smallest-size))))))
+
 (defn nodes-within
   "Returns a seq of IDs of nodes contained entirely within the area
   given as a vector offset relative to a given node, and a spherical
@@ -168,3 +205,16 @@
     (is-intersecting pos radius)
     (constantly true)))
 
+(defn smallest-room-containing
+  "Returns the smallest room node containing the given node."
+  [node-id]
+  (let [node (get-node node-id)
+        containing? (is-containing zero-vec (get-radius node))
+        match? #(and (is-room %1)
+                     (containing? %1 %2))
+        candidate-seq (search-nodes
+                        node
+                        match?
+                        match?
+                        (constantly true))]
+    (smallest-node candidate-seq)))
