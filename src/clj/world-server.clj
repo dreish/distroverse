@@ -41,8 +41,10 @@
   "Map of public keys to userid numbers")
 (defvar *userdata* (dm-get-map "userdata")
   "Map of userid numbers to other account data")
-(defvar *avatars* (ref #{})
-  "Set of all avatars")
+(defvar *avatars* (dm-get-map "avatars")
+  "Set of node IDs for all in-world avatars")
+(defvar *sessions* (ref #{})
+  "Set of sessions for all active connections")
 
 (defn gen-fun-call-id
   "Return a fun-call serial number unique within the given session."
@@ -99,11 +101,12 @@
   [att session]
   (let [userid (att :userid)
 	pos (att :lastpos)]
-    (dosync
+    (dm-dosync
      (let [avatar (add-object (get-node (pos :node))
 			      (pos :move)
 			      (att :avatarshape))]
-       (commute *avatars* conj {:object avatar :session session})
+       (commute *sessions* conj session)
+       (dm-insert *avatars* {:nodeid (avatar :nodeid)})
        (alter att assoc :avatar avatar)))))
 
 (defn new-user?

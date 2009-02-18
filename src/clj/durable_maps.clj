@@ -493,12 +493,31 @@
          @selected
        nil)))
 
+; dm-delete - remove a key from a map
+
+(defn dm-delete
+  "Deletes the row with the given key with the same concurrency
+  behavior as alter.  If the row does not currently exist, this
+  function either prevents a concurrent transaction from creating such
+  a row, or fails."
+
+  [dmap-c keyval]
+  (do
+    (require-dmtrans)
+    (let [dmap (dmap-c)
+          writes (dmap :write)
+          rowkey (row (-> dmap :spec :key))
+          write-query (delete-query dmap keyval)]
+      (commute writes 
+
+
 (defn dm-shutdown!
   "Flushes all pending writes and shuts down the database connection.
   Any attempts to write in any other thread after calling dm-shutdown
   will result in null-pointer exceptions."
   []
   (do
+    (io!)
     (dosync (alter @*dm-shutting-down* (fn [_] (tm))))
     (flush-writes-before! (tm))
     (assert (not @*write-queue*))))

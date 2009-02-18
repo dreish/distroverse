@@ -5,32 +5,33 @@
   - *avatars* should be permanent after all
     > Don't want a server reboot to leave a bunch of statues all over
       the place
+    + Single-column table: object ID
+    - Will need a way to delete from a dm (and bk)
+      - dm-delete
+        - How do I prevent the row from being reloaded from the
+          database after being deleted from the read and/or write
+          caches but before executing the DELETE statement?
+          - Must be some special signifier in the write cache to
+            indicate a deleted row
+            > (ref nil), obviously
+          - Create this signifier even if the row doesn't already
+            exist, to prevent a concurrent transaction from creating
+            the row
+          - Other parts of the library must be updated to handle
+            this possibility
+      - bk-delete
+        - Delete from val hash
+        - If that leaves the row with an empty hash, delete the row
+    - Will need a way to iterate through these to be fully useful,
+      preferably without loading the entire map into memory all at
+      once
+      - Problem: This must iterate through the keys on disk and the
+        keys in the write cache simultaneously, skipping deleted rows
+      - Behavior would be undefined outside a transaction
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible
       nodes
-  - node_tree.clj (ns node-tree)
-    x durable-maps/dm-annotate
-      x Add impermanent things to a map val (without generating a
-        write)
-        x Verify that db-stored fields are unchanged?  Or not?
-        > Problem: this would cause other writes to fail to happen
-          > Which happens to be the same reason this isn't necessary
-            for scalability
-    x Child/parent nodes exist as ints, and refs get looked up and
-      stored in a non-saved map
-      > Problem with this is that if I want to be able to clean out
-        the table, these refs might become invalid
-    > The answer for now is almost certainly to just not try to cache
-      any links
-    - (search-nodes start-node include? descend? ascend?)
-      - Conditional needs to transform as the tree is traversed
-        - Or, conditionals get called with an accumulated
-          transformation to convert a vector relative to the
-          start-node to one relative to the current node
-      - Return child nodes first
-    - (nodes-within relative-node-id pos radius)
-    - (nodes-touching relative-node-id pos radius)
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -466,6 +467,28 @@
     + new-universe
       + pick-radius is blowing up
       + Spec needs a :layer
+  + node_tree.clj (ns node-tree)
+    x durable-maps/dm-annotate
+      x Add impermanent things to a map val (without generating a
+        write)
+        x Verify that db-stored fields are unchanged?  Or not?
+        > Problem: this would cause other writes to fail to happen
+          > Which happens to be the same reason this isn't necessary
+            for scalability
+    x Child/parent nodes exist as ints, and refs get looked up and
+      stored in a non-saved map
+      > Problem with this is that if I want to be able to clean out
+        the table, these refs might become invalid
+    > The answer for now is almost certainly to just not try to cache
+      any links
+    + (search-nodes start-node include? descend? ascend?)
+      + Conditional needs to transform as the tree is traversed
+        + Or, conditionals get called with an accumulated
+          transformation to convert a vector relative to the
+          start-node to one relative to the current node
+      + Return child nodes first
+    + (nodes-within relative-node-id pos radius)
+    + (nodes-touching relative-node-id pos radius)
 
 ------------------------------------------------------------------------
 - To do for 0.03:

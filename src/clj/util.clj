@@ -93,3 +93,13 @@
   ([x form & more]
      `(+> (+> ~x ~form) ~@more)))
 
+(defn min-by
+  "Return the least member of the sequence s by comparing the results
+  of applying f to the members of s."
+  [f s]
+  ; TODO Could cut the calls to f in half with a loop/recur.
+  (reduce #(if (neg? (compare (f %1) (f %2)))
+             %1
+             %2)
+          s))
+

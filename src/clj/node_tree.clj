@@ -37,7 +37,8 @@
         clojure.contrib.def
         durable-maps
         bigkey-dm
-        def-universe))
+        def-universe
+        util))
 
 (import '(com.jme.math Quaternion Vector3f))
 
@@ -160,17 +161,7 @@
   "Returns the node with the smallest size from the given seq of
   nodes."
   [node-seq]
-  ; Too tired to think of the one-liner.  I'm sure it's obvious.
-  (loop [s (rest node-seq)
-         smallest (first node-seq)
-         smallest-size (get-radius smallest)]
-    (if (nil? s)
-      smallest
-      (let [next (first s)
-            next-size (get-radius next)]
-        (if (< next-size smallest-size)
-          (recur (rest s) next next-size)
-          (recur (rest s) smallest smallest-size))))))
+  (min-by get-radius node-seq))
 
 (defn nodes-within
   "Returns a seq of IDs of nodes contained entirely within the area
