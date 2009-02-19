@@ -374,16 +374,20 @@
     (let [dmap (dmap-c)
           writes (dmap :write)
           rowkey (row (-> dmap :spec :key))
+          oldrow (dmap-c rowkey)
           ; TODO delay (insert-query) for a slight performance ++
           write-query (insert-query dmap row)]
-      (commute writes assoc-new-or-die rowkey (ref row))
+      (if (and oldrow
+               (nil? @oldrow))
+        (ref-set oldrow row)
+        (commute writes assoc-new-or-die rowkey (ref row)))
       (add-to-write-queue write-query))
     dmap-c))
 
 ; dm-update - alter an existing map entry
 
 (defn- update-query
-  "Form an SQL query to insert the given row, a hash, into the table
+  "Form an SQL query to set the given row, a hash, in the table
   backing the given durable map.  Return it wrapped in a structure
   where the query string is :query, the vector of values is :vals, and
   the time of the write is :time."
@@ -419,7 +423,8 @@
           in-writes (@writes keyval)
           oldrow (dmap-c keyval)
           keycol (-> dmap :spec :key)]
-      (when-not oldrow
+      (when (or (nil? oldrow)
+                (nil? @oldrow))
         (throw (Exception.
                 (str "dm-update: No existing row for key " keyval))))
       (let [newrow (apply f oldrow args)
@@ -495,20 +500,41 @@
 
 ; dm-delete - remove a key from a map
 
+(defn- delete-query
+  "Form an SQL query to delete the row with the given key in the table
+  backing the given durable map.  Return it wrapped in a structure
+  where the query string is :query, the vector of values is :vals, and
+  the time of the write is :time."
+  [dmap keyval]
+  (let [table (dmap :table)
+        spec (dmap :spec)
+        keycol (spec :key)
+        query-str (str "DELETE FROM " table " WHERE "
+                       (name keycol) " = ?")]
+    {:dmap dmap
+     :row row
+     :query query-str
+     :vals (valify-row {keycol keyval} spec [keycol])
+     :time (tm)
+     :keyval keyval}))
+
 (defn dm-delete
   "Deletes the row with the given key with the same concurrency
   behavior as alter.  If the row does not currently exist, this
   function either prevents a concurrent transaction from creating such
-  a row, or fails."
-
+  a row, or fails (retrying the transaction)."
   [dmap-c keyval]
   (do
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
-          rowkey (row (-> dmap :spec :key))
+          in-writes (@writes keyval)
           write-query (delete-query dmap keyval)]
-      (commute writes 
+      (if in-writes
+        (ref-set in-writes nil)
+        (commute writes assoc-new-or-retry keyval (ref nil)))
+      (add-to-write-queue write-query)
+      nil)))
 
 
 (defn dm-shutdown!

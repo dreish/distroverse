@@ -11,13 +11,13 @@
         - How do I prevent the row from being reloaded from the
           database after being deleted from the read and/or write
           caches but before executing the DELETE statement?
-          - Must be some special signifier in the write cache to
+          + Must be some special signifier in the write cache to
             indicate a deleted row
             > (ref nil), obviously
-          - Create this signifier even if the row doesn't already
+          + Create this signifier even if the row doesn't already
             exist, to prevent a concurrent transaction from creating
             the row
-          - Other parts of the library must be updated to handle
+          + Other parts of the library must be updated to handle
             this possibility
       - bk-delete
         - Delete from val hash

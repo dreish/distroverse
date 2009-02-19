@@ -6938,3 +6938,23 @@ implementing some interface.  I guess it would need one method:
 
 AddObject createObject( byte[] data, double detail_level )
 
+2009-01-30
+
+To group STM transaction elements together into SQL transactions, bind
+some ref that will collect commands, and add them as a group.
+
+2009-02-08
+
+I still don't have a clear idea what form ephemeral nodes will take
+within the server.  If they will always be generated on-demand (which
+seems reasonable, since they might not be needed very often), then how
+will an avatar's position be reported when it is in ephemeral space?
+
+I want the position to be a chain of Moves relative to a concrete base
+node, but who generates that chain?
+
+It might be practical enough to just generate the ephemeral nodes as
+needed when the avatar moves out of range of its current spatial node,
+since in practice I expect it to be extremely rare for an avatar to be
+more than a handful of generations removed from a concrete node.
+
