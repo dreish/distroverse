@@ -7,8 +7,8 @@
       the place
     + Single-column table: object ID
     - Will need a way to delete from a dm (and bk)
-      - dm-delete
-        - How do I prevent the row from being reloaded from the
+      + dm-delete
+        + How do I prevent the row from being reloaded from the
           database after being deleted from the read and/or write
           caches but before executing the DELETE statement?
           + Must be some special signifier in the write cache to
@@ -19,6 +19,14 @@
             the row
           + Other parts of the library must be updated to handle
             this possibility
+        + Test this
+          + Delete an existing row
+          + Get it; confirm it comes back as nil
+          + Re-insert the same key
+            + Transaction failed after reaching retry limit
+              > Was looking up key using the external abstract
+                hash-like interface rather than the internal :writes
+                hash
       - bk-delete
         - Delete from val hash
         - If that leaves the row with an empty hash, delete the row
@@ -28,6 +36,7 @@
       - Problem: This must iterate through the keys on disk and the
         keys in the write cache simultaneously, skipping deleted rows
       - Behavior would be undefined outside a transaction
+  - Stress-test insertion, updating and deletion on both dm and bk
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible

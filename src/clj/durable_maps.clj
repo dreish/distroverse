@@ -374,13 +374,14 @@
     (let [dmap (dmap-c)
           writes (dmap :write)
           rowkey (row (-> dmap :spec :key))
-          oldrow (dmap-c rowkey)
+          in-writes (writes rowkey)
           ; TODO delay (insert-query) for a slight performance ++
           write-query (insert-query dmap row)]
-      (if (and oldrow
-               (nil? @oldrow))
-        (ref-set oldrow row)
-        (commute writes assoc-new-or-die rowkey (ref row)))
+      (if in-writes
+        (if (nil? @in-writes)
+          (ref-set in-writes row)
+          (throw (Exception. (str "dm-insert: Row exists: " rowkey))))
+        (commute writes assoc-new-or-retry rowkey (ref row)))
       (add-to-write-queue write-query))
     dmap-c))
 
@@ -512,7 +513,7 @@
         query-str (str "DELETE FROM " table " WHERE "
                        (name keycol) " = ?")]
     {:dmap dmap
-     :row row
+     :row nil
      :query query-str
      :vals (valify-row {keycol keyval} spec [keycol])
      :time (tm)
@@ -534,7 +535,7 @@
         (ref-set in-writes nil)
         (commute writes assoc-new-or-retry keyval (ref nil)))
       (add-to-write-queue write-query)
-      nil)))
+      dmap-c)))
 
 
 (defn dm-shutdown!
@@ -550,7 +551,7 @@
 
 ; dm-create-map!
 
-(let [create-map-mutex 1]
+(let [create-map-mutex (Object.)]
   (defn dm-create-map!
     "Create a new table.  This cannot be done inside a transaction.
     Does not check that column names, given as keywords, are legal SQL

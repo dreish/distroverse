@@ -18,6 +18,8 @@
 
 (prn (dm-dosync (my-test1 "foo")))
 
+(dm-dosync (dm-delete my-test1 "foo"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bk-init!)
