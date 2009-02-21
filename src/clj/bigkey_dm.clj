@@ -147,6 +147,23 @@
                              :spec spec}))
       (dm-create-map! tname dm-spec))))
 
+(defn bk-delete
+  "Deletes an entry from the map."
+  [bkc keyval]
+  (let [bk (bkc)
+        dmap (get-dmap bk)
+        abstract-keycol (get-abstract-keycol bk)
+        munged-key ((get-key-munger bk) (pr-str keyval))]
+    (if-let [dm-row (dmap munged-key)]
+        (if ((dm-row :val_hash) keyval)
+          (if (= 1 (count ((dmap munged-key) :val_hash)))
+            (dm-delete dmap munged-key)
+            (dm-update dmap dissoc-in :val_hash keyval))
+          (dm-ensure dmap munged-key))
+      (dm-delete dmap munged-key))
+    bkc))
+    
+
 (defn md5-munger
   "Returns a function that maps a string of arbitrary length to the first
   'width' characters of the hex-encoded MD5 sum of that string."

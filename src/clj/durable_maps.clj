@@ -499,6 +499,24 @@
          @selected
        nil)))
 
+; dm-ensure - like select, but also ensures the row does not change
+
+(defn dm-ensure
+  "Look something up in a map, returning a row hash, and ensuring its
+  value does not change within the transaction.  If the row does not
+  exist, this function throws an error.  Instead, use dm-delete to
+  ensure that a row remains deleted throughout a transaction."
+  [dmap-c keyval]
+  (do
+    (require-dmtrans)
+    (let [dmap (dmap-c)
+          selected (or (local-select dmap keyval)
+                       (database-select dmap keyval))]
+      (if (and selected @selected)
+        (ensure selected)
+        (throw (Exception. "dm-ensure: non-existent row"))))))
+
+
 ; dm-delete - remove a key from a map
 
 (defn- delete-query

@@ -28,14 +28,30 @@
                 hash-like interface rather than the internal :writes
                 hash
       - bk-delete
-        - Delete from val hash
-        - If that leaves the row with an empty hash, delete the row
+        + Delete from val hash
+          + dissoc-in
+        + Or dm-ensure if not in the val hash
+        + If that leaves the row with an empty hash, delete the row
+        + If there was no such dm row, dm-delete it to ensure it stays
+          nonexistent
+        + Return bkc
+        - Test this
     - Will need a way to iterate through these to be fully useful,
       preferably without loading the entire map into memory all at
       once
       - Problem: This must iterate through the keys on disk and the
         keys in the write cache simultaneously, skipping deleted rows
+        > Does this mean :writes should be a sorted map?
+          > That still wouldn't necessarily guarantee the same sort
+            order
+          > No, return non-nil :writes first, then iterate through
+            database skipping rows that are in :writes
       - Behavior would be undefined outside a transaction
+  - dm-ensure and bk-ensure
+    > Same as select, but ensuring
+    > Can't use this on deleted rows; use dm-delete instead
+    + dm-ensure
+    - bk-ensure
   - Stress-test insertion, updating and deletion on both dm and bk
   - Send surroundings from server to proxy
     - Set initial detail level -- -10

@@ -103,3 +103,8 @@
              %2)
           s))
 
+(defn dissoc-in
+  [m k & ks]
+  (if ks
+    (assoc m k (apply dissoc-in (get m k) ks))
+    (dissoc m k)))
