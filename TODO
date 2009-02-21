@@ -27,7 +27,7 @@
               > Was looking up key using the external abstract
                 hash-like interface rather than the internal :writes
                 hash
-      - bk-delete
+      + bk-delete
         + Delete from val hash
           + dissoc-in
         + Or dm-ensure if not in the val hash
@@ -35,7 +35,7 @@
         + If there was no such dm row, dm-delete it to ensure it stays
           nonexistent
         + Return bkc
-        - Test this
+        + Test this
     - Will need a way to iterate through these to be fully useful,
       preferably without loading the entire map into memory all at
       once
@@ -46,6 +46,10 @@
             order
           > No, return non-nil :writes first, then iterate through
             database skipping rows that are in :writes
+          > Note: no way to iterate through keys of bk map without
+            loading values
+          > For that matter, probably nothing useful that can be done
+            by iterating through keys alone
       - Behavior would be undefined outside a transaction
   - dm-ensure and bk-ensure
     > Same as select, but ensuring

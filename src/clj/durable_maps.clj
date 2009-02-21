@@ -424,8 +424,7 @@
           in-writes (@writes keyval)
           oldrow (dmap-c keyval)
           keycol (-> dmap :spec :key)]
-      (when (or (nil? oldrow)
-                (nil? @oldrow))
+      (when-not oldrow
         (throw (Exception.
                 (str "dm-update: No existing row for key " keyval))))
       (let [newrow (apply f oldrow args)

@@ -64,3 +64,4 @@
 
 (dm-dosync (bk-test3 [1 1 2 3 5 8 4]))
 
+(dm-dosync (bk-delete bk-test3 [1 1 2 3 5 8 4]))

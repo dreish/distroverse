@@ -156,9 +156,9 @@
         munged-key ((get-key-munger bk) (pr-str keyval))]
     (if-let [dm-row (dmap munged-key)]
         (if ((dm-row :val_hash) keyval)
-          (if (= 1 (count ((dmap munged-key) :val_hash)))
+          (if (= 1 (count (dm-row :val_hash)))
             (dm-delete dmap munged-key)
-            (dm-update dmap dissoc-in :val_hash keyval))
+            (dm-update dmap munged-key dissoc-in :val_hash keyval))
           (dm-ensure dmap munged-key))
       (dm-delete dmap munged-key))
     bkc))
