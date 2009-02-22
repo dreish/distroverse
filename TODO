@@ -1,7 +1,6 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Change references to CPL to cover any OSDL-approved license
   - *avatars* should be permanent after all
     > Don't want a server reboot to leave a bunch of statues all over
       the place
@@ -518,6 +517,11 @@
       + Return child nodes first
     + (nodes-within relative-node-id pos radius)
     + (nodes-touching relative-node-id pos radius)
+  + Change references to CPL to cover any OSDL-approved license
+    > OSDL is no more, which suggests a problem with this approach
+    + **/*.java; files containing string "Common Public License"
+    + **/*.java; files containing "Common\n * Public License"
+    + **/*.clj; files containing "Common\n;; Public License"
 
 ------------------------------------------------------------------------
 - To do for 0.03:

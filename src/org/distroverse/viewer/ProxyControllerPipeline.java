@@ -1,7 +1,7 @@
 /*
  * <copyleft>
  *
- * Copyright 2007-2008 Dan Reish
+ * Copyright 2007-2009 Dan Reish
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,12 +21,12 @@
  * If you modify this Program, or any covered work, by linking or
  * combining it with Clojure (or a modified version of that program)
  * or clojure-contrib (or a modified version of that library),
- * containing parts covered by the terms of the Common Public License,
- * the licensors of this Program grant you additional permission to
- * convey the resulting work. {Corresponding Source for a non-source
- * form of such a combination shall include the source code for the
- * parts of Clojure and clojure-contrib used as well as that of the
- * covered work.}
+ * containing parts covered by the terms of the Eclipse Public
+ * License, the licensors of this Program grant you additional
+ * permission to convey the resulting work. {Corresponding Source for
+ * a non-source form of such a combination shall include the source
+ * code for the parts of Clojure and clojure-contrib used as well as
+ * that of the covered work.}
  *
  * </copyleft>
  */
