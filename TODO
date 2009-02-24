@@ -1,60 +1,6 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - *avatars* should be permanent after all
-    > Don't want a server reboot to leave a bunch of statues all over
-      the place
-    + Single-column table: object ID
-    - Will need a way to delete from a dm (and bk)
-      + dm-delete
-        + How do I prevent the row from being reloaded from the
-          database after being deleted from the read and/or write
-          caches but before executing the DELETE statement?
-          + Must be some special signifier in the write cache to
-            indicate a deleted row
-            > (ref nil), obviously
-          + Create this signifier even if the row doesn't already
-            exist, to prevent a concurrent transaction from creating
-            the row
-          + Other parts of the library must be updated to handle
-            this possibility
-        + Test this
-          + Delete an existing row
-          + Get it; confirm it comes back as nil
-          + Re-insert the same key
-            + Transaction failed after reaching retry limit
-              > Was looking up key using the external abstract
-                hash-like interface rather than the internal :writes
-                hash
-      + bk-delete
-        + Delete from val hash
-          + dissoc-in
-        + Or dm-ensure if not in the val hash
-        + If that leaves the row with an empty hash, delete the row
-        + If there was no such dm row, dm-delete it to ensure it stays
-          nonexistent
-        + Return bkc
-        + Test this
-    - Will need a way to iterate through these to be fully useful,
-      preferably without loading the entire map into memory all at
-      once
-      - Problem: This must iterate through the keys on disk and the
-        keys in the write cache simultaneously, skipping deleted rows
-        > Does this mean :writes should be a sorted map?
-          > That still wouldn't necessarily guarantee the same sort
-            order
-          > No, return non-nil :writes first, then iterate through
-            database skipping rows that are in :writes
-          > Note: no way to iterate through keys of bk map without
-            loading values
-          > For that matter, probably nothing useful that can be done
-            by iterating through keys alone
-      - Behavior would be undefined outside a transaction
-  - dm-ensure and bk-ensure
-    > Same as select, but ensuring
-    > Can't use this on deleted rows; use dm-delete instead
-    + dm-ensure
-    - bk-ensure
   - Stress-test insertion, updating and deletion on both dm and bk
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
@@ -522,6 +468,67 @@
     + **/*.java; files containing string "Common Public License"
     + **/*.java; files containing "Common\n * Public License"
     + **/*.clj; files containing "Common\n;; Public License"
+  + *avatars* should be permanent after all
+    > Don't want a server reboot to leave a bunch of statues all over
+      the place
+    + Single-column table: object ID
+    + Will need a way to delete from a dm (and bk)
+      + dm-delete
+        + How do I prevent the row from being reloaded from the
+          database after being deleted from the read and/or write
+          caches but before executing the DELETE statement?
+          + Must be some special signifier in the write cache to
+            indicate a deleted row
+            > (ref nil), obviously
+          + Create this signifier even if the row doesn't already
+            exist, to prevent a concurrent transaction from creating
+            the row
+          + Other parts of the library must be updated to handle
+            this possibility
+        + Test this
+          + Delete an existing row
+          + Get it; confirm it comes back as nil
+          + Re-insert the same key
+            + Transaction failed after reaching retry limit
+              > Was looking up key using the external abstract
+                hash-like interface rather than the internal :writes
+                hash
+      + bk-delete
+        + Delete from val hash
+          + dissoc-in
+        + Or dm-ensure if not in the val hash
+        + If that leaves the row with an empty hash, delete the row
+        + If there was no such dm row, dm-delete it to ensure it stays
+          nonexistent
+        + Return bkc
+        + Test this
+    x Will need a way to iterate through these to be fully useful,
+      preferably without loading the entire map into memory all at
+      once
+      x Problem: This must iterate through the keys on disk and the
+        keys in the write cache simultaneously, skipping deleted rows
+        > Does this mean :writes should be a sorted map?
+          > That still wouldn't necessarily guarantee the same sort
+            order
+          > No, return non-nil :writes first, then iterate through
+            database skipping rows that are in :writes
+          > Note: no way to iterate through keys of bk map without
+            loading values
+          > For that matter, probably nothing useful that can be done
+            by iterating through keys alone
+          > Iterate through key/value pairs without storing anything?
+        x dm-seq => seq of row hashes
+          + Will need to be closed when finished; how can a seq know
+            when that is?
+            + Invert control?
+              > Yes; and only write these functions once I can
+                actually see how I'll be using them
+      > Behavior would be undefined outside a transaction
+  + dm-ensure and bk-ensure
+    > Same as select, but ensuring
+    > Can't use this on deleted rows; use dm-delete instead
+    + dm-ensure
+    + bk-ensure
 
 ------------------------------------------------------------------------
 - To do for 0.03:

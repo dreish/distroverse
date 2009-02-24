@@ -162,7 +162,23 @@
           (dm-ensure dmap munged-key))
       (dm-delete dmap munged-key))
     bkc))
-    
+
+; bk-ensure - like select, but also ensures the row does not change
+
+(defn bk-ensure
+  "Look up a row in a map, returning a hash, and ensuring its value
+  does not change within the transaction.  If the row does not exist,
+  this function throws an error.  Instead, use dm-delete to ensure
+  that a row remains deleted throughout a transaction."
+  [bkc keyval]
+  ; Note: This ensures the whole dm row.
+  (let [bk (bkc)
+        munged-key ((get-key-munger bk) (pr-str k))]
+    (or (if-let [dm-row (dm-ensure (get-dmap bk) munged-key)]
+            (let [valcol (dm-row :val_hash)]
+              (valcol k)))
+        (throw (Exception. "bk-ensure: non-existent row")))))
+
 
 (defn md5-munger
   "Returns a function that maps a string of arbitrary length to the first

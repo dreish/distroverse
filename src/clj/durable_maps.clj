@@ -501,10 +501,10 @@
 ; dm-ensure - like select, but also ensures the row does not change
 
 (defn dm-ensure
-  "Look something up in a map, returning a row hash, and ensuring its
-  value does not change within the transaction.  If the row does not
-  exist, this function throws an error.  Instead, use dm-delete to
-  ensure that a row remains deleted throughout a transaction."
+  "Look up a row in a map, returning a hash, and ensuring its value
+  does not change within the transaction.  If the row does not exist,
+  this function throws an error.  Instead, use dm-delete to ensure
+  that a row remains deleted throughout a transaction."
   [dmap-c keyval]
   (do
     (require-dmtrans)
@@ -607,6 +607,7 @@
                   {:varname "inname-num"
                    :val 1})))
     nil))
+
 
 ; Writer thread
 

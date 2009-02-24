@@ -111,7 +111,7 @@
 
 (defn new-user?
   "Does the given identity dict exist as a user account?  Must be in a
-  transaction."
+  dm transaction."
   [id]
   (not (*key-to-id* (id :pubkey))))
 
