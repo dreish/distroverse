@@ -23,10 +23,33 @@
         > Still no retries; nice and quick, though
       + Try with N=1000 and 50 threads
         > Got a few clusters of retries; worked beautifully though
-      - Shut off printing; time how long these things take
+      + Shut off printing; time how long these things take
         > N=10000 T=50: 3.64 secs
         > N=10000 T=10: 1.17 secs
         > N=10000 T=2:  0.95 secs
+      + Remove outer transaction; repeat above time trials
+        > Slight improvement in T=2 and T=10, bigger improvement in
+          T=50, not surprisingly
+    + scattershot-stress-test
+      + Initialize data: delete rows from 1 to N
+        > Try without this the first time; it does affect the dm data
+          structure
+      + Create added: (ref 0)
+      + Create T threads
+      + In each thread, while @added < N, pick a random number: if it
+        doesn't exist, add a row with that key, and increment added
+      + Once finished, linearly confirm all N rows exist
+      + Then do the same thing in reverse: delete and decrement if
+        row exists
+      + Confirm all N rows do not exist
+      + Try with N=10 T=1
+        > 0.003 secs
+      + Try with N=100 T=100
+        > 0.285 secs
+      + N=10 T=100: 0.039 secs
+      + N=10 T=200: 0.077 secs
+    > Will assume, for now, that bk works correctly, since it is a
+      simple layer on top of dm
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible

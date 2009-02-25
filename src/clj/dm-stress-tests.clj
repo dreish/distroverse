@@ -38,11 +38,17 @@
    "dm-stress-tests/sum-counter"
    {:cols {:k ["VARCHAR(32)" :str]
            :v ["TEXT" :obj]}
+    :key :k})
+  (dm-create-new-map!
+   "dm-stress-tests/scattershot"
+   {:cols {:k ["VARCHAR(32)" :obj]}
     :key :k}))
 
 (setup-dm-test-data!)
 
 (def sum-counter-dm (dm-get-map "dm-stress-tests/sum-counter"))
+
+(def scattershot-dm (dm-get-map "dm-stress-tests/scattershot"))
 
 (defn sum-counter-init-table
   []
@@ -61,14 +67,14 @@
   "Loop for one thread of the sum-counter-stress-test."
   [count-to my-thread-id]
   (loop []
-    (if (dm-dosync
+    (if ;(dm-dosync
          (let [counter (add-and-get sum-counter-dm "counter" 1)]
            (if (<= counter count-to)
              (let [sum (add-and-get sum-counter-dm "sum" counter)]
 ;               (println "added" counter "in thread" my-thread-id
 ;                        "and got" sum)
                true)
-             false)))
+             false)) ;)
       (recur)))
   (if (zero? my-thread-id)
     (prn "Finished at" (System/nanoTime))))
@@ -80,6 +86,62 @@
     (sum-counter-init-table)
     (prn "Started at" (System/nanoTime))
     (dotimes [t n-threads]
-        (.start (Thread.
-                 #(sum-counter-loop-to count-to t))))))
+      (.start (Thread.
+               #(sum-counter-loop-to count-to t))))))
 
+(defn scattershot-init-table
+  [n]
+  (dm-dosync
+   (dotimes [i n]
+     (dm-delete scattershot-dm i))))
+
+(defn scattershot-add-loop
+  [n-to-add added my-thread-id]
+  (loop []
+    (if (dm-dosync
+         (if (< @added n-to-add)
+           (let [r (int (rand n-to-add))]
+             (when-not (scattershot-dm r)
+               (dm-insert scattershot-dm {:k r})
+               (commute added inc))
+             true)
+           false))
+      (recur))))
+
+(defn scattershot-del-loop
+  [n-to-add added my-thread-id]
+  (loop []
+    (if (dm-dosync
+         (if (> @added 0)
+           (let [r (int (rand n-to-add))]
+             (when (scattershot-dm r)
+               (dm-delete scattershot-dm r)
+               (commute added dec))
+             true)
+           false))
+      (recur))))
+
+(defn scattershot-stress-test
+  "Tests insertion by several threads, and deletion by several threads."
+  [n-rows n-threads]
+  (let [added (ref 0)]
+    (scattershot-init-table n-rows)
+    (prn "Started at" (System/nanoTime))
+    (dotimes [t (dec n-threads)]
+      (.start (Thread.
+               #(scattershot-add-loop n-rows added t))))
+    (scattershot-add-loop n-rows added (dec n-threads))
+    (prn "Finished adding at" (System/nanoTime))
+    (dm-dosync
+     (dotimes [i n-rows]
+       (assert (scattershot-dm i))))
+    (prn "Finished checking rows added at" (System/nanoTime))
+    (dotimes [t (dec n-threads)]
+      (.start (Thread.
+               #(scattershot-del-loop n-rows added t))))
+    (scattershot-del-loop n-rows added (dec n-threads))
+    (prn "Finished deleting at" (System/nanoTime))
+    (dm-dosync
+     (dotimes [i n-rows]
+       (assert (not (scattershot-dm i)))))
+    (prn "Finished checking rows deleted at" (System/nanoTime))))
