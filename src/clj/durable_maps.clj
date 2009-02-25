@@ -534,6 +534,7 @@
      :query query-str
      :vals (valify-row {keycol keyval} spec [keycol])
      :time (tm)
+     :required true
      :keyval keyval}))
 
 (defn dm-delete
@@ -566,30 +567,39 @@
     (flush-writes-before! (tm))
     (assert (not @*write-queue*))))
 
-; dm-create-map!
-
 (let [create-map-mutex (Object.)]
   (defn dm-create-map!
     "Create a new table.  This cannot be done inside a transaction.
     Does not check that column names, given as keywords, are legal SQL
-    column names.  Returns nil."
-    [name spec]
-    (locking create-map-mutex
-      (io!)
-      (if (dm-dosync (dm-select *table-map* name))
-        (throw (Exception. (str "dm-create-map: Table exists: " name))))
-      (let [safename (str "u"
-                          (collapse-name name)
-                          (next-inname-num))]
-        (do
-          (create-table! safename spec)
-          (dm-dosync
-           (dm-insert (close-dmap *table-map*)
-                      {:inname safename
-                       :exname name
-                       :spec spec}))
-          nil)))))
+    column names.  Returns nil.  Throws an exception if the given map
+    already exists."
+    ([name spec]
+       (dm-create-map! name spec false))
+    ([name spec only-if-new]
+       (locking create-map-mutex
+         (io!)
+         (if (dm-dosync (dm-select *table-map* name))
+           (when-not only-if-new
+             (throw (Exception. (str "dm-create-map: Table exists: " name))))
+           (let [safename (str "u"
+                               (collapse-name name)
+                               (next-inname-num))]
+             (do
+               (create-table! safename spec)
+               (dm-dosync
+                (dm-insert (close-dmap *table-map*)
+                           {:inname safename
+                            :exname name
+                            :spec spec}))
+               nil)))))))
 
+(defn dm-create-new-map!
+    "Create a new table.  This cannot be done inside a transaction.
+    Does not check that column names, given as keywords, are legal SQL
+    column names.  Returns nil.  Does nothing if the given map already
+    exists."
+  ([name spec]
+     (dm-create-map! name spec true)))
 
 ; dm-init! - create core tables 'mtables' and 'mvar'
 

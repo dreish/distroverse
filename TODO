@@ -2,6 +2,31 @@
 
 - To do for 0.02:
   - Stress-test insertion, updating and deletion on both dm and bk
+    + sum-counter-stress-test
+      + Initialize data: delete counter and target rows if present,
+        then insert zeros for both
+      + Counter row: threads will get-and-increment from that row
+        until the value they get is over N, at which point they quit
+      + Target row: threads will add their counter to this target
+        value 
+      + Try with N=10 and 1 thread
+        + Mostly worked, but the delete/insert pair bombed; DELETE
+          query never ran, but INSERT did
+          + Is DELETE added with :required?
+      + Try with N=100 and 1 thread
+      + Try with N=10 and 2 threads
+        + Only one thread actually does anything
+          + Try .start, not .run, dumbass
+      + Try with N=100 and 2 threads
+        > No apparent retries
+      + Try with N=100 and 10 threads
+        > Still no retries; nice and quick, though
+      + Try with N=1000 and 50 threads
+        > Got a few clusters of retries; worked beautifully though
+      - Shut off printing; time how long these things take
+        > N=10000 T=50: 3.64 secs
+        > N=10000 T=10: 1.17 secs
+        > N=10000 T=2:  0.95 secs
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
     - Starting from avatar's parent node, find and send all visible
