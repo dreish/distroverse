@@ -1,59 +1,14 @@
                                         -*- Text -*-
 
 - To do for 0.02:
-  - Stress-test insertion, updating and deletion on both dm and bk
-    + sum-counter-stress-test
-      + Initialize data: delete counter and target rows if present,
-        then insert zeros for both
-      + Counter row: threads will get-and-increment from that row
-        until the value they get is over N, at which point they quit
-      + Target row: threads will add their counter to this target
-        value 
-      + Try with N=10 and 1 thread
-        + Mostly worked, but the delete/insert pair bombed; DELETE
-          query never ran, but INSERT did
-          + Is DELETE added with :required?
-      + Try with N=100 and 1 thread
-      + Try with N=10 and 2 threads
-        + Only one thread actually does anything
-          + Try .start, not .run, dumbass
-      + Try with N=100 and 2 threads
-        > No apparent retries
-      + Try with N=100 and 10 threads
-        > Still no retries; nice and quick, though
-      + Try with N=1000 and 50 threads
-        > Got a few clusters of retries; worked beautifully though
-      + Shut off printing; time how long these things take
-        > N=10000 T=50: 3.64 secs
-        > N=10000 T=10: 1.17 secs
-        > N=10000 T=2:  0.95 secs
-      + Remove outer transaction; repeat above time trials
-        > Slight improvement in T=2 and T=10, bigger improvement in
-          T=50, not surprisingly
-    + scattershot-stress-test
-      + Initialize data: delete rows from 1 to N
-        > Try without this the first time; it does affect the dm data
-          structure
-      + Create added: (ref 0)
-      + Create T threads
-      + In each thread, while @added < N, pick a random number: if it
-        doesn't exist, add a row with that key, and increment added
-      + Once finished, linearly confirm all N rows exist
-      + Then do the same thing in reverse: delete and decrement if
-        row exists
-      + Confirm all N rows do not exist
-      + Try with N=10 T=1
-        > 0.003 secs
-      + Try with N=100 T=100
-        > 0.285 secs
-      + N=10 T=100: 0.039 secs
-      + N=10 T=200: 0.077 secs
-    > Will assume, for now, that bk works correctly, since it is a
-      simple layer on top of dm
   - Send surroundings from server to proxy
     - Set initial detail level -- -10
+    - Set proxy's loading property
     - Starting from avatar's parent node, find and send all visible
       nodes
+      - Want to be able to send a seq of DvtpExternalizable objects
+        (maybe just use a classic Java iterator)
+    - Clear proxy's loading property
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -577,6 +532,55 @@
     > Can't use this on deleted rows; use dm-delete instead
     + dm-ensure
     + bk-ensure
+  + Stress-test insertion, updating and deletion on both dm and bk
+    + sum-counter-stress-test
+      + Initialize data: delete counter and target rows if present,
+        then insert zeros for both
+      + Counter row: threads will get-and-increment from that row
+        until the value they get is over N, at which point they quit
+      + Target row: threads will add their counter to this target
+        value 
+      + Try with N=10 and 1 thread
+        + Mostly worked, but the delete/insert pair bombed; DELETE
+          query never ran, but INSERT did
+          + Is DELETE added with :required?
+      + Try with N=100 and 1 thread
+      + Try with N=10 and 2 threads
+        + Only one thread actually does anything
+          + Try .start, not .run, dumbass
+      + Try with N=100 and 2 threads
+        > No apparent retries
+      + Try with N=100 and 10 threads
+        > Still no retries; nice and quick, though
+      + Try with N=1000 and 50 threads
+        > Got a few clusters of retries; worked beautifully though
+      + Shut off printing; time how long these things take
+        > N=10000 T=50: 3.64 secs
+        > N=10000 T=10: 1.17 secs
+        > N=10000 T=2:  0.95 secs
+      + Remove outer transaction; repeat above time trials
+        > Slight improvement in T=2 and T=10, bigger improvement in
+          T=50, not surprisingly
+    + scattershot-stress-test
+      + Initialize data: delete rows from 1 to N
+        > Try without this the first time; it does affect the dm data
+          structure
+      + Create added: (ref 0)
+      + Create T threads
+      + In each thread, while @added < N, pick a random number: if it
+        doesn't exist, add a row with that key, and increment added
+      + Once finished, linearly confirm all N rows exist
+      + Then do the same thing in reverse: delete and decrement if
+        row exists
+      + Confirm all N rows do not exist
+      + Try with N=10 T=1
+        > 0.003 secs
+      + Try with N=100 T=100
+        > 0.285 secs
+      + N=10 T=100: 0.039 secs
+      + N=10 T=200: 0.077 secs
+    > Will assume, for now, that bk works correctly, since it is a
+      simple layer on top of dm
 
 ------------------------------------------------------------------------
 - To do for 0.03:

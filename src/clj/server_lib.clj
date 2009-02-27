@@ -155,10 +155,11 @@
 
 (defn dvtp-send! [#^NetSession session message]
   "Send message in session."
-  (.add (.getNetOutQueue session)
-	message))
+  (io!
+   (.add (.getNetOutQueue session)
+         message)))
 
-(defmacro async-call! [session [assign-var message] code]
+(defmacro async-call! [session [assign-var message] & code]
   "Send message in session, asynchronously bind the result to
   assign-var, and call code.  Side effects: calls add-callback! with
   session.

@@ -58,7 +58,7 @@
   "Generates a FunCall constructor.  Assumes 'session is bound to a
   session."
   [rform]
-  `(FunCall. (gen-fun-call-id ~'session) ~@rform))
+  `(FunCall. (ULong. (gen-fun-call-id ~'session)) ~@rform))
 
 (defmacro ac!
   "Abbreviation for (async-call! session args...).  Assumes 'session
@@ -156,6 +156,19 @@
 	:id              id
 	:funcall-counter (ref 0)}))
 
+(defn start-rendering!
+  "Begins sending a proxy objects to display."
+  [att session]
+  (do
+    (dvtp-send! session
+                (FunCall. (ULong. 0)
+                          (Str. "setprop")
+                          (Str. "loading")
+                          (True.)))
+    ; XXX
+  ))
+  
+
 (defn init-connection!
   "Performs basic new-connection setup: getting and verifying the
   user's identity, looking up the user's position, and adding the
@@ -174,7 +187,8 @@
 	      (.setAttachment session (class att) att)
 	      (if (new-user? id)
 		(setup-new-user session att id))
-	      (add-self-to-world att session)))
+	      (add-self-to-world att session)
+              (start-rendering! att session)))
 	  (reject-id! session))))))
 
 (defn handle-callback!
