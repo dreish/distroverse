@@ -65,6 +65,20 @@
     (gen-children n)
     (map get-node (n :children))))
 
+(defn root-of
+  "Returns the root node of the given node."
+  [n]
+  (if-let [p (parent-of n)]
+    (recur p)
+    n))
+
+(defn parent-chain
+  "Returns a seq of the ancestors for the given node."
+  [n]
+  (if-let [p (parent-of n)]
+    (lazy-cons p
+               (parent-chain p))))
+
 (defn add-to-transformer
   "Add the position of the given node relative to its parent to the
   given vector transformation function, returning a new vector

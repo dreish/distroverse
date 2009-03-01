@@ -40,6 +40,8 @@ import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.Str;
 
+import clojure.lang.ISeq;
+
 public class DvtpFlexiStreamer extends ObjectStreamer< Object >
    {
    public DvtpFlexiStreamer( ByteBuffer b )
@@ -60,27 +62,39 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
             next_object = queue.remove();
          if ( next_object == null )
             return;
+         
+         if ( next_object instanceof ISeq )
+            {
+            ISeq n_o_seq = (ISeq) next_object;
+            next_object = n_o_seq.first();
+            
+            ISeq n_o_rest = n_o_seq.rest();
+            if ( n_o_rest != null )
+               queue.add( n_o_rest );
+            }
 
          if ( next_object instanceof String )
             {
-            if ( safelyStreamableString( (String) next_object ) )
+            String n_o_str = (String) next_object;
+            if ( safelyStreamableString( n_o_str ) )
                {
-               baos.write( ((String) next_object + "\r\n")
+               baos.write( (n_o_str + "\r\n")
                            .getBytes( "UTF-8" ) );
                return;
                }
-            next_object = new Str( (String) next_object );
+            next_object = new Str( n_o_str );
             }
          
          if ( next_object instanceof DvtpExternalizable )
             {
-            DvtpExternalizable no_de = (DvtpExternalizable) next_object;
+            DvtpExternalizable n_o_de 
+               = (DvtpExternalizable) next_object;
             ByteArrayOutputStream externalized_object
                = new ByteArrayOutputStream();
             ULong class_num 
-               = new ULong( no_de.getClassNumber() );
+               = new ULong( n_o_de.getClassNumber() );
             class_num.writeExternal( externalized_object );
-            no_de.writeExternal( externalized_object );
+            n_o_de.writeExternal( externalized_object );
             
             // Write initial NUL to baos
             baos.write( 0 );

@@ -2,12 +2,47 @@
 
 - To do for 0.02:
   - Send surroundings from server to proxy
-    - Set initial detail level -- -10
+    + Set initial detail level -- -10.0
+      > This is in the session attachment
     - Set proxy's loading property
-    - Starting from avatar's parent node, find and send all visible
+    x Starting from avatar's parent node, find and send all visible
       nodes
-      - Want to be able to send a seq of DvtpExternalizable objects
+    x Starting from avatar's parent node, find and send all top-level
+      visible nodes (all nodes such that some children might be
+      visible)
+      x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
+    - Send parent node; client will spread out requests from there
+    - Proxy will pull children that both proxy and server agree are
+      visible to the client at the current detail level
+      > Proxy will stop descending when a node has the same timestamp
+        as the copy in its cache; will not stop ascending
+      - One concession to efficiency: the server will send the chain
+        going up, and the client will only ever pull children
+        > Otherwise, the server will need to recheck visibility on
+          each node, which will be O(N^2) of the tree depth of the
+          avatar
+        + node-tree/parent-chain nodeid
+        - server-lib/node-encode {} => DNode
+        + Make dvtp-send! handle a seq
+          + It should get added to the netOutQueue as normal; the
+            queue reader needs to know how to handle a seq (or an
+            iterator)
+            > The queue reader is called DvtpFlexiStreamer
+            + Take an object from the seq and stream it
+            + Add the rest back to the end of the queue
+            > This is pretty awesome
+            > I'm pretty sure it will break when I switch to lazier seqs
+              tomorrow
+    x Server will automatically subscribe the client to changes in all
+      nodes within range
+      > Given that an avatar will move around more than nodes will, in
+        general, change, I think the subscriber list idea was not a
+        good one.  Instead, whenever a node is changed, the interested
+        clients should be determined dynamically, perhaps by using a
+        separate tree structure containing the locations of all
+        avatars (which would almost surely be useful in other cases)
+    - Client needs to subscribe to all these nodes, too
     - Clear proxy's loading property
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions

@@ -200,3 +200,36 @@
      (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
                             (Quat. q)))))
 
+(defmulti dvtp-convert
+  "Convert a string or number into a Str, ULong, or Flo, pass through
+  a list starting with a Dvtp class, and throw an exception for
+  anything else."
+  (fn [x] (class x)))
+
+;; dvtp-wrap
+
+(defmethod dvtp-convert clojure.lang.PersistentList
+  [x]
+  (if (message-set (first x))
+    x
+    (throw (Exception. (str "Cannot convert list " x
+                            ", try a vector")))))
+
+(defmethod dvtp-convert Integer [x]
+  `(Ulong. ~x))
+
+(defmethod dvtp-convert Boolean [x]
+  (if x `(True.) `(False.)))
+
+(defmethod dvtp-convert String [x]
+  `(Str. ~x))
+
+(defmethod dvtp-convert Double [x]
+  `(Flo. (float x)))
+
+(defn dvtp-wrap
+  "Converts a sequence including strings, booleans, and numbers into a
+  sequence including Strs, Bools, ULongs, and Flos."
+  [s]
+  (map dvtp-convert s))
+

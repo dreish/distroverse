@@ -58,7 +58,14 @@
   "Generates a FunCall constructor.  Assumes 'session is bound to a
   session."
   [rform]
-  `(FunCall. (ULong. (gen-fun-call-id ~'session)) ~@rform))
+  `(FunCall. (ULong. (gen-fun-call-id ~'session))
+             ~@(dvtp-wrap rform)))
+
+(defmacro dstmt
+  "Sends a DVTP FunCall statement.  Assumes 'session is bound to a
+  session."
+  [& rform]
+  `(dvtp-send! ~'session (FunCall. (ULong. 0) ~@(dvtp-wrap rform))))
 
 (defmacro ac!
   "Abbreviation for (async-call! session args...).  Assumes 'session
@@ -90,7 +97,8 @@
    (*id-to-node* nodeid)))
 
 (defn add-object
-  "Add shape as a child of node, with move move."
+  "Add shape as a child of node, with move move.  Returns the new node
+  ID."
   [node move shape]
   (dm-dosync
    ; XXX
@@ -154,20 +162,18 @@
   (ref {:callbacks       (ref {})
 	:session         session
 	:id              id
+        :detail          -10.0
+        :loading         true
 	:funcall-counter (ref 0)}))
 
 (defn start-rendering!
   "Begins sending a proxy objects to display."
   [att session]
   (do
+    (dstmt "setprop" "loading" true)
     (dvtp-send! session
-                (FunCall. (ULong. 0)
-                          (Str. "setprop")
-                          (Str. "loading")
-                          (True.)))
-    ; XXX
-  ))
-  
+        (map node-encode (parent-chain (att :avatar)))))
+
 
 (defn init-connection!
   "Performs basic new-connection setup: getting and verifying the
@@ -180,7 +186,7 @@
   (ac! [id-reply (AskInv. "ID" "id")]
     (let [id (get-id id-reply)
 	  challenge (gen-id-challenge id session)]
-      (ac! [id-response (fun-call ("challenge" "id" challenge))]
+      (ac! [id-response (fun-call ("challenge" "id" (Str. challenge)))]
 	(if (valid-id? id challenge id-response)
 	  (let [att (new-session-attachment session id)]
 	    (do
