@@ -82,8 +82,9 @@
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
   under 1 using the given generator, which should have been advanced
   by 52 bits."
-  (lazy-cons (bits-to-double (.getCollectedBits reg))
-	     (prng-double-seq (.advance reg 52))))
+  (lazy-seq
+    (cons (bits-to-double (.getCollectedBits reg))
+          (prng-double-seq (.advance reg 52)))))
 
 (defn feedback-double-seq [seed]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
@@ -96,10 +97,11 @@
   under 1 using the given generator, which should have been advanced
   to one.  Because of the increased accuracy in low numbers, this
   sequence will almost surely not include any exact zeros."
-  (let [reg2 (.advance reg 52)]
-    (lazy-cons (bits-to-double (.getCollectedBits reg2)
-			       (.getNumCollectedBits reg))
-	       (prng-perfect-double-seq (.advanceToOne reg2)))))
+  (lazy-seq
+    (let [reg2 (.advance reg 52)]
+      (cons (bits-to-double (.getCollectedBits reg2)
+                            (.getNumCollectedBits reg))
+            (prng-perfect-double-seq (.advanceToOne reg2))))))
 
 (defn feedback-perfect-double-seq [seed]
   "Returns a lazy sequence of pseudorandom doubles between 0 and just
@@ -111,8 +113,9 @@
 (defn prng-long-seq [#^PrngSslfsr reg]
   "Returns a lazy sequence of pseudorandom longs using the given
   generator, which should have been advanced by 64 bits."
-  (lazy-cons (.getCollectedBits reg)
-	     (prng-long-seq (.advance reg 64))))
+  (lazy-seq
+    (cons (.getCollectedBits reg)
+          (prng-long-seq (.advance reg 64)))))
 
 (defn feedback-long-seq [seed]
   "Returns a lazy sequence of pseudorandom longs from the given long
@@ -123,8 +126,9 @@
   "Returns a lazy sequence of pseudorandom floats between 0 and just
   under 1 using the given generator, which should have been advanced
   by 23 bits."
-  (lazy-cons (bits-to-float (.getCollectedBits reg))
-	     (prng-float-seq (.advance reg 23))))
+  (lazy-seq
+    (cons (bits-to-float (.getCollectedBits reg))
+          (prng-float-seq (.advance reg 23)))))
 
 (defn feedback-float-seq [seed]
   "Returns a lazy sequence of pseudorandom floats between 0 and just

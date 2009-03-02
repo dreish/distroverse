@@ -38,7 +38,7 @@
 
 (dm-dosync (bk-test1 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :date))
+(dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :down))
 
 
 

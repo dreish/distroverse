@@ -377,10 +377,10 @@
           in-writes (writes rowkey)
           ; TODO delay (insert-query) for a slight performance ++
           write-query (insert-query dmap row)]
+      (if (dmap-c rowkey)
+        (throw (Exception. (str "dm-insert: Row exists: " rowkey))))
       (if in-writes
-        (if (nil? @in-writes)
-          (ref-set in-writes row)
-          (throw (Exception. (str "dm-insert: Row exists: " rowkey))))
+        (ref-set in-writes row)
         (commute writes assoc-new-or-retry rowkey (ref row)))
       (add-to-write-queue write-query))
     dmap-c))

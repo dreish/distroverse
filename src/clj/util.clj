@@ -40,7 +40,7 @@
      (loop [q (queue)
             a args]
        (if a
-         (recur (conj q (first a)) (rest a))
+         (recur (conj q (first a)) (next a))
          q))))
 
 (defn cinc
@@ -52,9 +52,10 @@
   "Given two characters, returns a character range.  Like range, the
   end is not included."
   [#^Character begin #^Character end]
-  (if (not= begin end)
-    (lazy-cons begin
-               (crange (cinc begin) end))))
+  (lazy-seq
+    (if (not= begin end)
+      (cons begin
+            (crange (cinc begin) end)))))
 
 (let [nybs (vec (concat (crange \0 (cinc \9))
                         (crange \a (cinc \f))))]
@@ -62,13 +63,9 @@
     "Takes a sequence of bytes and returns a sequence of hex
     characters."
     [bytes]
-    (if bytes
-      (let [fb (first bytes)
-            high-nyb (quot (bit-and fb 240) 16)
-            low-nyb  (bit-and fb 15)]
-        (cons (nybs high-nyb)
-              (lazy-cons (nybs low-nyb)
-                         (hex-encode-bytes (rest bytes))))))))
+    (mapcat #(list (nybs (quot (bit-and % 240) 16))
+                   (nybs (bit-and % 15)))
+            bytes)))
 
 (defn inc-in
   "Return the given hash with the given field incremented."
@@ -87,8 +84,8 @@
        (if (some #(= % '_) form)
          `(~@(take-while #(not= % '_) form)
            ~x
-           ~@(rest (drop-while #(not= % '_) form)))
-         `(~(first form) ~x ~@(rest form)))
+           ~@(next (drop-while #(not= % '_) form)))
+         `(~(first form) ~x ~@(next form)))
        (list form x)))
   ([x form & more]
      `(+> (+> ~x ~form) ~@more)))
@@ -108,3 +105,17 @@
   (if ks
     (assoc m k (apply dissoc-in (get m k) ks))
     (dissoc m k)))
+
+(defn rests [coll]
+  "Returns a lazy sequence of successive rests of coll, beginning with
+  the entire collection and ending with a collection of count 1."
+  (take-while identity (iterate rest coll)))
+
+(defn do-or [& args]
+  "(or) as a function, evaluating all its arguments, but returning the
+  first true one just as (or) does."
+  (reduce #(or %1 %2) args))
+
+(defn gmt-time-string []
+  (. (java.util.Date.) toGMTString))
+

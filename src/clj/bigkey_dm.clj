@@ -111,7 +111,8 @@
         (if-let [bk-row ((dm-row :val_hash) keyval)]
             (let [new-bk-row (apply f bk-row args)]
               (dm-update dmap munged-key
-                         assoc-in [:val_hash keyval] new-bk-row))
+                         assoc-in [:val_hash keyval] new-bk-row)
+              new-bk-row)
           (nonexist-err))
       (nonexist-err))))
 
@@ -173,10 +174,10 @@
   [bkc keyval]
   ; Note: This ensures the whole dm row.
   (let [bk (bkc)
-        munged-key ((get-key-munger bk) (pr-str k))]
+        munged-key ((get-key-munger bk) (pr-str keyval))]
     (or (if-let [dm-row (dm-ensure (get-dmap bk) munged-key)]
             (let [valcol (dm-row :val_hash)]
-              (valcol k)))
+              (valcol keyval)))
         (throw (Exception. "bk-ensure: non-existent row")))))
 
 

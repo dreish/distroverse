@@ -12,7 +12,10 @@
       visible)
       x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
-    - Send parent node; client will spread out requests from there
+    - Send parent node; client will query downward from there
+      - node-tree/rel-vector a b [offset]
+        > Return vector from a to b, plus offset
+        - Nodes need a depth
     - Proxy will pull children that both proxy and server agree are
       visible to the client at the current detail level
       > Proxy will stop descending when a node has the same timestamp
@@ -34,6 +37,7 @@
             > This is pretty awesome
             > I'm pretty sure it will break when I switch to lazier seqs
               tomorrow
+              > Was easy to fix
     x Server will automatically subscribe the client to changes in all
       nodes within range
       > Given that an avatar will move around more than nodes will, in
@@ -616,6 +620,37 @@
       + N=10 T=200: 0.077 secs
     > Will assume, for now, that bk works correctly, since it is a
       simple layer on top of dm
+  + Switch to lazier seqs
+    + Follow upgrade instructions from rhickey
+      + Rename all calls to 'rest' to 'next'
+        x rests ??
+          + Can map take a rest?  Do I need to change rests to nexts?
+        + server-lib/const-message?
+        + util/queue
+        + util/+>
+          + Look at how -> is defined in the new core
+      + Port any use of lazy-cons to a different form using lazy-seq
+        + util/hex-encode-bytes
+          + Rewrite using mapcat
+        + node-tree/parent-chain
+        + prng-feedback/prng-*-seq
+        + sql/rs-seq
+          > Looks like this had a dumb bug in it, too
+        + util/crange
+    + Update and rebuild Clojure
+      + Use nil-punning debug mode:
+        + ant -Dclojure.assert-if-lazy-seq=true
+    + Restart repl
+    + Try tests:
+      + dm
+        + Interesting problem I never encountered before: a dm-insert
+          on an existing row created previously does not throw an
+          exception; result is that the writer thread errors out
+          + I check whether it's in writes, but not whether it's in
+            the table generally
+      + bk
+      + dm stress tests
+        > Runs at around the same speed
 
 ------------------------------------------------------------------------
 - To do for 0.03:

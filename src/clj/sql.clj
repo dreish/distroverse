@@ -66,12 +66,13 @@
 
 (defn rs-seq
   "Return a sequence of results.  CAUTION: probably not safe to lazily
-  evaluate this after closing an rs."
+  evaluate this after closing an rs.  DANGER: ResultSet is mutable, so
+  assume this function owns rs forever after it is passed to it."
   [rs n-cols]
-  (if (.next rs)
-    (lazy-cons (rs-row rs n-cols)
-               (if (.next rs)
-                 (rs-seq rs n-cols)))))
+  (lazy-seq
+    (if (.next rs)
+      (cons (rs-row rs n-cols)
+            (rs-seq rs n-cols)))))
 
 (defn rs-vec
   "Return a vector of results."

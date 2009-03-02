@@ -68,7 +68,10 @@ public class DvtpFlexiStreamer extends ObjectStreamer< Object >
             ISeq n_o_seq = (ISeq) next_object;
             next_object = n_o_seq.first();
             
-            ISeq n_o_rest = n_o_seq.rest();
+            // TODO replace this with .more() to make it lazier; factor
+            // out a getNextObject() method that will retry if it gets
+            // an empty seq
+            ISeq n_o_rest = n_o_seq.next();
             if ( n_o_rest != null )
                queue.add( n_o_rest );
             }

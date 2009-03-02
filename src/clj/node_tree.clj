@@ -75,9 +75,10 @@
 (defn parent-chain
   "Returns a seq of the ancestors for the given node."
   [n]
-  (if-let [p (parent-of n)]
-    (lazy-cons p
-               (parent-chain p))))
+  (lazy-seq
+    (if-let [p (parent-of n)]
+      (cons p
+            (parent-chain p)))))
 
 (defn add-to-transformer
   "Add the position of the given node relative to its parent to the

@@ -41,25 +41,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; General sequence functions
-
-(defn rests [coll]
-  "Returns a lazy sequence of successive rests of coll, beginning with
-  the entire collection and ending with a collection of count 1."
-  (take-while identity (iterate rest coll)))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ; Miscellaneous general functions
-
-(defn do-or [& args]
-  "(or) as a function, evaluating all its arguments, but returning the
-  first true one just as (or) does."
-  (reduce #(or %1 %2) args))
-
-(defn gmt-time-string []
-  (. (java.util.Date.) toGMTString))
 
 (let [rng (java.security.SecureRandom.)]
   (defn sec-random []
@@ -124,7 +106,7 @@
 	     (every? #(or (number? %)
 			  (string? %)
 			  (const-message? %))
-		     (rest mc)))
+		     (next mc)))
 	  true
 	:else
 	  false))

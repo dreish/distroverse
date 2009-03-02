@@ -30,6 +30,7 @@
 ;; </copyleft>
 
 (use :reload-all 'durable-maps)
+
 (use :reload-all 'util)
 
 (defn setup-dm-test-data!
