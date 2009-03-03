@@ -83,7 +83,7 @@
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
-(defn- new-gen-node [parent spec lspec subnode-index seed r moveseq]
+(defn- new-gen-node [parent depth spec lspec subnode-index seed r moveseq]
   "Return a new ephemeral node for the given parameters."
   {:name (lspec :name)
    :generator (lspec :generator)
@@ -96,21 +96,25 @@
    :seed-mutation-shift (-> (parent :seed-mutation-shift)
 			    (+ 4)
                             (rem 59))
+   :depth depth
+   :parent-ref parent
+   :parent (parent :nodeid)             ; might be nil
+   ; XXX need the path from a concrete node here
    })
 
 (defn new-top-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent spec lspec pos subnode-index]
+  [parent depth spec lspec pos subnode-index]
   (let [seed (subseed parent subnode-index)
 	r    (pick-radius lspec (inc seed))]
-    (new-gen-node parent spec lspec subnode-index seed r
+    (new-gen-node parent depth spec lspec subnode-index seed r
 		  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
 
 (defn new-sub-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent spec lspec pos subnode-index r]
+  [parent depth spec lspec pos subnode-index r]
   (let [seed (subseed parent subnode-index)]
-    (new-gen-node parent spec lspec subnode-index seed r
+    (new-gen-node parent depth spec lspec subnode-index seed r
 		  (pos-to-moveseq pos))))
 
 (defn pseudorandom-pos
@@ -138,10 +142,13 @@
 	size-factor  (structure 0)
 	my-radius    (* size-factor parent-rad)
 	next-layer?  (< my-radius (layer-spec :subscale))
+        depth        (inc (parent :depth))
 	subnode-gen
 	  (if next-layer?
-	    #(new-top-gen-node parent spec (spec (inc parent-layer)) %1 %2)
-	    #(new-sub-gen-node parent spec layer-spec %1 %2 my-radius))]
+	    #(new-top-gen-node parent depth
+                               spec (spec (inc parent-layer)) %1 %2)
+	    #(new-sub-gen-node parent depth
+                               spec layer-spec %1 %2 my-radius))]
     (map subnode-gen
 	 (map pseudorandom-pos
 	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]

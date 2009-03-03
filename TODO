@@ -4,7 +4,7 @@
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment
-    - Set proxy's loading property
+    + Set proxy's loading property
     x Starting from avatar's parent node, find and send all visible
       nodes
     x Starting from avatar's parent node, find and send all top-level
@@ -16,6 +16,8 @@
       - node-tree/rel-vector a b [offset]
         > Return vector from a to b, plus offset
         - Nodes need a depth
+          - Will be a property stored in concrete nodes
+          + gen-children should add it
     - Proxy will pull children that both proxy and server agree are
       visible to the client at the current detail level
       > Proxy will stop descending when a node has the same timestamp

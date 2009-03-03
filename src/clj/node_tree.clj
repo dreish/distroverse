@@ -55,7 +55,10 @@
   "Returns the parent node of the given node"
   [n]
   (if (n :ephemeral)
-    nil  ; XXX this might be hard
+    (or (if (n :parent)
+          (get-node (n :parent)))
+        (n :parent-ref)
+        (gen-parent n))
     (get-node (n :parent))))
 
 (defn children-of
