@@ -12,6 +12,31 @@
       visible)
       x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
+    - New approach to handling ephemeral nodes
+      - Make them concrete (temporarily) any time they have children
+        added
+        > Could have a concise message format for this
+        - In add-subnode (which should be in node-tree), if the parent
+          is ephemeral, call make-concrete on it
+      - When a child is removed, if the node itself hasn't been
+        modified, and all its children are again ephemeral (and none
+        of them have been deleted), it reverts back to ephemeral with
+        a delete/add transaction on the parent
+      x Avatars should probably have their quitting position stored as
+        a vector of MoveSeqs, since really any node might disappear
+      - Or as a series of node/vector combinations starting from the
+        last parent node and going up to the root; they would be tried
+        in order until one still existing was found
+        > This would have the advantage (?) that if the user were to
+          quit in a room that then got moved, the user would start in
+          the same place.  This might be very desireable in a case
+          like quitting as a passenger in a vehicle
+        > The minor disadvantage is that quitting far from an
+          artificial structure would cause a proportional but small
+          inaccuracy in the restart position
+          > For example, on an uninhabited continent 5000 km from any
+            civilization, the savepos error would be on the order of
+            0.6 meters
     - Send parent node; client will query downward from there
       - node-tree/rel-vector a b [offset]
         > Return vector from a to b, plus offset

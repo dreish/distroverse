@@ -31,6 +31,7 @@
 
 (ns server-lib
   (:use util
+        node-tree
         clojure.contrib.def))
 
 (import '(com.jme.math Quaternion Vector3f))
@@ -181,6 +182,29 @@
   ([[x y z] #^Quaternion q]
      (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
                             (Quat. q)))))
+
+(defn node-to-addobject
+  "Turns a node hash into an AddObject object."
+  [nh]
+  ; XXX
+  )
+
+(defn noderef-encode
+  "Turns a node hash into a DNodeRef object."
+  [nh]
+  ; XXX
+  ; XXX how to noderef to an ephem node? (this)  Will I need to change
+  ; the definition of DNodeRef?
+  )
+
+(defn node-encode
+  "Turns a node hash into a DNode object."
+  [nh]
+  (DNode. (node-to-addobject nh)
+          (nh :radius)
+          (noderef-encode nh)
+          (noderef-encode (parent-of nh))
+          (into-array (map noderef-encode )))) ; children
 
 (defmulti dvtp-convert
   "Convert a string or number into a Str, ULong, or Flo, pass through

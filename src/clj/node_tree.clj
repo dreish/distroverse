@@ -227,3 +227,26 @@
                         match?
                         (constantly true))]
     (smallest-node candidate-seq)))
+
+(defn make-concrete
+  ""
+  [node]
+  ; XXX
+  )
+
+(defn add-subnode
+  "Add node c as a child of node p, with move m.  Returns the new node
+  ID."
+  [p m c]
+  (do
+    (if (p :ephemeral)
+      (make-concrete p))
+    ; XXX
+  )
+
+(defn add-object
+  "Add shape as a child of node, with move move.  Returns the new node
+  ID."
+  [node move shape]
+   ; XXX
+  )
