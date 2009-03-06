@@ -90,20 +90,6 @@
        " # "
        (sec-random)))
 
-(defn get-node
-  "Return the node with the given id (a serial number)."
-  [nodeid]
-  (dm-dosync
-   (*id-to-node* nodeid)))
-
-(defn add-object
-  "Add shape as a child of node, with move move.  Returns the new node
-  ID."
-  [node move shape]
-  (dm-dosync
-   ; XXX
-  ))
-
 (defn add-self-to-world
   "Add the session's avatar to the world."
   [att session]

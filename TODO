@@ -18,6 +18,7 @@
         > Could have a concise message format for this
         - In add-subnode (which should be in node-tree), if the parent
           is ephemeral, call make-concrete on it
+          - Ephemeral nodes need to have an :index-in-parents-children
       - When a child is removed, if the node itself hasn't been
         modified, and all its children are again ephemeral (and none
         of them have been deleted), it reverts back to ephemeral with

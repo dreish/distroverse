@@ -51,6 +51,8 @@
 
 (def get-radius :radius)
 
+(def is-ephem? :ephemeral)
+
 (defn parent-of
   "Returns the parent node of the given node"
   [n]
@@ -229,18 +231,27 @@
     (smallest-node candidate-seq)))
 
 (defn make-concrete
-  ""
+  "Takes an ephemeral node and makes it concrete.  Returns the new
+  concrete node."
   [node]
-  ; XXX
-  )
+  (let [p (if (is-ephem? (parent-of node))
+            (make-concrete (parent-of node))
+            (parent-of node))
+        idx (get-index-in-parent node)
+        new-nodeid (pick-nodeid)]
+    (replace-subnode p
+                     idx
+                     (convert-to-concrete node new-nodeid)
+                     (get-move node))
+    new-nodeid))
 
 (defn add-subnode
   "Add node c as a child of node p, with move m.  Returns the new node
   ID."
   [p m c]
-  (do
-    (if (p :ephemeral)
-      (make-concrete p))
+  (let [p (if (is-ephem? p)
+            (make-concrete p)
+            p)]
     ; XXX
   )
 
