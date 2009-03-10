@@ -145,10 +145,12 @@
         depth        (inc (parent :depth))
 	subnode-gen
 	  (if next-layer?
-	    #(new-top-gen-node parent depth
-                               spec (spec (inc parent-layer)) %1 %2)
-	    #(new-sub-gen-node parent depth
-                               spec layer-spec %1 %2 my-radius))]
+	    #(new-top-gen-node parent depth spec
+                               (spec (inc parent-layer))
+                               %1 %2)
+	    #(new-sub-gen-node parent depth spec
+                               layer-spec
+                               %1 %2 my-radius))]
     (map subnode-gen
 	 (map pseudorandom-pos
 	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]

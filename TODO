@@ -19,6 +19,8 @@
         - In add-subnode (which should be in node-tree), if the parent
           is ephemeral, call make-concrete on it
           - Ephemeral nodes need to have an :index-in-parents-children
+            > Not concrete nodes, though, since they are subject to
+              deletion
       - When a child is removed, if the node itself hasn't been
         modified, and all its children are again ephemeral (and none
         of them have been deleted), it reverts back to ephemeral with
@@ -38,6 +40,8 @@
           > For example, on an uninhabited continent 5000 km from any
             civilization, the savepos error would be on the order of
             0.6 meters
+      - What does the boundary between a concrete parent node and
+        ephemeral children look like?
     - Send parent node; client will query downward from there
       - node-tree/rel-vector a b [offset]
         > Return vector from a to b, plus offset

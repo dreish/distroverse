@@ -42,8 +42,14 @@
 
 (import '(com.jme.math Quaternion Vector3f))
 
-(defvar *id-to-node* (dm-get-map "id-to-node")
+(defvar ws-ns "ws-a/"
+  "World server namespace")
+
+(defvar- *id-to-node* (dm-get-map (str ws-ns "node-tree/id-to-node"))
   "Maps node IDs to nodes.")
+
+(defvar- *node-tree-vars* (dm-get-map (str ws-ns "node-tree/vars"))
+  "Durable variables.")
 
 (def zero-vec (Vector3f. 0 0 0))
 
@@ -230,20 +236,49 @@
                         (constantly true))]
     (smallest-node candidate-seq)))
 
+(defn pick-nodeid
+  "Return a new, unused node id."
+  []
+  (:val
+   (dm-update *node-tree-vars* :next-nodeid inc-in :val)))
+
+(defn replace-subnode-with-new
+  "Replace whatever was in the subnode at index idx of parent node p
+  with the given new-node, which should already be in the node tree."
+  [p idx new-node move]
+  (do
+    (dm-update *id-to-node*
+               (p :nodeid)
+               assoc-in [:children idx]
+               (new-node :nodeid))
+    (dm-update *id-to-node*
+               (new-node :nodeid)
+               assoc-in [:parent] (p :nodeid))))
+
+(defn convert-to-concrete
+  "Takes an ephemeral node and returns a structure that can be used as
+  a concrete node (without adding it to the node tree)."
+  [e]
+  (assoc e
+    :nodeid (pick-nodeid)
+    :ephemeral false
+    :children (vec (gen-children e))))
+
 (defn make-concrete
   "Takes an ephemeral node and makes it concrete.  Returns the new
   concrete node."
   [node]
-  (let [p (if (is-ephem? (parent-of node))
+  (let [idx (get-index-in-parent node)
+        p (if (is-ephem? (parent-of node))
             (make-concrete (parent-of node))
             (parent-of node))
-        idx (get-index-in-parent node)
-        new-nodeid (pick-nodeid)]
-    (replace-subnode p
-                     idx
-                     (convert-to-concrete node new-nodeid)
-                     (get-move node))
-    new-nodeid))
+        new-node (convert-to-concrete node)]
+    (dm-insert *id-to-node* new-node)
+    (replace-subnode-with-new p
+                              idx
+                              new-node
+                              (get-move node))
+    new-node))
 
 (defn add-subnode
   "Add node c as a child of node p, with move m.  Returns the new node

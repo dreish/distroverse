@@ -305,6 +305,14 @@
   [val type]
   (pr-str val))
 
+(defmethod translate-type-in :keyword
+  [val type]
+  (keyword val))
+
+(defmethod translate-type-out :keyword
+  [val type]
+  (name val))
+
 (defn- translate-val-in
   [[col val] cols]
   (let [colspec (cols col)
