@@ -37,9 +37,24 @@ public final class DNode implements DvtpExternalizable
          mParent = new DNodeRef( in );
       else
          mParent = null;
-      int num_children = Util.safeInt( ULong.externalAsLong( in ) );
-      mChildren = DvtpObject.readArray( in, num_children,
-                                        DNodeRef.class, 29 );
+      mGeneratedChildren = Bool.externalAsBoolean( in );
+      if ( mGeneratedChildren )
+         {
+         mChildren = null;
+         mGenerator = Str.externalAsString( in );
+         int num_args = Util.safeInt( ULong.externalAsLong( in ) );
+         mGeneratorArgs = new DvtpExternalizable[ num_args ];
+         for ( int i = 0; i < num_args; ++i )
+            mGeneratorArgs[ i ] = DvtpObject.parseObject( in );
+         }
+      else
+         {
+         int num_children = Util.safeInt( ULong.externalAsLong( in ) );
+         mChildren = DvtpObject.readArray( in, num_children,
+                                           DNodeRef.class, 29 );
+         mGenerator = null;
+         mGeneratorArgs = null;
+         }
       }
 
    /*
@@ -54,6 +69,9 @@ public final class DNode implements DvtpExternalizable
       mThis = null;
       mParent = null;
       mChildren = null;
+      mGeneratedChildren = false;
+      mGenerator = null;
+      mGeneratorArgs = null;
       }
 
    public DNode( AddObject b, float r, DNodeRef t, DNodeRef p,
@@ -64,6 +82,22 @@ public final class DNode implements DvtpExternalizable
       mThis = t;
       mParent = p;
       mChildren = c.clone();
+      mGeneratedChildren = false;
+      mGenerator = null;
+      mGeneratorArgs = null;
+      }
+
+   public DNode( AddObject b, float r, DNodeRef t, DNodeRef p,
+                 String g, DvtpExternalizable[] g_args )
+      {
+      mBeing = b;
+      mRadius = r;
+      mThis = t;
+      mParent = p;
+      mChildren = null;
+      mGeneratedChildren = true;
+      mGenerator = g;
+      mGeneratorArgs = g_args;
       }
 
    /* (non-Javadoc)
@@ -77,7 +111,13 @@ public final class DNode implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(DNode "
+      if ( mGeneratedChildren )
+         return "(DNode. "
+                + Util.prettyPrintList( mBeing, mRadius, mThis, mParent,
+                                        mGenerator, mGeneratorArgs )
+                + ")";
+
+      return "(DNode. "
              + Util.prettyPrintList( mBeing, mRadius, mThis, mParent,
                                      mChildren )
              + ")";
@@ -94,7 +134,12 @@ public final class DNode implements DvtpExternalizable
                  &&  dn.mThis.equals( mThis )
                  &&  ((mParent == null && dn.mParent == null)
                       ||  dn.mParent.equals( mParent ))
-                 &&  Arrays.equals( dn.mChildren, mChildren ));
+                 &&  mGeneratedChildren == dn.mGeneratedChildren
+                 &&  ((mGenerator == null && dn.mGenerator == null)
+                      || (mGenerator != null
+                          && mGenerator.equals( dn.mGenerator )))
+                 &&  Arrays.equals( dn.mChildren, mChildren ))
+                 &&  Arrays.equals( dn.mGeneratorArgs, mGeneratorArgs );
          }
       return false;
       }
@@ -106,7 +151,9 @@ public final class DNode implements DvtpExternalizable
              ^ mBeing.hashCodeWithoutId()
              ^ mThis.hashCode()
              ^ (mParent == null ? 0 : mParent.hashCode())
-             ^ Arrays.hashCode( mChildren );
+             ^ Arrays.hashCode( mChildren )
+             ^ (mGenerator == null ? 0 : mGenerator.hashCode())
+             ^ Arrays.hashCode( mGeneratorArgs );
       }
 
    /* (non-Javadoc)
@@ -124,13 +171,28 @@ public final class DNode implements DvtpExternalizable
          Bool.booleanAsExternal( out, true );    // has_parent
          mParent.writeExternal( out );
          }
-      ULong.longAsExternal( out, mChildren.length );
-      DvtpObject.writeArray( out, mChildren );
+
+      Bool.booleanAsExternal( out, mGeneratedChildren );
+      if ( mGeneratedChildren )
+         {
+         Str.stringAsExternal( out, mGenerator );
+         ULong.longAsExternal( out, mGeneratorArgs.length );
+         for ( DvtpExternalizable arg : mGeneratorArgs )
+            DvtpObject.writeInnerObject( out, arg );
+         }
+      else
+         {
+         ULong.longAsExternal( out, mChildren.length );
+         DvtpObject.writeArray( out, mChildren );
+         }
       }
 
-   private final AddObject  mBeing;
-   private final float      mRadius;
-   private final DNodeRef   mThis;
-   private final DNodeRef   mParent;
-   private final DNodeRef[] mChildren;
+   private final AddObject            mBeing;
+   private final float                mRadius;
+   private final DNodeRef             mThis;
+   private final DNodeRef             mParent;
+   private final boolean              mGeneratedChildren;
+   private final DNodeRef[]           mChildren;
+   private final String               mGenerator;
+   private final DvtpExternalizable[] mGeneratorArgs;
    }

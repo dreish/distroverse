@@ -13,6 +13,13 @@
       x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
     - New approach to handling ephemeral nodes
+      + A concrete node can either have all concrete children, or it
+        can have a generator function to generate its child nodes
+        + DNode should have a switch: mGeneratedChildren
+          + Debug failed externalization test
+      - Converting a node to concrete means converting its parent to
+        have all concrete children, all of which will have generator
+        functions for their children
       - Make them concrete (temporarily) any time they have children
         added
         > Could have a concise message format for this
@@ -368,7 +375,7 @@
 	  > xoring the parent's seed instead
   + Plug server into database
     x Need FIFO map (for db-query caching so they're
-      transaction-safe): 
+      transaction-safe):
       x Created with a length limit, L
       x Adding something new to it, if the (L+1)th thing, causes the
         oldest one to disappear
@@ -610,7 +617,7 @@
       + Counter row: threads will get-and-increment from that row
         until the value they get is over N, at which point they quit
       + Target row: threads will add their counter to this target
-        value 
+        value
       + Try with N=10 and 1 thread
         + Mostly worked, but the delete/insert pair bombed; DELETE
           query never ran, but INSERT did

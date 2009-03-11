@@ -74,7 +74,7 @@ public final class Util
       public A a;
       public B b;
       @Override
-      
+
       /* This is wrong.  Two different pairs cannot be value-equal
        * because no pair is an immutable value, as currently coded.
        */
@@ -87,7 +87,7 @@ public final class Util
             }
          return false;
          }
-      
+
       @Override
       public int hashCode()
          {
@@ -242,7 +242,8 @@ public final class Util
    private Util() { /* Nothing */ }
 
    /**
-    * Pretty-prints a list of objects.
+    * Pretty-prints a list of objects.  Yes, I know this isn't really
+    * pretty printing.
     * @param objects
     * @return
     */
@@ -259,10 +260,10 @@ public final class Util
                                       .replaceAll( "\"", "\\\"" )
                         + "\"" );
          else if ( o == null )
-            ret.append( "null" );
+            ret.append( "nil" );
          else if ( o.getClass().isArray() )
             {
-            ret.append( "{" + prettyPrintList( (Object[]) o ) + "}" );
+            ret.append( "[" + prettyPrintList( (Object[]) o ) + "]" );
             }
          else
             ret.append( o.toString() );

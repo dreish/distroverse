@@ -487,25 +487,50 @@ public class TestExternalization
       tryBeamObject( new Dict( m ) );
       }
 
+   private static DNodeRef[] dNodeExamples()
+      {
+      return new DNodeRef[]
+         {
+         new DNodeRef( "0", 123L, new Real( 123.45, 2 ),
+                       null ),
+         new DNodeRef( "example.com", 456L,
+                       new Real( 12.777, 7 ), null ),
+         new DNodeRef( "0", 125L, new Real( 123.45, 2 ), null ),
+         };
+      }
+
    private static void testDNodeRef()
    throws IOException, ClassNotFoundException
       {
-      tryBeamObject( new DNodeRef( "0", 123L, new Real( 123.45, 2 ),
-                                   null ) );
-      tryBeamObject( new DNodeRef( "example.com", 456L,
-                                   new Real( 12.777, 7 ), null ) );
+      DNodeRef[] dnex = dNodeExamples();
+      for ( DNodeRef dn : dnex )
+         tryBeamObject( dn );
       }
 
    private static void testDNode()
    throws IOException, ClassNotFoundException
       {
       AddObject[] aoex = addObjectExamples();
+      DNodeRef[]  dnex = dNodeExamples();
       tryBeamObject(
-         new DNode( aoex[ 0 ], 2.0f,
-            new DNodeRef( "0", 123L, new Real( 123.45, 2 ), null ),
-            new DNodeRef( "0", 125L, new Real( 123.45, 2 ), null ),
-            new DNodeRef[] {}
-         ) );
+         new DNode( aoex[ 0 ], 2.0f, dnex[ 0 ], dnex[ 1 ],
+                    new DNodeRef[] {} )
+         );
+      tryBeamObject(
+         new DNode( aoex[ 0 ], 2.0f, dnex[ 0 ], dnex[ 1 ],
+                    dnex )
+         );
+      tryBeamObject(
+         new DNode( aoex[ 0 ], 3.0f, dnex[ 1 ], dnex[ 2 ],
+                    "gen-children", new DvtpExternalizable[]
+                                       { new ULong( 1 ) } )
+         );
+      tryBeamObject(
+         new DNode( aoex[ 0 ], 3.0f, dnex[ 1 ], dnex[ 2 ],
+                    "gen-children", new DvtpExternalizable[]
+                                       { new ULong( 1 ),
+                                         new Flo( 2.2f ) } )
+         );
       }
 
    private static void testDLong()
@@ -675,7 +700,7 @@ public class TestExternalization
          tryBeamObject( new SetVisible( i, false ) );
          }
       }
-   
+
    private static void testCTrans()
    throws IOException, ClassNotFoundException
       {
@@ -716,5 +741,9 @@ public class TestExternalization
       if ( ! out.equals( in ) )
          throw new RuntimeException( in.prettyPrint()
                                      + " != " + out.prettyPrint() );
+      if ( out.hashCode() != in.hashCode() )
+         throw new RuntimeException( "hashcode for " + in.prettyPrint()
+                                     + " does not match hashcode for "
+                                     + out.prettyPrint() );
       }
    }
