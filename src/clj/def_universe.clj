@@ -134,39 +134,41 @@
 
 (defn gen-fractalplace
   "Returns a sequence of 8 subnodes for the given parent node."
-  [parent spec]
-  (let [parent-layer (parent :layer)
-	parent-rad   (parent :radius)
-	layer-spec   (spec parent-layer)
-	structure    (layer-spec :structure)
-	size-factor  (structure 0)
-	my-radius    (* size-factor parent-rad)
-	next-layer?  (< my-radius (layer-spec :subscale))
-        depth        (inc (parent :depth))
-	subnode-gen
-	  (if next-layer?
-	    #(new-top-gen-node parent depth spec
-                               (spec (inc parent-layer))
-                               %1 %2)
-	    #(new-sub-gen-node parent depth spec
-                               layer-spec
-                               %1 %2 my-radius))]
-    (map subnode-gen
-	 (map pseudorandom-pos
-	      (for [xo [-1 1] yo [-1 1] zo [-1 1]]
-		(list xo yo zo))
-	      (repeat (or (parent :dim-skew) [1 1 1]))
-	      (repeat structure)
-	      (repeat parent-rad)
-	      (partition 3 (feedback-float-seq (parent :seed))))
-	 (range 1 9))))
+  ([parent spec]
+     (let [parent-layer (parent :layer)]
+       (gen-fractalplace parent spec parent-layer)))
+  ([parent spec parent-layer]
+     (let [parent-rad   (parent :radius)
+           layer-spec   (spec parent-layer)
+           structure    (layer-spec :structure)
+           size-factor  (structure 0)
+           my-radius    (* size-factor parent-rad)
+           next-layer?  (< my-radius (layer-spec :subscale))
+           depth        (inc (parent :depth))
+           subnode-gen
+           (if next-layer?
+             #(new-top-gen-node parent depth spec
+                                (spec (inc parent-layer))
+                                %1 %2)
+             #(new-sub-gen-node parent depth spec
+                                layer-spec
+                                %1 %2 my-radius))]
+       (map subnode-gen
+            (map pseudorandom-pos
+                 (for [xo [-1 1] yo [-1 1] zo [-1 1]]
+                   (list xo yo zo))
+                 (repeat (or (parent :dim-skew) [1 1 1]))
+                 (repeat structure)
+                 (repeat parent-rad)
+                 (partition 3 (feedback-float-seq (parent :seed))))
+            (range 1 9)))))
 
 (defn gen-children
   "Return a lazy seq of the children of the given ephemeral node."
-  [n]
+  [n & args]
   (let [gen (n :generator)
         spec (n :spec)]
-    (gen n spec)))
+    (apply gen n spec args)))
 
 (defn gen-starsystem
   []

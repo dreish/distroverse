@@ -17,6 +17,8 @@
         can have a generator function to generate its child nodes
         + DNode should have a switch: mGeneratedChildren
           + Debug failed externalization test
+      - Instead of a gen-children function, every node will have a
+        lazy seq of children
       - Converting a node to concrete means converting its parent to
         have all concrete children, all of which will have generator
         functions for their children
