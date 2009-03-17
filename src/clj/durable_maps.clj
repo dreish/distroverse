@@ -284,34 +284,51 @@
 
 ; dm-insert - add a new map entry, failing if the entry already exists
 
-(defmulti translate-type-in (fn [val type] type))
+(defmulti translate-type-in
+  "Translate an object read in from a database into an object for the
+  hash."
+  (fn [s type] type))
 
-(defmulti translate-type-out (fn [val type] type))
+(defmulti translate-type-out
+  "Translate an object in a hash into an object to be stored in the
+  database."
+  (fn [o type] type))
 
 (defmethod translate-type-in :str
-  [val type]
-  val)
+  [s type]
+  s)
 
 (defmethod translate-type-out :str
-  [val type]
-  val)
+  [o type]
+  o)
 
 (defmethod translate-type-in :obj
-  [val type]
+  [s type]
   ; FIXME - would prefer to use a non-evaluating read here
-  (read-string (str val)))
+  (read-string (str s)))
 
 (defmethod translate-type-out :obj
-  [val type]
-  (pr-str val))
+  [o type]
+  (pr-str o))
 
 (defmethod translate-type-in :keyword
-  [val type]
-  (keyword val))
+  [s type]
+  (keyword s))
 
 (defmethod translate-type-out :keyword
-  [val type]
-  (name val))
+  [o type]
+  (name o))
+
+(defmethod translate-type-in :seq
+  [s type]
+  (let [func (read-string (str s))]
+    {:func func
+     :seq (lazy-seq (apply (resolve (first func))
+                           (rest func)))}))
+
+(defmethod translate-type-out :seq
+  [o type]
+  (pr-str (o :func)))
 
 (defn- translate-val-in
   [[col val] cols]
@@ -373,6 +390,34 @@
   ; no nils in :vals
   (commute *write-queue* conj write-query))
 
+(defn- fixrow
+  "Regenerate any derived parts of the in-memory representation of a
+  row, returning the corrected row."
+  [newrow oldrow cols-to-check]
+  (if (nil? cols-to-check)
+    newrow
+    (let [col (first cols-to-check)
+          more-cols (next cols-to-check)
+          [colname checker fixer] col]
+      (if (and oldrow
+               (checker (newrow colname)
+                        (oldrow colname)))
+        (recur newrow oldrow more-cols)
+        (let [new-newrow (assoc newrow
+                           colname (fixer (newrow colname)))]
+          (recur new-newrow oldrow more-cols))))))
+
+(defn seq-check
+  [newcol oldcol]
+  (= (newcol :func) (oldcol :func)))
+
+(defn seq-fix
+  [colval]
+  (let [func (colval :func)]
+    (assoc colval
+      :seq (lazy-seq (apply (resolve (first func))
+                            (rest func))))))
+
 (defn dm-insert
   "Add a new map entry, throwing an exception if an entry with the
   given key already exists.  Returns dmap-c."
@@ -380,6 +425,7 @@
   (do
     (require-dmtrans)
     (let [dmap (dmap-c)
+          row (fixrow row nil (-> dmap :spec :checked-cols))
           writes (dmap :write)
           rowkey (row (-> dmap :spec :key))
           in-writes (writes rowkey)
@@ -436,6 +482,7 @@
         (throw (Exception.
                 (str "dm-update: No existing row for key " keyval))))
       (let [newrow (apply f oldrow args)
+            newrow (fixrow newrow oldrow (-> dmap :spec :checked-cols))
             ; TODO delay (update-query); will not always be needed
             write-query (update-query dmap newrow)]
         (if (not= (oldrow keycol) (newrow keycol))
@@ -446,27 +493,6 @@
           (commute writes assoc-new-or-retry keyval (ref newrow)))
         (add-to-write-queue write-query)
         newrow))))
-
-;; ; dm-commute - commute an existing map entry
-
-;; ; I'm afraid this might be impossible to implement correctly (as a
-;; ; real commute), since it might be impossible to guarantee the
-;; ; write query gets the correct value.
-
-;; (defn dm-commute
-;;   "Commute the row with the given key, setting the value at col to (f
-;;   oldval), and returning that new value."
-;;   [dmap-c key col f & args]
-;;   (do
-;;     (require-dmtrans)
-;;     (let [dmap (dmap-c)
-;;           writes (dmap :write)
-;;           need-ensure (local-select dmap key)
-;;           oldrow (dmap-c key)
-;;           write-query (update-query dmap row)]
-;;       (if need-ensure (ensure oldrow))
-;;       (commute oldrow f)
-;;       (add-to-write-queue write-query))))
 
 ; dm-select - look up something in a map
 

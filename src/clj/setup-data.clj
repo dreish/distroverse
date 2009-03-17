@@ -51,9 +51,12 @@
 
 (dm-create-map! (str ws-ns "node-tree/id-to-node")
                 {:cols {:nodeid ["VARCHAR(20)" :obj]
-                        :children ["MEDIUMTEXT" :obj]
+                        :children ["MEDIUMTEXT" :seq]
                         :parent ["VARCHAR(20)" :obj]
                         ; XXX
                         }
+                 ; FIXME :checked-cols should be handled internally by dm,
+                 ; but it's easier to put it here for now
+                 :checked-cols [:children seq-check seq-fix]
                  :key :nodeid})
 
