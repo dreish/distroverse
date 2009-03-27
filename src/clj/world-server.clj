@@ -160,7 +160,6 @@
     (dvtp-send! session
         (map node-encode (parent-chain (att :avatar)))))
 
-
 (defn init-connection!
   "Performs basic new-connection setup: getting and verifying the
   user's identity, looking up the user's position, and adding the

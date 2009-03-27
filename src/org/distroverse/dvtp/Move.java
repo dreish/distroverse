@@ -10,10 +10,14 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+import com.jme.math.Matrix4f;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 
 //immutable
@@ -50,13 +54,13 @@ public class Move implements DvtpExternalizable
       mMovePolyVecs
          = DvtpObject.readArray( in, mMoveDegree, Vec.class, 11 );
       mMoveSins =  Util.safeInt( ULong.externalAsLong( in ) );
-      mMoveSinVecs 
+      mMoveSinVecs
          = DvtpObject.readArray( in, mMoveSins, Vec.class, 11 );
       mMoveSinPeriods
-         = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
+         = DvtpObject.readArray( in, mMoveSins, Real.class, 33 );
       mMoveSinOffsets
          = DvtpObject.readArray( in, mMoveSins, Flo.class, 15 );
-      
+
       mRotDegree = Util.safeInt( ULong.externalAsLong( in ) + 1 );
       mRotPolyQuats
          = DvtpObject.readArray( in, mRotDegree, Quat.class, 16 );
@@ -64,11 +68,11 @@ public class Move implements DvtpExternalizable
       mRotSinQuats
          = DvtpObject.readArray( in, mRotSins, Quat.class, 16 );
       mRotSinPeriods
-         = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
+         = DvtpObject.readArray( in, mRotSins, Real.class, 33 );
       mRotSinOffsets
          = DvtpObject.readArray( in, mRotSins, Flo.class, 15 );
-      
-      mDuration = new Flo( in );
+
+      mDuration = new Real( in );
       }
 
    /*
@@ -83,16 +87,16 @@ public class Move implements DvtpExternalizable
       mMovePolyVecs = null;
       mMoveSins = 0;
       mMoveSinVecs = null;
-      
-      mRotSinPeriods = mRotSinOffsets
-         = mMoveSinPeriods = mMoveSinOffsets
-         = null;
+
+      mRotSinPeriods = mMoveSinPeriods = null;
+      mRotSinOffsets = mMoveSinOffsets = null;
+
       mRotSins = 0;
-      
+
       mRotDegree = 1;
       mRotPolyQuats = null;
       mRotSinQuats = null;
-      
+
       mDuration = null;
       }
 
@@ -103,7 +107,7 @@ public class Move implements DvtpExternalizable
     */
    public static Move getNew( Vec pos, Quat rot )
       {
-      return new Move( pos, rot, new Flo( -1 ) );
+      return new Move( pos, rot, new Real( new BigDecimal( -1 ) ) );
       }
 
    /**
@@ -111,7 +115,7 @@ public class Move implements DvtpExternalizable
     * @param pos
     * @param rot
     */
-   public Move( Vec pos, Quat rot, Flo dur )
+   public Move( Vec pos, Quat rot, Real dur )
       {
       super();
       mMoveDegree = 1;
@@ -119,27 +123,26 @@ public class Move implements DvtpExternalizable
       mMovePolyVecs[ 0 ] = pos;
       mMoveSins = 0;
       mMoveSinVecs = new Vec[ 0 ];
-      
-      mRotSinPeriods = mRotSinOffsets
-         = mMoveSinPeriods = mMoveSinOffsets
-         = new Flo[ 0 ];
+
+      mRotSinPeriods = mMoveSinPeriods = new Real[ 0 ];
+      mRotSinOffsets = mMoveSinOffsets = new Flo[ 0 ];
       mRotSins = 0;
-      
+
       mRotDegree = 1;
       mRotPolyQuats = new Quat[ 1 ];
       mRotPolyQuats[ 0 ] = rot;
       mRotSinQuats = new Quat[ 0 ];
-      
+
       mDuration = dur;
       }
 
    public Move( Vec[] poly_vecs, Vec[] sin_vecs,
-                Flo[] move_periods, Flo[] move_offsets,
+                Real[] move_periods, Flo[] move_offsets,
 
                 Quat[] poly_quats, Quat[] sin_quats,
-                Flo[] rot_periods, Flo[] rot_offsets,
+                Real[] rot_periods, Flo[] rot_offsets,
 
-                Flo duration )
+                Real duration )
       {
       super();
       if ( poly_vecs.length == 0 )
@@ -210,8 +213,8 @@ public class Move implements DvtpExternalizable
       }
 
    // XXX needs accessors
-   
-   
+
+
    public int getMoveDegree()
       {
       return mMoveDegree;
@@ -232,7 +235,7 @@ public class Move implements DvtpExternalizable
       return mMoveSinVecs[ n ];
       }
 
-   public Flo getMoveSinPeriods( int n )
+   public Real getMoveSinPeriods( int n )
       {
       return mMoveSinPeriods[ n ];
       }
@@ -262,7 +265,7 @@ public class Move implements DvtpExternalizable
       return mRotSinQuats[ n ];
       }
 
-   public Flo getRotSinPeriods( int n )
+   public Real getRotSinPeriods( int n )
       {
       return mRotSinPeriods[ n ];
       }
@@ -272,7 +275,7 @@ public class Move implements DvtpExternalizable
       return mRotSinOffsets[ n ];
       }
 
-   public Flo getDuration()
+   public Real getDuration()
       {
       return mDuration;
       }
@@ -287,6 +290,100 @@ public class Move implements DvtpExternalizable
          ret.addLocal( mMoveSinVecs[ i ].asVector3f()
                                         .mult( coefficient ) );
          }
+      return ret;
+      }
+
+   public Quaternion initialRotation()
+      {
+      Quaternion ret = mRotPolyQuats[ 0 ].asQuaternion();
+      for ( int i = 0; i < mRotSins; ++i )
+         {
+         float coefficient
+            = (float) Math.sin( mRotSinOffsets[ i ].asFloat() );
+         ret.slerp( ret.mult( mRotPolyQuats[ i ].asQuaternion() ),
+                    coefficient );
+         }
+      return ret;
+      }
+
+   private Vector3f positionAt( BigDecimal bd_time )
+      {
+      Vector3f ret = mMovePolyVecs[ 0 ].asVector3f();
+
+      BigDecimal poly_term = bd_time;
+      MathContext mult_context = new MathContext( bd_time.scale() * 2 );
+      for ( int i = 1; i < mMoveDegree; ++i )
+         {
+         poly_term = poly_term.multiply( bd_time, mult_context );
+         float coefficient = poly_term.floatValue();
+
+         ret.addLocal( mMovePolyVecs[ i ].asVector3f()
+                                         .mult( coefficient ) );
+         }
+
+      for ( int i = 0; i < mMoveSins; ++i )
+         {
+         float time_div_period
+            = bd_time.divide( mMoveSinPeriods[ i ].toBigDecimal() )
+                     .remainder( BigDecimal.ONE )
+                     .floatValue();
+         if ( time_div_period < 0 )
+            ++time_div_period;
+         float coefficient
+            = (float) Math.sin( mMoveSinOffsets[ i ].asFloat()
+                                + time_div_period * 2.0 * Math.PI );
+         ret.addLocal( mMoveSinVecs[ i ].asVector3f()
+                                        .mult( coefficient ) );
+         }
+
+      return ret;
+      }
+
+   private Quaternion rotationAt( BigDecimal bd_time )
+      {
+      Quaternion ret = mRotPolyQuats[ 0 ].asQuaternion();
+
+      BigDecimal poly_term = bd_time;
+      MathContext mult_context = new MathContext( bd_time.scale() * 2 );
+      for ( int i = 1; i < mRotDegree; ++i )
+         {
+         poly_term = poly_term.multiply( bd_time, mult_context );
+         float coefficient = poly_term.floatValue();
+
+         ret.slerp( ret.mult( mRotPolyQuats[ i ].asQuaternion() ),
+                    coefficient );
+         }
+
+      for ( int i = 0; i < mRotSins; ++i )
+         {
+         float time_div_period
+            = bd_time.divide( mRotSinPeriods[ i ].toBigDecimal() )
+                     .remainder( BigDecimal.ONE )
+                     .floatValue();
+         if ( time_div_period < 0 )
+            ++time_div_period;
+         float coefficient
+            = (float) Math.sin( mRotSinOffsets[ i ].asFloat()
+                                + time_div_period * 2.0 * Math.PI );
+         ret.slerp( ret.mult( mRotSinQuats[ i ].asQuaternion() ),
+                    coefficient );
+         }
+
+      return ret;
+      }
+
+   /**
+    * Returns the transformation for this Move at the given time, if the
+    * Move were unbounded in time.  (Typically, it should be >= 0 and
+    * <= mDuration.)
+    * @param bd_time
+    * @return
+    */
+   public Matrix4f transformAt( BigDecimal bd_time )
+      {
+      Matrix4f ret = new Matrix4f();
+      ret.setTranslation( positionAt( bd_time ) );
+      ret.setRotationQuaternion( rotationAt( bd_time ) );
       return ret;
       }
 
@@ -329,15 +426,15 @@ public class Move implements DvtpExternalizable
    private final Vec[] mMovePolyVecs;
    private final int mMoveSins;
    private final Vec[] mMoveSinVecs;
-   private final Flo[] mMoveSinPeriods;
+   private final Real[] mMoveSinPeriods;
    private final Flo[] mMoveSinOffsets;
 
    private final int mRotDegree;
    private final Quat[] mRotPolyQuats;
    private final int mRotSins;
    private final Quat[] mRotSinQuats;
-   private final Flo[] mRotSinPeriods;
+   private final Real[] mRotSinPeriods;
    private final Flo[] mRotSinOffsets;
 
-   private final Flo mDuration;
+   private final Real mDuration;
    }

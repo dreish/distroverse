@@ -35,6 +35,7 @@ package org.distroverse.viewer;
 import org.distroverse.dvtp.Move;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.Quat;
+import org.distroverse.dvtp.Real;
 import org.distroverse.dvtp.Vec;
 import org.distroverse.dvtp.MoveSeq.RepeatType;
 
@@ -55,7 +56,8 @@ public final class VUtil
       {
       Move init = Move.getNew( new Vec( pos ), new Quat( rot ) );
       Move[] seq = { init };
-      return new MoveSeq( seq, RepeatType.LOOP );
+      return new MoveSeq( seq, RepeatType.LOOP,
+                          Real.ZERO );
       }
 
    public static float vecDist( Vector3f a, Vector3f b )

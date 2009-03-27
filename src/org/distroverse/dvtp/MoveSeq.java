@@ -10,10 +10,13 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.distroverse.core.Util;
 
+import com.jme.math.Matrix4f;
+import com.jme.math.Quaternion;
 import com.jme.math.Vector3f;
 
 //immutable
@@ -34,6 +37,15 @@ public final class MoveSeq implements DvtpExternalizable
          = Util.safeInt( ULong.externalAsLong( in ) );
       checkRepeatType( repeat_int );
       mRepeatType = RepeatType.values()[ repeat_int ];
+      mBeginTime = new Real( in );
+
+      BigDecimal dur = BigDecimal.ZERO;
+      for ( Move m : mMoves )
+         dur = dur.add( m.getDuration().toBigDecimal() );
+      if ( mRepeatType == RepeatType.BOUNCE )
+         mTotalDuration = dur.multiply( new BigDecimal( 2 ) );
+      else
+         mTotalDuration = dur;
       }
 
    /*
@@ -46,23 +58,36 @@ public final class MoveSeq implements DvtpExternalizable
       super();
       mMoves = null;
       mRepeatType = null;
+      mBeginTime = null;
+      mTotalDuration = null;
       }
 
-   public MoveSeq( Move[] moves, RepeatType repeat_type )
+   public MoveSeq( Move[] moves, RepeatType repeat_type,
+                   Real begin_time )
       {
       super();
       if ( moves.length == 0 )
          throw new IllegalArgumentException( "A MoveSeq must contain"
                                              + " at least one Move" );
-      mMoves      = moves.clone();
-      mRepeatType = repeat_type;
+      mMoves         = moves.clone();
+      mRepeatType    = repeat_type;
+      mBeginTime     = begin_time;
+      BigDecimal dur = BigDecimal.ZERO;
+      for ( Move m : mMoves )
+         dur = dur.add( m.getDuration().toBigDecimal() );
+      if ( mRepeatType == RepeatType.BOUNCE )
+         mTotalDuration = dur.multiply( new BigDecimal( 2 ) );
+      else
+         mTotalDuration = dur;
       }
-   
+
    public MoveSeq( Move m )
       {
       super();
-      mMoves      = new Move[] { m };
-      mRepeatType = RepeatType.LOOP;
+      mMoves         = new Move[] { m };
+      mRepeatType    = RepeatType.LOOP;
+      mBeginTime     = new Real( BigDecimal.ZERO );
+      mTotalDuration = m.getDuration().toBigDecimal();
       }
 
    public int getClassNumber()
@@ -98,6 +123,64 @@ public final class MoveSeq implements DvtpExternalizable
       return mMoves[ 0 ].initialPosition();
       }
 
+   public Quaternion initialRotation()
+      {
+      return mMoves[ 0 ].initialRotation();
+      }
+
+   public Matrix4f initialTransform()
+      {
+      Matrix4f ret = new Matrix4f();
+      ret.setTranslation( initialPosition() );
+      ret.setRotationQuaternion( initialRotation() );
+      return ret;
+      }
+
+   public Matrix4f transformAt( Real time )
+      {
+      return transformAt( time.toBigDecimal() );
+      }
+
+   public Matrix4f transformAt( BigDecimal time )
+      {
+      BigDecimal bd_time = time.subtract( mBeginTime.toBigDecimal() );
+
+      // Transform time according to repeat rules.
+      if ( mRepeatType == RepeatType.ONCE )
+         {
+         if ( bd_time.compareTo( BigDecimal.ZERO ) <= 0 )
+            return initialTransform();
+         if ( bd_time.compareTo( mTotalDuration ) >= 0 )
+            bd_time = mTotalDuration;
+         }
+      else
+         {
+         bd_time = bd_time.remainder( mTotalDuration );
+         if ( bd_time.compareTo( BigDecimal.ZERO ) < 0 )
+            bd_time = bd_time.add( mTotalDuration );
+
+         if ( mRepeatType == RepeatType.BOUNCE
+              &&  bd_time.compareTo(
+                        mTotalDuration.divide( new BigDecimal( 2 ) ) )
+                  > 0 )
+            bd_time = mTotalDuration.subtract( bd_time );
+         }
+
+      int move_idx = 0;
+      while ( move_idx < mMoves.length - 1
+              &&  bd_time.compareTo( mMoves[ move_idx ].getDuration()
+                                                       .toBigDecimal() )
+                  > 0 )
+         {
+         bd_time
+            = bd_time.subtract( mMoves[ move_idx ].getDuration()
+                                                  .toBigDecimal() );
+         ++move_idx;
+         }
+
+      return mMoves[ move_idx ].transformAt( bd_time );
+      }
+
    private void checkRepeatType( int r ) throws ClassNotFoundException
       {
       if ( r < 0  ||  r >= RepeatType.values().length )
@@ -112,6 +195,7 @@ public final class MoveSeq implements DvtpExternalizable
       ULong.longAsExternal( out, mMoves.length );
       DvtpObject.writeArray( out, mMoves );
       ULong.longAsExternal( out, mRepeatType.ordinal() );
+      mBeginTime.writeExternal( out );
       }
 
    public String prettyPrint()
@@ -120,6 +204,8 @@ public final class MoveSeq implements DvtpExternalizable
              + Util.prettyPrintList( mMoves, mRepeatType ) + ")";
       }
 
-   private final Move[] mMoves;
+   private final Move[]     mMoves;
    private final RepeatType mRepeatType;
+   private final Real       mBeginTime;
+   private final BigDecimal mTotalDuration;
    }

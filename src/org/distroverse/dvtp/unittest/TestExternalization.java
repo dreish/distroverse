@@ -10,6 +10,8 @@ package org.distroverse.dvtp.unittest;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -315,11 +317,14 @@ public class TestExternalization
       return new MoveSeq[]
          {
          new MoveSeq( new Move[] { mex[ 0 ] },
-                      MoveSeq.RepeatType.ONCE ),
+                      MoveSeq.RepeatType.ONCE,
+                      new Real( BigDecimal.ZERO ) ),
          new MoveSeq( new Move[] { mex[ 1 ], mex[ 0 ], mex[ 2 ] },
-                      MoveSeq.RepeatType.BOUNCE ),
+                      MoveSeq.RepeatType.BOUNCE,
+                      new Real( new BigDecimal( 15.5 ) ) ),
          new MoveSeq( new Move[] { mex[ 0 ], mex[ 1 ], mex[ 2 ] },
-                      MoveSeq.RepeatType.LOOP ),
+                      MoveSeq.RepeatType.LOOP,
+                      new Real( BigDecimal.valueOf( 1234, 3 ) ) ),
          };
       }
 
@@ -329,13 +334,13 @@ public class TestExternalization
          {
          new Move( new Vec( new Vector3f( 0.5f, 0.5f, 0.5f ) ),
                    new Quat( new Quaternion( 0, 0, 0, 1 ) ),
-                   new Flo( 2 ) ),
+                   new Real( 2.0 ) ),
          new Move( new Vec( new Vector3f( 1.5f, 1.5f, 1.5f ) ),
                    new Quat( new Quaternion( 0, 1, 0, 0 ) ),
-                   new Flo( 2 ) ),
+                   new Real( 2.0 ) ),
          new Move( new Vec( new Vector3f( 2.5f, 2.5f, 2.5f ) ),
                    new Quat( new Quaternion( 0, 0, 1, 0 ) ),
-                   new Flo( 2 ) ),
+                   new Real( 2.0 ) ),
          };
       }
 
@@ -491,11 +496,13 @@ public class TestExternalization
       {
       return new DNodeRef[]
          {
-         new DNodeRef( "0", 123L, new Real( 123.45, 2 ),
+         new DNodeRef( "0", 123L,
+                       new Real( new BigDecimal( "123.45" ) ),
                        null ),
          new DNodeRef( "example.com", 456L,
-                       new Real( 12.777, 7 ), null ),
-         new DNodeRef( "0", 125L, new Real( 123.45, 2 ), null ),
+                       new Real( new BigDecimal( "12.777" ) ), null ),
+         new DNodeRef( "0", 125L,
+                       new Real( new BigDecimal( "123.45" ) ), null ),
          };
       }
 
@@ -561,18 +568,20 @@ public class TestExternalization
    private static void testReal()
    throws IOException, ClassNotFoundException
       {
-      double[] to_try = {  0.1,  0.3,  0.5,  0.7,  0.9,
-                          -0.1, -0.3, -0.5, -0.7, -0.9 };
+      double[] to_try = { 0.001,  0.01,  0.1,  0.3,  0.5,  0.7,  0.9,
+                         -0.001, -0.01, -0.1, -0.3, -0.5, -0.7, -0.9 };
       double[] to_add = { 0, 2, -2, 4, -4, 1000, -1000 };
       for ( double d : to_try )
          {
          for ( double da : to_add )
             {
-            tryBeamObject( new Real( d + da, 3  ) );
-            tryBeamObject( new Real( d + da, 7  ) );
-            tryBeamObject( new Real( d + da, 10 ) );
-            tryBeamObject( new Real( d + da, 14 ) );
-            tryBeamObject( new Real( d + da, 63 ) );
+            tryBeamObject( new Real( new BigDecimal( d + da ) ) );
+            tryBeamObject( new Real( new BigDecimal(
+                    d + da, MathContext.DECIMAL32 ) ) );
+            tryBeamObject( new Real( new BigDecimal(
+                    d + da, MathContext.DECIMAL64 ) ) );
+            tryBeamObject( new Real( new BigDecimal(
+                    d + da, MathContext.DECIMAL128 ) ) );
             }
          }
       }

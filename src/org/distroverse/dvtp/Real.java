@@ -10,8 +10,8 @@ package org.distroverse.dvtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.distroverse.core.Util;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 //immutable
 
@@ -21,14 +21,15 @@ import org.distroverse.core.Util;
  */
 public class Real implements DvtpExternalizable
    {
+   public static final Real ZERO = new Real( BigDecimal.ZERO );
+
    /**
     *
     */
    public Real( InputStream in ) throws IOException
       {
       super();
-      mIntegerPart = DLong.externalAsLong( in );
-      mFractionPart = new Frac( in );
+      mVal = Real.externalAsBigDecimal( in );
       }
 
    /*
@@ -38,25 +39,32 @@ public class Real implements DvtpExternalizable
    @SuppressWarnings( "unused" )
    private Real()
       {
-      mIntegerPart  = 0;
-      mFractionPart = null;
+      mVal = null;
       }
 
-   public Real( long integer_part, Frac fraction_part )
+   public Real( BigDecimal v )
       {
-      mIntegerPart  = integer_part;
-      mFractionPart = fraction_part;
+      mVal = convBigDecimal( v );
       }
 
-   /**
-    * @param x
-    * @param precision
-    */
-   public Real( double x, int denomionator_bits )
+   public Real( double d )
       {
-      mIntegerPart  = (long) Math.floor( x );
-      double fraction_part = x - mIntegerPart;
-      mFractionPart = Frac.getNew( fraction_part, denomionator_bits );
+      mVal = convBigDecimal( new BigDecimal( d ) );
+      }
+
+   public Real( double d, int precision )
+      {
+      mVal = convBigDecimal( new BigDecimal( d,
+                              new MathContext( precision ) ) );
+      }
+
+   private BigDecimal convBigDecimal( BigDecimal v )
+      {
+      if ( v.scale() == 0 )
+         return v.setScale( 2 );
+      if ( v.scale() % 2 == 0 )
+         return v;
+      return v.setScale( v.scale() + 1 );
       }
 
    /* (non-Javadoc)
@@ -67,27 +75,30 @@ public class Real implements DvtpExternalizable
 
    public float toFloat()
       {
-      return mIntegerPart + mFractionPart.toFloat();
+      return toBigDecimal().floatValue();
       }
 
    public double toDouble()
       {
-      return mIntegerPart + mFractionPart.toDouble();
+      return toBigDecimal().doubleValue();
+      }
+
+   public BigDecimal toBigDecimal()
+      {
+      return mVal;
       }
 
    @Override
    public boolean equals( Object o )
       {
       return (o.getClass().equals( this.getClass() )
-              &&  ((Real) o).mIntegerPart == mIntegerPart
-              &&  ((Real) o).mFractionPart.equals( mFractionPart ) );
+              &&  ((Real) o).mVal.equals( mVal ) );
       }
 
    @Override
    public int hashCode()
       {
-      return ((Long) mIntegerPart).hashCode()
-             ^ mFractionPart.hashCode()
+      return mVal.hashCode()
              ^ this.getClass().hashCode();
       }
 
@@ -96,9 +107,7 @@ public class Real implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(Real "
-             + Util.prettyPrintList( mIntegerPart, mFractionPart )
-             + ")";
+      return "(Real. " + mVal + "M)";
       }
 
    /* (non-Javadoc)
@@ -106,10 +115,91 @@ public class Real implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      DLong.longAsExternal( out, mIntegerPart );
-      mFractionPart.writeExternal( out );
+      Real.bigDecimalAsExternal( out, mVal );
       }
 
-   private final long mIntegerPart;
-   private final Frac mFractionPart;
+   public static BigDecimal externalAsBigDecimal( InputStream in )
+   throws IOException
+      {
+      StringBuilder srep = new StringBuilder();
+
+      byte b = (byte) in.read();
+      if ( b == 100 )
+         srep.append( '-' );
+      else
+         srep.append( (b & 127) % 100 );
+
+      while ( (b & 128) != 128 )
+         {
+         b = (byte) in.read();
+         if ( (b & 127) > 99 )
+            throw new IOException( "Malformed Real in input" );
+         srep.append( (b & 127) / 10 );
+         srep.append( (b & 127) % 10 );
+         }
+
+      srep.append( '.' );
+
+      while ( true )
+         {
+         b = (byte) in.read();
+         if ( (b & 127) > 99 )
+            throw new IOException( "Malformed Real in input" );
+         srep.append( (b & 127) / 10 );
+         srep.append( (b & 127) % 10 );
+         if ( (b & 128) == 128 )
+            return new BigDecimal( srep.toString() );
+         }
+      }
+
+   private static int encodeStr( String s )
+      {
+      return Integer.valueOf( s );
+      }
+
+   public static void bigDecimalAsExternal( OutputStream out,
+                                            BigDecimal val )
+   throws IOException
+     {
+     if ( val.signum() == -1 )
+        {
+        out.write( 100 );
+        bigDecimalAsExternal( out, val.negate() );
+        return;
+        }
+
+     String srep = val.toPlainString();
+     String[] srep_parts = srep.split( "\\.", 2 );
+     String int_part = srep_parts[ 0 ];
+     String dec_part = (srep_parts.length > 1) ? srep_parts[ 1 ] : "0";
+
+     writeCentesimal( out, int_part, false );
+     writeCentesimal( out, dec_part, true );
+     }
+
+   private static void writeCentesimal( OutputStream out,
+                                        String arg_num_str,
+                                        boolean append_zero )
+   throws IOException
+      {
+      String num_str = arg_num_str;
+      if ( (num_str.length() % 2) == 1 )
+         {
+         if ( append_zero )
+            num_str = num_str + "0";
+         else
+            num_str = "0" + num_str;
+         }
+
+      int pos;
+      for ( pos = 0;
+            pos < num_str.length() - 2;
+            pos += 2 )
+         out.write( encodeStr( num_str.substring( pos, pos + 2 ) ) );
+
+      out.write( encodeStr( num_str.substring( pos, pos + 2 ) )
+                 + 128 );
+      }
+
+   private final BigDecimal mVal;
    }

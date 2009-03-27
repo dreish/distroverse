@@ -30,7 +30,7 @@
 ;; </copyleft>
 
 
-; Generate a universe node tree from a random seed
+; Operations on a tree of nodes
 
 (ns node-tree
   (:use server-lib
@@ -51,23 +51,34 @@
 (defvar- *node-tree-vars* (dm-get-map (str ws-ns "node-tree/vars"))
   "Durable variables.")
 
-(def zero-vec (Vector3f. 0 0 0))
+(def +zero-vec+ (Vector3f. 0 0 0))
 
 (def get-node *id-to-node*)
 
 (def get-radius :radius)
 
+(defn get-xform
+  [n t]
+  (-> n get-move (.transformAt t)))
+
+(defn cur-xform
+  [n]
+  (get-xform n (now)))
+
 (def is-ephem? :ephemeral)
+
+(defn node-pos
+  "Return the position of the given node at time (time)"
+  [n]
+  ;; XXX
+  )
 
 (defn parent-of
   "Returns the parent node of the given node"
   [n]
-  (if (n :ephemeral)
-    (or (if (n :parent)
-          (get-node (n :parent)))
-        (n :parent-ref)
-        (gen-parent n))
-    (get-node (n :parent))))
+  (or (if (n :parent)
+        (get-node (n :parent)))
+      (n :parent-ref)))
 
 (defn children-of
   "Returns a lazy seq of the immediate children of the given node."
@@ -91,28 +102,10 @@
       (cons p
             (parent-chain p)))))
 
-(defn add-to-transformer
-  "Add the position of the given node relative to its parent to the
-  given vector transformation function, returning a new vector
-  transformation function."
-  [transformer n]
-  (let [pos (node-pos n now)
-        pos-xformed (transformer pos)]
-    (new-transformer pos-xformed)))
-
-(defn sub-from-transformer
-  "Subtract the position of the given node relative to its parent to
-  the given vector transformation function, returning a new vector
-  transformation function."
-  [transformer n]
-  (let [pos (node-pos n now)
-        pos-xformed (vec-rev (transformer (vec-rev pos)))]
-    (new-transformer pos-xformed)))
-
 (defn search-nodes
   "Traverses nodes connected to the given start node, returning a lazy
   sequence of search results, using the given conditional functions,
-  called with the node in question and a transformation function to
+  called with the node in question and a transformation matrix to
   convert a vector relative to start-node to a vector relative to the
   given node ending in the same location.  include? should return true
   if the given node is included in the search results.  ascend? should
@@ -121,14 +114,14 @@
   included in the results (this should almost always be true).
   descend? should return true if the given node or any of its
   descendents might be in the search results."
-  ; Apologies for the complexity, but this is a complex problem.
+  ;; Apologies for the complexity, but this is a complex problem.
   ([start-node include? descend? ascend?]
-     (search-nodes start-node include? descend? ascend? nil identity))
+     (search-nodes start-node include? descend? ascend? nil Midentity))
   ([start-node include? descend? ascend? exclude-node transformer]
      (let [ch (filter #(and %
                             (not= exclude-node %)
-                            (descend? % (add-to-transformer
-                                           transformer %))
+                            (descend? % (M* transformer
+                                            (Minvert (cur-xform %)))))
                       (children-of start-node))
            pa (parent-of start-node)]
        (lazy-cat
@@ -136,13 +129,14 @@
                   (include? start-node transformer))
            (list start-node))
          (mapcat #(search-nodes % include? descend? ascend? start-node
-                                ; Seems unfortunate to repeat this:
-                                (add-to-transformer transformer %))
+                                ;; Seems unfortunate to repeat this:
+                                (M* transformer
+                                    (Minvert (cur-xform %))))
                  ch)
          (if (and pa
                   (not= pa exclude-node))
            (let [parent-transformer
-                   (sub-from-transformer transformer pa)]
+                   (M* (cur-xform %) transformer)]
              (if (ascend? pa parent-transformer)
                (search-nodes pa include? descend? ascend? start-node
                              parent-transformer))))))))
@@ -153,7 +147,7 @@
   within the sphere defined by the given position and radius."
   [pos radius]
   (fn [node transformation]
-    (let [my-pos (transformation pos)
+    (let [my-pos (M* transformation pos)
           node-radius (get-radius node)
           distance (vec-abs my-pos)
           covered-radius (- radius distance)]
@@ -165,7 +159,7 @@
   sphere defined by the given position and radius."
   [pos radius]
   (fn [node transformation]
-    (let [my-pos (transformation pos)
+    (let [my-pos (M* transformation pos)
           node-radius (get-radius node)
           distance (vec-abs my-pos)
           reach (+ radius node-radius)]
@@ -177,7 +171,7 @@
   sphere defined by the given position and radius."
   [pos radius]
   (fn [node transformation]
-    (let [my-pos (transformation pos)
+    (let [my-pos (M* transformation pos)
           node-radius (get-radius node)
           distance (vec-abs my-pos)
           covered-radius (- node-radius distance)]
@@ -226,7 +220,7 @@
   "Returns the smallest room node containing the given node."
   [node-id]
   (let [node (get-node node-id)
-        containing? (is-containing zero-vec (get-radius node))
+        containing? (is-containing +zero-vec+ (get-radius node))
         match? #(and (is-room %1)
                      (containing? %1 %2))
         candidate-seq (search-nodes
@@ -287,12 +281,38 @@
   (let [p (if (is-ephem? p)
             (make-concrete p)
             p)]
-    ; XXX
-  )
+    ;; XXX
+  ))
 
 (defn add-object
   "Add shape as a child of node, with move move.  Returns the new node
   ID."
   [node move shape]
-   ; XXX
+  ;; XXX
   )
+
+(defn rel-vector
+  "Return a vector from node a to node b.  Throws an error if a and b
+  turn out not to be in the same tree."
+  ([a b]
+     (rel-vector a b +Midentity+ +Midentity+))
+  ([a b a->root root->b]
+     (cond (or (null? a)
+               (null? b))
+             (throw (Exception. (str "rel-vector called on two nodes"
+                                     " in unconnected trees")))
+           (= a b)
+             (M* a->root root->b +zero-vec+)
+           :else
+             (let [ad (node-depth a)
+                   bd (node-depth b)]
+               (if (< ad bd)
+                 (recur a
+                        (parent-of b)
+                        a->root
+                        (M* (cur-xform b) root->b))
+                 (recur (parent-of a)
+                        b
+                        (M* a->root (Minvert (cur-xform a)))
+                        root->b))))))
+

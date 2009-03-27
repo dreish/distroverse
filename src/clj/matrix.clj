@@ -30,39 +30,47 @@
 ;; </copyleft>
 
 
-(use :reload-all 'durable-maps)
+;; Operations with matrices.  They'll be immutable values as long as
+;; you never call methods on them outside of matrix.clj.
 
-(use :reload-all 'bigkey-dm)
+(ns matrix)
 
-(use 'clojure.contrib.def)
+(import '(com.jme.math Quaternion Vector3f Matrix4f))
 
-; Harmless to run this if it has already been run:
-(dm-init!)
+(def +Midentity+ (Matrix4f.))
 
-(bk-init!)
+(defmulti invert "Inverts a matrix" class)
 
-(defvar ws-ns "ws-a/"
-  "World server namespace")
+(defmethod invert Matrix4f [m] (.invert m))
 
-(dm-create-map! (str ws-ns "node-tree/vars")
-                {:cols {:key ["VARCHAR(32)" :keyword]
-                        :val ["MEDIUMTEXT" :obj]}
-                 :key :key})
+(defmulti M* "Multiply two matrices, or a matrix and a vector"
+  (fn [a b & more] [(class a) (class b)]))
 
-(dm-create-map! (str ws-ns "node-tree/id-to-node")
-                {:cols {:nodeid ["VARCHAR(20)" :obj]
-                        :children ["MEDIUMTEXT" :seq]
-                        :parent ["VARCHAR(20)" :obj]
-                        ; XXX
-                        }
-                 ; FIXME :checked-cols should be handled internally by dm,
-                 ; but it's easier to put it here for now
-                 :checked-cols [:children seq-check seq-fix]
-                 :key :nodeid})
+(defmethod M* [Matrix4f Matrix4f]
+  ([a b]
+     (.mult a b))
+  ([a b c & more]
+     (reduce M* (concat (list a b c) more))))
 
+(defmethod M* [Matrix4f Vector3f]
+  ([a b]
+     (.mult a b))
+  ([a b c & more]
+     (reduce M* (concat (list a b c) more))))
 
-(dm-dosync
- (dm-insert (dm-get-map (str ws-ns "node-tree/id-to-node"))
-            {:nodeid 1
-             :parent nil
-             
+(defmulti to-matrix
+  "Convert a translation vector or rotation quaternion into a
+  transformation matrix."
+  class)
+
+(defmethod to-matrix Vector3f
+  [v]
+  (doto (Matrix4f.)
+    (.setTranslation v)))
+
+(defmethod to-matrix Quaternion
+  [q]
+  (doto (Matrix4f.)
+    (.setRotationQuaternion q)))
+
+(defmethod to-matrix Matrix4f [m] m)

@@ -12,66 +12,21 @@
       visible)
       x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
-    - New approach to handling ephemeral nodes
-      + A concrete node can either have all concrete children, or it
-        can have a generator function to generate its child nodes
-        + DNode should have a switch: mGeneratedChildren
-          + Debug failed externalization test
-      + Instead of a gen-children function, every node will have a
-        lazy seq of children
-        + Column type :seq
-          + Store as :obj
-          x On update or load, apply given seq and store result as
-            :<colname>-seq
-          + val is a hash: {:func x, :seq y}
-          + Problem: dm-update will have to do an expensive check to
-            find out if the column has changed
-            + Not too bad: part of a table spec is a seq of columns
-              that need these checks
-              + (fixrow row prev-row dmap)
-              x On loading a dmap, scan the spec for columns that need
-                checks and build :checked-cols
-            + The caller of dm-update should just set func, not seq,
-              which will be overwritten
-          + dm-insert must also fix a row
-      - Converting a node to concrete means converting its parent to
-        have all concrete children, all of which will have generator
-        functions for their children
-        - That means each generator will need to be mappable to a
-          function that will return the function call to generate each
-          of the children
-      - Make them concrete (temporarily) any time they have children
-        added
-        > Could have a concise message format for this
-        - In add-subnode (which should be in node-tree), if the parent
-          is ephemeral, call make-concrete on it
-          - Ephemeral nodes need to have an :index-in-parents-children
-            > Not concrete nodes, though, since they are subject to
-              deletion
-      - When a child is removed, if the node itself hasn't been
-        modified, and all its children are again ephemeral (and none
-        of them have been deleted), it reverts back to ephemeral with
-        a delete/add transaction on the parent
-      x Avatars should probably have their quitting position stored as
-        a vector of MoveSeqs, since really any node might disappear
-      - Or as a series of node/vector combinations starting from the
-        last parent node and going up to the root; they would be tried
-        in order until one still existing was found
-        > This would have the advantage (?) that if the user were to
-          quit in a room that then got moved, the user would start in
-          the same place.  This might be very desireable in a case
-          like quitting as a passenger in a vehicle
-        > The minor disadvantage is that quitting far from an
-          artificial structure would cause a proportional but small
-          inaccuracy in the restart position
-          > For example, on an uninhabited continent 5000 km from any
-            civilization, the savepos error would be on the order of
-            0.6 meters
-      - What does the boundary between a concrete parent node and
-        ephemeral children look like?
     - Send parent node; client will query downward from there
       - node-tree/rel-vector a b [offset]
+        + MoveSeq.transformAt
+          + Looks like all times need to be Real
+        + Change search-nodes to do matrix mult
+        + Change is-within, is-intersecting, is-containing to use
+          matrices
+          > Interfaces shouldn't need to change
+        x nodes-within et al should need at most minimal changes,
+          right?
+          > No, nothing
         > Return vector from a to b, plus offset
+        + matrix.clj
+          + Minvert mat
+          + M* mat1 mat2
         - Nodes need a depth
           - Will be a property stored in concrete nodes
           + gen-children should add it
@@ -107,6 +62,68 @@
         avatars (which would almost surely be useful in other cases)
     - Client needs to subscribe to all these nodes, too
     - Clear proxy's loading property
+    - New approach to handling ephemeral nodes
+      + A concrete node can either have all concrete children, or it
+        can have a generator function to generate its child nodes
+        + DNode should have a switch: mGeneratedChildren
+          + Debug failed externalization test
+      + Instead of a gen-children function, every node will have a
+        lazy seq of children
+        + Column type :seq
+          + Store as :obj
+          x On update or load, apply given seq and store result as
+            :<colname>-seq
+          + val is a hash: {:func x, :seq y}
+          + Problem: dm-update will have to do an expensive check to
+            find out if the column has changed
+            + Not too bad: part of a table spec is a seq of columns
+              that need these checks
+              + (fixrow row prev-row dmap)
+              x On loading a dmap, scan the spec for columns that need
+                checks and build :checked-cols
+            + The caller of dm-update should just set func, not seq,
+              which will be overwritten
+          + dm-insert must also fix a row
+      - Converting a node to concrete means converting its parent to
+        have all concrete children, all of which will have generator
+        functions for their children
+        - That means each generator will need to be mappable to a
+          function that will return the function call to generate each
+          of the children
+          > That, or an ephemeral node has the same apply/seq pair it
+            would have as a concrete node
+        - If nodes have their parent node as a member, they obviously
+          could not contain a seq of their children as well
+          - Would making :parent-ref an actual ref help?
+      - Make them concrete (temporarily) any time they have children
+        added
+        > Could have a concise message format for this
+        - In add-subnode (which should be in node-tree), if the parent
+          is ephemeral, call make-concrete on it
+          - Ephemeral nodes need to have an :index-in-parents-children
+            > Not concrete nodes, though, since they are subject to
+              deletion
+      - When a child is removed, if the node itself hasn't been
+        modified, and all its children are again ephemeral (and none
+        of them have been deleted), it reverts back to ephemeral with
+        a delete/add transaction on the parent
+      x Avatars should probably have their quitting position stored as
+        a vector of MoveSeqs, since really any node might disappear
+      - Or as a series of node/vector combinations starting from the
+        last parent node and going up to the root; they would be tried
+        in order until one still existing was found
+        > This would have the advantage (?) that if the user were to
+          quit in a room that then got moved, the user would start in
+          the same place.  This might be very desireable in a case
+          like quitting as a passenger in a vehicle
+        > The minor disadvantage is that quitting far from an
+          artificial structure would cause a proportional but small
+          inaccuracy in the restart position
+          > For example, on an uninhabited continent 5000 km from any
+            civilization, the savepos error would be on the order of
+            0.6 meters
+      - What does the boundary between a concrete parent node and
+        ephemeral children look like?
   - Add a FengGUI location bar
     - Would be nice to know why TextArea causes OpenGL exceptions
   - Implement actual movement
@@ -710,6 +727,10 @@
       + bk
       + dm stress tests
         > Runs at around the same speed
+  + Redo Real as BigDecimal
+    + High bit: this is the last byte before/after the decimal
+    + Low 7 bits: two digits at a time, 00-99
+    + If first byte is 100, number is negative
 
 ------------------------------------------------------------------------
 - To do for 0.03:
