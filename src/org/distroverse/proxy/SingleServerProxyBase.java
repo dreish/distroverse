@@ -90,6 +90,10 @@ public abstract class SingleServerProxyBase extends NetProxyBase
               .add( new Str( "PROXYOPEN" ) );
       }
 
+   /**
+    * Called at the end of setUrl().
+    * @throws IOException
+    */
    protected abstract void initWorld() throws IOException;
 
    protected void setUrl( String new_url )

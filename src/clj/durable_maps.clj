@@ -62,8 +62,9 @@
 (defvar- *write-queue* (ref (queue)))
 (defvar- *dm-shutting-down* (ref nil))
 (Class/forName "com.mysql.jdbc.Driver")
-(defvar- *dm-db* (get-sql-conn
-                  "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
+;; (defvar- *dm-db* (get-sql-conn
+;;                   "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
+(defvar- *dm-db* (atom nil))
 ; TODO An engine like SQLite might be ideal
 
 (declare dm-update
@@ -114,7 +115,7 @@
   "Get a single row from a table, given a primary key column, and a
   value."
   [table keycol keyval]
-  (to-row-hash (get-query *dm-db*
+  (to-row-hash (get-query @*dm-db*
                           (str "SELECT * FROM " table " WHERE "
                                keycol " = ?")
                           [keyval])))
@@ -148,7 +149,7 @@
      (io!)
      (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
            cols (column-format spec)]
-       (run-stmt! *dm-db*
+       (run-stmt! @*dm-db*
                   (apply str cmd " " name " (" cols ")")))))
 
 (defn require-dmtrans
@@ -589,18 +590,6 @@
       (add-to-write-queue write-query)
       dmap-c)))
 
-
-(defn dm-shutdown!
-  "Flushes all pending writes and shuts down the database connection.
-  Any attempts to write in any other thread after calling dm-shutdown
-  will result in null-pointer exceptions."
-  []
-  (do
-    (io!)
-    (dosync (alter @*dm-shutting-down* (fn [_] (tm))))
-    (flush-writes-before! (tm))
-    (assert (not @*write-queue*))))
-
 (let [create-map-mutex (Object.)]
   (defn dm-create-map!
     "Create a new table.  This cannot be done inside a transaction.
@@ -685,10 +674,10 @@
       (if-let [next-write (get-next-write-before t)]
           (do
             (if (next-write :vals)
-              (run-stmt! *dm-db*
+              (run-stmt! @*dm-db*
                          (next-write :query)
                          (next-write :vals))
-              (run-stmt! *dm-db*
+              (run-stmt! @*dm-db*
                          (next-write :query)))
             (recur))))))
 
@@ -706,9 +695,6 @@
           oldest-trans-time (or (ffirst @*dm-transaction-times*)
                                 current-time)]
       (flush-writes-before! oldest-trans-time))))
-
-(when true
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
 (defvar- writer-thread
   (Thread.
@@ -723,8 +709,26 @@
   writing them to disk and removing them from the write queue.  Thread
   exits when *dm-shutting-down* is true.")
 
-(.start writer-thread)
+(defn dm-shutdown!
+  "Flushes all pending writes and shuts down the database connection.
+  Any attempts to write in any other thread after calling dm-shutdown
+  will result in null-pointer exceptions."
+  []
+  (do
+    (io!)
+    (dosync (alter @*dm-shutting-down* (fn [_] (tm))))
+    (flush-writes-before! (tm))
+    (assert (not @*write-queue*))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-)
-
+(defn dm-startup!
+  "Starts the database, if it hasn't already been started."
+  [db user password]
+  (do
+    (io!)
+    (or (compare-and-set! *dm-db*
+                          nil
+                          (get-sql-conn
+                           (str "jdbc:mysql://localhost/" db "?user=" user
+                                "&password=" password)))
+        (throw (Exception. "Database connection already established.")))
+    (.start writer-thread)))

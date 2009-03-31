@@ -170,6 +170,7 @@ public class WorldServer extends DvtpServer
     */
    public static void main( String[] args )
       {
+      Var startup_bang;
       try
          {
          RT.loadResourceScript( "world-server.clj" );
@@ -177,12 +178,14 @@ public class WorldServer extends DvtpServer
          mHandleObjectBang = RT.var( "user", "handle-object!" );
          mHandleGet        = RT.var( "user", "handle-get" );
          mHandleLocation   = RT.var( "user", "handle-location" );
+         startup_bang      = RT.var( "user", "startup!" );
          }
       catch ( Exception e )
          {
          e.printStackTrace();
          return;
          }
+      startup_bang.run();
       createServer( WorldServer.class,
                     "DVTP/0.01 WorldServer 0.02" );
       }

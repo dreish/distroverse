@@ -291,6 +291,13 @@
   ;; XXX
   )
 
+(defn reparent
+  "Make the node with the given ID a child of the given new-parent,
+  with move move.  Returns the given node id."
+  [new-parent move node]
+  ;; XXX
+  )
+
 (defn rel-vector
   "Return a vector from node a to node b.  Throws an error if a and b
   turn out not to be in the same tree."

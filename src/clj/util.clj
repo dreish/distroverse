@@ -108,8 +108,8 @@
 
 (defn rests [coll]
   "Returns a lazy sequence of successive rests of coll, beginning with
-  the entire collection and ending with a collection of count 1."
-  (take-while identity (iterate rest coll)))
+  a seq of the entire collection and ending with a seq of count 1."
+  (take-while seq (iterate rest coll)))
 
 (defn do-or [& args]
   "(or) as a function, evaluating all its arguments, but returning the
@@ -118,4 +118,12 @@
 
 (defn gmt-time-string []
   (. (java.util.Date.) toGMTString))
+
+(defn apply-lambda
+  "Returns a function of no arguments that, when called, will return
+  the result of applying the function named by (first s) to (rest s).
+  E.g., ((apply-lambda '(+ 1 2))) => 3."
+  [s]
+  (fn [] (apply (resolve (first s))
+                (rest s))))
 

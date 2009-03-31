@@ -42,7 +42,8 @@
 (defvar *userdata* (dm-get-map "userdata")
   "Map of userid numbers to other account data")
 (defvar *avatars* (dm-get-map "avatars")
-  "Set of node IDs for all in-world avatars")
+  "Set of node IDs for all in-world avatars (those having non-nil
+  parents)")
 (defvar *sessions* (ref #{})
   "Set of sessions for all active connections")
 
@@ -94,20 +95,35 @@
   "Add the session's avatar to the world."
   [att session]
   (let [userid (att :userid)
-	pos (att :lastpos)]
-    (dm-dosync
-     (let [avatar (add-object (get-node (pos :node))
-			      (pos :move)
-			      (att :avatarshape))]
-       (commute *sessions* conj session)
-       (dm-insert *avatars* {:nodeid (avatar :nodeid)})
-       (alter att assoc :avatar avatar)))))
+	pos (att :lastpos)
+        avatar-nid
+          (dm-dosync
+           (let [avatar-nid             ; FIXME This seems clumsy.
+                   (reparent (get-node (pos :node))
+                             (pos :move)
+                             (or (att :avatarnode)
+                                 (new-object (att :avatarshape))))]
+             (commute *sessions* conj session)
+             (dm-insert *avatars* {:nodeid avatar-nid})
+             (alter att assoc
+                    :avatar (get-node avatar-nid)
+                    :avatar-nid avatar-nid)
+             avatar-nid))]
+    (dstmt "set-avatar" (ULong. avatar-nid))))
 
 (defn new-user?
   "Does the given identity dict exist as a user account?  Must be in a
   dm transaction."
   [id]
   (not (*key-to-id* (id :pubkey))))
+
+(defn startup!
+  "Perform basic initialization operations before accepting
+  connections.  NB: The listener does not exist yet."
+  []
+  ;; FIXME Doesn't actually need ! yet, but I'm assuming it will
+  (dm-dosync
+   (deparent-all-avatars)))
 
 (defn shutdown!
   "Shut down the server, and flush all database queries.  t: timeout
@@ -158,7 +174,7 @@
   (do
     (dstmt "setprop" "loading" true)
     (dvtp-send! session
-        (map node-encode (parent-chain (att :avatar)))))
+        (map node-encode (parent-chain (att :avatar))))))
 
 (defn init-connection!
   "Performs basic new-connection setup: getting and verifying the

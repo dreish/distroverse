@@ -1,6 +1,14 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - Hopefully-emerging node design:
+    - Need a depth attribute
+      - Property stored in concrete nodes
+      + gen-children should add it
+    - server-lib/node-encode {} => DNode
+    - children: apply-lambda, not (lazy-seq (apply (resolve)))
+      > Important point: don't want this to persist after being
+        finished with it
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment
@@ -12,8 +20,8 @@
       visible)
       x Want to be able to send a seq of DvtpExternalizable objects
         (maybe just use a classic Java iterator)
-    - Send parent node; client will query downward from there
-      - node-tree/rel-vector a b [offset]
+    + Send ancestor nodes; client will query downward from there
+      + node-tree/rel-vector a b [offset]
         + MoveSeq.transformAt
           + Looks like all times need to be Real
         + Change search-nodes to do matrix mult
@@ -27,20 +35,16 @@
         + matrix.clj
           + Minvert mat
           + M* mat1 mat2
-        - Nodes need a depth
-          - Will be a property stored in concrete nodes
-          + gen-children should add it
     - Proxy will pull children that both proxy and server agree are
       visible to the client at the current detail level
       > Proxy will stop descending when a node has the same timestamp
         as the copy in its cache; will not stop ascending
-      - One concession to efficiency: the server will send the chain
+      + One concession to efficiency: the server will send the chain
         going up, and the client will only ever pull children
         > Otherwise, the server will need to recheck visibility on
           each node, which will be O(N^2) of the tree depth of the
           avatar
         + node-tree/parent-chain nodeid
-        - server-lib/node-encode {} => DNode
         + Make dvtp-send! handle a seq
           + It should get added to the netOutQueue as normal; the
             queue reader needs to know how to handle a seq (or an
@@ -49,9 +53,23 @@
             + Take an object from the seq and stream it
             + Add the rest back to the end of the queue
             > This is pretty awesome
-            > I'm pretty sure it will break when I switch to lazier seqs
-              tomorrow
+            > I'm pretty sure it will break when I switch to lazier
+              seqs tomorrow
               > Was easy to fix
+      - Pull from client
+        - Client needs to know where avatar is, not just camera
+          > Actually, just the proxy
+          + Server: send ("set-avatar" object-id)
+            + I want the avatar object to be permanent
+              + Change add-self-to-world:
+                + Don't add-object there
+                + Get avatar object, which should have no parent
+                + Reparent it to :lastpos
+          - Proxy: recognize this message
+            + Create WorldProxy (extends SingleServerProxyBase)
+            + Create message recognizer (FunCall objects)
+            - FunCall ID 0 does not need response
+            - Die on unrecognized messages
     x Server will automatically subscribe the client to changes in all
       nodes within range
       > Given that an avatar will move around more than nodes will, in
@@ -731,6 +749,10 @@
     + High bit: this is the last byte before/after the decimal
     + Low 7 bits: two digits at a time, 00-99
     + If first byte is 100, number is negative
+  + Break out dm database initialization and leave to the library's
+    caller to start it up
+    + Make *dm-db* an atom
+    + dm-startup!
 
 ------------------------------------------------------------------------
 - To do for 0.03:
