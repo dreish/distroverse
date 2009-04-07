@@ -72,7 +72,16 @@ public final class DNodeRef implements DvtpExternalizable
 
    public DNode getNode()
       {  return mDNode;  }
-   
+
+   public Real getLastChanged()
+      {  return mLastChangeTime;  }
+
+   public String getRemoteHost()
+      {  return mRemoteHost;  }
+
+   public long getId()
+      {  return mId;  }
+
    public DNodeRef assocNode( DNode n )
       {
       return new DNodeRef( mRemoteHost, mId, mLastChangeTime, n );

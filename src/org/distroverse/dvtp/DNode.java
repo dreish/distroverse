@@ -106,6 +106,15 @@ public final class DNode implements DvtpExternalizable
    public int getClassNumber()
       {  return 30;  }
 
+   public int getNumChildren()
+      {  return mChildren.length;  }
+
+   public DNodeRef getChild( int n )
+      {  return mChildren[ n ];  }
+
+   public DNodeRef getThisRef()
+      {  return mThis;  }
+
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
     */

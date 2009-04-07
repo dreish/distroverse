@@ -105,9 +105,11 @@ public abstract class NetProxyBase extends ProxyBase
     * This method is called by the NetInQueueWatcher every time an
     * object is sent from a server.
     * @param o
+    * @throws ClosedChannelException
     */
    public abstract void receiveFromServer( NetSession< Object > s,
-                                           DvtpExternalizable o );
+                                           DvtpExternalizable o )
+   throws ClosedChannelException;
 
    /**
     * This method is called by offer() for any object that is not a

@@ -181,6 +181,31 @@ public final class MoveSeq implements DvtpExternalizable
       return mMoves[ move_idx ].transformAt( bd_time );
       }
 
+   /**
+    * Returns the radius of a sphere around the origin beyond which the
+    * MoveSeq is guaranteed not to extend beyond.  The MoveSeq path may
+    * or may not extend to the edge of the sphere.
+    * @return
+    */
+   public float getRange()
+      {
+      if ( mCalculatedRange )
+         return mRange;
+
+      float max_range = 0;
+      for ( int i = 0; i < mMoves.length; ++i )
+         {
+         float r = mMoves[ i ].getRange();
+         if ( r > max_range )
+            max_range = r;
+         }
+
+      mRange = max_range;
+      mCalculatedRange = true;
+
+      return max_range;
+      }
+
    private void checkRepeatType( int r ) throws ClassNotFoundException
       {
       if ( r < 0  ||  r >= RepeatType.values().length )
@@ -208,4 +233,7 @@ public final class MoveSeq implements DvtpExternalizable
    private final RepeatType mRepeatType;
    private final Real       mBeginTime;
    private final BigDecimal mTotalDuration;
+
+   private boolean mCalculatedRange;
+   private float   mRange;
    }

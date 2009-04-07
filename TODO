@@ -57,7 +57,7 @@
               seqs tomorrow
               > Was easy to fix
       - Pull from client
-        - Client needs to know where avatar is, not just camera
+        + Client needs to know where avatar is, not just camera
           > Actually, just the proxy
           + Server: send ("set-avatar" object-id)
             + I want the avatar object to be permanent
@@ -65,11 +65,25 @@
                 + Don't add-object there
                 + Get avatar object, which should have no parent
                 + Reparent it to :lastpos
-          - Proxy: recognize this message
+          + Proxy: recognize this message
             + Create WorldProxy (extends SingleServerProxyBase)
             + Create message recognizer (FunCall objects)
-            - FunCall ID 0 does not need response
-            - Die on unrecognized messages
+            > FunCall ID 0 does not need response
+            + Die on unrecognized messages from the server
+              > Better just to log them for now
+            + For set-avatar, set long mAvatar
+        - Each time a node is received, along with its children and
+          their last-update times, check all children against what is
+          in the cache, and request any that are newer
+          - Trimming:
+            - The server will send any direct child of a node that is
+              within the client's visibility range
+            - The client will do trimming, and the server will only
+              double-check
+              - Algorithm will err on the side of permissiveness
+                (displaying) for moving objects
+                > Probably the same algorithm will determine when a node
+                  must be reparented up to accommodate a large movement
     x Server will automatically subscribe the client to changes in all
       nodes within range
       > Given that an avatar will move around more than nodes will, in
@@ -78,8 +92,19 @@
         clients should be determined dynamically, perhaps by using a
         separate tree structure containing the locations of all
         avatars (which would almost surely be useful in other cases)
-    - Client needs to subscribe to all these nodes, too
+        > The separate tree is problematic, but additional information
+          in the main node structure would make it relatively easy to
+          search
+    x Client needs to subscribe to all these nodes, too
     - Clear proxy's loading property
+      - It seems that with the current approach to loading, it will not
+        be clear when loading is finished
+        - Maintain a count of requested nodes?
+          > Would only be accurate if the server reported requested but
+            refused nodes, which might be a good idea anyway
+          - What about unrequested nodes?
+            - Separate message for requested nodes
+              - DList: (Str "rn", DNode)
     - New approach to handling ephemeral nodes
       + A concrete node can either have all concrete children, or it
         can have a generator function to generate its child nodes

@@ -62,7 +62,7 @@
   `(FunCall. (ULong. (gen-fun-call-id ~'session))
              ~@(dvtp-wrap rform)))
 
-(defmacro dstmt
+(defmacro dstmt!
   "Sends a DVTP FunCall statement.  Assumes 'session is bound to a
   session."
   [& rform]
@@ -91,7 +91,7 @@
        " # "
        (sec-random)))
 
-(defn add-self-to-world
+(defn add-self-to-world!
   "Add the session's avatar to the world."
   [att session]
   (let [userid (att :userid)
@@ -109,7 +109,7 @@
                     :avatar (get-node avatar-nid)
                     :avatar-nid avatar-nid)
              avatar-nid))]
-    (dstmt "set-avatar" (ULong. avatar-nid))))
+    (dstmt! "set-avatar" (ULong. avatar-nid))))
 
 (defn new-user?
   "Does the given identity dict exist as a user account?  Must be in a
@@ -172,7 +172,7 @@
   "Begins sending a proxy objects to display."
   [att session]
   (do
-    (dstmt "setprop" "loading" true)
+    (dstmt! "setprop" "loading" true)
     (dvtp-send! session
         (map node-encode (parent-chain (att :avatar))))))
 
@@ -194,7 +194,7 @@
 	      (.setAttachment session (class att) att)
 	      (if (new-user? id)
 		(setup-new-user session att id))
-	      (add-self-to-world att session)
+              (add-self-to-world! att session)
               (start-rendering! att session)))
 	  (reject-id! session))))))
 

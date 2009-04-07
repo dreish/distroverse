@@ -9,6 +9,7 @@ package org.distroverse.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 
 import org.distroverse.dvtp.DvtpExternalizable;
 

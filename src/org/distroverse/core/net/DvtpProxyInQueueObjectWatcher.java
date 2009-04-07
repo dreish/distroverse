@@ -32,6 +32,8 @@
  */
 package org.distroverse.core.net;
 
+import java.nio.channels.ClosedChannelException;
+
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.Str;
 import org.distroverse.proxy.NetProxyBase;
@@ -60,9 +62,10 @@ extends NetInQueueWatcher< Object >
     * @see org.distroverse.core.net.NetInQueueWatcher#handleNetInObject(java.lang.Object, org.distroverse.core.net.NetInQueue)
     */
    @Override
-   protected void 
+   protected void
    handleNetInObject( Object net_in_object,
                       NetInQueue< Object > queue )
+   throws ClosedChannelException
       {
       if ( net_in_object instanceof String )
          mProxy.receiveFromServer( queue.getSession(),

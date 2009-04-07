@@ -387,6 +387,36 @@ public class Move implements DvtpExternalizable
       return ret;
       }
 
+   /**
+    * Returns the radius of a sphere around the origin beyond which the
+    * Move is guaranteed not to extend beyond.  The Move path may or may
+    * not extend to the edge of the sphere.
+    * @return
+    */
+   public float getRange()
+      {
+      if ( mCalculatedRange )
+         return mRange;
+
+      float range = 0;
+      float time_adj = 1;
+      float dur = mDuration.toFloat();
+      dur += Math.ulp( dur );
+      for ( int i = 0; i < mMoveDegree; ++i )
+         {
+         range += mMovePolyVecs[ i ].asVector3f().length() * time_adj;
+         time_adj *= dur;
+         }
+
+      for ( int i = 0; i < mMoveSins; ++i )
+         range += mMoveSinVecs[ i ].asVector3f().length();
+
+      mRange = range;
+      mCalculatedRange = true;
+
+      return range;
+      }
+
    /* (non-Javadoc)
     * @see java.io.Externalizable#writeExternal(java.io.OutputStream)
     */
@@ -437,4 +467,7 @@ public class Move implements DvtpExternalizable
    private final Flo[] mRotSinOffsets;
 
    private final Real mDuration;
+
+   private boolean mCalculatedRange;
+   private float   mRange;
    }
