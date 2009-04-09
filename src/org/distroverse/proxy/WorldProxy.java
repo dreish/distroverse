@@ -1,5 +1,34 @@
-/**
+/*
+ * <copyleft>
  *
+ * Copyright 2007-2009 Dan Reish
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ * Additional permission under GNU GPL version 3 section 7
+ *
+ * If you modify this Program, or any covered work, by linking or
+ * combining it with Clojure (or a modified version of that program)
+ * or clojure-contrib (or a modified version of that library),
+ * containing parts covered by the terms of the Eclipse Public
+ * License, the licensors of this Program grant you additional
+ * permission to convey the resulting work. {Corresponding Source for
+ * a non-source form of such a combination shall include the source
+ * code for the parts of Clojure and clojure-contrib used as well as
+ * that of the covered work.}
+ *
+ * </copyleft>
  */
 package org.distroverse.proxy;
 
@@ -7,9 +36,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.distroverse.core.Log;
-import org.distroverse.core.Util;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DList;
@@ -34,6 +63,8 @@ public class WorldProxy extends SingleServerProxyBase
       {
       super();
       mAvatar = null;
+      mDetail = new AtomicReference< Float >();
+      mRequestedNodes = new AtomicInteger();
       }
 
    /* (non-Javadoc)
@@ -105,7 +136,7 @@ public class WorldProxy extends SingleServerProxyBase
       displayNode( dn );
 
       if ( withinView( dn ) )
-         getChildren( s, dn );
+         maybeGetChildren( s, dn );
       }
 
    private boolean withinView( DNode dn )
@@ -115,31 +146,28 @@ public class WorldProxy extends SingleServerProxyBase
       return false;
       }
 
-   private void getChildren( NetSession< Object > s, DNode dn )
+   private void maybeGetChildren( NetSession< Object > s, DNode dn )
       {
-      // TODO get node transform to avatar; pass to requestNode
-
-      for ( int i = 0; i < dn.getNumChildren(); ++i )
-         {
-         DNodeRef ch = dn.getChild( i );
-         DNode cached = getCache( ch );
-
-         if ( cached != null )
+      if ( visibleTo( mAvatar, dn, mDetail.get() ) )
+         for ( int i = 0; i < dn.getNumChildren(); ++i )
             {
-            BigDecimal server_last_changed
-               = ch.getLastChanged().toBigDecimal();
-            BigDecimal cache_last_changed
-               = cached.getThisRef().getLastChanged().toBigDecimal();
+            DNodeRef ch = dn.getChild( i );
+            DNode cached = getCache( ch );
 
-            if ( server_last_changed.compareTo( cache_last_changed )
-                 > 0 )
+            if ( cached != null )
                {
-               requestNode( s, ch );
+               BigDecimal server_last_changed
+                  = ch.getLastChanged().toBigDecimal();
+               BigDecimal cache_last_changed
+                  = cached.getThisRef().getLastChanged().toBigDecimal();
+
+               if ( server_last_changed.compareTo( cache_last_changed )
+                     > 0 )
+                  requestNode( s, ch );
                }
+            else
+               requestNode( s, ch );
             }
-         else
-            requestNode( s, ch );
-         }
       }
 
    private void displayNode( DNode dn )
@@ -157,12 +185,33 @@ public class WorldProxy extends SingleServerProxyBase
       // XXX else, map it to something
       }
 
-   private void requestNode( NetSession< Object > s, DNodeRef ch )
+   /**
+    * Request a node if its parent node is visible to mAvatar.
+    * @param s
+    * @param child
+    */
+   private void requestNode( NetSession< Object > s, DNodeRef child )
       {
-      // TODO trim based on transform-to-avatar and detail level
       // TODO send a get-node query to the server
 
       mRequestedNodes.incrementAndGet();
+      }
+
+   /**
+    * Returns true if the given node dn is visible to the given avatar
+    * at the given detail level, _or_ if it is unable to determine this
+    * for any reason, such as a missing avatar or connecting node.
+    * @param avatar
+    * @param dn
+    * @param detail
+    * @return
+    */
+   private boolean visibleTo( DNodeRef avatar, DNode dn,
+                              float detail )
+      {
+
+      // TODO -- duplicate node-tree/rel-vector
+      return true;
       }
 
    private void addCache( DNode dn )
@@ -204,5 +253,6 @@ public class WorldProxy extends SingleServerProxyBase
       }
 
    private DNodeRef mAvatar;
-   private AtomicInteger mRequestedNodes;
+   private final AtomicInteger mRequestedNodes;
+   private final AtomicReference< Float > mDetail;
    }
