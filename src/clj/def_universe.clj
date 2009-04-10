@@ -45,10 +45,10 @@
   subnode-index."
   [parent subnode-index]
   (let [pshift   (parent :seed-mutation-shift)
-	sshift   (-> pshift (+ 4) (rem 59))
-	pseed    (parent :seed)
-	mutation (bit-shift-left (+ 1 subnode-index) sshift)
-	seedseed (bit-xor pseed mutation)]
+        sshift   (-> pshift (+ 4) (rem 59))
+        pseed    (parent :seed)
+        mutation (bit-shift-left (+ 1 subnode-index) sshift)
+        seedseed (bit-xor pseed mutation)]
     (long (first (feedback-long-seq seedseed)))))
 
 (defn lognormal-rand
@@ -57,12 +57,12 @@
   sequence."
   ([randseq log-avg log-std-dev]
      (map #(-> % (* log-std-dev) (+ log-avg) Math/exp float)
-	  randseq))
+          randseq))
   ([randseq log-avg log-std-dev log-max]
      (if log-max
        (let [max (float (Math/exp log-max))]
-	 (map #(if (> % max) max %)
-	      (lognormal-rand randseq log-avg log-std-dev)))
+         (map #(if (> % max) max %)
+              (lognormal-rand randseq log-avg log-std-dev)))
        (lognormal-rand randseq log-avg log-std-dev))))
 
 (defn pick-radius [spec seed]
@@ -75,11 +75,11 @@
   Quaternion."
   [seed]
   (let [[x y z] (take 3 (feedback-normal-seq seed))
-	rot (first (feedback-float-seq (inc seed)))
-	theta (* rot 2 Math/PI)
-	vec (if (= 0 x y z)
-	      (Vector3f. 1 1 1)
-	      (Vector3f. x y z))]
+        rot (first (feedback-float-seq (inc seed)))
+        theta (* rot 2 Math/PI)
+        vec (if (= 0 x y z)
+              (Vector3f. 1 1 1)
+              (Vector3f. x y z))]
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
@@ -94,7 +94,7 @@
    :moveseq moveseq
    :ephemeral true
    :seed-mutation-shift (-> (parent :seed-mutation-shift)
-			    (+ 4)
+                            (+ 4)
                             (rem 59))
    :depth depth
    :parent-ref parent
@@ -106,16 +106,16 @@
   "Returns a new highest-level node for a given layer spec."
   [parent depth spec lspec pos subnode-index]
   (let [seed (subseed parent subnode-index)
-	r    (pick-radius lspec (inc seed))]
+        r    (pick-radius lspec (inc seed))]
     (new-gen-node parent depth spec lspec subnode-index seed r
-		  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
+                  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
 
 (defn new-sub-gen-node
   "Returns a new highest-level node for a given layer spec."
   [parent depth spec lspec pos subnode-index r]
   (let [seed (subseed parent subnode-index)]
     (new-gen-node parent depth spec lspec subnode-index seed r
-		  (pos-to-moveseq pos))))
+                  (pos-to-moveseq pos))))
 
 (defn pseudorandom-pos
   "Generate a reproduceable pseudorandom location for a new subnode.
@@ -123,14 +123,14 @@
   [coord-scalars [unused-size offset-factor rand-factor]
    skews radius prngs]
   (let [offset (* offset-factor radius)
-	rand-scale (* rand-factor radius)]
+        rand-scale (* rand-factor radius)]
     (map (fn [rng scalar skew]
-	   (-> offset (* scalar skew)
-	              (+ (* rng rand-scale))
-		      (- (/ rand-scale 2))))
-	 prngs
-	 coord-scalars
-	 skews)))
+           (-> offset (* scalar skew)
+                      (+ (* rng rand-scale))
+                      (- (/ rand-scale 2))))
+         prngs
+         coord-scalars
+         skews)))
 
 (defn gen-fractalplace
   "Returns a sequence of 8 subnodes for the given parent node."
@@ -182,14 +182,14 @@
   node."
   [s name]
   (let [[size offset randfactor] s
-	totaloffset (+ offset (/ randfactor 2))
-	maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
-		       size)]
+        totaloffset (+ offset (/ randfactor 2))
+        maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
+                       size)]
     (if (> maxdistance 1.0)
       (throw (Exception. (str name " structure too big by a factor of "
-			      maxdistance ", try "
-			      (with-out-str
-			       (prn (map #(/ % maxdistance) s)))))))))
+                              maxdistance ", try "
+                              (with-out-str
+                               (prn (map #(/ % maxdistance) s)))))))))
 
 (defn new-universe-spec
   "Returns a seq containing the given layer specs, each one a hash,

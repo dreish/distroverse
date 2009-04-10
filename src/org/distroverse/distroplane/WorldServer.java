@@ -142,7 +142,7 @@ public class WorldServer extends DvtpServer
       try
          {
          // Down the rabbit hole.
-         mInitSessionBang.invoke( ns, token );
+         mInitConnectionBang.invoke( ns, token );
          }
       catch ( Exception e )
          {
@@ -150,14 +150,14 @@ public class WorldServer extends DvtpServer
          try
             {
             Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
-            Log.p( "(init-session!) must not throw exceptions",
+            Log.p( "(init-connection!) must not throw exceptions",
                    Log.SERVER | Log.UNHANDLED, 100 );
             ns.close();
             }
          catch ( IOException e2 )
             {
             Log.p( e2, Log.SERVER | Log.UNHANDLED, 100 );
-            Log.p( "(init-session!) exception: got another exception"
+            Log.p( "(init-connection!) exception: got another exception"
                    + "while closing the channel!",
                    Log.SERVER | Log.UNHANDLED, 100 );
             e2.printStackTrace();
@@ -174,11 +174,11 @@ public class WorldServer extends DvtpServer
       try
          {
          RT.loadResourceScript( "world-server.clj" );
-         mInitSessionBang  = RT.var( "user", "init-session!" );
-         mHandleObjectBang = RT.var( "user", "handle-object!" );
-         mHandleGet        = RT.var( "user", "handle-get" );
-         mHandleLocation   = RT.var( "user", "handle-location" );
-         startup_bang      = RT.var( "user", "startup!" );
+         mInitConnectionBang = RT.var( "user", "init-connection!" );
+         mHandleObjectBang   = RT.var( "user", "handle-object!" );
+         mHandleGet          = RT.var( "user", "handle-get" );
+         mHandleLocation     = RT.var( "user", "handle-location" );
+         startup_bang        = RT.var( "user", "startup!" );
          }
       catch ( Exception e )
          {
@@ -190,7 +190,7 @@ public class WorldServer extends DvtpServer
                     "DVTP/0.01 WorldServer 0.02" );
       }
 
-   private static Var mInitSessionBang;
+   private static Var mInitConnectionBang;
    private static Var mHandleObjectBang;
    private static Var mHandleGet;
    private static Var mHandleLocation;

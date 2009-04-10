@@ -56,18 +56,18 @@
   Optional second argument provides the exponent bits; 1 will give
   results from 0.5 to 1; 2 will give results from 0.25 to 0.5; etc."
   ([l] (- (Double/longBitsToDouble (bit-or hex3ff0000000000000 l))
-	  1.0))
+          1.0))
   ([l e] (Double/longBitsToDouble
-	  (bit-or l (bit-shift-left (- 1023 e) 52)))))
+          (bit-or l (bit-shift-left (- 1023 e) 52)))))
 
 (defn- bits-to-float
   "Convert a 23-bit integer to a number between 0.0 and just under 1.
   Optional second argument provides the exponent bits; 1 will give
   results from 0.5 to 1; 2 will give results from 0.25 to 0.5; etc."
   ([i] (- (Float/intBitsToFloat (bit-or hex3f800000 i))
-	  (float 1.0)))
+          (float 1.0)))
   ([i e] (Float/intBitsToFloat
-	  (bit-or i (bit-shift-left (- 127 e) 23)))))
+          (bit-or i (bit-shift-left (- 127 e) 23)))))
 
 (defn get-prng-double [reg-ref]
   "Return a new double between 0 and just under 1, and update the
@@ -144,16 +144,16 @@
   ; http://en.wikipedia.org/wiki/Box-Muller_transform as of
   ; 2008-12-13, so I'm returning (Z0 Z1).
   (let [u1term (-> (Math/log u1) (* -2) Math/sqrt)
-	u2term (* u2 2 Math/PI)]
+        u2term (* u2 2 Math/PI)]
     (list (float (* u1term (Math/cos u2term)))
-	  (float (* u1term (Math/sin u2term))))))
+          (float (* u1term (Math/sin u2term))))))
 
 (defn prng-normal-seq [reg]
   "Returns a lazy sequence of pseudorandom normally distributed
   floats.  Register should have been advanced 23 bits."
   (mapcat box-muller
-	  (partition 2 (map #(if (zero? %) 1 %)
-			    (prng-float-seq reg)))))
+          (partition 2 (map #(if (zero? %) 1 %)
+                            (prng-float-seq reg)))))
 
 (defn feedback-normal-seq [seed]
   "Returns a lazy sequence of pseudorandom normally distributed
@@ -174,8 +174,8 @@
 
 
   (dorun (map (fn [x] (println (get-prng-double myrng)
-			       (.getRegister @myrng)))
-	      (range 40)))
+                               (.getRegister @myrng)))
+              (range 40)))
 
   (dosync (ref-set myrng (PrngSslfsr. (long 16))))
 

@@ -74,16 +74,16 @@
       (throw (Exception. (str "No response to " (class message)))))))
 
 (defvar message-set
-  #{'AddObject.	'AskInv.	'Blob.	'ClearShape.	'Click.
-    'Click2.	'Cookie.	'DLong.	'DNode.	'DNodeRef.
-    'Dict.	'Frac.	'GetCookie.	'Real.	'ReparentObject.
-    'ReplyInv.	'SetShape.	'SetVisible.	'ULong.	'ConPerm.
-    'DList.	'DeleteObject.	'DisplayUrl.	'DvtpExternalizable.
-    'DvtpObject.	'Err.	'False.	'Flo.	'FunCall.
-    'FunRet.	'KeyDown.	'KeyUp.	'Keystroke.	'MoreDetail.
-    'Move.	'MoveObject.	'MoveSeq.	'Pair.	'PointArray.
-    'ProxySpec.	'Quat.	'RedirectUrl.	'SetUrl.	'Shape.
-    'Str.	'True.	'Vec.	'Warp.	'WarpObject.	'WarpSeq.}
+  #{'AddObject. 'AskInv.        'Blob.  'ClearShape.    'Click.
+    'Click2.    'Cookie.        'DLong. 'DNode. 'DNodeRef.
+    'Dict.      'Frac.  'GetCookie.     'Real.  'ReparentObject.
+    'ReplyInv.  'SetShape.      'SetVisible.    'ULong. 'ConPerm.
+    'DList.     'DeleteObject.  'DisplayUrl.    'DvtpExternalizable.
+    'DvtpObject.        'Err.   'False. 'Flo.   'FunCall.
+    'FunRet.    'KeyDown.       'KeyUp. 'Keystroke.     'MoreDetail.
+    'Move.      'MoveObject.    'MoveSeq.       'Pair.  'PointArray.
+    'ProxySpec. 'Quat.  'RedirectUrl.   'SetUrl.        'Shape.
+    'Str.       'True.  'Vec.   'Warp.  'WarpObject.    'WarpSeq.}
   "Lists the constructors of DvtpExternalizable classes that either
   are messages sent by this server, or are components of those
   messages.  (Additional classes not included in this description may
@@ -101,16 +101,16 @@
   determined at compile-time?  (Err on the side of returning false, if
   at all.)"
   (cond (not (list? mc))
-	  false
-	(and (symbol? (first mc))
-	     (message-set (first mc))
-	     (every? #(or (number? %)
-			  (string? %)
-			  (const-message? %))
-		     (next mc)))
-	  true
-	:else
-	  false))
+          false
+        (and (symbol? (first mc))
+             (message-set (first mc))
+             (every? #(or (number? %)
+                          (string? %)
+                          (const-message? %))
+                     (next mc)))
+          true
+        :else
+          false))
 
 (defmacro lookup-response [message]
   "Look up the response matcher to the given message, at compile time
@@ -129,11 +129,11 @@
   (let [callbacks-ref (@(.getPayload session) :callbacks)]
     (dosync
      (let [new-callback
-	   (if (@callbacks-ref matcher)
-	     ; Add the new callback after any existing ones
-	     #(do-or (@callbacks-ref matcher)
-		     callback)
-	     callback)]
+           (if (@callbacks-ref matcher)
+             ; Add the new callback after any existing ones
+             #(do-or (@callbacks-ref matcher)
+                     callback)
+             callback)]
        (alter callbacks-ref assoc matcher new-callback)))))
 
 (defn dvtp-send! [#^NetSession session message]
@@ -151,8 +151,8 @@
   if timed out."
   `(do
      (add-callback! ~session
-		    ~(lookup-response message)
-		    (fn (~assign-var) ~@code))
+                    ~(lookup-response message)
+                    (fn (~assign-var) ~@code))
      (dvtp-send! ~session ~message)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

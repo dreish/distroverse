@@ -695,7 +695,8 @@
           oldest-trans-time (or (ffirst @*dm-transaction-times*)
                                 current-time)]
       (flush-writes-before! oldest-trans-time))))
-  
+
+;; TODO - for increased joy, get rid of the polling thread
 (defvar- writer-thread
   (Thread.
      #(loop []

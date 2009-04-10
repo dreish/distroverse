@@ -417,8 +417,8 @@
       x All the node management will be in Java, but the response/
         callback structure will be a major pain in Java.  Java no likey
         callbacks
-	> Actually node management, as state shared by multiple
-	  threads, is the strongest argument for using Clojure
+        > Actually node management, as state shared by multiple
+          threads, is the strongest argument for using Clojure
       + Get and install Clojure
       + Enjoy the consing for a few minutes
       > http://en.wikibooks.org/wiki/Clojure_Programming demonstrates
@@ -442,17 +442,17 @@
       + universe-spec
       + gen-fractalplace
         + new-topnode
-	  + Problem: This generates nodes with a radius larger than
-	    those made with new-subnode; they will exceed the bounds
-  	    of their parent nodes
-	+ new-subnode
+          + Problem: This generates nodes with a radius larger than
+            those made with new-subnode; they will exceed the bounds
+            of their parent nodes
+        + new-subnode
       + Node seed to child node seed
         + Node has a seed-mutation-shift
         + Child node's seed-mutation-shift is parent's (+ 1) (rem 60)
         + Node's seed is:
           x First long generated from rand sequence using parent's seed
-	  x bit-xor (node-index << seed-mutation-shift)
-	  > xoring the parent's seed instead
+          x bit-xor (node-index << seed-mutation-shift)
+          > xoring the parent's seed instead
   + Plug server into database
     x Need FIFO map (for db-query caching so they're
       transaction-safe):
@@ -816,7 +816,7 @@
   - Proxy
     - Obviously these need to be loaded
       > http://gist.github.com/36217 shows an example sandbox function
-      	in Clojure; try this for restricting proxy permissions
+        in Clojure; try this for restricting proxy permissions
     - Forbid connecting to SMTP
   - Server
     - Group dm transactions into SQL transactions
@@ -834,6 +834,8 @@
     - If write has a :callback, call it with true if query performed,
       false if canceled
       - send for :callback, send-off for :callback-off
+  - Try replacing the writer thread with an agent; send clean-queue
+    function after every outer transaction
   - Make dm-insert and bk-insert, etc., multimethods
   - Server for mass-audience events:
     - Performance recorded on a short delay in an arena with no audience

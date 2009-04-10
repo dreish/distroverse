@@ -95,7 +95,7 @@
   "Add the session's avatar to the world."
   [att session]
   (let [userid (att :userid)
-	pos (att :lastpos)
+        pos (att :lastpos)
         avatar-nid
           (dm-dosync
            (let [avatar-nid             ; FIXME This seems clumsy.
@@ -148,10 +148,10 @@
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-	 (dm-insert *key-to-id* {:key (id :pubkey),
+         (dm-insert *key-to-id* {:key (id :pubkey),
                                  :id new-userid})
-	 (dm-insert *userdata* (new-user-from-skel id new-userid))
-	 (alter att assoc :userid new-userid))))))
+         (dm-insert *userdata* (new-user-from-skel id new-userid))
+         (alter att assoc :userid new-userid))))))
 
 (defn get-id
   [dvtp-id]
@@ -162,11 +162,11 @@
   "Return a new session attachment object."
   [session id]
   (ref {:callbacks       (ref {})
-	:session         session
-	:id              id
+        :session         session
+        :id              id
         :detail          -10.0
         :loading         true
-	:funcall-counter (ref 0)}))
+        :funcall-counter (ref 0)}))
 
 (defn start-rendering!
   "Begins sending a proxy objects to display."
@@ -186,17 +186,17 @@
   [session token]
   (ac! [id-reply (AskInv. "ID" "id")]
     (let [id (get-id id-reply)
-	  challenge (gen-id-challenge id session)]
+          challenge (gen-id-challenge id session)]
       (ac! [id-response (fun-call ("challenge" "id" (Str. challenge)))]
-	(if (valid-id? id challenge id-response)
-	  (let [att (new-session-attachment session id)]
-	    (do
-	      (.setAttachment session (class att) att)
-	      (if (new-user? id)
-		(setup-new-user session att id))
+        (if (valid-id? id challenge id-response)
+          (let [att (new-session-attachment session id)]
+            (do
+              (.setAttachment session (class att) att)
+              (if (new-user? id)
+                (setup-new-user session att id))
               (add-self-to-world! att session)
               (start-rendering! att session)))
-	  (reject-id! session))))))
+          (reject-id! session))))))
 
 (defn handle-callback!
   "Look for the given ob in the given session's callback map, and if
@@ -205,7 +205,7 @@
   return false."
   [session att ob]
   (let [matcher   (trim-to-matcher ob)
-	callbacks (@att :callbacks)]
+        callbacks (@att :callbacks)]
     (if-let [callback! (@callbacks matcher)]
         (if (callback!)
           (dosync
@@ -231,8 +231,8 @@
   "Handle an anonymous LOCATION request."
   [noq loc]
   (.offer noq (Str. "http://www.distroverse.org/proxies/WorldProxy.jar"
-		    ".*"
-		    "org.distroverse.proxy.WorldProxy")))
+                    ".*"
+                    "org.distroverse.proxy.WorldProxy")))
 
 (defn handle-get
   "Handle an anonymous GET request."
