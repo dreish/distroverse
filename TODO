@@ -9,6 +9,14 @@
     - children: apply-lambda, not (lazy-seq (apply (resolve)))
       > Important point: don't want this to persist after being
         finished with it
+  - Refactor durable-maps so it can sit on top of any data store that
+    can provide atomic multi-record writes (such as the cookie store)
+    - For testing, target a brain-dead simple filesystem tree,
+      ignoring the atomic write issue (as I currently do for SQL,
+      anyway)
+    - datastore.clj
+      - sync-call! using async-call!?  How would that work inside a
+        transaction?
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment
@@ -80,10 +88,17 @@
               within the client's visibility range
             - The client will do trimming, and the server will only
               double-check
-              - Algorithm will err on the side of permissiveness
+              + Algorithm will err on the side of permissiveness
                 (displaying) for moving objects
                 > Probably the same algorithm will determine when a node
                   must be reparented up to accommodate a large movement
+              - NodeTreeUtils.vectorTo()
+                - This is actually impossible to do correctly without
+                  either using STM or locking the entire cookie store,
+                  isn't it?  So how do I do transactions from the proxy
+                  on a database stored by the client?
+                  > durable-maps, of course
+                  - From the proxy, load durable-maps
     x Server will automatically subscribe the client to changes in all
       nodes within range
       > Given that an avatar will move around more than nodes will, in

@@ -521,22 +521,22 @@ public class TestExternalization
       DNodeRef[]  dnex = dNodeExamples();
       tryBeamObject(
          new DNode( aoex[ 0 ], 2.0f, dnex[ 0 ], dnex[ 1 ],
-                    new DNodeRef[] {} )
+                    new DNodeRef[] {}, 8 )
          );
       tryBeamObject(
          new DNode( aoex[ 0 ], 2.0f, dnex[ 0 ], dnex[ 1 ],
-                    dnex )
+                    dnex, 6 )
          );
       tryBeamObject(
          new DNode( aoex[ 0 ], 3.0f, dnex[ 1 ], dnex[ 2 ],
                     "gen-children", new DvtpExternalizable[]
-                                       { new ULong( 1 ) } )
+                                       { new ULong( 1 ) }, 5 )
          );
       tryBeamObject(
          new DNode( aoex[ 0 ], 3.0f, dnex[ 1 ], dnex[ 2 ],
                     "gen-children", new DvtpExternalizable[]
                                        { new ULong( 1 ),
-                                         new Flo( 2.2f ) } )
+                                         new Flo( 2.2f ) }, 3 )
          );
       }
 

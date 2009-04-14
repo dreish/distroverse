@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.distroverse.core.Log;
+import org.distroverse.core.NodeTreeUtils;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DList;
@@ -49,6 +50,8 @@ import org.distroverse.dvtp.FunCall;
 import org.distroverse.dvtp.FunRet;
 import org.distroverse.dvtp.Str;
 import org.distroverse.dvtp.ULong;
+
+import com.jme.math.Vector3f;
 
 /**
  *
@@ -152,7 +155,7 @@ public class WorldProxy extends SingleServerProxyBase
          for ( int i = 0; i < dn.getNumChildren(); ++i )
             {
             DNodeRef ch = dn.getChild( i );
-            DNode cached = getCache( ch );
+            DNode cached = getCachedNode( ch );
 
             if ( cached != null )
                {
@@ -206,12 +209,19 @@ public class WorldProxy extends SingleServerProxyBase
     * @param detail
     * @return
     */
-   private boolean visibleTo( DNodeRef avatar, DNode dn,
+   private boolean visibleTo( DNodeRef avatar_ref, DNode dn,
                               float detail )
       {
+      DNode avatar = getCachedNode( avatar_ref );
+      if ( avatar == null )
+         return true;
 
-      // TODO -- duplicate node-tree/rel-vector
-      return true;
+      Vector3f vec_to = NodeTreeUtils.vectorTo( avatar, dn );
+      float target_size = dn.getRadius();
+      float target_range = dn.getMoveSeq().getRange();
+      float min_distance = vec_to.length() - target_range;
+      return min_distance
+             < WorldProxy.visibleDistance( detail, target_size );
       }
 
    private void addCache( DNode dn )
@@ -219,7 +229,7 @@ public class WorldProxy extends SingleServerProxyBase
       // TODO -- caching
       }
 
-   private DNode getCache( DNodeRef ch )
+   private DNode getCachedNode( DNodeRef ch )
       {
       // TODO -- caching
       return null;
@@ -250,6 +260,20 @@ public class WorldProxy extends SingleServerProxyBase
          }
 
       return null;
+      }
+
+   /**
+    * Returns the maximum distance at which an object of size
+    * target_size can be seen at the given detail level.
+    * @param detail
+    * @param target_size
+    * @return
+    */
+   public static float visibleDistance( float detail,
+                                        float target_size )
+      {
+      // TODO Auto-generated method stub
+      return 0;
       }
 
    private DNodeRef mAvatar;

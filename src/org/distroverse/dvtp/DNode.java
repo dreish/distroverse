@@ -37,6 +37,7 @@ public final class DNode implements DvtpExternalizable
          mParent = new DNodeRef( in );
       else
          mParent = null;
+      mDepth = Util.safeInt( ULong.externalAsLong( in ) );
       mGeneratedChildren = Bool.externalAsBoolean( in );
       if ( mGeneratedChildren )
          {
@@ -68,6 +69,7 @@ public final class DNode implements DvtpExternalizable
       mRadius = 0;
       mThis = null;
       mParent = null;
+      mDepth = 0;
       mChildren = null;
       mGeneratedChildren = false;
       mGenerator = null;
@@ -75,12 +77,13 @@ public final class DNode implements DvtpExternalizable
       }
 
    public DNode( AddObject b, float r, DNodeRef t, DNodeRef p,
-                 DNodeRef[] c )
+                 DNodeRef[] c, int d )
       {
       mBeing = b;
       mRadius = r;
       mThis = t;
       mParent = p;
+      mDepth = d;
       mChildren = c.clone();
       mGeneratedChildren = false;
       mGenerator = null;
@@ -88,12 +91,13 @@ public final class DNode implements DvtpExternalizable
       }
 
    public DNode( AddObject b, float r, DNodeRef t, DNodeRef p,
-                 String g, DvtpExternalizable[] g_args )
+                 String g, DvtpExternalizable[] g_args, int d )
       {
       mBeing = b;
       mRadius = r;
       mThis = t;
       mParent = p;
+      mDepth = d;
       mChildren = null;
       mGeneratedChildren = true;
       mGenerator = g;
@@ -114,6 +118,18 @@ public final class DNode implements DvtpExternalizable
 
    public DNodeRef getThisRef()
       {  return mThis;  }
+
+   public float getRadius()
+      {  return mRadius;  }
+
+   public MoveSeq getMoveSeq()
+      {  return mBeing.getMoveSeq();  }
+
+   public DNodeRef getParent()
+      {  return mParent;  }
+
+   public int getDepth()
+      {  return mDepth;  }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()
@@ -142,7 +158,9 @@ public final class DNode implements DvtpExternalizable
                  &&  dn.mBeing.equalsWithoutId( mBeing )
                  &&  dn.mThis.equals( mThis )
                  &&  ((mParent == null && dn.mParent == null)
-                      ||  dn.mParent.equals( mParent ))
+                      ||  (dn.mParent != null
+                           &&  dn.mParent.equals( mParent )))
+                 &&  dn.mDepth == mDepth
                  &&  mGeneratedChildren == dn.mGeneratedChildren
                  &&  ((mGenerator == null && dn.mGenerator == null)
                       || (mGenerator != null
@@ -160,6 +178,7 @@ public final class DNode implements DvtpExternalizable
              ^ mBeing.hashCodeWithoutId()
              ^ mThis.hashCode()
              ^ (mParent == null ? 0 : mParent.hashCode())
+             ^ mDepth * 132247
              ^ Arrays.hashCode( mChildren )
              ^ (mGenerator == null ? 0 : mGenerator.hashCode())
              ^ Arrays.hashCode( mGeneratorArgs );
@@ -200,6 +219,7 @@ public final class DNode implements DvtpExternalizable
    private final float                mRadius;
    private final DNodeRef             mThis;
    private final DNodeRef             mParent;
+   private final int                  mDepth;
    private final boolean              mGeneratedChildren;
    private final DNodeRef[]           mChildren;
    private final String               mGenerator;
