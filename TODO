@@ -11,12 +11,38 @@
         finished with it
   - Refactor durable-maps so it can sit on top of any data store that
     can provide atomic multi-record writes (such as the cookie store)
+    - datastore.clj
+      - sync-call using async-call!?  How would that work inside a
+        transaction?
+        - dvtp-lib/functional-sync-call
+          - Takes a DvtpChannel -- anything with void .send
+            DvtpExternalizable
+          - Add .send method to NetSession
+          - Need some kind of .send interface in WorldProxy
+      > Okay if schemas look different depending on datastore backend
+      - Need some place to store the meta tables?  Would there even be
+        meta tables for the :dcookies store?
+        > No, every table has the same schema
+        + Create table is a no-op for :dcookies
+        - Move all SQL out of durable-maps and into datastore
+          + dm-startup! should take a connection type, and varargs
+          + create-table! -- run-stmt!
+            + Will just take exactly the same tablespec format I was
+              using with durable-maps
+            > I'm really just moving code and adding some
+              polymorphism; not much changes
+          - Writes just contain the abstract information (a simple
+            copy); the query is constructed in datastore.clj by
+            functions called from the writer thread (or agent)
+          - flush-writes-before! -- run-stmt!
+          - insert-query
+          - update-query
+          - delete-query
+        - Get schema is protocol-specific
+        - Table name mutation should be done within datastore
     - For testing, target a brain-dead simple filesystem tree,
       ignoring the atomic write issue (as I currently do for SQL,
       anyway)
-    - datastore.clj
-      - sync-call! using async-call!?  How would that work inside a
-        transaction?
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment

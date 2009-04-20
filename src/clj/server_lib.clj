@@ -32,6 +32,7 @@
 (ns server-lib
   (:use util
         node-tree
+        dvtp-lib
         clojure.contrib.def))
 
 (import '(com.jme.math Quaternion Vector3f))
@@ -55,69 +56,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Communications functions
-
-(defvar response-map
-  {AskInv       #(ReplyInv. (.getKey %)),
-   GetCookie    #(Cookie. (.getKey %)),
-   FunCall      #(FunRet. (.getContents % 0))}
-  "Defines the classes that are expected in response to each message
-  class, and a vector of methods to call on the message object to
-  build up a list of arguments to pass to a constructor for the
-  response class to make a matcher object.")
-
-(defn lookup-response-func [message]
-  "Lookup a response matcher to the given message.  Throws an exception
-  if the given message does not call for a response."
-  (let [response-code (response-map (class message))]
-    (if response-code
-      (response-code message)
-      (throw (Exception. (str "No response to " (class message)))))))
-
-(defvar message-set
-  #{'AddObject. 'AskInv.        'Blob.  'ClearShape.    'Click.
-    'Click2.    'Cookie.        'DLong. 'DNode. 'DNodeRef.
-    'Dict.      'Frac.  'GetCookie.     'Real.  'ReparentObject.
-    'ReplyInv.  'SetShape.      'SetVisible.    'ULong. 'ConPerm.
-    'DList.     'DeleteObject.  'DisplayUrl.    'DvtpExternalizable.
-    'DvtpObject.        'Err.   'False. 'Flo.   'FunCall.
-    'FunRet.    'KeyDown.       'KeyUp. 'Keystroke.     'MoreDetail.
-    'Move.      'MoveObject.    'MoveSeq.       'Pair.  'PointArray.
-    'ProxySpec. 'Quat.  'RedirectUrl.   'SetUrl.        'Shape.
-    'Str.       'True.  'Vec.   'Warp.  'WarpObject.    'WarpSeq.}
-  "Lists the constructors of DvtpExternalizable classes that either
-  are messages sent by this server, or are components of those
-  messages.  (Additional classes not included in this description may
-  also be listed.)")
-
-(defmacro import-dvtp
-  "Import all DVTP classes that might be used by the server."
-  []
-  (let [classes (map #(+> % name seq drop-last (apply str _) symbol)
-                     message-set)]
-    `(import '(org.distroverse.dvtp ~@classes))))
-
-(defn const-message? [mc]
-  "Is the message object described by the given code completely
-  determined at compile-time?  (Err on the side of returning false, if
-  at all.)"
-  (cond (not (list? mc))
-          false
-        (and (symbol? (first mc))
-             (message-set (first mc))
-             (every? #(or (number? %)
-                          (string? %)
-                          (const-message? %))
-                     (next mc)))
-          true
-        :else
-          false))
-
-(defmacro lookup-response [message]
-  "Look up the response matcher to the given message, at compile time
-  if possible, or else at runtime."
-  (if (const-message? message)
-    (lookup-response-func (eval message))
-    `(lookup-response-func ~message)))
 
 (defn add-callback! [session matcher callback]
   "Add the given callback to the session so that if, later, a message

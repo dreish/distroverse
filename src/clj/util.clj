@@ -127,3 +127,7 @@
   (fn [] (apply (resolve (first s))
                 (rest s))))
 
+(defn firstarg
+  "Return the first of any arbitrary number of arguments."
+  [x & more]
+  x)

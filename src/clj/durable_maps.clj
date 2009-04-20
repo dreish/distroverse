@@ -120,38 +120,6 @@
                                keycol " = ?")
                           [keyval])))
 
-(defn- column-format
-  "Convert a spec map into a string suitable for putting between the
-  parentheses of a CREATE TABLE statement."
-  [spec]
-  (let [cols  (spec :cols)
-        name-type-seq  (map #(vector (name (first %))
-                                     (first (second %)))
-                            cols)
-        name-type-clauses  (map (fn [[n t]] (str n " " t))
-                                name-type-seq)
-        keycol  (name (spec :key))
-        key-clause  (if keycol
-                      (str "PRIMARY KEY (" keycol ")"))
-        clause-seq  (if keycol
-                      (concat name-type-clauses (list key-clause))
-                      name-type-clauses)]
-    (apply str (interpose ", " clause-seq))))
-
-(defn- create-table!
-  "Create a table, given a name and a :spec map.  An optional third
-  parameter, if true, specifies that the table should be created with
-  CREATE TABLE IF NEW."
-  ([name spec]
-     (create-table! name spec false))
-
-  ([name spec if-new]
-     (io!)
-     (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
-           cols (column-format spec)]
-       (run-stmt! @*dm-db*
-                  (apply str cmd " " name " (" cols ")")))))
-
 (defn require-dmtrans
   "Throw an exception if not running inside a durable-maps
   transaction.  (Note: (io!) is sufficient to do the reverse.)"
@@ -608,7 +576,7 @@
                                (collapse-name name)
                                (next-inname-num))]
              (do
-               (create-table! safename spec)
+               (ds-newtable! *dm-db* safename spec)
                (dm-dosync
                 (dm-insert (close-dmap *table-map*)
                            {:inname safename
@@ -723,13 +691,12 @@
 
 (defn dm-startup!
   "Starts the database, if it hasn't already been started."
-  [db user password]
+  [& ds-args]
   (do
     (io!)
     (or (compare-and-set! *dm-db*
                           nil
-                          (get-sql-conn
-                           (str "jdbc:mysql://localhost/" db "?user=" user
-                                "&password=" password)))
+                          (apply ds-open! ds-args))
         (throw (Exception. "Database connection already established.")))
     (.start writer-thread)))
+

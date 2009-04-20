@@ -32,11 +32,31 @@
 (ns datastore
   (:use clojure.contrib.def
         util
-        sql))
+        sql
+        dcookies
+        dvtp-lib))
 
 ; Simple interface for an arbitrary, possibly asynchronous data
 ; storage backend, preferably supporting simultaneous atomic
 ; modifications of multiple records.
+
+(defmulti ds-open!
+  "Return a datastore connection object (the first argument to all the
+  other datastore functions).  If the first argument is :sql, the
+  remaining arguments give the database name, username, and password.
+  localhost and mysql are (currently) assumed.  If the first argument
+  is :dcookies, the second argument is a DvtpChannel object that will
+  take GetCookie messages, and the third argument is a callback adder
+  function such as add-callback!."
+  firstarg)
+
+(defmethod ds-open! :sql
+  [ds-type db user password]
+  {:db (get-sql-conn
+        (str "jdbc:mysql://localhost/" db "?user=" user
+             "&password=" password))
+   :datastore ds-type})
+
 
 (defn on-datastore
   "Method dispatch function, based on the :datastore value of the
@@ -44,12 +64,12 @@
   ([ds & more]
      (ds :datastore)))
 
-(defmulti ds-get
+(defmulti ds-get!
   "Get the record from the given table with the given key, returning a
   hash.  If no keycol is given, use the table's primary key."
   on-datastore)
 
-(defmethod ds-get :sql
+(defmethod ds-get! :sql
   ([ds tablename keycol keyval]
      ;; XXX
      )
@@ -57,7 +77,7 @@
      (ds-get ds tablename (get-pk ds tablename) keyval)))
 
 
-(defmethod ds-get :dcookies
+(defmethod ds-get! :dcookies
   ([ds tablename keycol keyval]
      (if (not= :k keycol)
        (throw (Exception. (str "datastore :dcookies does not support key"
@@ -68,49 +88,93 @@
      ;; same functionality as ac-call!, which currently has an io!
      ;; block.
      (let [cookie (functional-sync-call
-                   (GetCookie. (Str. tablename keyval)))]
+                   (GetCookie. (Str. tablename keyval))
+                   (ds :chan) 500)]
        {:k keyval
         :v cookie})))
 
 
-(defmulti ds-change
+(defmulti ds-change!
   "Change the record in the given table matching the given hash by
   primary key, setting it to the given hash."
   on-datastore)
 
-(defmethod ds-change :sql
+(defmethod ds-change! :sql
   [ds tablename row]
   ;; XXX
   )
 
 
-(defmulti ds-add
+(defmulti ds-add!
   "Add a new record to the given table."
   on-datastore)
 
-(defmethod ds-add :sql
+(defmethod ds-add! :sql
   [ds tablename row]
   ;; XXX
   )
 
 
-(defmulti ds-newtable
+(defmulti ds-newtable!
   "Add a new table with the given name and description to the given
-  data store."
+  data store.  An optional boolean fourth parameter determines whether
+  the pre-existence of a table with the same name should be allowed
+  without an error.  (Default is to throw an error if the table
+  already exists.)  Note that in some data stores, this function might
+  always be a no-op."
   on-datastore)
 
-(defmethod ds-newtable :sql
-  [ds tablename tablespec]
-  ;; XXX
-  )
+(defn- column-format
+  "Convert a spec map into a string suitable for putting between the
+  parentheses of a CREATE TABLE statement."
+  [spec]
+  (let [cols  (spec :cols)
+        name-type-seq  (map #(vector (name (first %))
+                                     (first (second %)))
+                            cols)
+        name-type-clauses  (map (fn [[n t]] (str n " " t))
+                                name-type-seq)
+        keycol  (name (spec :key))
+        key-clause  (if keycol
+                      (str "PRIMARY KEY (" keycol ")"))
+        clause-seq  (if keycol
+                      (concat name-type-clauses (list key-clause))
+                      name-type-clauses)]
+    (apply str (interpose ", " clause-seq))))
+
+(defn- create-table!
+  "Create a table, given a name and a :spec map.  An optional third
+  parameter, if true, specifies that the table should be created with
+  CREATE TABLE IF NEW."
+  ([name spec]
+     (create-table! name spec false))
+
+  ([name spec if-new]
+     (io!)
+     (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
+           cols (column-format spec)]
+       (run-stmt! @*dm-db*
+                  (apply str cmd " " name " (" cols ")")))))
+
+(defmethod ds-newtable! :sql
+  ([ds tablename tablespec]
+     (ds-newtable ds tablename tablespec false))
+  ([ds tablename tablespec if-new]
+     (create-table! tablename tablespec if-new)))
+
+(defmethod ds-newtable! :dcookies
+  ;; Nothing needs to be created.
+  ;; TODO at least check that the table being created doesn't have an
+  ;; unsupported schema.
+  [_ _ _] nil)
 
 
-(defmulti ds-delete
+(defmulti ds-delete!
   "Delete the record from the given table with the given key,
   returning nil."
   on-datastore)
 
-(defmethod ds-delete :sql
+(defmethod ds-delete! :sql
   ([ds tablename keycol keyval]
      ;; XXX
      )
