@@ -92,7 +92,8 @@
 
 (defn min-by
   "Return the least member of the sequence s by comparing the results
-  of applying f to the members of s."
+  of applying f to the members of s.  Best for cheap functions; f will
+  be called twice on each element in s."
   [f s]
   ; TODO Could cut the calls to f in half with a loop/recur.
   (reduce #(if (neg? (compare (f %1) (f %2)))
@@ -129,5 +130,11 @@
 
 (defn firstarg
   "Return the first of any arbitrary number of arguments."
-  [x & more]
+  [x & _]
   x)
+
+(defn tm []
+  "Return a time value such that each call to (tm) returns a number
+  greater than or equal to all numbers previously returned.  The units
+  of the time value are not specified."
+  (System/currentTimeMillis))

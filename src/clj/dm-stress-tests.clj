@@ -33,6 +33,8 @@
 
 (use :reload-all 'util)
 
+(dm-startup! :sql "dm" "dm" "nZe3a5dL")
+
 (defn setup-dm-test-data!
   []
   (dm-create-new-map!
@@ -68,14 +70,14 @@
   "Loop for one thread of the sum-counter-stress-test."
   [count-to my-thread-id]
   (loop []
-    (if ;(dm-dosync
+    (if (dm-dosync
          (let [counter (add-and-get sum-counter-dm "counter" 1)]
            (if (<= counter count-to)
              (let [sum (add-and-get sum-counter-dm "sum" counter)]
 ;               (println "added" counter "in thread" my-thread-id
 ;                        "and got" sum)
                true)
-             false)) ;)
+             false)) )
       (recur)))
   (if (zero? my-thread-id)
     (prn "Finished at" (System/nanoTime))))

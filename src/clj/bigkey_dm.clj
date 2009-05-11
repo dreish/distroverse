@@ -49,7 +49,16 @@
 (defvar- get-key-munger :key-munger-fn)
 (defvar- get-abstract-keycol #(-> % :spec :abstract-keycol))
 
-(defvar- *bk-maps* (dm-get-map "bigkey-dm/mbk-maps"))
+(defvar- *bk-maps* (atom nil))
+
+(defn bk-startup!
+  "Loads the map of bk-maps.  Must be called after dm-startup!."
+  []
+  (io!
+   (or (compare-and-set! *bk-maps*
+                         nil
+                         (dm-get-map "bigkey-dm/mbk-maps"))
+       (throw (Exception. "Database connection already established.")))))
 
 (defn bk-init!
   "Initializes the permanent data structures used by bigkey-dm.
@@ -125,7 +134,7 @@
   (memoize
    (fn
      [name]
-     (if-let [bkm (*bk-maps* name)]
+     (if-let [bkm (@*bk-maps* name)]
          (close-bk (assoc bkm
                      :key-munger-fn (mem-eval
                                      (-> bkm :spec :key-munger))
@@ -144,7 +153,7 @@
                           :val_hash (spec :val-type)}
                    :key :hashed_key}]
       (dm-dosync
-       (dm-insert *bk-maps* {:exname name
+       (dm-insert @*bk-maps* {:exname name
                              :spec spec}))
       (dm-create-map! tname dm-spec))))
 

@@ -31,18 +31,75 @@
               using with durable-maps
             > I'm really just moving code and adding some
               polymorphism; not much changes
-          - Writes just contain the abstract information (a simple
+            + But who mutates the tablename?  And who keeps track of
+              the correspondence?
+              > Since the dcookie datastore can't handle the mtables
+                schema, datastore can't be completely unaware of table
+                name mutation
+              + datastore/ds-munge
+              + datastore/default-spec
+              + When adding a table, check for a default schema; if
+                the ds has one, given spec must match it and nothing
+                else need be done; if it doesn't have one, then add it
+                to *table-map*
+              + dm-load-table also needs to check for a default schema
+          + Writes just contain the abstract information (a simple
             copy); the query is constructed in datastore.clj by
             functions called from the writer thread (or agent)
-          - flush-writes-before! -- run-stmt!
-          - insert-query
-          - update-query
-          - delete-query
+            + Bring valify-row down to datastore as well
+              > Looks like all the associated functions can come too
+            + Bring down mapify-row -- this is SQL specific as well
+          + flush-writes-before! -- run-stmt!
+          + insert-query
+            + Call ds-add! in queue clearer
+            + Implement ds-add! -- take insert-query
+          + update-query
+          + delete-query
+            + Add a {:type :delete ...} hash to the write queue
+              instead of forming an SQL query and adding that
+            + Handle this in data-write!
+              + Call ds-delete!, don't form a DELETE FROM query
+          + get-query
+            + get-row
+              + ds-get equivalent to get-row
+          + ds-get calls mapify-row, not database-select?
+            x database-select needs to pass a hash with :dmap equal to
+              dmap
+            + Change all the SQL functions to take whole dmaps
+              + Or more precisely, any hash with :table for table
+                name, :key for primary key column name, and a :spec
+                like what I've been using
+                + ds-get definition
+                + ds-get calls
+                + ds-change! defn
+                + ds-change! call
+                + ds-add! defn
+                + ds-add! call
+                + ds-delete! was already set
+            + Make sure that's what they're all being given
+          + Can't create-table! in dm-init!
+        + Test :sql using test-scratch.clj; both dm & bk
+          > dm appears to work
+          + bk fails to load on dm-get-map "bigkey-dm/mbk-maps"
+            > Can't load bk until after loading dm and calling
+              dm-startup!
+              > This seems unfortunate; is there a way to pass these
+                parameters while use-ing?
+              > Or (def *db* ...) before loading?
+            + Create bk-startup!
+        - Try out the stress tests; probably somewhat faster now
+          > No big difference
         - Get schema is protocol-specific
+        - Make sure mtables and mvar either won't be hit for dcookies,
+          or can be translated somehow
+        - Make dm-init! work for dcookies; currently would die because
+          the specs are not compatible
         - Table name mutation should be done within datastore
     - For testing, target a brain-dead simple filesystem tree,
-      ignoring the atomic write issue (as I currently do for SQL,
-      anyway)
+      ignoring the transactional write issue (as I currently do for
+      SQL, anyway)
+  - Once things are working again (testable), get rid of the ds- dm-
+    bk- anti-pattern (import into ds/ dm/ bk/ if needed)
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment

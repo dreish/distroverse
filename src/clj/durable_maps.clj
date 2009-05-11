@@ -31,6 +31,7 @@
 
 (ns durable-maps
   (:use clojure.contrib.def
+        datastore
         util
         sql))
 
@@ -97,28 +98,6 @@
     (assoc m mkey value)))
 
 ; internal low-level functions
-
-(defn- tm []
-  "Return a time value such that each call to (tm) returns a number
-  greater than or equal to all numbers previously returned.  The units
-  of the time value are not specified."
-  (System/currentTimeMillis))
-
-(defn- to-row-hash
-  "Convert a result hash from sql/get-query to a hash for a single row."
-  [row-result]
-  (if (pos? (count (row-result :rows)))
-    (zipmap (map keyword (row-result :colnames))
-            (first (row-result :rows)))))
-
-(defn- get-row
-  "Get a single row from a table, given a primary key column, and a
-  value."
-  [table keycol keyval]
-  (to-row-hash (get-query @*dm-db*
-                          (str "SELECT * FROM " table " WHERE "
-                               keycol " = ?")
-                          [keyval])))
 
 (defn require-dmtrans
   "Throw an exception if not running inside a durable-maps
@@ -231,13 +210,22 @@
   @*tables*.  If the table happens to be loaded, this function has no
   effect."
   [name]
-  (if-let [table-map-entry (dm-dosync (dm-select *table-map* name))]
-    (swap! *tables* assoc-new name
-           {:name name
-            :table (table-map-entry :inname)
-            :spec (table-map-entry :spec)
-            :write (ref {})
-            :read (ref {})})))
+  (let [def-spec (default-spec @*dm-db*)
+        table-map-entry (when-not def-spec
+                          (dm-dosync (dm-select *table-map* name)))]
+    (if (or def-spec table-map-entry)
+      (let [table-name (if def-spec
+                         name
+                         (table-map-entry :inname))
+            table-spec (if def-spec
+                         def-spec
+                         (table-map-entry :spec))]
+        (swap! *tables* assoc-new name
+               {:name name
+                :table table-name
+                :spec table-spec
+                :write (ref {})
+                :read (ref {})})))))
 
 (defn dm-get-map
   "Return a named map, loading it if necessary.  The actual value
@@ -252,106 +240,6 @@
         (close-dmap t))))
 
 ; dm-insert - add a new map entry, failing if the entry already exists
-
-(defmulti translate-type-in
-  "Translate an object read in from a database into an object for the
-  hash."
-  (fn [s type] type))
-
-(defmulti translate-type-out
-  "Translate an object in a hash into an object to be stored in the
-  database."
-  (fn [o type] type))
-
-(defmethod translate-type-in :str
-  [s type]
-  s)
-
-(defmethod translate-type-out :str
-  [o type]
-  o)
-
-(defmethod translate-type-in :obj
-  [s type]
-  ; FIXME - would prefer to use a non-evaluating read here
-  (read-string (str s)))
-
-(defmethod translate-type-out :obj
-  [o type]
-  (pr-str o))
-
-(defmethod translate-type-in :keyword
-  [s type]
-  (keyword s))
-
-(defmethod translate-type-out :keyword
-  [o type]
-  (name o))
-
-(defmethod translate-type-in :seq
-  [s type]
-  (let [func (read-string (str s))]
-    {:func func
-     :seq (lazy-seq (apply (resolve (first func))
-                           (rest func)))}))
-
-(defmethod translate-type-out :seq
-  [o type]
-  (pr-str (o :func)))
-
-(defn- translate-val-in
-  [[col val] cols]
-  (let [colspec (cols col)
-        [_ coltype] colspec]
-    [col (translate-type-in val coltype)]))
-
-(defn- translate-val-out
-  [col val cols]
-  (let [colspec (cols col)
-        [_ coltype] colspec]
-    (translate-type-out val coltype)))
-
-(defn- mapify-row
-  "Converts the key-value pairs pulled out of SQL for a row into the
-  parsed and marked-up hash that represents the row in memory."
-  [raw-row spec]
-  (if raw-row
-    (let [cols (spec :cols)]
-      (apply assoc {}
-             (apply concat (map #(translate-val-in % cols)
-                                raw-row))))))
-
-(defn- valify-row
-  "Converts the given map into a sequence of vals that can be passed
-  to sql/run-stmt!"
-  [row-map spec cols]
-  (let [colspecs (spec :cols)]
-    (map #(translate-val-out % (row-map %) colspecs)
-         cols)))
-
-(defn- insert-query
-  "Form an SQL query to insert the given row, a hash, into the table
-  backing the given durable map.  Return it wrapped in a structure
-  where the query string is :query, the vector of values is :vals, and
-  the time of the write is :time."
-  [dmap row]
-  (let [table (dmap :table)
-        spec (dmap :spec)
-        cols (keys (spec :cols))
-        keycol (spec :key)
-        cols-str (apply str (interpose ", " (map name cols)))
-        num-cols (count cols)
-        val-?s (apply str (interpose ", " (take num-cols
-                                                (repeat "?"))))
-        query-str (str "INSERT INTO " table
-                       " (" cols-str ") VALUES (" val-?s ")")]
-    {:dmap dmap
-     :row row
-     :query query-str
-     :vals (valify-row row spec cols)
-     :time (tm)
-     :required true
-     :keyval (row keycol)}))
 
 (defn- add-to-write-queue
   [write-query]
@@ -399,7 +287,12 @@
           rowkey (row (-> dmap :spec :key))
           in-writes (writes rowkey)
           ; TODO delay (insert-query) for a slight performance ++
-          write-query (insert-query dmap row)]
+          ; write-query (insert-query dmap row)
+          write-query {:type :insert
+                       :dmap dmap
+                       :time (tm)
+                       :required true
+                       :row row}]
       (if (dmap-c rowkey)
         (throw (Exception. (str "dm-insert: Row exists: " rowkey))))
       (if in-writes
@@ -409,30 +302,6 @@
     dmap-c))
 
 ; dm-update - alter an existing map entry
-
-(defn- update-query
-  "Form an SQL query to set the given row, a hash, in the table
-  backing the given durable map.  Return it wrapped in a structure
-  where the query string is :query, the vector of values is :vals, and
-  the time of the write is :time."
-  [dmap row]
-  (let [table (dmap :table)
-        spec (dmap :spec)
-        keycol (spec :key)
-        cols (filter #(not= keycol %)
-                     (keys (spec :cols)))
-        keyval (row keycol)
-        col-sets-str (apply str (interpose ", " (map #(str % " = ?")
-                                                     (map name cols))))
-        num-cols (count cols)
-        query-str (str "UPDATE " table " SET " col-sets-str
-                       " WHERE " (name keycol) " = ?")]
-    {:dmap dmap
-     :row row
-     :query query-str
-     :vals (valify-row row spec (concat cols (list keycol)))
-     :time (tm)
-     :keyval keyval}))
 
 (defn dm-update
   "Update the row with the given key with the same concurrency
@@ -453,7 +322,12 @@
       (let [newrow (apply f oldrow args)
             newrow (fixrow newrow oldrow (-> dmap :spec :checked-cols))
             ; TODO delay (update-query); will not always be needed
-            write-query (update-query dmap newrow)]
+            ; write-query (update-query dmap newrow)
+            write-query {:type :update
+                         :dmap dmap
+                         :time (tm)
+                         :required true
+                         :newrow newrow}]
         (if (not= (oldrow keycol) (newrow keycol))
           (throw (Exception.
                   "dm-update attempted to change key")))
@@ -473,13 +347,14 @@
   read cache, and return it."
   [dmap key-value]
   (let [spec (dmap :spec)
-        row (get-row (dmap :table)
-                     (name (spec :key))
-                     key-value)
-        row-map (mapify-row row spec)
+        row-map (ds-get @*dm-db*        ; not row
+                        dmap
+                        (name (spec :key))
+                        key-value)
+;        row-map (mapify-row row spec)
         row-map-ref (ref row-map)
         reads (dmap :read)]
-    (when (pos? (count row))
+    (when (pos? (count row-map))
       (commute reads assoc-new key-value row-map-ref)
       row-map-ref)))
 
@@ -521,41 +396,28 @@
 
 ; dm-delete - remove a key from a map
 
-(defn- delete-query
-  "Form an SQL query to delete the row with the given key in the table
-  backing the given durable map.  Return it wrapped in a structure
-  where the query string is :query, the vector of values is :vals, and
-  the time of the write is :time."
-  [dmap keyval]
-  (let [table (dmap :table)
-        spec (dmap :spec)
-        keycol (spec :key)
-        query-str (str "DELETE FROM " table " WHERE "
-                       (name keycol) " = ?")]
-    {:dmap dmap
-     :row nil
-     :query query-str
-     :vals (valify-row {keycol keyval} spec [keycol])
-     :time (tm)
-     :required true
-     :keyval keyval}))
-
 (defn dm-delete
   "Deletes the row with the given key with the same concurrency
-  behavior as alter.  If the row does not currently exist, this
-  function either prevents a concurrent transaction from creating such
-  a row, or fails (retrying the transaction)."
+  behavior as altering the row.  If the row does not currently exist,
+  this function either prevents a concurrent transaction from creating
+  such a row, or fails (retrying the transaction)."
   [dmap-c keyval]
   (do
     (require-dmtrans)
     (let [dmap (dmap-c)
           writes (dmap :write)
           in-writes (@writes keyval)
-          write-query (delete-query dmap keyval)]
+          ;write-query (delete-query dmap keyval)
+          ]
       (if in-writes
         (ref-set in-writes nil)
         (commute writes assoc-new-or-retry keyval (ref nil)))
-      (add-to-write-queue write-query)
+      ;(add-to-write-queue write-query)
+      (add-to-write-queue {:type :delete
+                           :dmap dmap
+                           :time (tm)
+                           :required true
+                           :keyval keyval})
       dmap-c)))
 
 (let [create-map-mutex (Object.)]
@@ -569,20 +431,21 @@
     ([name spec only-if-new]
        (locking create-map-mutex
          (io!)
+         (when-not (valid-spec @*dm-db* spec)
+           (throw (Exception. "dm-create-map: Invalid spec")))
          (if (dm-dosync (dm-select *table-map* name))
            (when-not only-if-new
              (throw (Exception. (str "dm-create-map: Table exists: " name))))
-           (let [safename (str "u"
-                               (collapse-name name)
-                               (next-inname-num))]
-             (do
-               (ds-newtable! *dm-db* safename spec)
-               (dm-dosync
-                (dm-insert (close-dmap *table-map*)
-                           {:inname safename
-                            :exname name
-                            :spec spec}))
-               nil)))))))
+           (when-not (default-spec @*dm-db*)
+             (let [safename (ds-munge @*dm-db* name)]
+               (do
+                 (ds-newtable! @*dm-db* safename spec)
+                 (dm-dosync
+                  (dm-insert (close-dmap *table-map*)
+                             {:inname safename
+                              :exname name
+                              :spec spec}))
+                 nil))))))))
 
 (defn dm-create-new-map!
     "Create a new table.  This cannot be done inside a transaction.
@@ -600,8 +463,8 @@
   existing database; it will have no effect."
   []
   (do
-    (create-table! "mtables" (*table-map* :spec) true)
-    (create-table! "mvar"    (*var-map*   :spec) true)
+    (ds-newtable! @*dm-db* "mtables" (*table-map* :spec) true)
+    (ds-newtable! @*dm-db* "mvar"    (*var-map*   :spec) true)
     (dm-dosync
      (if (not (dm-select *var-map* "inname-num"))
        (dm-insert (close-dmap *var-map*)
@@ -632,22 +495,51 @@
              q
              (recur))))))))
 
+(defn- data-delete!
+  [w]
+  (ds-delete! @*dm-db*
+              (w :dmap)
+              (-> w :dmap :spec :key)
+              (w :keyval)))
+
+(defn- data-insert!
+  [w]
+  (ds-add! @*dm-db*
+           (w :dmap)
+           (w :row)))
+
+(defn- data-update!
+  [w]
+  (ds-change! @*dm-db*
+              (w :dmap)
+              (w :newrow)))
+
+;; Would prefer to use a defmulti-, but there's no such thing
+(let [impl-map {:delete data-delete!
+                :insert data-insert!
+                :update data-update!}]
+  (defn- data-write!
+    "Execute an internal write object."
+    [w]
+    (if-let [impl (impl-map (w :type))]
+      (impl w))))
+
 (defn- flush-writes-before!
   "Flush writes older than the given time value.  Returns the number
   of writes committed to permanent storage."
   [t]
-  (do
-    (io!)
-    (loop []
-      (if-let [next-write (get-next-write-before t)]
-          (do
-            (if (next-write :vals)
-              (run-stmt! @*dm-db*
-                         (next-write :query)
-                         (next-write :vals))
-              (run-stmt! @*dm-db*
-                         (next-write :query)))
-            (recur))))))
+  (io!
+   (loop []
+     (if-let [next-write (get-next-write-before t)]
+       (do
+;;          (if (next-write :vals)
+;;            (run-stmt! @*dm-db*
+;;                       (next-write :query)
+;;                       (next-write :vals))
+;;            (run-stmt! @*dm-db*
+;;                       (next-write :query)))
+         (data-write! next-write)
+         (recur))))))
 
 
 (defn flush-ready-writes!
@@ -692,11 +584,10 @@
 (defn dm-startup!
   "Starts the database, if it hasn't already been started."
   [& ds-args]
-  (do
-    (io!)
-    (or (compare-and-set! *dm-db*
-                          nil
-                          (apply ds-open! ds-args))
-        (throw (Exception. "Database connection already established.")))
-    (.start writer-thread)))
+  (io!
+   (or (compare-and-set! *dm-db*
+                         nil
+                         (apply ds-open! ds-args))
+       (throw (Exception. "Database connection already established.")))
+   (.start writer-thread)))
 

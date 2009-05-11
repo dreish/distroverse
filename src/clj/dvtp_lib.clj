@@ -32,7 +32,6 @@
 
 (ns dvtp-lib
   (:use util
-        node-tree
         clojure.contrib.def))
 
 (import '(java.util.concurrent ArrayBlockingQueue TimeUnit))
@@ -40,7 +39,7 @@
 (import '(com.jme.math Quaternion Vector3f))
 (import '(org.distroverse.dvtp Quat Vec Move MoveSeq AskInv ReplyInv
                                GetCookie Cookie FunCall FunRet))
-(import '(org.distroverse.core.net NetSession))
+(import '(org.distroverse.core.net NetSession DvtpChannel))
 
 
 (defvar response-map
@@ -109,6 +108,12 @@
 (defn send-message
   [msg #^DvtpChannel chan]
   (.send chan msg))
+
+(defn add-callback
+  "XXX TODO"
+  []
+  ; XXX
+  (throw (Exception. "implement add-callback")))
 
 (defn functional-sync-call
   "Send the given inquiry message along the given channel,

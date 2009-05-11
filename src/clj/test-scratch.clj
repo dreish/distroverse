@@ -34,6 +34,8 @@
 
 (use :reload-all 'bigkey-dm)
 
+(dm-startup! :sql "dm" "dm" "nZe3a5dL")
+
 ; Harmless to run this if it has already been run:
 (dm-init!)
 
@@ -52,6 +54,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(bk-startup!)
+
 (bk-init!)
 
 (bk-create-map! "bktest1"
@@ -68,9 +72,9 @@
 
 (dm-dosync (bk-test1 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :down))
+(dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :up))
 
-
+(dm-dosync (bk-delete bk-test1 [1 1 2 3 5 8]))
 
 
 (bk-create-map! "bktest3"
