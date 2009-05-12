@@ -55,10 +55,9 @@
   "Loads the map of bk-maps.  Must be called after dm-startup!."
   []
   (io!
-   (or (compare-and-set! *bk-maps*
-                         nil
-                         (dm-get-map "bigkey-dm/mbk-maps"))
-       (throw (Exception. "Database connection already established.")))))
+   (compare-and-set! *bk-maps*
+                     nil
+                     (dm-get-map "bigkey-dm/mbk-maps"))))
 
 (defn bk-init!
   "Initializes the permanent data structures used by bigkey-dm.

@@ -585,9 +585,9 @@
   "Starts the database, if it hasn't already been started."
   [& ds-args]
   (io!
-   (or (compare-and-set! *dm-db*
-                         nil
-                         (apply ds-open! ds-args))
-       (throw (Exception. "Database connection already established.")))
-   (.start writer-thread)))
+   (let [new-conn (apply ds-open! ds-args)]
+     (or (compare-and-set! *dm-db* nil new-conn)
+         (ds-close! new-conn)))
+   (when-not (.isAlive writer-thread)
+     (.start writer-thread))))
 

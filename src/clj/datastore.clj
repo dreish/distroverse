@@ -69,6 +69,14 @@
   ([ds & more]
      (ds :datastore)))
 
+(defmulti ds-close!
+  "Close the given database connection."
+  on-datastore)
+
+(defmethod ds-close! :sql
+  [ds]
+  (close-sql-conn (ds :db)))
+
 
 (defmulti translate-type-in
   "Translate an object read in from a database into an object for the

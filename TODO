@@ -87,7 +87,7 @@
                 parameters while use-ing?
               > Or (def *db* ...) before loading?
             + Create bk-startup!
-        - Try out the stress tests; probably somewhat faster now
+        + Try out the stress tests; probably somewhat faster now
           > No big difference
         - Get schema is protocol-specific
         - Make sure mtables and mvar either won't be hit for dcookies,

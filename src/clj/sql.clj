@@ -44,6 +44,11 @@
          :str conn-str
          :fails 0}))
 
+(defn close-sql-conn
+  "Close the given SQL connection object."
+  [conn-obj]
+  (.close (@conn-obj :conn)))
+
 (defn fill-placeholders
   "Returns a Statement, which the caller is responsible for closing."
   [conn query values]
