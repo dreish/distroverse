@@ -1,6 +1,12 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - As quickly as possible, put together a server that sends an
+    extremely simplified universe (with no detail culling), a proxy
+    that caches nothing, and get it working with the client
+    - Replace universe def with something very limited
+    - Make a star system just a single polyhedron
+    - Get it to show up in the client
   - Hopefully-emerging node design:
     - Need a depth attribute
       - Property stored in concrete nodes
@@ -89,9 +95,13 @@
             + Create bk-startup!
         + Try out the stress tests; probably somewhat faster now
           > No big difference
-        - Get schema is protocol-specific
-        - Make sure mtables and mvar either won't be hit for dcookies,
+        + Make sure mtables and mvar either won't be hit for dcookies,
           or can be translated somehow
+          + It appears dm-create-map! does not handle this correctly
+          + next-inname-num, using *var-map*, looks problematic
+            > Add comment and punt for now
+            > Solution might be to change to :k :v, but what about
+              type conversion?
         - Make dm-init! work for dcookies; currently would die because
           the specs are not compatible
         - Table name mutation should be done within datastore

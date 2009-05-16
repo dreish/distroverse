@@ -124,6 +124,14 @@
   [o type]
   (pr-str (o :func)))
 
+(defmethod translate-type-in :dobj
+  [d type]
+  d)
+
+(defmethod translate-type-out :dobj
+  [d type]
+  d)
+
 (defn- translate-val-in
   [[col val] cols]
   (let [colspec (cols col)

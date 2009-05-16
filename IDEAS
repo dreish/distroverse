@@ -6958,3 +6958,224 @@ needed when the avatar moves out of range of its current spatial node,
 since in practice I expect it to be extremely rare for an avatar to be
 more than a handful of generations removed from a concrete node.
 
+2009-02-26
+
+I'm once again reevaluating how nodes will get their way from the server
+to the client.  Maybe I should just pick something stupid and plunge
+ahead with it.  This is just _a_ server out of the universe of possible
+servers that can use DVTP.
+
+2009-02-27
+
+So I think the answer is to send a root node and have the proxy pull,
+and have the server refuse what shouldn't be visible.
+
+And I think I want to have two classes of objects: motive and
+non-motive, and keep a notify list for the former and check for interest
+for the latter.  Maybe the best way to check for interest is just to
+poll actual clients over the net. Maybe it would be reasonable to narrow
+that down based on the max detail level among all clients, and a query
+on the locations of all avatars.
+
+No, of course, I should send the avatar's parent node first.  The proxy
+will request outward from there.
+
+2009-03-17
+
+I think I need to start over on the node tree.
+
+I'm sure this would all be at least a little easier (for me to figure
+out, anyway) in an object-oriented language.  But it's probably worth
+thinking about a different way of doing this.
+
+A node with a concrete parent should probably just have the Ref in ...
+no, it would be better for it to have the node ID.
+
+I can't get away from thinking first about what a node _has_, but really
+I just need to define an interface first and regard nodes themselves as
+black boxes, and then once I've figured out how they're going to be
+used, the interface (or really, the collection of functions) should
+guide the requirements for the data.
+
+It's somewhat backwards from the typical OO way of doing exploratory
+programming: define classes and data first, think of some obvious
+methods, start implementing, and gradually a useful vocabulary of nouns
+with verbs attached to them starts to emerge.  Instead, this is: build
+up a vocabulary of verbs until a noun starts to emerge.
+
+It would be an unnecessary distinction, but immutability is foiling my
+attempts to just dump the obvious attributes into a hash.  I really have
+to figure out what will be done with them first.
+
+Rather than think of obvious general operations on a node in a tree, I
+should probably be thinking about the actual client/server interactions.
+Specifically, will a server _ever_ need to know about an ephemeral node
+other than when it converts it to concrete?  If not, then my design
+might be a good deal simpler than I'd been thinking.
+
+Even in the case of collisions, I suspect it would be _rare_ (though
+definitely not impossible) to need to confirm a collision with an
+ephemeral node, simply because the object doing the colliding is almost
+always going to be a sibling of the ephemeral node, which means it would
+be at least temporarily concrete.
+
+Maybe I could really get away with doing something absurdly inefficient,
+generating all ephemeral nodes on demand.  (Haven't I been through this
+already?  Wasn't there some reason I couldn't do this?)
+
+I'll probably still need to do the same thing: create the ephemeral
+node with an empty Ref for the children, then set the Ref to some lazy
+sequence of a function taking the node itself as a parameter.
+
+2009-03-18
+
+So here's the answer: I'm going to ignore the fact that I don't have a
+real node tree.  I'm going to just code around it.  With any luck,
+eventually I'll hit some functions that are actually specific enough to
+guide the data structure.
+
+2009-04-05
+
+I'm finding it hard to do things that aren't O(N^2) as to the number of
+avatars, but I'm strongly motivated to avoid it.  Even a big N log N
+should be better in the long run.
+
+2009-04-10
+
+I want the proxy to be able to determine whether a given node is visible
+to the avatar at the user's current detail level.  To do this, it will
+trace through the node tree as cached in the cookie store.  But while it
+is doing that in one thread, another proxy thread could be applying
+updates to the cached node tree based on messages from the server.
+
+The proxy needs a way to get a frozen snapshot of the cookie store,
+which means it needs to be transactional.
+
+How am I going to allow a proxy to run a function in a transaction that
+potentially affects the client?  That sounds messy.  Locking would be
+much worse, of course.
+
+One option might be to start moving the proxy over to Clojure, giving it
+a durable-maps interface to the cookie database.  That _almost_ sounds
+reasonable.
+
+The only hard part would be abstracting away the SQL stuff currently in
+durable_maps.clj.
+
+I think that's going to be the only practical way to do this while still
+preserving the asynchronous messaging nature of DVTP.  Conveniently, the
+way I did my STM-compatible persistence framework in Clojure fits
+perfectly with an asynchronous messaging protocol.  If I had mixed reads
+and writes within transactions, I could have made something that
+wouldn't translate cleanly to the proxy/client interface.
+
+The one drawback of this is that only a single proxy will be able to
+access a given part of the cookie store at a time.  So accessing a site
+twice through the same browser won't work.
+
+2009-04-11
+
+I had another idea today for resolving the tree-cache-walking issue, but
+though somewhat clever, it doesn't work: I would check the last-modified
+time for each node I encountered, and if it was after the begin time for
+the walk, I would abort and start over.
+
+Actually, that _could_ work if the last-modified time is generated
+locally, rather than being the time given by the server.  (In which case
+both would need to be stored.)
+
+I think the problem is that even if this quick and dirty method works in
+the simple case, the system as a whole will produce some complex
+scenario in which the simple approach produces visibly wrong behavior,
+such as visibility being calculated in one thread while simultaneously
+another thread updates the node such that it is no longer visible, but
+due to a race condition it stays visible.
+
+Worse would be the opposite case: something buzzing past the avatar but
+never becoming visible.
+
+I think the further I go, the more I'm going to find I just can't do
+things correctly while scaling to high numbers of threads without
+transactions.
+
+2009-04-12
+
+For a minute I thought I wouldn't be able to make a DVTP replacement for
+a SQL SELECT without continuations, but all I need to do is create a
+blocking queue, add a callback that will add something to the queue, and
+then do a blocking get from the queue.  I really need to figure out how
+I'm going to do timeouts for these callbacks.
+
+Of course, this means I'm doing a lot of bad things inside transactions.
+As long as it works reasonably well in practice, though, I don't think I
+care.
+
+I think the admonishment against doing I/O in transactions comes from
+the fact that they might be retried, and I/O is generally not
+idempotent, but sending a message that is nothing more than a get query
+seems safe enough to me.  And I don't think my GetCookie/Cookie cycle
+can block for a significant enough amount of time to make STM fall over.
+
+We'll see.
+
+2009-05-12
+
+Yesterday, while waiting in the jury assembly room, I decided that
+proxies are going to have to run in one of two ways:
+
+- Each window is backed by a proxy thread running in a process
+  collecting all like proxies*, whatever site they are connected to;
+
+or
+
+- Each window is backed by a proxy thread running in a process
+  collecting all like proxies connected to the same site.
+
+*"like" meaning "having the same jar".
+
+The former design is potentially more powerful; a proxy could be
+specifically designed to enable interesting cross-site interactions.  It
+might be more of a headache than it could be worth, though, depending on
+how hard it is to keep things separate that should be separate.
+
+Maybe it should be a property of the proxy itself -- i.e., a jar has
+some policy file that indicates which way it should be run.  I'm not
+100% certain it's as easy to make either of these happen as I seem to be
+assuming it would be.
+
+2009-05-14
+
+In a dream last night, Paul Graham berated me for failing to follow the
+Lisp development model: get something simple working quickly and then
+iterate.  (Of course, this being a dream, the criticism was actually
+about failing to pop some popcorn correctly, but I understood the
+subtext.)
+
+Later today I rationalized what I've been working on lately by reasoning
+that I might have a completely unworkable idea, and that I should at
+least make sure I'll be able to go all the way with the design I have
+before I get too deep into it.
+
+But at any rate, I'm past that point, and now I need to make something
+simple that actually runs:
+
+- A single detail level
+- All star systems are just a single polyhedral star and no other
+  objects
+- A greatly reduced universe that can be fetched in its entirety (no
+  detail-level culling)
+
+Though this last point makes the exercise _almost_ pointless:
+
+- Scene graph root in client is the same as the root node on the server.
+
+I hope I can figure out an incremental way to go from that last shortcut
+to having any arbitrary node be the root.
+
+Or maybe I can accomplish nearly the same thing by having the root node
+offset from the origin such that any arbitrary node would be located at
+(or near enough to) the origin.  Somehow I don't think the math works on
+that idea, though.
+
+No, it wouldn't.
+

@@ -192,6 +192,7 @@
 
 (defn- next-inname-num
   "Return the next unique number to be used for internal table names."
+  ; FIXME - this isn't going to work for :dcookies
   []
   (dm-dosync
    (-> (close-dmap *var-map*)
@@ -429,23 +430,24 @@
     ([name spec]
        (dm-create-map! name spec false))
     ([name spec only-if-new]
-       (locking create-map-mutex
-         (io!)
-         (when-not (valid-spec @*dm-db* spec)
-           (throw (Exception. "dm-create-map: Invalid spec")))
-         (if (dm-dosync (dm-select *table-map* name))
-           (when-not only-if-new
-             (throw (Exception. (str "dm-create-map: Table exists: " name))))
-           (when-not (default-spec @*dm-db*)
-             (let [safename (ds-munge @*dm-db* name)]
-               (do
-                 (ds-newtable! @*dm-db* safename spec)
-                 (dm-dosync
-                  (dm-insert (close-dmap *table-map*)
-                             {:inname safename
-                              :exname name
-                              :spec spec}))
-                 nil))))))))
+       (when-not (valid-spec @*dm-db* spec)
+         (throw (Exception. "dm-create-map: Invalid spec")))
+       (when-not (default-spec @*dm-db*)
+         (io!
+          (locking create-map-mutex
+            (if (dm-dosync (dm-select *table-map* name))
+              (when-not only-if-new
+                (throw (Exception. (str "dm-create-map: Table exists: " name))))
+              (when-not (default-spec @*dm-db*)
+                (let [safename (ds-munge @*dm-db* name)]
+                  (do
+                    (ds-newtable! @*dm-db* safename spec)
+                    (dm-dosync
+                     (dm-insert (close-dmap *table-map*)
+                                {:inname safename
+                                 :exname name
+                                 :spec spec}))
+                    nil))))))))))
 
 (defn dm-create-new-map!
     "Create a new table.  This cannot be done inside a transaction.
