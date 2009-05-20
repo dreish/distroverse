@@ -171,10 +171,26 @@
     (apply gen n spec args)))
 
 (defn gen-starsystem
-  []
   ""
+  ([parent spec]
+     (list
+      {:radius ;XXX
+       :moveseq ;XXX
+       :ephemeral true
+       :shape (polyhedron :rows 4)
+       :depth ;XXX
+       :parent-ref parent
+       :parent (parent :nodeid)
+       }))
+  
   ; XXX
   )
+
+(defn gen-simple-starsystem
+  "Returns a sequence of subnodes making up the given star system."
+  [n]
+  ; XXX
+  (list ))
 
 (defn- check-structure
   "Throws an exception if the structure constants would violate the
@@ -222,7 +238,7 @@
                 (pick-radius (spec 0) (inc seed))
                 (pos-to-moveseq [0 0 0])))
 
-(defvar universe-spec
+(defvar big-universe-spec
   (new-universe-spec
    {:name          "universe",
     :generator     gen-fractalplace,
@@ -271,3 +287,22 @@
    )
   "Parameters defining how universes are generated.")
 
+(defvar small-universe-spec
+  (new-universe-spec
+   {:name          "stellarcluster",
+    :generator     gen-fractalplace,
+    :log-max-size  40.0,             ; ~24.88 light years
+    :log-avg-size  40.0,
+    :log-std-dev   0,
+    :structure     [0.4349 0.21769 0.21769],
+    }
+   
+   {:name          "starsystem",
+    :generator     gen-simple-starsystem,
+    :log-max-size  38.39528,         ; ~ 5 light years
+    :log-avg-size  38.39528,
+    :log-std-dev   0,
+    }
+   )
+  "Parameters for a small, simple universe of just a few polyhedral
+  stars in an open cluster.")

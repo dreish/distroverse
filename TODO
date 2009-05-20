@@ -4,9 +4,18 @@
   - As quickly as possible, put together a server that sends an
     extremely simplified universe (with no detail culling), a proxy
     that caches nothing, and get it working with the client
-    - Replace universe def with something very limited
+    + Replace universe def with something very limited
+      + defvar small-universe-spec
     - Make a star system just a single polyhedron
+      - How do I send a polyhedron?  Or any node for that matter?
+        > First pass at a proxy will just respond to DNode (from
+          server) by sending client an AddObject
     - Get it to show up in the client
+      - On connect, call dump-universe
+        - Traverse entire universe (from hardcoded root node #1)
+        - Convert each node to a DNode and send it to the client
+    - Add a trivial avatar to the world
+    - Add avatar movement
   - Hopefully-emerging node design:
     - Need a depth attribute
       - Property stored in concrete nodes
