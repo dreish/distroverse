@@ -10,6 +10,7 @@
       - How do I send a polyhedron?  Or any node for that matter?
         > First pass at a proxy will just respond to DNode (from
           server) by sending client an AddObject
+        + Add DNode handling in proxy
     - Get it to show up in the client
       - On connect, call dump-universe
         - Traverse entire universe (from hardcoded root node #1)

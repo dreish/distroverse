@@ -65,7 +65,7 @@ public abstract class SingleServerProxyBase extends NetProxyBase
    public void sendToServer( DvtpExternalizable o )
    throws ClosedChannelException
       {
-      mSession.getNetOutQueue().add( o );
+      mRemoteSession.getNetOutQueue().add( o );
       }
 
    /**
@@ -77,16 +77,16 @@ public abstract class SingleServerProxyBase extends NetProxyBase
     */
    protected void setServer( String host, int port ) throws IOException
       {
-      if ( mSession != null )
-         mSession.close();
+      if ( mRemoteSession != null )
+         mRemoteSession.close();
 
       Log.p( "connecting to server: " + host + ":" + port,
              Log.PROXY, -50 );
       SocketAddress remote_addr = new InetSocketAddress( host, port );
-      mSession = connect( remote_addr );
+      mRemoteSession = connect( remote_addr );
       Log.p( "sending PROXYOPEN command to " + host + ":" + port,
              Log.PROXY, -50 );
-      mSession.getNetOutQueue()
+      mRemoteSession.getNetOutQueue()
               .add( new Str( "PROXYOPEN" ) );
       }
 
@@ -134,7 +134,7 @@ public abstract class SingleServerProxyBase extends NetProxyBase
          }
       }
 
-   private NetSession< Object > mSession;
+   private NetSession< Object > mRemoteSession;
    private String mCurrentHost;
    private int    mCurrentPort;
    }

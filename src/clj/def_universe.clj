@@ -172,6 +172,11 @@
 
 (defn gen-starsystem
   ""
+  ;; XXX
+  )
+
+(defn gen-simple-starsystem
+  "Returns a sequence of subnodes making up the given star system."
   ([parent spec]
      (list
       {:radius ;XXX
@@ -181,16 +186,7 @@
        :depth ;XXX
        :parent-ref parent
        :parent (parent :nodeid)
-       }))
-  
-  ; XXX
-  )
-
-(defn gen-simple-starsystem
-  "Returns a sequence of subnodes making up the given star system."
-  [n]
-  ; XXX
-  (list ))
+       })))
 
 (defn- check-structure
   "Throws an exception if the structure constants would violate the

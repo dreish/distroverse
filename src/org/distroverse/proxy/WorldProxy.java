@@ -144,14 +144,14 @@ public class WorldProxy extends SingleServerProxyBase
 
    private boolean withinView( DNode dn )
       {
-      // TODO Auto-generated method stub
-
-      return false;
+      // FIXME something to implement ...
+      return true;
       }
 
    private void maybeGetChildren( NetSession< Object > s, DNode dn )
       {
-      if ( visibleTo( mAvatar, dn, mDetail.get() ) )
+      // XXX - short-circuited for now; server will send everything
+      if ( false && visibleTo( mAvatar, dn, mDetail.get() ) )
          for ( int i = 0; i < dn.getNumChildren(); ++i )
             {
             DNodeRef ch = dn.getChild( i );
@@ -176,16 +176,21 @@ public class WorldProxy extends SingleServerProxyBase
    private void displayNode( DNode dn )
       {
       // TODO Auto-generated method stub
-      long client_id_for_node
+      ULong client_id_for_node
          = serverIdToClient( dn.getThisRef().getId(),
                              dn.getThisRef().getRemoteHost() );
+      ULong client_id_for_parent
+         = serverIdToClient( dn.getParent().getId(),
+                             dn.getParent().getRemoteHost() );
+      putQueue( dn.getBeing().setIds( client_id_for_node,
+                                      client_id_for_parent ) );
       }
 
-   public long serverIdToClient( long id, String remoteHost )
+   public ULong serverIdToClient( long id, String remoteHost )
       {
       // XXX If remoteHost == mMainHost:
-      return id;
-      // XXX else, map it to something
+      return new ULong( id );
+      // XXX else, map it to something (check if already cached)
       }
 
    /**

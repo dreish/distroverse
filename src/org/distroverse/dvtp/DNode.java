@@ -124,6 +124,9 @@ public final class DNode implements DvtpExternalizable
 
    public MoveSeq getMoveSeq()
       {  return mBeing.getMoveSeq();  }
+   
+   public AddObject getBeing()
+      {  return mBeing;  }
 
    public DNodeRef getParent()
       {  return mParent;  }
