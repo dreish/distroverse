@@ -122,8 +122,14 @@
                             (Quat. q)))))
 
 (defn node-to-addobject
-  "Turns a node hash into an AddObject object."
+  "Turns a node hash into an AddObject message."
   [nh]
+  (if (nh :shape)
+    (AddObject. true
+                (nh :shape)
+                (nh :id)
+                (nh :parentid)
+                (nh )))
   ; XXX
   )
 
@@ -136,7 +142,7 @@
   )
 
 (defn node-encode
-  "Turns a node hash into a DNode object."
+  "Turns a node hash into a DNode message."
   [nh]
   (DNode. (node-to-addobject nh)
           (nh :radius)
@@ -153,6 +159,7 @@
 ;; dvtp-wrap
 
 (defmethod dvtp-convert clojure.lang.PersistentList
+  ;; (to catch a likely error)
   [x]
   (if (message-set (first x))
     x

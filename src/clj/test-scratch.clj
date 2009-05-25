@@ -30,72 +30,75 @@
 ;; </copyleft>
 
 
-(use :reload-all 'durable-maps)
+(ns test
+  (:require :reload-all [durable-maps :as dm])
+  (:require :reload-all [bigkey-dm :as bk]))
 
-(use :reload-all 'bigkey-dm)
+; (use :reload-all 'durable-maps :as 'dm)
+; (use :reload-all 'bigkey-dm)
 
-(dm-startup! :sql "dm" "dm" "nZe3a5dL")
+(dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
 ; Harmless to run this if it has already been run:
-(dm-init!)
+(dm/init!)
 
-(dm-create-map! "test1"
+(dm/create-map! "test1"
                 {:cols {:mykey ["VARCHAR(32)" :str]
                         :myval ["TEXT" :obj]}
                  :key :mykey})
 
-(def my-test1 (dm-get-map "test1"))
+(def my-test1 (dm/get-map "test1"))
 
-(dm-dosync (dm-insert my-test1 {:mykey "foo", :myval 10}))
+(dm/dmsync (dm/insert my-test1 {:mykey "foo", :myval 10}))
 
-(prn (dm-dosync (my-test1 "foo")))
+(prn (dm/dmsync (my-test1 "foo")))
 
-(dm-dosync (dm-delete my-test1 "foo"))
+(dm/dmsync (dm/delete my-test1 "foo"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(bk-startup!)
+(bk/startup!)
 
-(bk-init!)
+(bk/init!)
 
-(bk-create-map! "bktest1"
+(bk/create-map! "bktest1"
                 {:abstract-keycol :key
                   ; md5 is only 32 chars; oops
                  :key-munger `(md5-munger 40)
                  :key-type ["VARCHAR(40)" :str]
                  :val-type ["MEDIUMTEXT" :obj]})
 
-(def bk-test1 (dm-dosync (bk-get-map "bktest1")))
+(def bk-test1 (dm/dmsync (bk/get-map "bktest1")))
 
-(dm-dosync (bk-insert bk-test1 {:key [1 1 2 3 5 8]
+(dm/dmsync (bk/insert bk-test1 {:key [1 1 2 3 5 8]
                                 :any-key "xyz"}))
 
-(dm-dosync (bk-test1 [1 1 2 3 5 8]))
+(dm/dmsync (bk-test1 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test1 [1 1 2 3 5 8] assoc :up :up))
+(dm/dmsync (bk/update bk-test1 [1 1 2 3 5 8] assoc :up :up))
 
-(dm-dosync (bk-delete bk-test1 [1 1 2 3 5 8]))
+(dm/dmsync (bk/delete bk-test1 [1 1 2 3 5 8]))
 
 
-(bk-create-map! "bktest3"
+(bk/create-map! "bktest3"
                 {:abstract-keycol :key
                   ; md5 is only 32 chars; oops
                  :key-munger `(md5-munger 1)
                  :key-type ["CHAR(1)" :str]
                  :val-type ["MEDIUMTEXT" :obj]})
 
-(def bk-test3 (dm-dosync (bk-get-map "bktest3")))
+(def bk-test3 (dm/dmsync (bk/get-map "bktest3")))
 
-(dm-dosync (bk-insert bk-test3 {:key [1 1 2 3 5 8]
+(dm/dmsync (bk/insert bk-test3 {:key [1 1 2 3 5 8]
                                 :any-key "xyz"}))
 
-(dm-dosync (bk-test3 [1 1 2 3 5 8]))
+(dm/dmsync (bk-test3 [1 1 2 3 5 8]))
 
-(dm-dosync (bk-update bk-test3 [1 1 2 3 5 8] assoc :up :down))
+(dm/dmsync (bk/update bk-test3 [1 1 2 3 5 8] assoc :up :down))
 
-(dm-dosync (bk-insert bk-test3 {:key [1 1 2 3 5 8 4]
+(dm/dmsync (bk/insert bk-test3 {:key [1 1 2 3 5 8 4]
                                 :any-key "xyz again"}))
 
-(dm-dosync (bk-test3 [1 1 2 3 5 8 4]))
+(dm/dmsync (bk-test3 [1 1 2 3 5 8 4]))
 
-(dm-dosync (bk-delete bk-test3 [1 1 2 3 5 8 4]))
+(dm/dmsync (bk/delete bk-test3 [1 1 2 3 5 8 4]))

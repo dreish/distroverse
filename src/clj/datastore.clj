@@ -43,9 +43,9 @@
 ; modifications of multiple records.
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-open!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; open!
 
-(defmulti ds-open!
+(defmulti open!
   "Return a datastore connection object (the first argument to all the
   other datastore functions).  If the first argument is :sql, the
   remaining arguments give the database name, username, and password.
@@ -55,7 +55,7 @@
   function such as add-callback!."
   firstarg)
 
-(defmethod ds-open! :sql
+(defmethod open! :sql
   [ds-type db user password]
   {:db (get-sql-conn
         (str "jdbc:mysql://localhost/" db "?user=" user
@@ -69,11 +69,11 @@
   ([ds & more]
      (ds :datastore)))
 
-(defmulti ds-close!
+(defmulti close!
   "Close the given database connection."
   on-datastore)
 
-(defmethod ds-close! :sql
+(defmethod close! :sql
   [ds]
   (close-sql-conn (ds :db)))
 
@@ -163,9 +163,9 @@
          cols)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-get
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; getrec
 
-(defmulti ds-get
+(defmulti getrec
   "Get the record from the given table with the given key, returning a
   hash.  If no keycol is given, use the table's primary key."
   on-datastore)
@@ -192,7 +192,7 @@
   [_ _]
   (throw (Exception. "Unimplemented function: get-pk")))
 
-(defmethod ds-get :sql
+(defmethod getrec :sql
   ([ds table keycol keyval]
      (get-row (ds :db)
               (table :table)
@@ -200,15 +200,15 @@
               keycol
               keyval))
   ([ds table keyval]
-     (ds-get ds table (get-pk ds table) keyval)))
+     (getrec ds table (get-pk ds table) keyval)))
 
 
-(defmethod ds-get :dcookies
+(defmethod getrec :dcookies
   ([ds table keycol keyval]
      (if (not= :k keycol)
        (throw (Exception. (str "datastore :dcookies does not support key"
                                " columns other than :k")))
-       (ds-get ds table keyval)))
+       (getrec ds table keyval)))
   ([ds table keyval]
      ;; XXX this is going to require a synchronous wrapper around the
      ;; same functionality as ac-call!, which currently has an io!
@@ -221,9 +221,9 @@
         :v cookie})))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-change!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; change!
 
-(defmulti ds-change!
+(defmulti change!
   "Change the record in the given table matching the given hash by
   primary key, setting it to the given hash."
   on-datastore)
@@ -252,7 +252,7 @@
      :time (tm)
      :keyval keyval}))
 
-(defmethod ds-change! :sql
+(defmethod change! :sql
   [ds table row]
   (let [q (update-query table row)]
     (run-stmt! (ds :db)
@@ -260,9 +260,9 @@
                (q :vals))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-add!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; add!
 
-(defmulti ds-add!
+(defmulti add!
   "Add a new record to the given table."
   on-datastore)
 
@@ -290,7 +290,7 @@
      :required true
      :keyval (row keycol)}))
 
-(defmethod ds-add! :sql
+(defmethod add! :sql
   [ds table row]
   (let [q (insert-query table row)]
     (run-stmt! (ds :db)
@@ -298,9 +298,9 @@
                (q :vals))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-newtable!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; newtable!
 
-(defmulti ds-newtable!
+(defmulti newtable!
   "Add a new table with the given name and description to the given
   data store.  An optional boolean fourth parameter determines whether
   the pre-existence of a table with the same name should be allowed
@@ -341,31 +341,31 @@
        (run-stmt! db
                   (apply str cmd " " name " (" cols ")")))))
 
-(defmethod ds-newtable! :sql
+(defmethod newtable! :sql
   ([ds tablename tablespec]
-     (ds-newtable! ds tablename tablespec false))
+     (newtable! ds tablename tablespec false))
   ([ds tablename tablespec if-new]
      (create-table! (ds :db) tablename tablespec if-new)))
 
-(defmethod ds-newtable! :dcookies
+(defmethod newtable! :dcookies
   ;; Nothing needs to be created.
   ;; TODO at least check that the table being created doesn't have an
   ;; unsupported schema.
   [_ _ _] nil)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-munge
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; munge
 
-(defmulti ds-munge
+(defmulti munge
   "Mutate the given table name to something safe for use with the
   given datastore."
   on-datastore)
 
-(defmethod ds-munge :sql
+(defmethod munge :sql
   [ds name]
   (apply str (take 16 (re-seq #"[a-zA-Z]" name))))
 
-(defmethod ds-munge :dcookies
+(defmethod munge :dcookies
   [ds name]
   name)
 
@@ -400,14 +400,14 @@
     true))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ds-delete!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; delete!
 
-(defmulti ds-delete!
+(defmulti delete!
   "Delete the record from the given table with the given key,
   returning nil."
   on-datastore)
 
-(defmethod ds-delete! :sql
+(defmethod delete! :sql
   ([ds table keycol keyval]
      (let [tablename (table :table)
            spec (table :spec)
@@ -418,9 +418,9 @@
            vals (valify-row {keycol keyval} spec [keycol])]
        (run-stmt! db query-str vals)))
   ([ds table keyval]
-     (ds-delete! ds table (get-pk table) keyval)))
+     (delete! ds table (get-pk table) keyval)))
 
-(defmethod ds-delete! :dcookies
+(defmethod delete! :dcookies
   ([ds table keycol keyval]
      )
   ([ds table keyval]

@@ -30,8 +30,8 @@
 ;; </copyleft>
 
 (ns durable-maps
+  (:require [datastore :as ds])
   (:use clojure.contrib.def
-        datastore
         util
         sql))
 
@@ -44,7 +44,7 @@
 ; the committed data will exist permanently on disk.  In the case of a
 ; write to a durable map, the write to disk may happen an arbitrary
 ; amount of time later than that.  (TODO provide an await function)
-; Programs using this library must call dm-shutdown! before exiting,
+; Programs using this library must call shutdown! before exiting,
 ; or they will hang.
 
 ; I'm (ab)using SQL as an implementation detail.  I'm not really using
@@ -56,22 +56,22 @@
 ; Doing it with a database makes it a little easier to scale to
 ; ridiculous numbers by throwing money at the problem, though.
 
-(defvar *dm-transaction-times* (atom (sorted-set)))
-(defvar *dm-transaction-level* 0)
+(defvar- *transaction-times* (atom (sorted-set)))
+(defvar- *transaction-level* 0)
 
 (defvar- *tables* (atom {}))
 (defvar- *write-queue* (ref (queue)))
-(defvar- *dm-shutting-down* (ref nil))
+(defvar- *shutting-down* (ref nil))
 (Class/forName "com.mysql.jdbc.Driver")
-;; (defvar- *dm-db* (get-sql-conn
+;; (defvar- *db* (get-sql-conn
 ;;                   "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
-(defvar- *dm-db* (atom nil))
+(defvar- *db* (atom nil))
 ; TODO An engine like SQLite might be ideal
 
-(declare dm-update
+(declare update
          database-select
          local-select
-         dm-select
+         select
          flush-writes-before!)
 
 (defn assoc-new [m mkey value]
@@ -103,11 +103,11 @@
   "Throw an exception if not running inside a durable-maps
   transaction.  (Note: (io!) is sufficient to do the reverse.)"
   []
-  (when-not (pos? *dm-transaction-level*)
+  (when-not (pos? *transaction-level*)
     (throw (IllegalStateException.
-            "Call to transaction-only function outside (dm-dosync)"))))
+            "Call to transaction-only function outside (dmsync)"))))
 
-; dm-create-map! - create a new table
+; create-map! - create a new table
 
 (defn- get-internal-table-map
   "Given a table's raw SQL name, and a map defining the columns of the
@@ -135,7 +135,7 @@
                            :key :varname})
   "Map containing arbitrary persistent variables")
 
-; dm-dosync
+; dmsync
 
 (let [i (atom 0)]
   (defn- new-trans-id []
@@ -143,7 +143,7 @@
 
 (defn- swap-in-time [times]
   "Create a vector with the current time and a unique transaction
-  identifier, swap-conj that into *dm-transaction-times*, and return
+  identifier, swap-conj that into *transaction-times*, and return
   the vector."
   (let [trans-time [(tm) (new-trans-id)]]
     (swap! times conj trans-time)
@@ -156,24 +156,24 @@
   addition to Clojure refs.  Modifications, once successful, are
   queued for writing to permanent storage."
   [f]
-  ; TODO could probably replace *dm-transaction-level* with a boolean,
+  ; TODO could probably replace *transaction-level* with a boolean,
   ; and when true, just call f.  This could even make flying reads
   ; reasonable.
   (do
-    (binding [database-select (if (pos? *dm-transaction-level*)
+    (binding [database-select (if (pos? *transaction-level*)
                                 database-select
                                 (memoize database-select))
-              *dm-transaction-level* (inc *dm-transaction-level*)]
-      (let [trans-time (swap-in-time *dm-transaction-times*)]
+              *transaction-level* (inc *transaction-level*)]
+      (let [trans-time (swap-in-time *transaction-times*)]
         (try
          (dosync
-          (if (ensure *dm-shutting-down*)
+          (if (ensure *shutting-down*)
             (throw (IllegalStateException.
                     "Transaction attempted while shutting down.")))
           (f))
-         (finally (swap! *dm-transaction-times* disj trans-time)))))))
+         (finally (swap! *transaction-times* disj trans-time)))))))
 
-(defmacro dm-dosync
+(defmacro dmsync
   "Runs the exprs (in an implicit do) in a transaction that
   encompasses exprs and any nested calls.  The transaction provides a
   consistent and complete view of the durable-map universe, in
@@ -188,15 +188,15 @@
   [dmap]
   (fn
     ([] dmap)
-    ([k] (dm-select dmap k))))
+    ([k] (select dmap k))))
 
 (defn- next-inname-num
   "Return the next unique number to be used for internal table names."
   ; FIXME - this isn't going to work for :dcookies
   []
-  (dm-dosync
+  (dmsync
    (-> (close-dmap *var-map*)
-       (dm-update "inname-num" update-in [:val] inc)
+       (update "inname-num" update-in [:val] inc)
        :val)))
 
 (defn- collapse-name
@@ -204,16 +204,16 @@
   [name]
   (apply str (take 16 (re-seq #"[a-zA-Z]" name))))
 
-; dm-get-map
+; get-map
 
-(defn- dm-load-table
+(defn- load-table
   "Load the existing table with the given name into *tables*.  Returns
   @*tables*.  If the table happens to be loaded, this function has no
   effect."
   [name]
-  (let [def-spec (default-spec @*dm-db*)
+  (let [def-spec (default-spec @*db*)
         table-map-entry (when-not def-spec
-                          (dm-dosync (dm-select *table-map* name)))]
+                          (dmsync (select *table-map* name)))]
     (if (or def-spec table-map-entry)
       (let [table-name (if def-spec
                          name
@@ -228,7 +228,7 @@
                 :write (ref {})
                 :read (ref {})})))))
 
-(defn dm-get-map
+(defn get-map
   "Return a named map, loading it if necessary.  The actual value
   returned is the function select closed over the map, so that it can
   be used as if it were an ordinary Clojure map.  This may be done in
@@ -236,11 +236,11 @@
   [name]
   (do
     (when-not (@*tables* name)
-      (dm-load-table name))
+      (load-table name))
     (if-let [t (@*tables* name)]
         (close-dmap t))))
 
-; dm-insert - add a new map entry, failing if the entry already exists
+; insert - add a new map entry, failing if the entry already exists
 
 (defn- add-to-write-queue
   [write-query]
@@ -276,7 +276,7 @@
       :seq (lazy-seq (apply (resolve (first func))
                             (rest func))))))
 
-(defn dm-insert
+(defn insert
   "Add a new map entry, throwing an exception if an entry with the
   given key already exists.  Returns dmap-c."
   [dmap-c row] 
@@ -295,16 +295,16 @@
                        :required true
                        :row row}]
       (if (dmap-c rowkey)
-        (throw (Exception. (str "dm-insert: Row exists: " rowkey))))
+        (throw (Exception. (str "insert: Row exists: " rowkey))))
       (if in-writes
         (ref-set in-writes row)
         (commute writes assoc-new-or-retry rowkey (ref row)))
       (add-to-write-queue write-query))
     dmap-c))
 
-; dm-update - alter an existing map entry
+; update - alter an existing map entry
 
-(defn dm-update
+(defn update
   "Update the row with the given key with the same concurrency
   behavior as alter, setting the value at col to (f oldrow), and
   returning that new value.  The row must already exist.  The key
@@ -319,7 +319,7 @@
           keycol (-> dmap :spec :key)]
       (when-not oldrow
         (throw (Exception.
-                (str "dm-update: No existing row for key " keyval))))
+                (str "update: No existing row for key " keyval))))
       (let [newrow (apply f oldrow args)
             newrow (fixrow newrow oldrow (-> dmap :spec :checked-cols))
             ; TODO delay (update-query); will not always be needed
@@ -331,14 +331,14 @@
                          :newrow newrow}]
         (if (not= (oldrow keycol) (newrow keycol))
           (throw (Exception.
-                  "dm-update attempted to change key")))
+                  "update attempted to change key")))
         (if in-writes
           (ref-set in-writes newrow)
           (commute writes assoc-new-or-retry keyval (ref newrow)))
         (add-to-write-queue write-query)
         newrow))))
 
-; dm-select - look up something in a map
+; select - look up something in a map
 
 ; get-map returns this function closed over a table handle so it can
 ; be used for lookup just like a regular Clojure map.
@@ -348,10 +348,10 @@
   read cache, and return it."
   [dmap key-value]
   (let [spec (dmap :spec)
-        row-map (ds-get @*dm-db*        ; not row
-                        dmap
-                        (name (spec :key))
-                        key-value)
+        row-map (ds/getrec @*db*        ; not row
+                           dmap
+                           (name (spec :key))
+                           key-value)
 ;        row-map (mapify-row row spec)
         row-map-ref (ref row-map)
         reads (dmap :read)]
@@ -366,7 +366,7 @@
   (or (@(dmap :write) keyval)
       (@(dmap :read) keyval)))
 
-(defn- dm-select
+(defn- select
   "Look something up in a map, returning a row hash, or nil if it is
   not found.  Unlike with Refs, there are no flying reads on durable
   maps.  This function must always be called inside a transaction."
@@ -377,13 +377,13 @@
          @selected
        nil)))
 
-; dm-ensure - like select, but also ensures the row does not change
+; selock - like select, but also ensures the row does not change
 
-(defn dm-ensure
+(defn selock
   "Look up a row in a map, returning a hash, and ensuring its value
   does not change within the transaction.  If the row does not exist,
-  this function throws an error.  Instead, use dm-delete to ensure
-  that a row remains deleted throughout a transaction."
+  this function throws an error.  Instead, use delete to ensure that a
+  row remains deleted throughout a transaction."
   [dmap-c keyval]
   (do
     (require-dmtrans)
@@ -392,12 +392,12 @@
                        (database-select dmap keyval))]
       (if (and selected @selected)
         (ensure selected)
-        (throw (Exception. "dm-ensure: non-existent row"))))))
+        (throw (Exception. "selock: non-existent row"))))))
 
 
-; dm-delete - remove a key from a map
+; delete - remove a key from a map
 
-(defn dm-delete
+(defn delete
   "Deletes the row with the given key with the same concurrency
   behavior as altering the row.  If the row does not currently exist,
   this function either prevents a concurrent transaction from creating
@@ -422,56 +422,57 @@
       dmap-c)))
 
 (let [create-map-mutex (Object.)]
-  (defn dm-create-map!
+  (defn create-map!
     "Create a new table.  This cannot be done inside a transaction.
     Does not check that column names, given as keywords, are legal SQL
     column names.  Returns nil.  Throws an exception if the given map
     already exists."
     ([name spec]
-       (dm-create-map! name spec false))
+       (create-map! name spec false))
     ([name spec only-if-new]
-       (when-not (valid-spec @*dm-db* spec)
-         (throw (Exception. "dm-create-map: Invalid spec")))
-       (when-not (default-spec @*dm-db*)
+       (when-not (valid-spec @*db* spec)
+         (throw (Exception. "create-map: Invalid spec")))
+       (when-not (default-spec @*db*)
          (io!
           (locking create-map-mutex
-            (if (dm-dosync (dm-select *table-map* name))
+            (if (dmsync (select *table-map* name))
               (when-not only-if-new
-                (throw (Exception. (str "dm-create-map: Table exists: " name))))
-              (when-not (default-spec @*dm-db*)
-                (let [safename (ds-munge @*dm-db* name)]
+                (throw (Exception. (str "create-map: Table exists: "
+                                        name))))
+              (when-not (default-spec @*db*)
+                (let [safename (ds/munge @*db* name)]
                   (do
-                    (ds-newtable! @*dm-db* safename spec)
-                    (dm-dosync
-                     (dm-insert (close-dmap *table-map*)
-                                {:inname safename
-                                 :exname name
-                                 :spec spec}))
-                    nil))))))))))
+                    (ds/newtable! @*db* safename spec)
+                    (dmsync
+                     (insert (close-dmap *table-map*)
+                             {:inname safename
+                              :exname name
+                              :spec spec}))
+                    nil))))))))))  ; )))))))))))))))))))))))))))))))))))
 
-(defn dm-create-new-map!
+(defn create-new-map!
     "Create a new table.  This cannot be done inside a transaction.
     Does not check that column names, given as keywords, are legal SQL
     column names.  Returns nil.  Does nothing if the given map already
     exists."
   ([name spec]
-     (dm-create-map! name spec true)))
+     (create-map! name spec true)))
 
-; dm-init! - create core tables 'mtables' and 'mvar'
+; init! - create core tables 'mtables' and 'mvar'
 
-(defn dm-init!
+(defn init!
   "Creates the core internal tables used by durable-maps to store
   persistent metadata.  It is safe to call this function on an
   existing database; it will have no effect."
   []
   (do
-    (ds-newtable! @*dm-db* "mtables" (*table-map* :spec) true)
-    (ds-newtable! @*dm-db* "mvar"    (*var-map*   :spec) true)
-    (dm-dosync
-     (if (not (dm-select *var-map* "inname-num"))
-       (dm-insert (close-dmap *var-map*)
-                  {:varname "inname-num"
-                   :val 1})))
+    (ds/newtable! @*db* "mtables" (*table-map* :spec) true)
+    (ds/newtable! @*db* "mvar"    (*var-map*   :spec) true)
+    (dmsync
+     (if (not (select *var-map* "inname-num"))
+       (insert (close-dmap *var-map*)
+               {:varname "inname-num"
+                :val 1})))
     nil))
 
 
@@ -499,20 +500,20 @@
 
 (defn- data-delete!
   [w]
-  (ds-delete! @*dm-db*
+  (ds/delete! @*db*
               (w :dmap)
               (-> w :dmap :spec :key)
               (w :keyval)))
 
 (defn- data-insert!
   [w]
-  (ds-add! @*dm-db*
+  (ds/add! @*db*
            (w :dmap)
            (w :row)))
 
 (defn- data-update!
   [w]
-  (ds-change! @*dm-db*
+  (ds/change! @*db*
               (w :dmap)
               (w :newrow)))
 
@@ -535,10 +536,10 @@
      (if-let [next-write (get-next-write-before t)]
        (do
 ;;          (if (next-write :vals)
-;;            (run-stmt! @*dm-db*
+;;            (run-stmt! @*db*
 ;;                       (next-write :query)
 ;;                       (next-write :vals))
-;;            (run-stmt! @*dm-db*
+;;            (run-stmt! @*db*
 ;;                       (next-write :query)))
          (data-write! next-write)
          (recur))))))
@@ -551,10 +552,10 @@
   (if (pos? (count @*write-queue*))
     (let [current-time (tm)
           ; Must call (tm) before checking
-          ; *dm-transaction-times* to ensure that
+          ; *transaction-times* to ensure that
           ; oldest-trans-time will be before any transaction
-          ; started after *dm-transaction-times* is checked.
-          oldest-trans-time (or (ffirst @*dm-transaction-times*)
+          ; started after *transaction-times* is checked.
+          oldest-trans-time (or (ffirst @*transaction-times*)
                                 current-time)]
       (flush-writes-before! oldest-trans-time))))
 
@@ -564,32 +565,32 @@
      #(loop []
         (flush-ready-writes!)
         (Thread/sleep 2000)
-        (when-not @*dm-shutting-down*
+        (when-not @*shutting-down*
           (recur)))
      "writer-thread")
   "Thread that wakes every two seconds and polls for writes old enough
   that they are no longer entangled in any ongoing transactions,
   writing them to disk and removing them from the write queue.  Thread
-  exits when *dm-shutting-down* is true.")
+  exits when *shutting-down* is true.")
 
-(defn dm-shutdown!
+(defn shutdown!
   "Flushes all pending writes and shuts down the database connection.
-  Any attempts to write in any other thread after calling dm-shutdown
+  Any attempts to write in any other thread after calling shutdown
   will result in null-pointer exceptions."
   []
   (do
     (io!)
-    (dosync (alter @*dm-shutting-down* (fn [_] (tm))))
+    (dosync (alter @*shutting-down* (fn [_] (tm))))
     (flush-writes-before! (tm))
     (assert (not @*write-queue*))))
 
-(defn dm-startup!
+(defn startup!
   "Starts the database, if it hasn't already been started."
   [& ds-args]
   (io!
-   (let [new-conn (apply ds-open! ds-args)]
-     (or (compare-and-set! *dm-db* nil new-conn)
-         (ds-close! new-conn)))
+   (let [new-conn (apply ds/open! ds-args)]
+     (or (compare-and-set! *db* nil new-conn)
+         (ds/close! new-conn)))
    (when-not (.isAlive writer-thread)
      (.start writer-thread))))
 

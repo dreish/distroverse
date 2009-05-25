@@ -6,6 +6,8 @@
     that caches nothing, and get it working with the client
     + Replace universe def with something very limited
       + defvar small-universe-spec
+    - Instantiate simple universe and convert all nodes to concrete
+      - Create node tree dm
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
         > First pass at a proxy will just respond to DNode (from
@@ -118,8 +120,6 @@
     - For testing, target a brain-dead simple filesystem tree,
       ignoring the transactional write issue (as I currently do for
       SQL, anyway)
-  - Once things are working again (testable), get rid of the ds- dm-
-    bk- anti-pattern (import into ds/ dm/ bk/ if needed)
   - Send surroundings from server to proxy
     + Set initial detail level -- -10.0
       > This is in the session attachment
@@ -896,6 +896,14 @@
     caller to start it up
     + Make *dm-db* an atom
     + dm-startup!
+  + Once things are working again (testable), get rid of the ds- dm-
+    bk- anti-pattern (import into ds/ dm/ bk/ if needed)
+    + durable-maps
+    + bigkey-dm
+    + datastore
+      + Remove ds- from names
+      + Change get to getrec
+      + Fix usage in durable-maps
 
 ------------------------------------------------------------------------
 - To do for 0.03:
