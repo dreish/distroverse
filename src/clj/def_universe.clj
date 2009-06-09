@@ -33,9 +33,10 @@
 ; Generate a universe node tree from a random seed
 
 (ns def-universe
-  (:use server-lib
-        prng-feedback
-        clojure.contrib.def))
+  (:require [durable-maps :as dm])
+  (:use [server-lib])
+  (:use [prng-feedback])
+  (:use [clojure.contrib.def]))
 
 (import '(com.jme.math Quaternion Vector3f))
 
@@ -131,6 +132,18 @@
          prngs
          coord-scalars
          skews)))
+
+(defvar- ntvars (dm/dmsync (dm/get-map (str ws-ns "node-tree/vars"))))
+
+(defn gen-echildren
+  [spec-dm-varname par-radius par-layer par-depth par-seed]
+  (let [spec (dm/dmsync (:val (ntvars spec-dm-varname)))
+        fakeparent {:radius par-radius
+                    :layer par-layer
+                    :depth par-depth
+                    :seed par-seed}
+        generator (:generator (spec par-layer))]
+    (generator fakeparent spec par-layer)))
 
 (defn gen-fractalplace
   "Returns a sequence of 8 subnodes for the given parent node."

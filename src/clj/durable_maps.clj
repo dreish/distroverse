@@ -62,11 +62,12 @@
 (defvar- *tables* (atom {}))
 (defvar- *write-queue* (ref (queue)))
 (defvar- *shutting-down* (ref nil))
+(defvar- *ds-open-args* (ref nil))
+(defvar- *db* (ref nil))
+(defvar- *schema-change-mutex* (Object.))
+; XXX convenient, but probably doesn't belong here
 (Class/forName "com.mysql.jdbc.Driver")
-;; (defvar- *db* (get-sql-conn
-;;                   "jdbc:mysql://localhost/dm?user=dm&password=nZe3a5dL"))
-(defvar- *db* (atom nil))
-; TODO An engine like SQLite might be ideal
+
 
 (declare update
          database-select
@@ -139,6 +140,8 @@
 
 (let [i (atom 0)]
   (defn- new-trans-id []
+    "Generate a unique transaction ID to guarantee an unambiguous
+  order of transactions."
     (swap! i inc)))
 
 (defn- swap-in-time [times]
@@ -192,17 +195,11 @@
 
 (defn- next-inname-num
   "Return the next unique number to be used for internal table names."
-  ; FIXME - this isn't going to work for :dcookies
   []
   (dmsync
    (-> (close-dmap *var-map*)
        (update "inname-num" update-in [:val] inc)
        :val)))
-
-(defn- collapse-name
-  "Return a SQL-friendly object name based on the given name."
-  [name]
-  (apply str (take 16 (re-seq #"[a-zA-Z]" name))))
 
 ; get-map
 
@@ -211,7 +208,7 @@
   @*tables*.  If the table happens to be loaded, this function has no
   effect."
   [name]
-  (let [def-spec (default-spec @*db*)
+  (let [def-spec (ds/default-spec @*db*)
         table-map-entry (when-not def-spec
                           (dmsync (select *table-map* name)))]
     (if (or def-spec table-map-entry)
@@ -256,7 +253,9 @@
     newrow
     (let [col (first cols-to-check)
           more-cols (next cols-to-check)
-          [colname checker fixer] col]
+          [colname checker fixer] col
+          checker (resolve checker)     ; TODO do this only once
+          fixer (resolve fixer)]        ; TODO do this only once
       (if (and oldrow
                (checker (newrow colname)
                         (oldrow colname)))
@@ -287,8 +286,6 @@
           writes (dmap :write)
           rowkey (row (-> dmap :spec :key))
           in-writes (writes rowkey)
-          ; TODO delay (insert-query) for a slight performance ++
-          ; write-query (insert-query dmap row)
           write-query {:type :insert
                        :dmap dmap
                        :time (tm)
@@ -421,42 +418,63 @@
                            :keyval keyval})
       dmap-c)))
 
-(let [create-map-mutex (Object.)]
-  (defn create-map!
-    "Create a new table.  This cannot be done inside a transaction.
-    Does not check that column names, given as keywords, are legal SQL
-    column names.  Returns nil.  Throws an exception if the given map
-    already exists."
-    ([name spec]
-       (create-map! name spec false))
-    ([name spec only-if-new]
-       (when-not (valid-spec @*db* spec)
-         (throw (Exception. "create-map: Invalid spec")))
-       (when-not (default-spec @*db*)
-         (io!
-          (locking create-map-mutex
-            (if (dmsync (select *table-map* name))
-              (when-not only-if-new
-                (throw (Exception. (str "create-map: Table exists: "
-                                        name))))
-              (when-not (default-spec @*db*)
-                (let [safename (ds/munge @*db* name)]
-                  (do
-                    (ds/newtable! @*db* safename spec)
-                    (dmsync
-                     (insert (close-dmap *table-map*)
-                             {:inname safename
-                              :exname name
-                              :spec spec}))
-                    nil))))))))))  ; )))))))))))))))))))))))))))))))))))
+(defn create-map!
+  "Create a new table.  This cannot be done inside a transaction.
+  Does not check that column names, given as keywords, are legal SQL
+  column names.  Returns nil.  Throws an exception if the given map
+  already exists."
+  ([name spec]
+     (create-map! name spec false))
+  ([name spec only-if-new]
+     (when-not (ds/valid-spec @*db* spec)
+       (throw (Exception. "create-map: Invalid spec")))
+     (when-not (ds/default-spec @*db*)
+       (io!)
+       (locking *schema-change-mutex*
+         (if (dmsync (select *table-map* name))
+           (when-not only-if-new
+             (throw (Exception. (str "create-map: Table exists: "
+                                     name))))
+           (when-not (ds/default-spec @*db*)
+             (let [safename (str (ds/munge @*db* name)
+                                 (next-inname-num))]
+               (do
+                 (ds/newtable! @*db* safename spec)
+                 (dmsync
+                  (insert (close-dmap *table-map*)
+                          {:inname safename
+                           :exname name
+                           :spec spec}))
+                 nil))))))))
 
 (defn create-new-map!
-    "Create a new table.  This cannot be done inside a transaction.
-    Does not check that column names, given as keywords, are legal SQL
-    column names.  Returns nil.  Does nothing if the given map already
-    exists."
+  "Create a new table.  This cannot be done inside a transaction.
+  Does not check that column names, given as keywords, are legal SQL
+  column names.  Returns nil.  Does nothing if the given map already
+  exists."
   ([name spec]
      (create-map! name spec true)))
+
+(defn drop-map!
+  "Delete a map.  Requires that the key column name (a keyword) be
+  given as a safety measure."
+  ([name k]
+     (io!)
+     (locking *schema-change-mutex*
+       (if-let [t (dmsync (select *table-map* name))]
+         (do
+           (when-not (-> t :spec :key (= k))
+             (throw (Exception. (str "Key " k " is not correct for table "
+                                     name))))
+           (ds/drop! @*db* (t :inname))
+           (if-let [other-t (@*tables* name)]
+             (dosync
+              (ref-set (other-t :write) nil)
+              (ref-set (other-t :read) nil)))
+           (swap! *tables* dissoc name)
+           (dmsync (delete (close-dmap *table-map*)
+                           name))
+           nil)))))
 
 ; init! - create core tables 'mtables' and 'mvar'
 
@@ -535,12 +553,6 @@
    (loop []
      (if-let [next-write (get-next-write-before t)]
        (do
-;;          (if (next-write :vals)
-;;            (run-stmt! @*db*
-;;                       (next-write :query)
-;;                       (next-write :vals))
-;;            (run-stmt! @*db*
-;;                       (next-write :query)))
          (data-write! next-write)
          (recur))))))
 
@@ -586,11 +598,23 @@
 
 (defn startup!
   "Starts the database, if it hasn't already been started."
-  [& ds-args]
-  (io!
-   (let [new-conn (apply ds/open! ds-args)]
-     (or (compare-and-set! *db* nil new-conn)
-         (ds/close! new-conn)))
-   (when-not (.isAlive writer-thread)
-     (.start writer-thread))))
+  ([& ds-args]
+     (let [new-conn (apply ds/open! ds-args)]
+       (try
+        (dosync
+         (if (and (ensure *ds-open-args*)
+                  (not= @*ds-open-args* ds-args))
+           (throw (Exception. (str "startup! called with different"
+                                   " arguments than previously")))
+           (if (= nil (ensure *db*))
+             (do (ref-set *db* new-conn)
+                 (when-not (.isAlive writer-thread)
+                   (.start writer-thread))
+                 (ref-set *ds-open-args* ds-args)
+                 nil)
+             (ds/close! new-conn))))
+        (catch Exception e
+          (do 
+            (ds/close! new-conn)
+            (throw e)))))))
 

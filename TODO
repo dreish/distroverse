@@ -2,12 +2,81 @@
 
 - To do for 0.02:
   - As quickly as possible, put together a server that sends an
-    extremely simplified universe (with no detail culling), a proxy
-    that caches nothing, and get it working with the client
+    extremely simplified universe (with no detail culling and only one
+    detail level), a proxy that caches nothing, and get it working
+    with the client
     + Replace universe def with something very limited
       + defvar small-universe-spec
     - Instantiate simple universe and convert all nodes to concrete
-      - Create node tree dm
+      + Create node tree dm
+        + echildren: optional generator function
+          + Takes spec ID (look up in node-tree/vars), parent radius,
+            layer, depth, seed; returns ephemeral children of course
+            > Any reason not to just take the parent node struct?
+        + children: optional list of node ids; has precedence over
+          echildren
+        > Whenever children and echildren agree, children can be
+          deleted
+        + Libraries attempting to use the database without calling
+          dm/startup! is now an issue
+          + Every lib that uses dm at load-time should obviously call
+            dm/startup!
+          + dm/startup! should throw an error if called with different
+            parameters than the last time
+          x Mark any use of :reload-all with an XXX; not for use in
+            production
+            > Only in setup scripts (with dashes)
+        x Column name "key" is no good; munge all column names so they
+          cannot collide with SQL keywords
+          x And then re-init the database
+          x And then change :xkey back to :key
+        + Change :key to :k, and :val to :v to match
+          + Need a way to drop a table
+            x Resolve :drop write to data-drop!
+            + ds/drop!
+              + For :sql, drop a table
+              + For :dcookies, no op
+            + dm/drop-map!
+              + Need to grab the same mutex as create-map!
+              + Drop table first
+              + Then delete from table map
+          + Drop and recreate node-tree/vars
+        + From the names of the newly-created tables, it looks like
+          I'm not appending a serial number as I think I did
+          previously
+          + Add a serial number whenever ds/munge must be used (which
+            is whenever there is no default spec)
+      + Add a root node to it (nodeid 1)
+        x seq-check and seq-fix need to handle nil correctly
+          > For now, try writing code without using those functions at
+            all, and without using the :seq type
+        + Dropping a table and then recreating it, get-map still
+          returns the table I just dropped
+          + *tables* also needs to be modified
+            + First, nil-out :read and :write so anyone else
+              attempting to use a copy of it will fail
+            + Then swap-dissoc it
+            + Why do I even have both *tables* and *table-map*?
+              > I think I did that to guarantee that there is never
+                more than one copy of a table loaded, regardless of
+                concurrent transaction activity
+                > It might not actually be needed, but it probably
+                  doesn't hurt
+                > It also makes the :dcookies design a little easier,
+                  coincidentally
+        + How does the generator function call actually get stored?
+          Do I just stuff the entire spec into the node data?
+          > This would introduce a huge amount of redundancy; every
+            terminal concrete node would have several copies of the
+            entire universe spec
+          + Refer to a var in node-tree/vars
+      - Add small-universe-spec to node-tree/vars
+        - use def-universe
+          - Need to merge node_tree.clj and server_lib.clj
+      - Convert immediate children to concrete
+        - (concretize-children 1)
+      - Recursively convert all descendant nodes to concrete
+        - (get-children 1)
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
         > First pass at a proxy will just respond to DNode (from

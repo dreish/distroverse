@@ -32,14 +32,14 @@
 
 (ns test
   (:require :reload-all [durable-maps :as dm])
-  (:require :reload-all [bigkey-dm :as bk]))
+  (:require :reload-all [bigkey-dm    :as bk]))
 
-; (use :reload-all 'durable-maps :as 'dm)
-; (use :reload-all 'bigkey-dm)
+;; (use :reload-all 'durable-maps :as 'dm)
+;; (use :reload-all 'bigkey-dm)
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
-; Harmless to run this if it has already been run:
+;; Harmless to run this if it has already been run:
 (dm/init!)
 
 (dm/create-map! "test1"
@@ -51,7 +51,11 @@
 
 (dm/dmsync (dm/insert my-test1 {:mykey "foo", :myval 10}))
 
-(prn (dm/dmsync (my-test1 "foo")))
+(time (prn (dm/dmsync (my-test1 "foo"))))
+
+(time
+ (dm/dmsync (dm/update my-test1 "foo"
+                       #(assoc % :myval (+ 7 (% :myval))))))
 
 (dm/dmsync (dm/delete my-test1 "foo"))
 

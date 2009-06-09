@@ -32,6 +32,8 @@
 (ns util
   (:use clojure.contrib.def))
 
+(import '(org.distroverse.dvtp Real))
+
 (defn queue
   "Creates a new queue containing the args."
   ([]
@@ -107,17 +109,20 @@
     (assoc m k (apply dissoc-in (get m k) ks))
     (dissoc m k)))
 
-(defn rests [coll]
+(defn rests
   "Returns a lazy sequence of successive rests of coll, beginning with
   a seq of the entire collection and ending with a seq of count 1."
+  [coll]
   (take-while seq (iterate rest coll)))
 
-(defn do-or [& args]
+(defn do-or
   "(or) as a function, evaluating all its arguments, but returning the
   first true one just as (or) does."
+  [& args]
   (reduce #(or %1 %2) args))
 
-(defn gmt-time-string []
+(defn gmt-time-string
+  []
   (. (java.util.Date.) toGMTString))
 
 (defn apply-lambda
@@ -133,8 +138,16 @@
   [x & _]
   x)
 
-(defn tm []
+(defn tm
   "Return a time value such that each call to (tm) returns a number
   greater than or equal to all numbers previously returned.  The units
   of the time value are not specified."
+  []
   (System/currentTimeMillis))
+
+(defn now
+  "Return the current time as a Real, the format that is used by DVTP,
+  e.g., as the argument to MoveSeq.transformAt()."
+  []
+  (Real. (BigDecimal. (BigInteger/valueOf (System/currentTimeMillis))
+                      3)))

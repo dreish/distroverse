@@ -33,22 +33,24 @@
 ; Operations on a tree of nodes
 
 (ns node-tree
+  (:require [durable-maps :as dm])
+  (:require [bigkey-dm :as bk])
   (:use server-lib
         clojure.contrib.def
-        durable-maps
-        bigkey-dm
-        def-universe
-        util))
+        util
+        def-universe))
 
 (import '(com.jme.math Quaternion Vector3f))
+
+(dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
 (defvar ws-ns "ws-a/"
   "World server namespace")
 
-(defvar- *id-to-node* (dm-get-map (str ws-ns "node-tree/id-to-node"))
+(defvar- *id-to-node* (dm/get-map (str ws-ns "node-tree/id-to-node"))
   "Maps node IDs to nodes.")
 
-(defvar- *node-tree-vars* (dm-get-map (str ws-ns "node-tree/vars"))
+(defvar- *node-tree-vars* (dm/get-map (str ws-ns "node-tree/vars"))
   "Durable variables.")
 
 (def +zero-vec+ (Vector3f. 0 0 0))
@@ -56,6 +58,8 @@
 (def get-node *id-to-node*)
 
 (def get-radius :radius)
+
+(def get-move :move)
 
 (defn get-xform
   [n t]
@@ -234,18 +238,18 @@
   "Return a new, unused node id."
   []
   (:val
-   (dm-update *node-tree-vars* :next-nodeid inc-in :val)))
+   (dm/update *node-tree-vars* :next-nodeid inc-in :val)))
 
 (defn replace-subnode-with-new
   "Replace whatever was in the subnode at index idx of parent node p
   with the given new-node, which should already be in the node tree."
   [p idx new-node move]
   (do
-    (dm-update *id-to-node*
+    (dm/update *id-to-node*
                (p :nodeid)
                assoc-in [:children idx]
                (new-node :nodeid))
-    (dm-update *id-to-node*
+    (dm/update *id-to-node*
                (new-node :nodeid)
                assoc-in [:parent] (p :nodeid))))
 
@@ -267,7 +271,7 @@
             (make-concrete (parent-of node))
             (parent-of node))
         new-node (convert-to-concrete node)]
-    (dm-insert *id-to-node* new-node)
+    (dm/insert *id-to-node* new-node)
     (replace-subnode-with-new p
                               idx
                               new-node

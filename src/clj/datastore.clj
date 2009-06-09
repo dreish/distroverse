@@ -356,6 +356,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; munge
 
+;; I'm not entirely convinced this belongs here instead of in
+;; durable_maps.clj.
+
 (defmulti munge
   "Mutate the given table name to something safe for use with the
   given datastore."
@@ -425,4 +428,21 @@
      )
   ([ds table keyval]
      ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; drop!
+
+(defmulti drop!
+  "Drop a table, returning nil.  Does not throw an error if the table
+  didn't exist."
+  on-datastore)
+
+(defmethod drop! :sql
+  ([ds tablename]
+     (let [db (ds :db)
+           query-str (str "DROP TABLE IF EXISTS " tablename)]
+       (run-stmt! db query-str))))
+
+(defmethod drop! :dcookies
+  ([ds tablename]
+     nil))
 

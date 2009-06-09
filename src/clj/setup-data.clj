@@ -29,40 +29,54 @@
 
 ;; </copyleft>
 
+(ns setup-data
+  (:require :reload-all [durable-maps :as dm])
+  (:require :reload-all [bigkey-dm    :as bk])
+  (:use [clojure.contrib.def]))
 
-(use :reload-all 'durable-maps)
-
-(use :reload-all 'bigkey-dm)
-
-(use 'clojure.contrib.def)
+(dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
 ; Harmless to run this if it has already been run:
-(dm-init!)
+(dm/init!)
 
-(bk-init!)
+(bk/init!)
 
 (defvar ws-ns "ws-a/"
   "World server namespace")
 
-(dm-create-map! (str ws-ns "node-tree/vars")
-                {:cols {:key ["VARCHAR(32)" :keyword]
-                        :val ["MEDIUMTEXT" :obj]}
-                 :key :key})
+(dm/create-map! (str ws-ns "node-tree/vars")
+                {:cols {:k ["VARCHAR(32)" :keyword]
+                        :v ["MEDIUMTEXT" :obj]}
+                 :key :k})
 
-(dm-create-map! (str ws-ns "node-tree/id-to-node")
-                {:cols {:nodeid ["VARCHAR(20)" :obj]
-                        :children ["MEDIUMTEXT" :seq]
-                        :parent ["VARCHAR(20)" :obj]
+(dm/create-map! (str ws-ns "node-tree/id-to-node")
+                {:cols {:nodeid ["VARCHAR(32)" :obj]
+                        :children ["MEDIUMTEXT" :obj]
+                        :echildren ["MEDIUMTEXT" :obj]
+                        :parent ["VARCHAR(32)" :obj]
+                        :shape ["MEDIUMTEXT" :obj]
+                        :radius ["VARCHAR(32)" :obj]
                         ; XXX
                         }
-                 ; FIXME :checked-cols should be handled internally by dm,
-                 ; but it's easier to put it here for now
-                 :checked-cols [:children seq-check seq-fix]
+                 ; FIXME :checked-cols should be handled internally by
+                 ; dm (any :seq col needs this check/fix thing), but
+                 ; it's easier to put it here for now
+                 ; :checked-cols `[[:echildren dm/seq-check dm/seq-fix]]
                  :key :nodeid})
 
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
+            {:key :small-universe-spec-1
+             :val small-universe-spec}))
 
-(dm-dosync
- (dm-insert (dm-get-map (str ws-ns "node-tree/id-to-node"))
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "node-tree/id-to-node"))
             {:nodeid 1
              :parent nil
-             
+             :echildren '(gen-echildren :small-universe-spec-1
+                                        #=(eval (Math/exp 40.0))
+                                        0
+                                        1)
+             :radius #=(eval (Math/exp 40.0))
+             }))
+

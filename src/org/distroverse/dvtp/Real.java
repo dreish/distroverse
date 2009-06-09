@@ -55,7 +55,7 @@ public class Real implements DvtpExternalizable
    public Real( double d, int precision )
       {
       mVal = convBigDecimal( new BigDecimal( d,
-                              new MathContext( precision ) ) );
+                                       new MathContext( precision ) ) );
       }
 
    private BigDecimal convBigDecimal( BigDecimal v )
