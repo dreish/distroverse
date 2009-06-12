@@ -71,8 +71,12 @@
             entire universe spec
           + Refer to a var in node-tree/vars
       - Add small-universe-spec to node-tree/vars
-        - use def-universe
-          - Need to merge node_tree.clj and server_lib.clj
+        x use def-universe
+          + Need to merge node_tree.clj and server_lib.clj, and
+            def-universe
+            > Actual universe specs could be in setup-data
+        - use server-lib
+        - Add any needed forward declarations
       - Convert immediate children to concrete
         - (concretize-children 1)
       - Recursively convert all descendant nodes to concrete
