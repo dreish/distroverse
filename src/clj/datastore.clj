@@ -162,6 +162,14 @@
     (map #(translate-val-out % (row-map %) colspecs)
          cols)))
 
+(defn- valify-keyval
+  "Convert the given keyval to a value that can be passed to
+  sql/get-query or sql/run-stmt!."
+  ([v spec]
+     (let [keycol (spec :key)
+           colspecs (spec :cols)]
+       (translate-val-out keycol v colspecs))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; getrec
 
@@ -184,7 +192,7 @@
   (mapify-row (to-row-hash (get-query db
                                       (str "SELECT * FROM " table
                                            " WHERE " keycol " = ?")
-                                      [keyval]))
+                                      [(valify-keyval keyval spec)]))
               spec))
 
 (defn get-pk

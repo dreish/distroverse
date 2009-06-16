@@ -240,10 +240,16 @@
 ; insert - add a new map entry, failing if the entry already exists
 
 (defn- add-to-write-queue
-  [write-query]
-  ; TODO do some basic validation here; at least make sure there are
-  ; no nils in :vals
-  (commute *write-queue* conj write-query))
+  ([write-query]
+     ;; TODO do some basic validation here; at least make sure there
+     ;; are no nils in :vals
+     (let [dmap (write-query :dmap)
+           row (write-query :row)
+           keycol (-> dmap :spec :key)]
+       (when-not (exists? row keycol)
+         (throw (Exception. (str "Attempted to add a row to the write"
+                                 " queue with no key column")))))
+     (commute *write-queue* conj write-query)))
 
 (defn- fixrow
   "Regenerate any derived parts of the in-memory representation of a
@@ -469,8 +475,8 @@
            (ds/drop! @*db* (t :inname))
            (if-let [other-t (@*tables* name)]
              (dosync
-              (ref-set (other-t :write) nil)
-              (ref-set (other-t :read) nil)))
+              (ref-set (other-t :write) "fail")
+              (ref-set (other-t :read)  "fail")))
            (swap! *tables* dissoc name)
            (dmsync (delete (close-dmap *table-map*)
                            name))

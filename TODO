@@ -70,13 +70,23 @@
             terminal concrete node would have several copies of the
             entire universe spec
           + Refer to a var in node-tree/vars
-      - Add small-universe-spec to node-tree/vars
+      + Add small-universe-spec to node-tree/vars
         x use def-universe
           + Need to merge node_tree.clj and server_lib.clj, and
             def-universe
             > Actual universe specs could be in setup-data
-        - use server-lib
-        - Add any needed forward declarations
+        + use server-lib
+        + Add any needed forward declarations
+        + :generator needs to be unevaluated expr or symbol
+        + The :keyword type isn't working on the key column; isn't
+          translating it to a string on select (before inserting)
+          > This should happen in ds/getrec
+        + Attempting to re-add the row right after deleting it leads
+          to a bad query ("SELECT * FROM wsanodetreevars WHERE k = ?"
+          :: nil); throws an exception in the writer thread
+          > Attempting to insert a map with no :k (still had :key)
+          + Don't allow bad queries to be added to the queue; die
+            earlier
       - Convert immediate children to concrete
         - (concretize-children 1)
       - Recursively convert all descendant nodes to concrete
@@ -92,6 +102,7 @@
         - Convert each node to a DNode and send it to the client
     - Add a trivial avatar to the world
     - Add avatar movement
+  - dm/ds: die on attempting to encode an unreadable object as a str
   - Hopefully-emerging node design:
     - Need a depth attribute
       - Property stored in concrete nodes

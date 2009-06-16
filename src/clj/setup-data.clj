@@ -32,6 +32,7 @@
 (ns setup-data
   (:require :reload-all [durable-maps :as dm])
   (:require :reload-all [bigkey-dm    :as bk])
+  (:use [server-lib])
   (:use [clojure.contrib.def]))
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
@@ -40,9 +41,6 @@
 (dm/init!)
 
 (bk/init!)
-
-(defvar ws-ns "ws-a/"
-  "World server namespace")
 
 (dm/create-map! (str ws-ns "node-tree/vars")
                 {:cols {:k ["VARCHAR(32)" :keyword]
@@ -66,8 +64,13 @@
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
-            {:key :small-universe-spec-1
-             :val small-universe-spec}))
+            {:k :small-universe-spec-1
+             :v small-universe-spec}))
+
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
+            {:kk :small-universe-spec-1
+             :vv small-universe-spec}))
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/id-to-node"))

@@ -31,7 +31,7 @@
  * </copyleft>
  */
 /**
- * 
+ *
  */
 package org.distroverse.distroplane.lib;
 
@@ -44,18 +44,18 @@ import com.jme.math.Vector3f;
  * A BallFactory is a Factory that generates roughly spherical Shapes.
  * <p>
  * Fun facts: for setNumRows(3), the generate()d shape is a regular
- * octahedron. For setNumRows(4), the generate()d shape is not exactly a
- * regular icosahedron, but it could pass for one. (The equatorial band
- * of triangles is stretched too wide toward the poles.) More party
- * trivia: I can't help typing "*-hedrom" instead of "*-hedron".
- * 
+ * octahedron.  For setNumRows(4), the generate()d shape is not exactly
+ * a regular icosahedron, but it could pass for one.  (The equatorial
+ * band of triangles is stretched too wide toward the poles.)  More
+ * party trivia: I can't help typing "*-hedrom" instead of "*-hedron".
+ *
  * @author dreish
- * 
+ *
  */
 public class BallFactory extends ShapeFactory implements DimFactory
    {
    public static final int DEFAULT_NUM_ROWS = 16;
-   
+
    /**
     * Default BallFactory creates reasonably smooth spheres.
     */
@@ -65,7 +65,7 @@ public class BallFactory extends ShapeFactory implements DimFactory
       mAspectRatio      = 1.0;
       mNumRows          = DEFAULT_NUM_ROWS;
       }
-   
+
    public BallFactory setEquatorialRadius( double r )
       { mEquatorialRadius = r;  return this; }
    public BallFactory setAspectRatio( double a )
@@ -82,7 +82,7 @@ public class BallFactory extends ShapeFactory implements DimFactory
       Vector3f vertices[][] = generateVertices();
       return generateSurface( vertices );
       }
-   
+
    private Vector3f[][] generateVertices()
       {
       // TODO Handle slices of a ball here, and in AddVertexRow.
@@ -92,7 +92,7 @@ public class BallFactory extends ShapeFactory implements DimFactory
          addVertexRow( vertices, i, mRenderedRows );
       return vertices;
       }
-   
+
    private void addVertexRow( Vector3f vertices[][], int row,
                               int total_rows )
       {
@@ -103,8 +103,8 @@ public class BallFactory extends ShapeFactory implements DimFactory
                          * mAspectRatio);
       double circle_radius = Math.sin( latitude )
                              * mEquatorialRadius;
-      int n_points = Util.safeInt( 
-               Math.round((total_rows * 2 - 2) 
+      int n_points = Util.safeInt(
+               Math.round((total_rows * 2 - 2)
                           * Math.sin( latitude )));
       double circle_divisions = n_points;
       // Make sure the last point is the same as the first one.  This
@@ -118,7 +118,7 @@ public class BallFactory extends ShapeFactory implements DimFactory
          if ( n_points == 1 )
             longitude = 0;
          else
-            longitude = 2.0 * Math.PI * (i + offset) 
+            longitude = 2.0 * Math.PI * (i + offset)
                         / circle_divisions;
          float x = (float) (Math.sin( longitude ) * circle_radius);
          float z = (float) (Math.cos( longitude ) * circle_radius);
@@ -126,7 +126,7 @@ public class BallFactory extends ShapeFactory implements DimFactory
          }
       }
 
-   
+
    public BallFactory setDims( double radius, double v_aspect,
                                double h_aspect )
       {

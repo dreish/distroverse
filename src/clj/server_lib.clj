@@ -35,14 +35,20 @@
   (:use util
         dvtp-lib
         prng-feedback
+        matrix
         clojure.contrib.def))
 
 (import '(com.jme.math Quaternion Vector3f))
 (import '(org.distroverse.dvtp Quat Vec Move MoveSeq AskInv ReplyInv
-                               GetCookie Cookie FunCall FunRet))
+                               GetCookie Cookie FunCall FunRet
+                               AddObject ULong DNode))
 (import '(org.distroverse.core.net NetSession))
+(import '(org.distroverse.distroplane.lib BallFactory))
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
+
+(declare parent-of
+         gen-children)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -129,10 +135,11 @@
   [nh]
   (if (nh :shape)
     (AddObject. true
-                (nh :shape)
-                (nh :id)
-                (nh :parentid)
-                (nh )))
+                #^Shape (nh :shape)
+                (ULong. (nh :id))
+                (ULong. (nh :parentid))
+                (nh :moveseq)  ; MoveSeq?
+                (nh :warpseq)))
   ; XXX
   )
 
@@ -151,7 +158,8 @@
           (nh :radius)
           (noderef-encode nh)
           (noderef-encode (parent-of nh))
-          (into-array (map noderef-encode )))) ; children
+          (into-array (map noderef-encode ))
+          (nh :depth))) ; children
 
 (defmulti dvtp-convert
   "Convert a string or number into a Str, ULong, or Flo, pass through
@@ -187,6 +195,22 @@
   [s]
   (map dvtp-convert s))
 
+;; Shapes
+
+(defn sphere
+  "Returns an approximately spherical Shape."
+  ([opts]
+     (let [rows   (or (opts :rows)   3)
+           radius (or (opts :radius) 1.0)
+           aspect (or (opts :aspect) 1.0)]
+       (-> (doto (BallFactory.)
+             (.setEquatorialRadius radius)
+             (.setNumRows rows)
+             (.setAspectRatio aspect))
+           .generate)))
+  ([o1 & orest]
+     (sphere (apply hash-map o1 orest))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Node-tree operations
@@ -208,6 +232,10 @@
 
 (def get-move :move)
 
+(defn vec-abs
+  [#^Vector3f v]
+  (.length v))
+
 (defn get-xform
   [n t]
   (-> n get-move (.transformAt t)))
@@ -216,7 +244,11 @@
   [n]
   (get-xform n (now)))
 
-(def is-ephem? :ephemeral)
+(def ephem? :ephemeral)
+
+(def room? :room)
+
+(def node-depth :depth)
 
 (defn node-pos
   "Return the position of the given node at time (time)"
@@ -267,12 +299,13 @@
   descendents might be in the search results."
   ;; Apologies for the complexity, but this is a complex problem.
   ([start-node include? descend? ascend?]
-     (search-nodes start-node include? descend? ascend? nil Midentity))
+     (search-nodes start-node include? descend? ascend?
+                   nil +Midentity+))
   ([start-node include? descend? ascend? exclude-node transformer]
      (let [ch (filter #(and %
                             (not= exclude-node %)
                             (descend? % (M* transformer
-                                            (Minvert (cur-xform %)))))
+                                            (invert (cur-xform %)))))
                       (children-of start-node))
            pa (parent-of start-node)]
        (lazy-cat
@@ -282,12 +315,12 @@
          (mapcat #(search-nodes % include? descend? ascend? start-node
                                 ;; Seems unfortunate to repeat this:
                                 (M* transformer
-                                    (Minvert (cur-xform %))))
+                                    (invert (cur-xform %))))
                  ch)
          (if (and pa
                   (not= pa exclude-node))
            (let [parent-transformer
-                   (M* (cur-xform %) transformer)]
+                   #(M* (cur-xform %) transformer)] ;???
              (if (ascend? pa parent-transformer)
                (search-nodes pa include? descend? ascend? start-node
                              parent-transformer))))))))
@@ -372,7 +405,7 @@
   [node-id]
   (let [node (get-node node-id)
         containing? (is-containing +zero-vec+ (get-radius node))
-        match? #(and (is-room %1)
+        match? #(and (room? %1)
                      (containing? %1 %2))
         candidate-seq (search-nodes
                         node
@@ -409,27 +442,32 @@
     :ephemeral false
     :children (vec (gen-children e))))
 
+;; (defn make-concrete
+;;   "Takes an ephemeral node and makes it concrete.  Returns the new
+;;   concrete node."
+;;   [node]
+;;   (let [idx (get-index-in-parent node)
+;;         p (if (ephem? (parent-of node))
+;;             (make-concrete (parent-of node))
+;;             (parent-of node))
+;;         new-node (convert-to-concrete node)]
+;;     (dm/insert *id-to-node* new-node)
+;;     (replace-subnode-with-new p
+;;                               idx
+;;                               new-node
+;;                               (get-move node))
+;;     new-node))
+
 (defn make-concrete
-  "Takes an ephemeral node and makes it concrete.  Returns the new
-  concrete node."
   [node]
-  (let [idx (get-index-in-parent node)
-        p (if (is-ephem? (parent-of node))
-            (make-concrete (parent-of node))
-            (parent-of node))
-        new-node (convert-to-concrete node)]
-    (dm/insert *id-to-node* new-node)
-    (replace-subnode-with-new p
-                              idx
-                              new-node
-                              (get-move node))
-    new-node))
+  ;; XXX
+  )
 
 (defn add-subnode
   "Add node c as a child of node p, with move m.  Returns the new node
   ID."
   [p m c]
-  (let [p (if (is-ephem? p)
+  (let [p (if (ephem? p)
             (make-concrete p)
             p)]
     ;; XXX
@@ -455,8 +493,8 @@
   ([a b]
      (rel-vector a b +Midentity+ +Midentity+))
   ([a b a->root root->b]
-     (cond (or (null? a)
-               (null? b))
+     (cond (or (nil? a)
+               (nil? b))
              (throw (Exception. (str "rel-vector called on two nodes"
                                      " in unconnected trees")))
            (= a b)
@@ -471,7 +509,7 @@
                         (M* (cur-xform b) root->b))
                  (recur (parent-of a)
                         b
-                        (M* a->root (Minvert (cur-xform a)))
+                        (M* a->root (invert (cur-xform a)))
                         root->b))))))
 
 
@@ -630,11 +668,11 @@
   "Returns a sequence of subnodes making up the given star system."
   ([parent spec]
      (list
-      {:radius ;XXX
-       :moveseq ;XXX
+      {:radius 10.0
+       :moveseq (pos-to-moveseq [0 0 0])
        :ephemeral true
-       :shape (polyhedron :rows 4)
-       :depth ;XXX
+       :shape (sphere :rows 4)
+       :depth (inc (parent :depth))
        :parent-ref parent
        :parent (parent :nodeid)
        })))
@@ -688,7 +726,7 @@
 (defvar big-universe-spec
   (new-universe-spec
    {:name          "universe",
-    :generator     gen-fractalplace,
+    :generator     'gen-fractalplace,
     :log-max-size  60.56,            ; ~ 21.14 bln light years
     :log-avg-size  60.56,
     :log-std-dev   0,
@@ -699,7 +737,7 @@
     }
 
    {:name          "supercluster",
-    :generator     gen-fractalplace,
+    :generator     'gen-fractalplace,
     :log-max-size  56.87148,         ; ~ 528.5 mln light years
     :log-avg-size  55.955,           ; ~ 211.36 mln light years
     :log-std-dev   1.0,
@@ -707,7 +745,7 @@
     }
 
    {:name          "cluster",
-    :generator     gen-fractalplace,
+    :generator     'gen-fractalplace,
     :log-max-size  54.08633,         ; ~ 32.62 mln light years
     :log-avg-size  52.93494,         ; ~ 10.31 mln light years
     :log-std-dev   0.8,
@@ -715,7 +753,7 @@
     }
 
    {:name          "galaxy",
-    :generator     gen-fractalplace,
+    :generator     'gen-fractalplace,
     :log-max-size  49.48105,         ; ~ 326,200 light years
     :log-avg-size  47.17847,         ; ~ 32,620 light years
     :log-std-dev   1.3,
@@ -726,26 +764,25 @@
     }
 
    {:name          "starsystem",
-    :generator     gen-starsystem,
+    :generator     'gen-starsystem,
     :log-max-size  38.39528,         ; ~ 5 light years
     :log-avg-size  38.39528,
     :log-std-dev   0,
-    }
-   )
+    })
   "Parameters defining how universes are generated.")
 
 (defvar small-universe-spec
   (new-universe-spec
    {:name          "stellarcluster",
-    :generator     gen-fractalplace,
+    :generator     'gen-fractalplace,
     :log-max-size  40.0,             ; ~24.88 light years
     :log-avg-size  40.0,
     :log-std-dev   0,
-    :structure     [0.4349 0.21769 0.21769],
+    :structure     [0.43457 0.21763 0.21763],
     }
    
    {:name          "starsystem",
-    :generator     gen-simple-starsystem,
+    :generator     'gen-simple-starsystem,
     :log-max-size  38.39528,         ; ~ 5 light years
     :log-avg-size  38.39528,
     :log-std-dev   0,

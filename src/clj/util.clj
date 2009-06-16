@@ -109,6 +109,12 @@
     (assoc m k (apply dissoc-in (get m k) ks))
     (dissoc m k)))
 
+(let [o (Object.)]
+  (defn exists?
+    "Does the given key exist in the given hash?"
+    ([k h]
+       (not= o (h k o)))))
+
 (defn rests
   "Returns a lazy sequence of successive rests of coll, beginning with
   a seq of the entire collection and ending with a seq of count 1."
