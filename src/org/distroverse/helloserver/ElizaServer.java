@@ -73,19 +73,19 @@ public final class ElizaServer extends DvtpServer
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyOpen(java.lang.String)
+    * @see org.distroverse.distroplane.lib.DvtpServer#handleEnvoyOpen(java.lang.String)
     */
    @Override
-   public void handleProxyOpen( String token,
+   public void handleEnvoyOpen( String token,
                                 NetOutQueue< Object > noq )
    throws IOException
       {
-      Log.p( "got: proxyopen " + token, Log.SERVER, -50 );
+      Log.p( "got: envoyopen " + token, Log.SERVER, -50 );
       noq.add( "Tell me more about " + token + "." );
-//      // This is how we would normally handle the PROXYOPEN command:
-//      noq.getSession().setAttachment( ProxySession.class,
-//                                      new ProxySession() );
-//      noq.getSession().setProxyMode();
+//      // This is how we would normally handle the ENVOYOPEN command:
+//      noq.getSession().setAttachment( EnvoySession.class,
+//                                      new EnvoySession() );
+//      noq.getSession().setEnvoyMode();
 //      noq.add( new True() );
       }
 
@@ -99,14 +99,14 @@ public final class ElizaServer extends DvtpServer
       }
 
    @Override
-   public void handleProxyObject( Object net_in_object,
+   public void handleEnvoyObject( Object net_in_object,
                                   NetSession< Object > session )
    throws IOException
       {
       throw new IOException( "How did I get here?" );
 //      // Normally we would do this:
-//      ProxySession ps
-//         = session.getAttachmentOrNull( ProxySession.class );
+//      EnvoySession ps
+//         = session.getAttachmentOrNull( EnvoySession.class );
 //      // And using some combination of the session data in ps and the
 //      // global data in this class, react to the object.
       }

@@ -28,7 +28,7 @@ import java.io.OutputStream;
  * value other than 0x81 is malformed.)
  *
  * A future upgrade path for DVTP will involve first giving clients the
- * capability to accept larger DLongs, and then deploying proxies that
+ * capability to accept larger DLongs, and then deploying envoys that
  * use this capability.
  * @author dreish
  */

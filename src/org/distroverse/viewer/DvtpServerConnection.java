@@ -45,7 +45,7 @@ import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.dvtp.Blob;
 import org.distroverse.dvtp.DvtpObject;
 import org.distroverse.dvtp.ULong;
-import org.distroverse.dvtp.ProxySpec;
+import org.distroverse.dvtp.EnvoySpec;
 import org.distroverse.dvtp.Str;
 
 
@@ -193,7 +193,7 @@ public class DvtpServerConnection
          }
       }
 
-   public ProxySpec location( URI u )
+   public EnvoySpec location( URI u )
    throws IOException, ProtocolException
       { 
       try
@@ -203,11 +203,11 @@ public class DvtpServerConnection
       catch ( ClassNotFoundException e )    // From query()
          {
          throw new ProtocolException( "Server did not return a"
-                       + " ProxySpec in response to a LOCATION query" );
+                       + " EnvoySpec in response to a LOCATION query" );
          }  
       }
    
-   public ProxySpec location( String resource_name ) 
+   public EnvoySpec location( String resource_name ) 
    throws IOException, ProtocolException
       {  
       try
@@ -217,7 +217,7 @@ public class DvtpServerConnection
       catch ( ClassNotFoundException e )    // From query()
          {
          throw new ProtocolException( "Server did not return a"
-                       + " ProxySpec in response to a LOCATION query" );
+                       + " EnvoySpec in response to a LOCATION query" );
          }  
       }
 
@@ -280,19 +280,19 @@ public class DvtpServerConnection
          }
       }
 
-   private ProxySpec
+   private EnvoySpec
    receiveLocation( Object response ) throws ProtocolException
       {
       try
          {
          // TODO possibly throw an exception if the regexp doesn't
          // match 'url', but only if it solves a real problem.
-         return (ProxySpec) response;
+         return (EnvoySpec) response;
          }
       catch ( ClassCastException e )
          {
          throw new ProtocolException( "Server did not return a"
-                       + " ProxySpec in response to a LOCATION query" );
+                       + " EnvoySpec in response to a LOCATION query" );
          }
       }
 

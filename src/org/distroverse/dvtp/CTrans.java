@@ -19,19 +19,19 @@ import org.distroverse.core.Util;
  * 
  * @author dreish
  */
-public class CTrans implements ProxySendable
+public class CTrans implements EnvoySendable
    {
    public CTrans( InputStream in )
    throws IOException, ClassNotFoundException
       {
       super();
       int length = Util.safeInt( ULong.externalAsLong( in ) );
-      mContents = new ProxySendable[ length ];
+      mContents = new EnvoySendable[ length ];
       for ( int i = 0; i < length; ++i )
          try
             {
             mContents[ i ]
-               = (ProxySendable) DvtpObject.parseObject( in );
+               = (EnvoySendable) DvtpObject.parseObject( in );
             }
          catch ( ClassCastException e )
             {
@@ -49,16 +49,16 @@ public class CTrans implements ProxySendable
       mContents = null;
       }
 
-   public CTrans( ProxySendable... f )
+   public CTrans( EnvoySendable... f )
       {
       super();
       mContents = f.clone();
       }
 
-   public CTrans( ProxySendable f )
+   public CTrans( EnvoySendable f )
       {
       super();
-      mContents = new ProxySendable[] { f };
+      mContents = new EnvoySendable[] { f };
       }
 
    /* (non-Javadoc)
@@ -100,5 +100,5 @@ public class CTrans implements ProxySendable
              + Util.prettyPrintList( (Object[]) mContents ) + ")";
       }
 
-   private final ProxySendable[] mContents;
+   private final EnvoySendable[] mContents;
    }

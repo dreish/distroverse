@@ -19,7 +19,7 @@ import org.distroverse.core.Util;
  * Takes an object ID and a MoveSeq, and moves it.
  * @author dreish
  */
-public final class MoveObject implements ProxySendable
+public final class MoveObject implements EnvoySendable
    {
    public MoveObject( InputStream in )
    throws IOException, ClassNotFoundException

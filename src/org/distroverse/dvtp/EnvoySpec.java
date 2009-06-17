@@ -17,22 +17,22 @@ import org.distroverse.core.Util;
 
 /**
  * This class is the only valid non-error response to a LOCATION query.
- * It gives the URL of a proxy to use to connect to this site at the
+ * It gives the URL of a envoy to use to connect to this site at the
  * requested location, and a resource regular expression specifying the
- * range of URLs (at the same host) covered by this proxy.  For example,
- * a simple site covered in its entirety by a single proxy could return
+ * range of URLs (at the same host) covered by this envoy.  For example,
+ * a simple site covered in its entirety by a single envoy could return
  * ".*" for the resource regexp.
  *
  * @author dreish
  */
-public class ProxySpec implements DvtpExternalizable
+public class EnvoySpec implements DvtpExternalizable
    {
-   public ProxySpec( InputStream in ) throws IOException
+   public EnvoySpec( InputStream in ) throws IOException
       {
       super();
-      mProxyUrl       = new Str( in );
+      mEnvoyUrl       = new Str( in );
       mResourceRegexp = new Str( in );
-      mProxyName      = new Str( in );
+      mEnvoyName      = new Str( in );
       }
 
    /*
@@ -40,25 +40,25 @@ public class ProxySpec implements DvtpExternalizable
     * immutable class.
     */
    @SuppressWarnings( "unused" )
-   private ProxySpec()
+   private EnvoySpec()
       {
-      mProxyUrl = mResourceRegexp = mProxyName = null;
+      mEnvoyUrl = mResourceRegexp = mEnvoyName = null;
       }
 
-   public ProxySpec( Str proxy_url, Str resource_regexp,
-                     Str proxy_name )
+   public EnvoySpec( Str envoy_url, Str resource_regexp,
+                     Str envoy_name )
       {
-      mProxyUrl = proxy_url;
+      mEnvoyUrl = envoy_url;
       mResourceRegexp = resource_regexp;
-      mProxyName = proxy_name;
+      mEnvoyName = envoy_name;
       }
 
-   public ProxySpec( String proxy_url, String resource_regexp,
-                     String proxy_name )
+   public EnvoySpec( String envoy_url, String resource_regexp,
+                     String envoy_name )
       {
-      mProxyUrl = new Str( proxy_url );
+      mEnvoyUrl = new Str( envoy_url );
       mResourceRegexp = new Str( resource_regexp );
-      mProxyName = new Str( proxy_name );
+      mEnvoyName = new Str( envoy_name );
       }
 
    /* (non-Javadoc)
@@ -72,10 +72,10 @@ public class ProxySpec implements DvtpExternalizable
       {
       if ( o.getClass().equals( this.getClass() ) )
          {
-         ProxySpec ps = (ProxySpec) o;
-         return (   mProxyUrl.equals( ps.mProxyUrl )
+         EnvoySpec ps = (EnvoySpec) o;
+         return (   mEnvoyUrl.equals( ps.mEnvoyUrl )
                  && mResourceRegexp.equals( ps.mResourceRegexp )
-                 && mProxyName.equals( ps.mProxyName ));
+                 && mEnvoyName.equals( ps.mEnvoyName ));
          }
       return false;
       }
@@ -83,9 +83,9 @@ public class ProxySpec implements DvtpExternalizable
    @Override
    public int hashCode()
       {
-      return   mProxyUrl.hashCode()
+      return   mEnvoyUrl.hashCode()
              ^ mResourceRegexp.hashCode() * 529
-             ^ mProxyName.hashCode() * 279841
+             ^ mEnvoyName.hashCode() * 279841
              ^ this.getClass().hashCode();
       }
 
@@ -94,23 +94,23 @@ public class ProxySpec implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      mProxyUrl.writeExternal( out );
+      mEnvoyUrl.writeExternal( out );
       mResourceRegexp.writeExternal( out );
-      mProxyName.writeExternal( out );
+      mEnvoyName.writeExternal( out );
       }
 
    public String prettyPrint()
       {
-      return "(ProxySpec "
-             + Util.prettyPrintList( mProxyUrl, mResourceRegexp,
-                                     mProxyName ) + ")";
+      return "(EnvoySpec "
+             + Util.prettyPrintList( mEnvoyUrl, mResourceRegexp,
+                                     mEnvoyName ) + ")";
       }
 
-   public Str getProxyUrl()        {  return mProxyUrl;  }
+   public Str getEnvoyUrl()        {  return mEnvoyUrl;  }
    public Str getResourceRegexp()  {  return mResourceRegexp;  }
-   public Str getProxyName()       {  return mProxyName;  }
+   public Str getEnvoyName()       {  return mEnvoyName;  }
 
-   private final Str mProxyUrl;
+   private final Str mEnvoyUrl;
    private final Str mResourceRegexp;
-   private final Str mProxyName;
+   private final Str mEnvoyName;
    }

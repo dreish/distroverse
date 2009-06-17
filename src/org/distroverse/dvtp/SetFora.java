@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * move.
  * @author dreish
  */
-public final class SetFora implements ProxySendable
+public final class SetFora implements EnvoySendable
    {
    public SetFora( InputStream in )
    throws IOException, ClassNotFoundException

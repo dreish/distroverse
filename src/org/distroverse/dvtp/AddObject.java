@@ -20,7 +20,7 @@ import org.distroverse.core.Util;
  * sequence.  The latter may be empty, the former not.
  * @author dreish
  */
-public final class AddObject implements ProxySendable
+public final class AddObject implements EnvoySendable
    {
    public AddObject( InputStream in )
    throws IOException, ClassNotFoundException

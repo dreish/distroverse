@@ -48,8 +48,8 @@ public class TestClient
          DvtpServerConnection dsc
             = new DvtpServerConnection( "localhost" );
 //         String query = "LOCATION dvtp://localhost/foo";
-//         String query = "GET drtp://localhost/HelloSimpleProxy.jar";
-         String query = "PROXYOPEN";
+//         String query = "GET drtp://localhost/HelloSimpleEnvoy.jar";
+         String query = "ENVOYOPEN";
          pr( "Querying localhost: " + query );
          Object response = dsc.query( query );
          pr( "Response:" );

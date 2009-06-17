@@ -40,9 +40,9 @@ import java.net.URISyntaxException;
 
 /**
  * A subclass of ControllerPipeline receives objects from a
- * ProxyClientConnection, responds to them appropriately, which in most
+ * EnvoyClientConnection, responds to them appropriately, which in most
  * cases means some operation on a StandardGame (a jME window). It also
- * receives user events and either forwards them to the proxy, or to the
+ * receives user events and either forwards them to the envoy, or to the
  * window.
  *
  * @author dreish
@@ -52,9 +52,9 @@ public abstract class ControllerPipeline
    /**
     * Returns a new subclass of ControllerPipeline, appropriate for the
     * given URL, targeting the given game engine and window, and
-    * possibly interacting with the given proxy connection.
+    * possibly interacting with the given envoy connection.
     * @param url
-    * @param proxy
+    * @param envoy
     * @param game
     * @param window
     * @return
@@ -70,19 +70,19 @@ public abstract class ControllerPipeline
       if ( url.matches( "(?i)about:.*" ) )
          return new AboutControllerPipeline( url, window );
       if ( url.matches( "(?i)dvtp:.*" ) )
-         return new ProxyControllerPipeline( url, window );
+         return new EnvoyControllerPipeline( url, window );
       return null;
       }
 
    /**
-    * Stops reading from the proxy, and removes everything written to
+    * Stops reading from the envoy, and removes everything written to
     * the game (window).
     */
    public abstract void close();
 
    /**
     * A typical implementation would find out whether it needs a new
-    * proxy, and either send a SetUrl object to its proxy or get a new
+    * envoy, and either send a SetUrl object to its envoy or get a new
     * one.
     * @param url
     * @throws IOException

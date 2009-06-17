@@ -15,14 +15,14 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a proxy to a client to tell it to show a different URL in the
+ * Sent by a envoy to a client to tell it to show a different URL in the
  * location widget.  The URL contained in this object must be part of
- * the site whose proxy sent the object.
+ * the site whose envoy sent the object.
  *
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public final class DisplayUrl extends Str implements ProxySendable
+public final class DisplayUrl extends Str implements EnvoySendable
    {
    public DisplayUrl( InputStream in ) throws IOException
       {

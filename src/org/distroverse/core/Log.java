@@ -13,7 +13,7 @@ public class Log
    public static final int NET       = 2;
    public static final int DVTP      = 4;
    public static final int CLIENT    = 8;
-   public static final int PROXY     = 16;
+   public static final int ENVOY     = 16;
    public static final int SERVER    = 32;
 
    /**

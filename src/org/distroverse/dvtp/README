@@ -1,7 +1,7 @@
 DVTP, the Distroverse Transfer Protocol, defines a standard interface
 for transmitting sensory information from a server to a client (through
-a "proxy" Java application), and for transmitting control information
-from a client to a program (also through the "proxy").
+a "envoy" Java application), and for transmitting control information
+from a client to a program (also through the "envoy").
 
 The classes in org.distroverse.dvtp, together with their inline
 documentation, constitute the authoritative definition of DVTP.

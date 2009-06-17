@@ -11,25 +11,25 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Any proxy must implement this interface.
+ * Any envoy must implement this interface.
  * @author dreish
  */
-public interface DvtpProxy
+public interface DvtpEnvoy
    {
    /**
-    * Called by the client to set the queue through which the proxy will
+    * Called by the client to set the queue through which the envoy will
     * feed objects to the client.
     * @param queue
     */
-   public void setQueue( BlockingQueue< ProxySendable > queue );
+   public void setQueue( BlockingQueue< EnvoySendable > queue );
 
    /**
-    * Called by the client to start the proxy.  Does not return.
+    * Called by the client to start the envoy.  Does not return.
     */
    public void run();
 
    /**
-    * Called by the client to feed an object to the proxy.
+    * Called by the client to feed an object to the envoy.
     * @param o
     * @throws IOException 
     */

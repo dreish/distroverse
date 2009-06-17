@@ -55,17 +55,17 @@ public class NetSession< T >
       mNetInQueue  = niqs;
       mNetOutQueue = noqs;
       mPeer = peer;
-      mProxyMode = false;
+      mEnvoyMode = false;
       }
 
    public NetInQueue< T > getNetInQueue()
       {  return mNetInQueue;  }
    public NetOutQueue< T > getNetOutQueue()
       {  return mNetOutQueue;  }
-   public void setProxyMode()
-      {  mProxyMode = true;  }
-   public boolean inProxyMode()
-      {  return mProxyMode;  }
+   public void setEnvoyMode()
+      {  mEnvoyMode = true;  }
+   public boolean inEnvoyMode()
+      {  return mEnvoyMode;  }
    public < AT > AT setAttachment( Class< AT > attachment_class,
                                    AT attachment )
       {
@@ -121,6 +121,6 @@ public class NetSession< T >
    private NetOutQueue< T > mNetOutQueue;
    private Object           mAttachment;
    private Class< ? >       mAttachmentClass;
-   private boolean          mProxyMode;
+   private boolean          mEnvoyMode;
    private SocketChannel    mPeer;
    }

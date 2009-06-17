@@ -48,7 +48,7 @@ import org.distroverse.dvtp.MoveObject;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.Pair;
 import org.distroverse.dvtp.PointArray;
-import org.distroverse.dvtp.ProxySpec;
+import org.distroverse.dvtp.EnvoySpec;
 import org.distroverse.dvtp.Quat;
 import org.distroverse.dvtp.Real;
 import org.distroverse.dvtp.RedirectUrl;
@@ -153,7 +153,7 @@ public class TestExternalization
          case 130: testFunRet();         break;
          case 131: testErr();            break;
          case 132: testSetVisible();     break;
-         case 133: testProxySpec();      break;
+         case 133: testEnvoySpec();      break;
          case 134: testAskInv();         break;
          case 135: testReplyInv();       break;
          case 136: testSetShape();       break;
@@ -463,7 +463,7 @@ public class TestExternalization
       {
       tryBeamObject( new GetCookie( new Str( "foo" ) ) );
       tryBeamObject( new GetCookie(
-                        new ProxySpec( "a:--//", "b$$##\\\\", "&" ) ) );
+                        new EnvoySpec( "a:--//", "b$$##\\\\", "&" ) ) );
       Move[] mex = moveExamples();
       tryBeamObject( new GetCookie( mex[ 1 ] ));
       }
@@ -474,9 +474,9 @@ public class TestExternalization
       tryBeamObject( new Cookie( new Str( "foo" ) ) );
       tryBeamObject( new Cookie( new Str( "foo" ), new Str( "bar" ) ) );
       tryBeamObject( new Cookie(
-                        new ProxySpec( "a:--//", "b$$##\\\\", "&" ) ) );
+                        new EnvoySpec( "a:--//", "b$$##\\\\", "&" ) ) );
       tryBeamObject( new Cookie(
-                          new ProxySpec( "a:--//", "b$$##\\\\", "&" ),
+                          new EnvoySpec( "a:--//", "b$$##\\\\", "&" ),
                           new Flo( 3.5f ) ) );
       }
 
@@ -640,12 +640,12 @@ public class TestExternalization
       tryBeamObject( new Err( "fooness not found", 404 ) );
       }
 
-   private static void testProxySpec()
+   private static void testEnvoySpec()
    throws IOException, ClassNotFoundException
       {
-      tryBeamObject( new ProxySpec( "a", "b", "c" ) );
-      tryBeamObject( new ProxySpec( "", "", "" ) );
-      tryBeamObject( new ProxySpec( "a:--//", "b$$##\\\\", "&" ) );
+      tryBeamObject( new EnvoySpec( "a", "b", "c" ) );
+      tryBeamObject( new EnvoySpec( "", "", "" ) );
+      tryBeamObject( new EnvoySpec( "a:--//", "b$$##\\\\", "&" ) );
       }
 
    private static void testAskInv()

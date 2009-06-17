@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * @author dreish
  *
  */
-public final class ReparentObject implements ProxySendable
+public final class ReparentObject implements EnvoySendable
    {
 
    /**

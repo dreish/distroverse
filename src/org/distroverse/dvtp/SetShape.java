@@ -19,7 +19,7 @@ import org.distroverse.core.Util;
  * @author dreish
  *
  */
-public final class SetShape implements ProxySendable
+public final class SetShape implements EnvoySendable
    {
    /**
     *

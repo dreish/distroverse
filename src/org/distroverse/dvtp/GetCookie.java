@@ -16,11 +16,11 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a proxy to a client to request a cookie from the client's
+ * Sent by a envoy to a client to request a cookie from the client's
  * cookie store.
  * @author dreish
  */
-public final class GetCookie implements ProxySendable
+public final class GetCookie implements EnvoySendable
    {
    /**
     *

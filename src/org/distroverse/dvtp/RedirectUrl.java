@@ -15,16 +15,16 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a proxy to a client to tell it to go to a URL at a different
+ * Sent by a envoy to a client to tell it to go to a URL at a different
  * site.  The URL contained in this object must NOT be part of the site
- * whose proxy sent the object.  Bear in mind that a client could be
+ * whose envoy sent the object.  Bear in mind that a client could be
  * programmed to ignore these, so they do not provide any real keep-away
  * security.
  *
  * For the moment, this is just a trivial extension of Str.
  * @author dreish
  */
-public final class RedirectUrl extends Str implements ProxySendable
+public final class RedirectUrl extends Str implements EnvoySendable
    {
    public RedirectUrl( InputStream in ) throws IOException
       {

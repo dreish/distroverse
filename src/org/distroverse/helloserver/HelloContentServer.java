@@ -45,7 +45,7 @@ import org.distroverse.distroplane.lib.PrimFactory.PrimShape;
 import org.distroverse.dvtp.AddObject;
 import org.distroverse.dvtp.Err;
 import org.distroverse.dvtp.MoveSeq;
-import org.distroverse.dvtp.ProxySpec;
+import org.distroverse.dvtp.EnvoySpec;
 import org.distroverse.dvtp.Shape;
 import org.distroverse.dvtp.ULong;
 import org.distroverse.dvtp.WarpSeq;
@@ -65,9 +65,9 @@ public class HelloContentServer extends DvtpServer
    public void handleGet( String url, NetOutQueue< Object > noq )
    throws IOException
       {
-      if ( url.matches( "drtp://.*/PassThroughProxy.jar" ) )
+      if ( url.matches( "drtp://.*/PassThroughEnvoy.jar" ) )
          {
-         SUtil.sendFile( "PassThroughProxy.jar", url, noq );
+         SUtil.sendFile( "PassThroughEnvoy.jar", url, noq );
          }
       else
          {
@@ -80,22 +80,22 @@ public class HelloContentServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( new ProxySpec( "drtp://localhost/PassThroughProxy.jar",
+      noq.add( new EnvoySpec( "drtp://localhost/PassThroughEnvoy.jar",
                               ".*",
-                          "org.distroverse.proxy.PassThroughProxy" ) );
+                          "org.distroverse.envoy.PassThroughEnvoy" ) );
       }
 
    @Override
-   public void handleProxyObject( Object net_in_object,
+   public void handleEnvoyObject( Object net_in_object,
                                   NetSession< Object > session )
    throws IOException
       {
-      // This server never enters proxy mode.
-      throw new IOException( "handleProxyObject() unimplemented" );
+      // This server never enters envoy mode.
+      throw new IOException( "handleEnvoyObject() unimplemented" );
       }
 
    @Override
-   public void handleProxyOpen( String token,
+   public void handleEnvoyOpen( String token,
                                 NetOutQueue< Object > noq )
    throws IOException
       {
@@ -120,7 +120,7 @@ public class HelloContentServer extends DvtpServer
       noq.add( new AddObject( true, s, id, pid, m, new WarpSeq() ) );
       }
 
-   // XXX This is mostly duplicated with ProxyBase.
+   // XXX This is mostly duplicated with EnvoyBase.
    protected void addObject( NetOutQueue< Object > noq, Shape s,
                              long id, float x, float y, float z )
    throws ClosedChannelException

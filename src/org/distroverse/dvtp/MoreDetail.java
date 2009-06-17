@@ -18,7 +18,7 @@ import java.io.InputStream;
  * rendering slowly and needs a less detailed scene.  The number
  * indicates the factor above the target frames/second rate at which the
  * client is currently rendering.  It should always be a positive
- * number.  Proxy or server behavior for values less than or equal to
+ * number.  Envoy or server behavior for values less than or equal to
  * zero is undefined.
  * @author dreish
  */

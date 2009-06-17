@@ -45,7 +45,7 @@ import org.distroverse.dvtp.Err;
 /**
  * An abstract base class handling the annoying details of a DVTP
  * server.  Subclass this and implement handleLocation(), handleGet(),
- * and handleProxyOpen() to define your server.
+ * and handleEnvoyOpen() to define your server.
  *
  * Instantiate it with an instance of a subclass of DvtpListener that
  * will define how your server handles multiple connections (e.g.,
@@ -129,11 +129,11 @@ public abstract class DvtpServer
       else if ( Util.stringStartsIgnoreCase( command, "location " ) )
          handleLocation( command.substring( "location ".length() ),
                          noq );
-      else if ( Util.stringStartsIgnoreCase( command, "proxyopen " ) )
-         handleProxyOpen( command.substring( "proxyopen ".length() ),
+      else if ( Util.stringStartsIgnoreCase( command, "envoyopen " ) )
+         handleEnvoyOpen( command.substring( "envoyopen ".length() ),
                           noq );
-      else if ( command.equalsIgnoreCase( "proxyopen" ) )
-         handleProxyOpen( null, noq );
+      else if ( command.equalsIgnoreCase( "envoyopen" ) )
+         handleEnvoyOpen( null, noq );
       else
          handleUnrecognizedCommand( command, noq );
       }
@@ -161,24 +161,24 @@ public abstract class DvtpServer
    throws IOException;
 
    /**
-    * Handles the PROXYOPEN command, which is the handshake that begins
-    * a session between proxy and server.  The response, and every
+    * Handles the ENVOYOPEN command, which is the handshake that begins
+    * a session between envoy and server.  The response, and every
     * aspect of the protocol after that point, are completely
     * @param token
     */
-   public abstract void handleProxyOpen( String token,
+   public abstract void handleEnvoyOpen( String token,
                                          NetOutQueue< Object > noq )
    throws IOException;
 
    /**
-    * Handles any arbitrary object from a proxy.  This is the only
+    * Handles any arbitrary object from a envoy.  This is the only
     * method called on a DvtpServer from a session that has entered
-    * proxy mode by calling setProxyMode() on the NetSession object.
+    * envoy mode by calling setEnvoyMode() on the NetSession object.
     * @param net_in_object
     * @param session
     */
    public abstract void
-   handleProxyObject( Object net_in_object,
+   handleEnvoyObject( Object net_in_object,
                       NetSession< Object > session )
    throws IOException;
 

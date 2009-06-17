@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * Turns visibility for an object (and its subobjects) on or off.
  * @author dreish
  */
-public class SetVisible implements ProxySendable
+public class SetVisible implements EnvoySendable
    {
    /**
     *

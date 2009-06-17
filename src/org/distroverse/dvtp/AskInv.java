@@ -19,7 +19,7 @@ import org.distroverse.core.Util;
  * @author dreish
  *
  */
-public class AskInv implements ProxySendable
+public class AskInv implements EnvoySendable
    {
    /**
     *

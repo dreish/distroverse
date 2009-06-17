@@ -1,9 +1,20 @@
                                         -*- Text -*-
 
 - To do for 0.02:
+  - Change "proxy" to "envoy"
+    - proxies -> envoys
+    - Proxies -> Envoys
+    - proxy -> envoy
+    - Proxy -> Envoy
+    - PROXY -> ENVOY
+    - Rename any file with Proxy to Envoy
+    - Rename src/org/distroverse/proxy to envoy
+    -^- perl -pi -e 's/proxies/envoys/g; s/Proxies/Envoys/g;
+        s/proxy/envoy/g; s/Proxy/Envoy/g; s/PROXY/ENVOY/g;' **/*(^/)
+        ../TODO
   - As quickly as possible, put together a server that sends an
     extremely simplified universe (with no detail culling and only one
-    detail level), a proxy that caches nothing, and get it working
+    detail level), a envoy that caches nothing, and get it working
     with the client
     + Replace universe def with something very limited
       + defvar small-universe-spec
@@ -93,9 +104,9 @@
         - (get-children 1)
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
-        > First pass at a proxy will just respond to DNode (from
+        > First pass at a envoy will just respond to DNode (from
           server) by sending client an AddObject
-        + Add DNode handling in proxy
+        + Add DNode handling in envoy
     - Get it to show up in the client
       - On connect, call dump-universe
         - Traverse entire universe (from hardcoded root node #1)
@@ -120,7 +131,7 @@
           - Takes a DvtpChannel -- anything with void .send
             DvtpExternalizable
           - Add .send method to NetSession
-          - Need some kind of .send interface in WorldProxy
+          - Need some kind of .send interface in WorldEnvoy
       > Okay if schemas look different depending on datastore backend
       - Need some place to store the meta tables?  Would there even be
         meta tables for the :dcookies store?
@@ -204,10 +215,10 @@
     - For testing, target a brain-dead simple filesystem tree,
       ignoring the transactional write issue (as I currently do for
       SQL, anyway)
-  - Send surroundings from server to proxy
+  - Send surroundings from server to envoy
     + Set initial detail level -- -10.0
       > This is in the session attachment
-    + Set proxy's loading property
+    + Set envoy's loading property
     x Starting from avatar's parent node, find and send all visible
       nodes
     x Starting from avatar's parent node, find and send all top-level
@@ -230,9 +241,9 @@
         + matrix.clj
           + Minvert mat
           + M* mat1 mat2
-    - Proxy will pull children that both proxy and server agree are
+    - Envoy will pull children that both envoy and server agree are
       visible to the client at the current detail level
-      > Proxy will stop descending when a node has the same timestamp
+      > Envoy will stop descending when a node has the same timestamp
         as the copy in its cache; will not stop ascending
       + One concession to efficiency: the server will send the chain
         going up, and the client will only ever pull children
@@ -253,15 +264,15 @@
               > Was easy to fix
       - Pull from client
         + Client needs to know where avatar is, not just camera
-          > Actually, just the proxy
+          > Actually, just the envoy
           + Server: send ("set-avatar" object-id)
             + I want the avatar object to be permanent
               + Change add-self-to-world:
                 + Don't add-object there
                 + Get avatar object, which should have no parent
                 + Reparent it to :lastpos
-          + Proxy: recognize this message
-            + Create WorldProxy (extends SingleServerProxyBase)
+          + Envoy: recognize this message
+            + Create WorldEnvoy (extends SingleServerEnvoyBase)
             + Create message recognizer (FunCall objects)
             > FunCall ID 0 does not need response
             + Die on unrecognized messages from the server
@@ -282,10 +293,10 @@
               - NodeTreeUtils.vectorTo()
                 - This is actually impossible to do correctly without
                   either using STM or locking the entire cookie store,
-                  isn't it?  So how do I do transactions from the proxy
+                  isn't it?  So how do I do transactions from the envoy
                   on a database stored by the client?
                   > durable-maps, of course
-                  - From the proxy, load durable-maps
+                  - From the envoy, load durable-maps
     x Server will automatically subscribe the client to changes in all
       nodes within range
       > Given that an avatar will move around more than nodes will, in
@@ -298,7 +309,7 @@
           in the main node structure would make it relatively easy to
           search
     x Client needs to subscribe to all these nodes, too
-    - Clear proxy's loading property
+    - Clear envoy's loading property
       - It seems that with the current approach to loading, it will not
         be clear when loading is finished
         - Maintain a count of requested nodes?
@@ -421,9 +432,9 @@
     + Go back to 1.0
     + CVS update to get jME 1.0.1
   + Now getting errors loading about:hello
-    + ControllerPipeline should have the ProxyClientConnection, not
+    + ControllerPipeline should have the EnvoyClientConnection, not
       ViewerWindow; otherwise there's no point to it
-      + The ProxyClientConnection currently has a way back to the
+      + The EnvoyClientConnection currently has a way back to the
         ViewerWindow, and gives that to the ViewerDispatcher; this
         must instead go through the pipeline (which should have the
         dispatcher)
@@ -543,7 +554,7 @@
     WorldSession.java; LGPL files do not need to change
     > (To allow gradual conversion to Clojure, including the contrib
       library)
-  + CTrans class - Client Transaction; list of ProxySendables
+  + CTrans class - Client Transaction; list of EnvoySendables
   + Fix mutability problems in DVTP classes
     + Make Dict copy a map rather than adopting one
     + Make all readExternal() methods private
@@ -563,7 +574,7 @@
     + Also, change implementation to use any Map; change hashCode to
       the sum of the hashes of keys * 852403729 ^ hashes of values
   + Get rid of KNOCK command
-    > A DVTP proxy will be allowed to connect to any server, at any
+    > A DVTP envoy will be allowed to connect to any server, at any
       time, on any port except SMTP, which is always forbidden
     + Remove handleKnock()
   + Remove WorldSession class
@@ -593,11 +604,11 @@
         > Not compared
       + DNode
         > For convenience; not externalized or compared
-    + DNode class (not client<->proxy, as AddObject is) (30)
+    + DNode class (not client<->envoy, as AddObject is) (30)
       + AddObject being
         + AddObject.readWithoutId( InputStream in )
           > Sets Id and ParentId to 0
-          > Proxy will pick a locally unique ID and set it as it
+          > Envoy will pick a locally unique ID and set it as it
             receives the DNode
         + AddObject.writeWithoutId( OutputStream out )
         + Compare with AddObject.equalsWithoutId()
@@ -609,7 +620,7 @@
       + array of DNodeRefs, children
     + Add all new classes to TestExternalization
       + And implement equals()/hashCode() as required
-    > Proxy will need to maintain maps, both of RemoteHost/id and of
+    > Envoy will need to maintain maps, both of RemoteHost/id and of
       local id, to either DNodeRefs or DNodes
       > Which one will depend on how the map will be used most often
       > Break out RemoteHost/id as its own type?
@@ -1000,13 +1011,13 @@
     - kp-enter to switch between mouselook/pointer mode
     - Sound
     - Shape smoothing
-      - Should this all be done at the proxy level, with additional
+      - Should this all be done at the envoy level, with additional
         polygons?
       > Goal: a future client with tactile output should be able to
         distinguish between sharp and rounded edges
       > Render versus feel detail levels?
       > Render large area at visual detail; small area at feel detail?
-        > Proxies able to break all shapes into numerous smaller shapes
+        > Envoys able to break all shapes into numerous smaller shapes
           for ultra-high detail; also useful for microscopic avatars
     - Mouselook smoothing
       > E.g., if mouse resolution results in a 10-pixel movement of the
@@ -1020,13 +1031,13 @@
       > These could be properties of objects, or they could be
         independent messages mapping to points on the user's skin where
         the sensation is felt, or both
-    - Figure animations (as long as a proxy can do it)
+    - Figure animations (as long as a envoy can do it)
     - Sound
     - Inventory system with remote object browser integration
-  - Proxy
+  - Envoy
     - Obviously these need to be loaded
       > http://gist.github.com/36217 shows an example sandbox function
-        in Clojure; try this for restricting proxy permissions
+        in Clojure; try this for restricting envoy permissions
     - Forbid connecting to SMTP
   - Server
     - Group dm transactions into SQL transactions
@@ -1054,7 +1065,7 @@
       > (DList Real:time DvtpExt:event Real:time DvtpExt:event ...)
     - Packages compressed and signed
     - Packages distributed peer-to-peer
-    - Proxies receive them, unpack, and send each event to the client at
+    - Envoys receive them, unpack, and send each event to the client at
       the time at which it is scheduled to occur
     - Audience can interact with nearby audience members, or other
       people in the private box, for example; rest of audience simulated
@@ -1065,7 +1076,7 @@
       delay
     - Audience member returning to the seats would need to be delayed to
       avoid appearing in two places at once
-  - Sleep mode (suspend all proxy threads and stop rendering)
+  - Sleep mode (suspend all envoy threads and stop rendering)
     > In a menu item, not a button; this is not something someone is
       going to need to hit in a moment of frustration like the mute
       button
@@ -1078,13 +1089,13 @@
       objects, but a sender will need to back up and retransmit
       > Right now, I think I might be discarding the sent bytes
   - Backward compatibility
-    - Client should be able to ignore child classes of ProxySendable
+    - Client should be able to ignore child classes of EnvoySendable
       that it does not recognize
       > Is this just a matter of making the default case a fall-through?
   - Textures must be specifiable as URLs (?) or else they can only be
-    loaded from the DVTP server, because that's all the proxy can
+    loaded from the DVTP server, because that's all the envoy can
     connect to
-  - Add support for Scheme source code proxy (using SISC)
+  - Add support for Scheme source code envoy (using SISC)
   - Need a test that exposes that a server is not threadsafe
     - Tests can run with N threads; good values of N to test would be 1,
       2, 10, 100, maximum that will fit in memory
@@ -1104,7 +1115,7 @@
       > Java or fully Java-callable libraries
       > Other projects in other languages, at a higher level
     > Looks like I'm going with Clojure
-  - Proxy: short-range chat:
+  - Envoy: short-range chat:
     - Nearest N people (six or seven -- what a person can normally keep
       track of in conversation) appear along the bottom and scroll up,
       horizontally aligned with the person speaking (arrows for people
@@ -1150,8 +1161,8 @@
       implement such a thing
       > With a protocol for passing object directories around; it has to
         be done
-  - Proxy-side collisions with no trust needed
-    > Any proxy may report a moment and point of collision between two
+  - Envoy-side collisions with no trust needed
+    > Any envoy may report a moment and point of collision between two
       objects; the server knows the trajectories of the objects,
       verifies the collision (cheap), and calculates resulting forces
       > The same method could be used to pass this back to the client,
@@ -1165,10 +1176,10 @@
     - A SetUrl starts a new tree, but with a dotted line to where the
       user was; can connect as a branch
   - Editor with syntax highlighting
-    - Proxy sends client a bunch of HTML
+    - Envoy sends client a bunch of HTML
       - <noedit></noedit>?  Is there a standard way to do that?
     - Client renders HTML in an editing box
-    - Updates and/or keystrokes are sent back to the proxy; proxy can
+    - Updates and/or keystrokes are sent back to the envoy; envoy can
       send back updates with new HTML tags as well
     - Named colors would provide an easy way to configure color schemes
       at the client side (?)
@@ -1176,7 +1187,7 @@
     > That is, if there's any ablity to fill out forms with things like
       name, address, etc., standardize the field names and implement an
       auto-fill method early on
-  - Should be able to cache R-tree nodes (in the proxy, keeping them in
+  - Should be able to cache R-tree nodes (in the envoy, keeping them in
     cookies)
     - Just check the top-level node on the server; if the timestamp is
       the same as the cached one, no need to update any of the subnodes
@@ -1209,9 +1220,9 @@
       - For Arc hackers
         - The shortest and easiest one to write; do this first
   - Darc editor: paren/bracket coloring
-    - Could do this strictly in the proxy, by updating html
+    - Could do this strictly in the envoy, by updating html
     - Or perhaps bind ( to commands color/insert/send/color
-  - Use bittorrent for downloading proxies?
+  - Use bittorrent for downloading envoys?
     > Comes with default file to check for updates
     > User can add/remove index files of course
   - 2D mode, in which only GUI objects are valid (others ignored), for

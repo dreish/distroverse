@@ -30,7 +30,7 @@
  *
  * </copyleft>
  */
-package org.distroverse.proxy;
+package org.distroverse.envoy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -51,13 +51,13 @@ import org.distroverse.dvtp.Str;
 /**
  * Converts setUrl objects from client into the act of connecting to a
  * server (disconnecting from the previous server if connected) and
- * sending it the PROXYOPEN command (with no argument), and passes other
+ * sending it the ENVOYOPEN command (with no argument), and passes other
  * messages to the abstract method receiveFromClient().
  * @author dreish
  */
-public abstract class SingleServerProxyBase extends NetProxyBase
+public abstract class SingleServerEnvoyBase extends NetEnvoyBase
    {
-   public SingleServerProxyBase() throws IOException
+   public SingleServerEnvoyBase() throws IOException
       {
       super();
       }
@@ -69,7 +69,7 @@ public abstract class SingleServerProxyBase extends NetProxyBase
       }
 
    /**
-    * Continue using the same proxy, but connect to a different server.
+    * Continue using the same envoy, but connect to a different server.
     * (Also used for the first-time connection.)
     * @param remote_url
     * @throws URISyntaxException
@@ -81,13 +81,13 @@ public abstract class SingleServerProxyBase extends NetProxyBase
          mRemoteSession.close();
 
       Log.p( "connecting to server: " + host + ":" + port,
-             Log.PROXY, -50 );
+             Log.ENVOY, -50 );
       SocketAddress remote_addr = new InetSocketAddress( host, port );
       mRemoteSession = connect( remote_addr );
-      Log.p( "sending PROXYOPEN command to " + host + ":" + port,
-             Log.PROXY, -50 );
+      Log.p( "sending ENVOYOPEN command to " + host + ":" + port,
+             Log.ENVOY, -50 );
       mRemoteSession.getNetOutQueue()
-              .add( new Str( "PROXYOPEN" ) );
+              .add( new Str( "ENVOYOPEN" ) );
       }
 
    /**

@@ -64,11 +64,11 @@ public class ViewerWindow
 
    /**
     * Requests that this viewer go to a given URL by either getting a
-    * new proxy, or sending a SetUrl object to the existing proxy.
+    * new envoy, or sending a SetUrl object to the existing envoy.
     * @param url - the DVTP URL to go to
     * @throws URISyntaxException - goes without saying
     * @throws IOException - general I/O problems, typically network
-    * @throws ClassNotFoundException - if the proxy cannot be loaded
+    * @throws ClassNotFoundException - if the envoy cannot be loaded
     */
    public void requestUrl( String url )
       {
@@ -92,7 +92,7 @@ public class ViewerWindow
          }
       catch ( Exception e )
          {
-         Log.p( "Unloadable proxy from: " + url, Log.DVTP, 5 );
+         Log.p( "Unloadable envoy from: " + url, Log.DVTP, 5 );
          Log.p( e, Log.DVTP, 5 );
          }
       }

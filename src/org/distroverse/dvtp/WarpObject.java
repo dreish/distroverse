@@ -19,7 +19,7 @@ import org.distroverse.core.Util;
  * @author dreish
  *
  */
-public final class WarpObject implements ProxySendable
+public final class WarpObject implements EnvoySendable
    {
    /**
     *

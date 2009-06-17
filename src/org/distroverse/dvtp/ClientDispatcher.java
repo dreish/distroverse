@@ -10,17 +10,17 @@
  */
 package org.distroverse.dvtp;
 
-import org.distroverse.viewer.ProxyErrorException;
+import org.distroverse.viewer.EnvoyErrorException;
 
 /**
- * Subclasses of this class handle incoming DVTP objects from a proxy
+ * Subclasses of this class handle incoming DVTP objects from a envoy
  * for a particular client.
  * @author dreish
  */
 public abstract class ClientDispatcher
    {
-   public void dispatchObject( ProxySendable o ) 
-   throws ProxyErrorException
+   public void dispatchObject( EnvoySendable o ) 
+   throws EnvoyErrorException
       {
       switch ( o.getClassNumber() )
          {
@@ -48,13 +48,13 @@ public abstract class ClientDispatcher
       }
    
    protected abstract void dispatchDisplayUrl( DisplayUrl o )
-   throws ProxyErrorException;
+   throws EnvoyErrorException;
    protected abstract void dispatchRedirectUrl( RedirectUrl o )
-   throws ProxyErrorException;
+   throws EnvoyErrorException;
    protected abstract void dispatchAddObject( AddObject o )
-   throws ProxyErrorException;
+   throws EnvoyErrorException;
    protected abstract void dispatchMoveObject( MoveObject o )
-   throws ProxyErrorException;
+   throws EnvoyErrorException;
    protected abstract void dispatchDeleteObject( DeleteObject o )
-   throws ProxyErrorException;
+   throws EnvoyErrorException;
    }

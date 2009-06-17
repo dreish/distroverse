@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * @author dreish
  *
  */
-public class ClearShape implements ProxySendable
+public class ClearShape implements EnvoySendable
    {
    /**
     *

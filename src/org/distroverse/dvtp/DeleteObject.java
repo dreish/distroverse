@@ -13,7 +13,7 @@ import java.io.OutputStream;
 
 //immutable
 
-public final class DeleteObject implements ProxySendable
+public final class DeleteObject implements EnvoySendable
    {
    public DeleteObject( InputStream in ) throws IOException
       {

@@ -56,25 +56,25 @@ public class ViewerDispatcher extends ClientDispatcher
 
    @Override
    protected void dispatchDisplayUrl( DisplayUrl o )
-   throws ProxyErrorException
+   throws EnvoyErrorException
       {
       String url = o.getUrl();
 
       if ( mPipeline.handlesUrl( url ) )
          mWindow.setDisplayedUrl( url );
       else
-         throw new ProxyErrorException( "Proxy tried to display a URL"
+         throw new EnvoyErrorException( "Envoy tried to display a URL"
                            + " that does not belong to it: " + url );
       }
 
    @Override
    protected void dispatchRedirectUrl( RedirectUrl o )
-   throws ProxyErrorException
+   throws EnvoyErrorException
       {
       String url = o.getUrl();
 
       if ( mPipeline.handlesUrl( url ) )
-         throw new ProxyErrorException( "Proxy tried to redirect to"
+         throw new EnvoyErrorException( "Envoy tried to redirect to"
                           + "a URL that it handles: " + url );
 
       try

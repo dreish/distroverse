@@ -30,17 +30,17 @@
  *
  * </copyleft>
  */
-package org.distroverse.proxy;
+package org.distroverse.envoy;
 
 import org.distroverse.distroplane.lib.PrimFactory;
 import org.distroverse.distroplane.lib.PrimFactory.PrimShape;
 import org.distroverse.dvtp.ClientSendable;
 
 /**
- * A simple demo proxy that does not connect to any server.
+ * A simple demo envoy that does not connect to any server.
  * @author dreish
  */
-public class HelloSimpleProxy extends ProxyBase
+public class HelloSimpleEnvoy extends EnvoyBase
    {
    public void offer( ClientSendable o )
       {

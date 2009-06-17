@@ -169,7 +169,7 @@
         :funcall-counter (ref 0)}))
 
 (defn start-rendering!
-  "Begins sending a proxy objects to display."
+  "Begins sending a envoy objects to display."
   [att session]
   (do
     (dstmt! "setprop" "loading" true)
@@ -221,7 +221,7 @@
   )
 
 (defn handle-object!
-  "Handle an object received from a proxy.  TODO log unhandled messages?"
+  "Handle an object received from a envoy.  TODO log unhandled messages?"
   [session att ob]
   (or (handle-callback! session att ob)
       (handle-standard! session att ob)))
@@ -230,9 +230,9 @@
 (defn handle-location
   "Handle an anonymous LOCATION request."
   [noq loc]
-  (.offer noq (Str. "http://www.distroverse.org/proxies/WorldProxy.jar"
+  (.offer noq (Str. "http://www.distroverse.org/envoys/WorldEnvoy.jar"
                     ".*"
-                    "org.distroverse.proxy.WorldProxy")))
+                    "org.distroverse.envoy.WorldEnvoy")))
 
 (defn handle-get
   "Handle an anonymous GET request."

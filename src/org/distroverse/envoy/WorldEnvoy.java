@@ -30,7 +30,7 @@
  *
  * </copyleft>
  */
-package org.distroverse.proxy;
+package org.distroverse.envoy;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -57,12 +57,12 @@ import com.jme.math.Vector3f;
  *
  * @author dreish
  */
-public class WorldProxy extends SingleServerProxyBase
+public class WorldEnvoy extends SingleServerEnvoyBase
    {
    /**
     * @throws IOException
     */
-   public WorldProxy() throws IOException
+   public WorldEnvoy() throws IOException
       {
       super();
       mAvatar = null;
@@ -71,7 +71,7 @@ public class WorldProxy extends SingleServerProxyBase
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.proxy.SingleServerProxyBase#initWorld()
+    * @see org.distroverse.envoy.SingleServerEnvoyBase#initWorld()
     */
    @Override
    protected void initWorld() throws IOException
@@ -81,7 +81,7 @@ public class WorldProxy extends SingleServerProxyBase
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.proxy.NetProxyBase#receiveFromClient(org.distroverse.dvtp.ClientSendable)
+    * @see org.distroverse.envoy.NetEnvoyBase#receiveFromClient(org.distroverse.dvtp.ClientSendable)
     */
    @Override
    protected void receiveFromClient( ClientSendable o )
@@ -95,7 +95,7 @@ public class WorldProxy extends SingleServerProxyBase
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.proxy.NetProxyBase#receiveFromServer(org.distroverse.core.net.NetSession, org.distroverse.dvtp.DvtpExternalizable)
+    * @see org.distroverse.envoy.NetEnvoyBase#receiveFromServer(org.distroverse.core.net.NetSession, org.distroverse.dvtp.DvtpExternalizable)
     */
    @Override
    public void receiveFromServer( NetSession< Object > s,
@@ -226,7 +226,7 @@ public class WorldProxy extends SingleServerProxyBase
       float target_range = dn.getMoveSeq().getRange();
       float min_distance = vec_to.length() - target_range;
       return min_distance
-             < WorldProxy.visibleDistance( detail, target_size );
+             < WorldEnvoy.visibleDistance( detail, target_size );
       }
 
    private void addCache( DNode dn )

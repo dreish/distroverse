@@ -36,35 +36,35 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.distroverse.dvtp.ProxySendable;
-import org.distroverse.dvtp.ProxySpec;
+import org.distroverse.dvtp.EnvoySendable;
+import org.distroverse.dvtp.EnvoySpec;
 import org.distroverse.dvtp.SetUrl;
 
-public class ProxyControllerPipeline extends ControllerPipeline
+public class EnvoyControllerPipeline extends ControllerPipeline
    {
    /**
-    * Note that the 'proxy' passed to this constructor, which may be
+    * Note that the 'envoy' passed to this constructor, which may be
     * null, is the one already loaded and running, if any.  If that
-    * proxy can handle the given URL, it will be used.
+    * envoy can handle the given URL, it will be used.
     * @param url - the dvtp:// URL this pipeline should be connected to
     * @param window - the ViewerWindow on which to display
-    * @param proxy - the already-running proxy, if any
+    * @param envoy - the already-running envoy, if any
     * @throws URISyntaxException
     * @throws IOException
     * @throws ClassNotFoundException
     */
-   public ProxyControllerPipeline( String url, ViewerWindow window )
+   public EnvoyControllerPipeline( String url, ViewerWindow window )
    throws URISyntaxException, IOException, ClassNotFoundException,
           Exception
       {
-      mProxy = new ProxyClientConnection( url,
-                             ProxyControllerPipeline.getProxyUrl( url ),
+      mEnvoy = new EnvoyClientConnection( url,
+                             EnvoyControllerPipeline.getEnvoyUrl( url ),
                                           this );
       mDispatcher = new ViewerDispatcher( window, this );
       requestUrl( url );
       }
 
-   public static ProxySpec getProxyUrl( String url )
+   public static EnvoySpec getEnvoyUrl( String url )
    throws URISyntaxException, IOException
       {
       URI place_uri = new URI( url );
@@ -76,16 +76,16 @@ public class ProxyControllerPipeline extends ControllerPipeline
    @Override
    public void close()
       {
-      if ( mProxy != null )
-         mProxy.close();
+      if ( mEnvoy != null )
+         mEnvoy.close();
       }
 
    @Override
    public void requestUrl( String location_url )
    throws Exception
       {
-      if ( mProxy.handlesUrl( location_url ) )
-         mProxy.offer( new SetUrl( location_url ) );
+      if ( mEnvoy.handlesUrl( location_url ) )
+         mEnvoy.offer( new SetUrl( location_url ) );
       else
          redirectUrl( location_url );
       }
@@ -93,28 +93,28 @@ public class ProxyControllerPipeline extends ControllerPipeline
    private void redirectUrl( String location_url )
    throws Exception
       {
-      ProxySpec proxy_info = getProxyUrl( location_url );
-      String proxy_url  = proxy_info.getProxyUrl().toString();
-      String proxy_name = proxy_info.getProxyName().toString();
-      String loc_regexp = proxy_info.getResourceRegexp().toString();
-      if ( mProxy != null
-           &&  proxy_url  == mProxy.getProxyUrl()
-           &&  proxy_name == mProxy.getProxyName() )
-         mProxy.setUrl( location_url, loc_regexp );
+      EnvoySpec envoy_info = getEnvoyUrl( location_url );
+      String envoy_url  = envoy_info.getEnvoyUrl().toString();
+      String envoy_name = envoy_info.getEnvoyName().toString();
+      String loc_regexp = envoy_info.getResourceRegexp().toString();
+      if ( mEnvoy != null
+           &&  envoy_url  == mEnvoy.getEnvoyUrl()
+           &&  envoy_name == mEnvoy.getEnvoyName() )
+         mEnvoy.setUrl( location_url, loc_regexp );
       else
          {
-         mProxy.close();
-         mProxy = new ProxyClientConnection( location_url, proxy_url,
-                                      proxy_name, loc_regexp, this );
+         mEnvoy.close();
+         mEnvoy = new EnvoyClientConnection( location_url, envoy_url,
+                                      envoy_name, loc_regexp, this );
          }
       }
 
-   public void dispatchObject( ProxySendable o )
-   throws ProxyErrorException
+   public void dispatchObject( EnvoySendable o )
+   throws EnvoyErrorException
       {
       mDispatcher.dispatchObject( o );
       }
 
-   private ProxyClientConnection mProxy;
+   private EnvoyClientConnection mEnvoy;
    private ViewerDispatcher      mDispatcher;
    }

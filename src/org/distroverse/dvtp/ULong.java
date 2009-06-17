@@ -22,7 +22,7 @@ import java.io.OutputStream;
  * streamed.  An unset high bit on the seventh octet is an error.
  *
  * A future upgrade path for DVTP will involve first giving clients the
- * capability to accept larger ULongs, and then deploying proxies that
+ * capability to accept larger ULongs, and then deploying envoys that
  * use this capability.
  * @author dreish
  */

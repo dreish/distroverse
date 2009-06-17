@@ -24,7 +24,7 @@ import com.jme.util.geom.BufferUtils;
 
 /**
  * This class is part of the DVTP protocol.  It defines how shapes
- * are transmitted from the proxy to the client.  Shape includes
+ * are transmitted from the envoy to the client.  Shape includes
  * texture and image map.
  *
  * @author dreish

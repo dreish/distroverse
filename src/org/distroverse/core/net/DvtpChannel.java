@@ -30,51 +30,12 @@
  *
  * </copyleft>
  */
+
 package org.distroverse.core.net;
 
-import java.io.IOException;
-import java.net.ProtocolException;
+import org.distroverse.dvtp.DvtpExternalizable;
 
-import org.distroverse.distroplane.lib.*;
-
-/**
- * Defines an object-handling method for NetInQueueWatcher appropriate
- * for a DvtpServer.
- * @author dreish
- */
-public class DvtpServerInQueueObjectWatcher 
-extends NetInQueueWatcher< Object >
+public interface DvtpChannel
    {
-   public DvtpServerInQueueObjectWatcher( DvtpServer s )
-      {
-      super();
-      mServer = s;
-      }
-
-   @Override
-   protected void handleNetInObject( Object net_in_object,
-                                     NetInQueue< Object > queue )
-   throws IOException
-      {
-      NetSession< Object > session = queue.getSession();
-      
-      if ( session.inEnvoyMode() )
-         {
-         mServer.handleEnvoyObject( net_in_object, session );
-         }
-      else if ( net_in_object instanceof String )
-         {
-         NetOutQueue< Object > noq = session.getNetOutQueue();
-         mServer.handleCommand( (String) net_in_object, noq );
-         }
-      else
-         {
-         throw new ProtocolException( "Received a non-string object"
-                      + " of type "
-                      + net_in_object.getClass().getCanonicalName()
-                      + " while in conversation mode" );
-         }
-      }
-
-   private DvtpServer mServer;
+   public void send( DvtpExternalizable msg );
    }

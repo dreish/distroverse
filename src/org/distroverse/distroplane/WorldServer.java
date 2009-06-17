@@ -97,10 +97,10 @@ public class WorldServer extends DvtpServer
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyObject(java.lang.Object, org.distroverse.core.net.NetSession)
+    * @see org.distroverse.distroplane.lib.DvtpServer#handleEnvoyObject(java.lang.Object, org.distroverse.core.net.NetSession)
     */
    @Override
-   public void handleProxyObject( Object net_in_object,
+   public void handleEnvoyObject( Object net_in_object,
                                   NetSession< Object > session )
       {
       try
@@ -130,10 +130,10 @@ public class WorldServer extends DvtpServer
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.distroplane.lib.DvtpServer#handleProxyOpen(java.lang.String, org.distroverse.core.net.NetOutQueue)
+    * @see org.distroverse.distroplane.lib.DvtpServer#handleEnvoyOpen(java.lang.String, org.distroverse.core.net.NetOutQueue)
     */
    @Override
-   public void handleProxyOpen( String token,
+   public void handleEnvoyOpen( String token,
                                 NetOutQueue< Object > noq )
       {
       NetSession< Object > ns = noq.getSession();

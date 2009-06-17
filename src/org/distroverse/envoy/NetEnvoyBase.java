@@ -30,7 +30,7 @@
  *
  * </copyleft>
  */
-package org.distroverse.proxy;
+package org.distroverse.envoy;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -39,21 +39,21 @@ import java.nio.channels.ClosedChannelException;
 import org.distroverse.core.net.DvtpFlexiParser;
 import org.distroverse.core.net.DvtpFlexiStreamer;
 import org.distroverse.core.net.DvtpMultiplexedClient;
-import org.distroverse.core.net.DvtpProxyInQueueObjectWatcher;
+import org.distroverse.core.net.DvtpEnvoyInQueueObjectWatcher;
 import org.distroverse.core.net.NetInQueueWatcher;
 import org.distroverse.core.net.NetSession;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
 
 /**
- * Provides a useful base upon which to build proxy classes that
+ * Provides a useful base upon which to build envoy classes that
  * communicate with a server using pure-object DVTP (i.e., no simple
  * CRLF-terminated strings).
  * @author dreish
  */
-public abstract class NetProxyBase extends ProxyBase
+public abstract class NetEnvoyBase extends EnvoyBase
    {
-   public NetProxyBase() throws IOException
+   public NetEnvoyBase() throws IOException
       {
       mMultiplexer
          = new DvtpMultiplexedClient< Object, DvtpFlexiParser,
@@ -62,11 +62,11 @@ public abstract class NetProxyBase extends ProxyBase
       }
 
    /* (non-Javadoc)
-    * @see org.distroverse.dvtp.DvtpProxy#run()
+    * @see org.distroverse.dvtp.DvtpEnvoy#run()
     */
    public void run()
       {
-      mWatcher = new DvtpProxyInQueueObjectWatcher( this );
+      mWatcher = new DvtpEnvoyInQueueObjectWatcher( this );
       mMultiplexer.setWatcher( mWatcher );
       mWatcher.start();
       mMultiplexer.start();
@@ -98,7 +98,7 @@ public abstract class NetProxyBase extends ProxyBase
       {
       // FIXME: rather than doing it this way, respond to the server's
       // greeting.
-      new_server.getNetOutQueue().add( "PROXYOPEN" );
+      new_server.getNetOutQueue().add( "ENVOYOPEN" );
       }
 
    /**

@@ -68,7 +68,7 @@
     'DvtpObject.        'Err.   'False. 'Flo.   'FunCall.
     'FunRet.    'KeyDown.       'KeyUp. 'Keystroke.     'MoreDetail.
     'Move.      'MoveObject.    'MoveSeq.       'Pair.  'PointArray.
-    'ProxySpec. 'Quat.  'RedirectUrl.   'SetUrl.        'Shape.
+    'EnvoySpec. 'Quat.  'RedirectUrl.   'SetUrl.        'Shape.
     'Str.       'True.  'Vec.   'Warp.  'WarpObject.    'WarpSeq.}
   "Lists the constructors of DvtpExternalizable classes that either
   are messages sent by this server, or are components of those

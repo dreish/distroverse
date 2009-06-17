@@ -30,16 +30,16 @@
  *
  * </copyleft>
  */
-package org.distroverse.proxy;
+package org.distroverse.envoy;
 
 import java.util.concurrent.BlockingQueue;
 
 import org.distroverse.core.Log;
 import org.distroverse.dvtp.AddObject;
 import org.distroverse.dvtp.ULong;
-import org.distroverse.dvtp.DvtpProxy;
+import org.distroverse.dvtp.DvtpEnvoy;
 import org.distroverse.dvtp.MoveSeq;
-import org.distroverse.dvtp.ProxySendable;
+import org.distroverse.dvtp.EnvoySendable;
 import org.distroverse.dvtp.Shape;
 import org.distroverse.dvtp.WarpSeq;
 import org.distroverse.viewer.VUtil;
@@ -52,28 +52,28 @@ import com.jme.math.Vector3f;
  * setQueue() method.  Leaves unimplemented: run(), offer().
  * @author dreish
  */
-public abstract class ProxyBase implements DvtpProxy
+public abstract class EnvoyBase implements DvtpEnvoy
    {
-   public ProxyBase()
+   public EnvoyBase()
       {
       super();
       }
 
-   public void setQueue( BlockingQueue< ProxySendable > queue )
+   public void setQueue( BlockingQueue< EnvoySendable > queue )
       {
       mClientQueue = queue;
       }
 
    /**
     * Add an object to the client's queue.  In most cases, there is
-    * another method in ProxyBase that provides a convenient alternative
+    * another method in EnvoyBase that provides a convenient alternative
     * to calling this one.
     *
     * For now, this is just going to log and keep retrying if it gets
     * interrupted.  This is probably a very bad strategy, but we'll see.
     * @param o
     */
-   protected void putQueue( ProxySendable o )
+   protected void putQueue( EnvoySendable o )
       {
       while ( true )
          {
@@ -106,5 +106,5 @@ public abstract class ProxyBase implements DvtpProxy
       }
 
 
-   private BlockingQueue< ProxySendable > mClientQueue;
+   private BlockingQueue< EnvoySendable > mClientQueue;
    }

@@ -7,7 +7,7 @@
  */
 package org.distroverse.dvtp;
 
-public interface ProxySendable extends DvtpExternalizable
+public interface EnvoySendable extends DvtpExternalizable
    {
    // No additional function.
    }

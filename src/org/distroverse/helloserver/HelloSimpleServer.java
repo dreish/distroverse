@@ -40,7 +40,7 @@ import org.distroverse.distroplane.lib.DvtpListener;
 import org.distroverse.distroplane.lib.DvtpServer;
 import org.distroverse.distroplane.lib.SUtil;
 import org.distroverse.dvtp.Err;
-import org.distroverse.dvtp.ProxySpec;
+import org.distroverse.dvtp.EnvoySpec;
 
 public class HelloSimpleServer extends DvtpServer
    {
@@ -53,9 +53,9 @@ public class HelloSimpleServer extends DvtpServer
    public void handleGet( String url, NetOutQueue< Object > noq )
    throws IOException
       {
-      if ( url.equals( "drtp://localhost/HelloSimpleProxy.jar" ) )
+      if ( url.equals( "drtp://localhost/HelloSimpleEnvoy.jar" ) )
          {
-         SUtil.sendFile( "HelloSimpleProxy.jar", url, noq );
+         SUtil.sendFile( "HelloSimpleEnvoy.jar", url, noq );
          }
       else
          {
@@ -68,29 +68,29 @@ public class HelloSimpleServer extends DvtpServer
                                NetOutQueue< Object > noq )
    throws IOException
       {
-      noq.add( new ProxySpec( "drtp://localhost/HelloSimpleProxy.jar",
+      noq.add( new EnvoySpec( "drtp://localhost/HelloSimpleEnvoy.jar",
                               ".*",
-                          "org.distroverse.proxy.HelloSimpleProxy" ) );
+                          "org.distroverse.envoy.HelloSimpleEnvoy" ) );
       }
 
    @Override
-   public void handleProxyObject( Object net_in_object,
+   public void handleEnvoyObject( Object net_in_object,
                                   NetSession< Object > session )
    throws IOException
       {
-      /* This server only hands out self-sufficient proxies.  There's no
-       * way to establish proxy connections.
+      /* This server only hands out self-sufficient envoys.  There's no
+       * way to establish envoy connections.
        */
-      throw new IOException( "handleProxyObject() unimplemented" );
+      throw new IOException( "handleEnvoyObject() unimplemented" );
       }
 
    @Override
-   public void handleProxyOpen( String token, 
+   public void handleEnvoyOpen( String token, 
                                 NetOutQueue< Object > noq )
    throws IOException
       {
-      // This server only hands out self-sufficient proxies.
-      noq.add( new Err( "PROXYOPEN not implemented", 501 ) );
+      // This server only hands out self-sufficient envoys.
+      noq.add( new Err( "ENVOYOPEN not implemented", 501 ) );
       }
 
    /**

@@ -77,7 +77,7 @@ public final class DvtpObject
         FunRet.class,           // 130
         Err.class,              // 131
         SetVisible.class,       // 132
-        ProxySpec.class,        // 133
+        EnvoySpec.class,        // 133
         AskInv.class,           // 134
         ReplyInv.class,         // 135
         SetShape.class,         // 136

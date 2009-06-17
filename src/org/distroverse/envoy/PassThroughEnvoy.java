@@ -30,53 +30,54 @@
  *
  * </copyleft>
  */
-package org.distroverse.core.net;
+package org.distroverse.envoy;
 
+import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
+import org.distroverse.core.Log;
+import org.distroverse.core.Util;
+import org.distroverse.core.net.NetSession;
+import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DvtpExternalizable;
+import org.distroverse.dvtp.FunCall;
+import org.distroverse.dvtp.EnvoySendable;
 import org.distroverse.dvtp.Str;
-import org.distroverse.proxy.NetProxyBase;
 
-/**
- * Defines an object-handling method for NetInQueueWatcher appropriate
- * for a NetProxyBase.
- * @author dreish
- */
-public class DvtpProxyInQueueObjectWatcher
-extends NetInQueueWatcher< Object >
+public class PassThroughEnvoy extends SingleServerEnvoyBase
    {
-   /**
-    * Create a thread object that, when started, will watch any queues
-    * that are added to it and dispatch each object o in those queues
-    * with p.receiveFromServer( o ).
-    * @param p
-    */
-   public DvtpProxyInQueueObjectWatcher( NetProxyBase p )
+   public PassThroughEnvoy() throws IOException
       {
       super();
-      mProxy = p;
+      Log.p( "instantiated PassThroughEnvoy", Log.ENVOY, -50 );
       }
 
-   /* (non-Javadoc)
-    * @see org.distroverse.core.net.NetInQueueWatcher#handleNetInObject(java.lang.Object, org.distroverse.core.net.NetInQueue)
-    */
    @Override
-   protected void
-   handleNetInObject( Object net_in_object,
-                      NetInQueue< Object > queue )
+   public void receiveFromServer( NetSession< Object > s,
+                                  DvtpExternalizable o )
+      {
+      Log.p( "from server: " + Util.prettyPrintList( o ),
+             Log.ENVOY, -100 );
+      if ( o instanceof EnvoySendable )
+         putQueue( (EnvoySendable) o );
+      else
+         Log.p( "(which was not EnvoySendable, so ignored)",
+                Log.ENVOY, -20 );
+      }
+
+   @Override
+   protected void receiveFromClient( ClientSendable o )
    throws ClosedChannelException
       {
-      if ( net_in_object instanceof String )
-         mProxy.receiveFromServer( queue.getSession(),
-                                   new Str( (String) net_in_object ) );
-      else if ( net_in_object instanceof DvtpExternalizable )
-         mProxy.receiveFromServer( queue.getSession(),
-                                   (DvtpExternalizable) net_in_object );
-      else
-         throw new IllegalArgumentException( "net_in_object not a valid"
-                                             + "DVTP type" );
+      Log.p( "from client: " + Util.prettyPrintList( o ),
+             Log.ENVOY, -100 );
+      Util.prettyPrintList( o );
+      sendToServer( o );
       }
 
-   private NetProxyBase mProxy;
+   @Override
+   protected void initWorld() throws ClosedChannelException
+      {
+      sendToServer( new FunCall( new Str( "init" ) ) );
+      }
    }
