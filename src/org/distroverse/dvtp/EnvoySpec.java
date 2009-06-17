@@ -17,7 +17,7 @@ import org.distroverse.core.Util;
 
 /**
  * This class is the only valid non-error response to a LOCATION query.
- * It gives the URL of a envoy to use to connect to this site at the
+ * It gives the URL of an envoy to use to connect to this site at the
  * requested location, and a resource regular expression specifying the
  * range of URLs (at the same host) covered by this envoy.  For example,
  * a simple site covered in its entirety by a single envoy could return

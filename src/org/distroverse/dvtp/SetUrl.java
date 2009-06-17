@@ -13,7 +13,7 @@ import java.io.InputStream;
 //immutable
 
 /**
- * Sent by a client to a envoy to request that it switch to a
+ * Sent by a client to an envoy to request that it switch to a
  * different URL.  If the envoy agrees, it will send back a DisplayUrl
  * object with the same URL, which will be what actually causes the
  * client to show a different URL.

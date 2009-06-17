@@ -171,7 +171,7 @@ public abstract class DvtpServer
    throws IOException;
 
    /**
-    * Handles any arbitrary object from a envoy.  This is the only
+    * Handles any arbitrary object from an envoy.  This is the only
     * method called on a DvtpServer from a session that has entered
     * envoy mode by calling setEnvoyMode() on the NetSession object.
     * @param net_in_object

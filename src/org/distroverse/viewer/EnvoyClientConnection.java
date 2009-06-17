@@ -50,7 +50,7 @@ import org.distroverse.dvtp.EnvoySpec;
 import org.distroverse.dvtp.SetUrl;
 
 /**
- * A EnvoyClientConnection listens for objects from a envoy and
+ * An EnvoyClientConnection listens for objects from an envoy and
  * dispatches them.  It also handles messages that the client may need
  * to send to the envoy.
  *
@@ -59,7 +59,7 @@ import org.distroverse.dvtp.SetUrl;
 public class EnvoyClientConnection implements Runnable
    {
    /**
-    * Loads a envoy and creates a connection to it.
+    * Loads an envoy and creates a connection to it.
     * @param url - The Location URL
     * @param envoy_url - The Envoy resource URL
     * @param location_regexp - Matches what Locations the envoy handles
@@ -76,7 +76,7 @@ public class EnvoyClientConnection implements Runnable
       }
 
    /**
-    * Loads a envoy and creates a connection to it
+    * Loads an envoy and creates a connection to it
     * @param url - The Location URL
     * @param envoy_spec - a (envoy_url, location_regexp) Pair
     * @throws MalformedURLException
@@ -95,7 +95,7 @@ public class EnvoyClientConnection implements Runnable
       }
 
    private void init( String url, String envoy_url, String envoy_name,
-                      String location_regexp, 
+                      String location_regexp,
                       EnvoyControllerPipeline pipeline )
    throws Exception
       {
@@ -118,7 +118,7 @@ public class EnvoyClientConnection implements Runnable
       }
 
    /**
-    * Running a EnvoyClientConnection causes it to listen to its queue
+    * Running an EnvoyClientConnection causes it to listen to its queue
     * for objects, and to act on them.  run() does not return unless
     * interrupted.
     */

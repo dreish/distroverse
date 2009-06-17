@@ -13,7 +13,7 @@ package org.distroverse.dvtp;
 import org.distroverse.viewer.EnvoyErrorException;
 
 /**
- * Subclasses of this class handle incoming DVTP objects from a envoy
+ * Subclasses of this class handle incoming DVTP objects from an envoy
  * for a particular client.
  * @author dreish
  */

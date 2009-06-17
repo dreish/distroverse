@@ -15,7 +15,7 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a envoy to a client to tell it to show a different URL in the
+ * Sent by an envoy to a client to tell it to show a different URL in the
  * location widget.  The URL contained in this object must be part of
  * the site whose envoy sent the object.
  *

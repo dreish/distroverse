@@ -15,7 +15,7 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a envoy to a client to tell it to go to a URL at a different
+ * Sent by an envoy to a client to tell it to go to a URL at a different
  * site.  The URL contained in this object must NOT be part of the site
  * whose envoy sent the object.  Bear in mind that a client could be
  * programmed to ignore these, so they do not provide any real keep-away

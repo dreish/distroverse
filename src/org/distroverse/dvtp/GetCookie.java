@@ -16,7 +16,7 @@ import org.distroverse.core.Util;
 //immutable
 
 /**
- * Sent by a envoy to a client to request a cookie from the client's
+ * Sent by an envoy to a client to request a cookie from the client's
  * cookie store.
  * @author dreish
  */

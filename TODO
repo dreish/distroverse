@@ -12,9 +12,10 @@
     -^- perl -pi -e 's/proxies/envoys/g; s/Proxies/Envoys/g;
         s/proxy/envoy/g; s/Proxy/Envoy/g; s/PROXY/ENVOY/g;' **/*(^/)
         ../TODO
+    - "an envoy" is not so cool
   - As quickly as possible, put together a server that sends an
     extremely simplified universe (with no detail culling and only one
-    detail level), a envoy that caches nothing, and get it working
+    detail level), an envoy that caches nothing, and get it working
     with the client
     + Replace universe def with something very limited
       + defvar small-universe-spec
@@ -104,7 +105,7 @@
         - (get-children 1)
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
-        > First pass at a envoy will just respond to DNode (from
+        > First pass at an envoy will just respond to DNode (from
           server) by sending client an AddObject
         + Add DNode handling in envoy
     - Get it to show up in the client
@@ -1031,7 +1032,7 @@
       > These could be properties of objects, or they could be
         independent messages mapping to points on the user's skin where
         the sensation is felt, or both
-    - Figure animations (as long as a envoy can do it)
+    - Figure animations (as long as an envoy can do it)
     - Sound
     - Inventory system with remote object browser integration
   - Envoy

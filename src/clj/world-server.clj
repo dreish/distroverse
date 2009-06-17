@@ -169,7 +169,7 @@
         :funcall-counter (ref 0)}))
 
 (defn start-rendering!
-  "Begins sending a envoy objects to display."
+  "Begins sending an envoy objects to display."
   [att session]
   (do
     (dstmt! "setprop" "loading" true)
@@ -221,7 +221,7 @@
   )
 
 (defn handle-object!
-  "Handle an object received from a envoy.  TODO log unhandled messages?"
+  "Handle an object received from an envoy.  TODO log unhandled messages?"
   [session att ob]
   (or (handle-callback! session att ob)
       (handle-standard! session att ob)))

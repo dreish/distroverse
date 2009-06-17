@@ -51,7 +51,7 @@ import com.jme.scene.shape.Tube;
 
 /**
  * This controller pipeline knows how to generate about:* views, which
- * do not use a envoy.
+ * do not use an envoy.
  * @author dreish
  */
 public class AboutControllerPipeline extends ControllerPipeline
