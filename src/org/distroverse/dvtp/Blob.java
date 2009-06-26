@@ -129,8 +129,9 @@ public class Blob implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Blob " + Util.prettyPrintList( mBytes, mResource,
-                                              mPos, mFileLength ) + ")";
+      return "(org.distroverse.dvtp.Blob. "
+             + Util.prettyPrintList( mBytes, mResource,
+                                     mPos, mFileLength ) + ")";
       }
 
    private final byte[] mBytes;

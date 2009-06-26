@@ -63,6 +63,8 @@ public abstract class Bool implements DvtpExternalizable
    
    public String prettyPrint()
       {
-      return "(Bool " + asBoolean() + ")";
+      return "(org.distroverse.dvtp.Bool/newInstance "
+             + asBoolean() + ")";
       }
    }
+

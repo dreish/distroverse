@@ -51,6 +51,7 @@ public class FunCall extends DList
    @Override
    public String prettyPrint()
       {
-      return "(FunCall " + prettyPrintContents() + ")";
+      return "(org.distroverse.dvtp.FunCall. "
+             + prettyPrintContents() + ")";
       }
    }

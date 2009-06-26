@@ -1,18 +1,6 @@
-                                        -*- Text -*-
+                                        -*- Org -*-
 
 - To do for 0.02:
-  - Change "proxy" to "envoy"
-    - proxies -> envoys
-    - Proxies -> Envoys
-    - proxy -> envoy
-    - Proxy -> Envoy
-    - PROXY -> ENVOY
-    - Rename any file with Proxy to Envoy
-    - Rename src/org/distroverse/proxy to envoy
-    -^- perl -pi -e 's/proxies/envoys/g; s/Proxies/Envoys/g;
-        s/proxy/envoy/g; s/Proxy/Envoy/g; s/PROXY/ENVOY/g;' **/*(^/)
-        ../TODO
-    - "an envoy" is not so cool
   - As quickly as possible, put together a server that sends an
     extremely simplified universe (with no detail culling and only one
     detail level), an envoy that caches nothing, and get it working
@@ -101,8 +89,44 @@
             earlier
       - Convert immediate children to concrete
         - (concretize-children 1)
+          - (children-of (get-node 1))
+            x Needs :ephemeral property
+            + This shouldn't check the node's :ephemeral property,
+              it should look for either :children or :echildren
+            + fix (gen-children)
+              + fake-parent needs a :seed-mutation-shift
+                + Add to gen-echildren call in root node
+                + Add to gen-echildren parameters
+                + Add to constructed fake-parent
+            - :parent is nil; could be given in this case
+              > But this does raise questions about whether parent-ref
+                makes sense; maybe I should just ditch it until it
+                proves necessary
+            - Children need their own gen-echildren calls
+              in :echildren, unless a terminal node
+            + Obviously DvtpExternalizable objects need a print-dup
+              + Maybe the way to do this is in binary
+                + dvtp-to-bytearray
+                + bytearray-to-dvtp
+                + binu64
+                + u64bin
+              + "#=" prettyPrint -- define this in dvtp-lib
+                + I will certainly need to use eval; straight #=()
+                  wouldn't call nested constructors
+              x Make a test function that iterates through all the
+                DvtpExternalizable classes and makes sure an example
+                value equals itself after print/read
+                > This would duplicate the existing tests for
+                  DvtpExternalizable, now that I just have a general
+                  layer on top of that
+              x ".prettyPrint" should print full class names, with a
+                dot
+              x Will need constructors that take any iterable
+                collection, not just arrays
+            - :obj use print-dup
+            - Should probably continue to make the spec just a label;
+              in fact, it should only exist as an arg in :echildren
       - Recursively convert all descendant nodes to concrete
-        - (get-children 1)
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
         > First pass at an envoy will just respond to DNode (from
@@ -1000,12 +1024,24 @@
       + Remove ds- from names
       + Change get to getrec
       + Fix usage in durable-maps
+  + Change "proxy" to "envoy"
+    + proxies -> envoys
+    + Proxies -> Envoys
+    + proxy -> envoy
+    + Proxy -> Envoy
+    + PROXY -> ENVOY
+    + Rename any file with Proxy to Envoy
+    + Rename src/org/distroverse/proxy to envoy
+    +^+ perl -pi -e 's/proxies/envoys/g; s/Proxies/Envoys/g;
+        s/proxy/envoy/g; s/Proxy/Envoy/g; s/PROXY/ENVOY/g;' **/*(^/)
+        ../TODO
+    + "a envoy" is not so cool
 
-------------------------------------------------------------------------
+* ----------------------------------------------------------------------
 - To do for 0.03:
   - Text
 
-------------------------------------------------------------------------
+* ----------------------------------------------------------------------
 - To do for 0.99:
   - Client
     - Text -- can't escape the morass

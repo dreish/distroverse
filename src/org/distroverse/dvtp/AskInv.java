@@ -82,7 +82,7 @@ public class AskInv implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(AskInv "
+      return "(org.distroverse.dvtp.AskInv. "
              + Util.prettyPrintList( mType, mKey )
              + ")";
       }

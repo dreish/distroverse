@@ -157,3 +157,10 @@
   []
   (Real. (BigDecimal. (BigInteger/valueOf (System/currentTimeMillis))
                       3)))
+
+(defn normint
+  "Normalize an integer to the exact class and value that would be
+  returned by the reader on reading that integer."
+  ([n]
+     (read-string (print-str (+ n 0)))))
+

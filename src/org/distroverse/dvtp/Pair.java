@@ -91,7 +91,7 @@ public final class Pair implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Pair "
+      return "(org.distroverse.dvtp.Pair. "
              + Util.prettyPrintList( mFirst, mSecond ) + ")";
       }
 

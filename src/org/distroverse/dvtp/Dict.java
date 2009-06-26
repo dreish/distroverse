@@ -73,7 +73,7 @@ public final class Dict implements DvtpExternalizable
    public String prettyPrint()
       {
       StringBuilder ret = new StringBuilder();
-      ret.append( "(Dict" );
+      ret.append( "(org.distroverse.dvtp.Dict." );
       for ( Map.Entry< DvtpExternalizable, DvtpExternalizable > pair
             : mDict.entrySet() )
          {

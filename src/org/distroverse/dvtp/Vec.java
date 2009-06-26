@@ -75,7 +75,8 @@ public final class Vec implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Vec " + Util.prettyPrintList( mVec ) + ")";
+      return "(org.distroverse.dvtp.Vec. "
+             + Util.prettyPrintList( mVec ) + ")";
       }
 
    private final Vector3f mVec;

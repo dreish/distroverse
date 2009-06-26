@@ -82,7 +82,7 @@ public class Flo implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Flo " + mF + ")";
+      return "(org.distroverse.dvtp.Flo. (float " + mF + "))";
       }
 
    private final float mF;

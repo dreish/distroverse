@@ -54,6 +54,6 @@ public class MoreDetail extends Flo implements ClientSendable
    @Override
    public String prettyPrint()
       {
-      return "(MoreDetail " + getAmount() + ")";
+      return "(org.distroverse.dvtp.MoreDetail. " + getAmount() + ")";
       }
    }

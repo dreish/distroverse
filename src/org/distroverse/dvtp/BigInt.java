@@ -104,7 +104,8 @@ public class BigInt implements DvtpExternalizable,
 
    public String prettyPrint()
       {
-      return "(BigInt " + Util.prettyPrintList( mVal ) + ")";
+      return "(org.distroverse.dvtp.BigInt. "
+             + Util.prettyPrintList( mVal ) + ")";
       }
 
    private final BigInteger mVal;

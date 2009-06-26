@@ -96,7 +96,7 @@ public class CTrans implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(DList "
+      return "(org.distroverse.dvtp.CTrans. "
              + Util.prettyPrintList( (Object[]) mContents ) + ")";
       }
 

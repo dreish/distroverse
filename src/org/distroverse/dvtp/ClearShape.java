@@ -70,7 +70,8 @@ public class ClearShape implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(ClearShape " + mId + ")";
+      return "(org.distroverse.dvtp.ClearShape. "
+             + mId + ")";
       }
 
    /* (non-Javadoc)

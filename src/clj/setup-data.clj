@@ -54,6 +54,7 @@
                         :parent ["VARCHAR(32)" :obj]
                         :shape ["MEDIUMTEXT" :obj]
                         :radius ["VARCHAR(32)" :obj]
+                        :depth ["VARCHAR(16)" :obj]
                         ; XXX
                         }
                  ; FIXME :checked-cols should be handled internally by
@@ -67,19 +68,18 @@
             {:k :small-universe-spec-1
              :v small-universe-spec}))
 
-(dm/dmsync
- (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
-            {:kk :small-universe-spec-1
-             :vv small-universe-spec}))
+;; (dm/dmsync
+;;  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
+;;             {:kk :small-universe-spec-1
+;;              :vv small-universe-spec}))
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/id-to-node"))
             {:nodeid 1
              :parent nil
+             :depth 0
              :echildren '(gen-echildren :small-universe-spec-1
                                         #=(eval (Math/exp 40.0))
-                                        0
-                                        1)
-             :radius #=(eval (Math/exp 40.0))
-             }))
+                                        0 0 1 1)
+             :radius #=(eval (Math/exp 40.0))}))
 

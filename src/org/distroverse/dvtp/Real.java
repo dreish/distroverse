@@ -107,7 +107,7 @@ public class Real implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(Real. " + mVal + "M)";
+      return "(org.distroverse.dvtp.Real. " + mVal + "M)";
       }
 
    /* (non-Javadoc)

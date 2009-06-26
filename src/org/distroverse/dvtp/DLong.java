@@ -165,7 +165,7 @@ public final class DLong implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(DLong " + mVal + ")";
+      return "(org.distroverse.dvtp.DLong. " + mVal + ")";
       }
 
    private final long mVal;

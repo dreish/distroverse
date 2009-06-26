@@ -226,7 +226,9 @@
 
 (def +zero-vec+ (Vector3f. 0 0 0))
 
-(def get-node *id-to-node*)
+(defn get-node
+  [id]
+  (*id-to-node* (normint id)))
 
 (def get-radius :radius)
 
@@ -266,7 +268,7 @@
 (defn children-of
   "Returns a lazy seq of the immediate children of the given node."
   [n]
-  (if (n :ephemeral)
+  (if (n :echildren)
     (gen-children n)
     (map get-node (n :children))))
 
@@ -560,12 +562,12 @@
     (doto (Quaternion.)
       (.fromAngleAxis theta vec))))
 
-(defn- new-gen-node [parent depth spec lspec subnode-index seed r moveseq]
+(defn- new-gen-node
   "Return a new ephemeral node for the given parameters."
+  [parent depth spec lspec subnode-index seed r moveseq]
   {:name (lspec :name)
    :generator (lspec :generator)
    :layer (lspec :layer)
-   :spec spec
    :radius r
    :seed seed
    :moveseq moveseq
@@ -576,7 +578,8 @@
    :depth depth
    :parent-ref parent
    :parent (parent :nodeid)             ; might be nil
-   ; XXX need the path from a concrete node here
+   :echildren `(gen-echildren spec-name )  ; XXX
+   ; XXX need the path from a concrete node here?
    })
 
 (defn new-top-gen-node
@@ -612,21 +615,23 @@
 (defvar- ntvars (dm/dmsync (dm/get-map (str ws-ns "node-tree/vars"))))
 
 (defn gen-echildren
-  [spec-dm-varname par-radius par-layer par-depth par-seed]
-  (let [spec (dm/dmsync (:val (ntvars spec-dm-varname)))
+  [spec-dm-varname par-radius par-layer par-depth par-seed
+   par-seed-mut-shift]
+  (let [spec (dm/dmsync (:v (ntvars spec-dm-varname)))
         fakeparent {:radius par-radius
                     :layer par-layer
                     :depth par-depth
-                    :seed par-seed}
-        generator (:generator (spec par-layer))]
-    (generator fakeparent spec par-layer)))
+                    :seed par-seed
+                    :seed-mutation-shift par-seed-mut-shift}
+        generator (resolve (:generator (spec par-layer)))]
+    (generator fakeparent spec par-layer spec-dm-varname)))
 
 (defn gen-fractalplace
   "Returns a sequence of 8 subnodes for the given parent node."
-  ([parent spec]
+  ([parent spec spec-name]
      (let [parent-layer (parent :layer)]
-       (gen-fractalplace parent spec parent-layer)))
-  ([parent spec parent-layer]
+       (gen-fractalplace parent spec parent-layer spec-name)))
+  ([parent spec parent-layer spec-name]
      (let [parent-rad   (parent :radius)
            layer-spec   (spec parent-layer)
            structure    (layer-spec :structure)
@@ -653,11 +658,11 @@
             (range 1 9)))))
 
 (defn gen-children
-  "Return a lazy seq of the children of the given ephemeral node."
-  [n & args]
-  (let [gen (n :generator)
-        spec (n :spec)]
-    (apply gen n spec args)))
+  "Return a lazy seq of the ephemeral children of the given node."
+  ([n]
+     (let [[fname & fargs] (n :echildren)]
+       (apply (resolve fname)
+              fargs))))
 
 (defn gen-starsystem
   ""

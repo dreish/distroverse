@@ -140,12 +140,12 @@ public final class DNode implements DvtpExternalizable
    public String prettyPrint()
       {
       if ( mGeneratedChildren )
-         return "(DNode. "
+         return "(org.distroverse.dvtp.DNode. "
                 + Util.prettyPrintList( mBeing, mRadius, mThis, mParent,
                                         mGenerator, mGeneratorArgs )
                 + ")";
 
-      return "(DNode. "
+      return "(org.distroverse.dvtp.DNode. "
              + Util.prettyPrintList( mBeing, mRadius, mThis, mParent,
                                      mChildren )
              + ")";

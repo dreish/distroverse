@@ -45,7 +45,10 @@ public final class SetFora implements EnvoySendable
       {  return 141;  }
 
    public String prettyPrint()
-      {  return "(SetFora " + mMS.prettyPrint() + ")";  }
+      {
+      return "(org.distroverse.dvtp.SetFora. "
+             + mMS.prettyPrint() + ")";
+      }
 
    @Override
    public boolean equals( Object o )

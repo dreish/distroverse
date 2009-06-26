@@ -37,6 +37,6 @@ public class KeyDown extends Keystroke
    @Override
    public String prettyPrint()
       {
-      return "(KeyDown " + getKey() + ")";
+      return "(org.distroverse.dvtp.KeyDown. " + getKey() + ")";
       }
    }

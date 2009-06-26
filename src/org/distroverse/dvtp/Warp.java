@@ -116,7 +116,7 @@ public class Warp implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(Warp "
+      return "(org.distroverse.dvtp.Warp. "
              + Util.prettyPrintList( mDegree, mPolyWarps, mSins,
                                 mSinWarps, mSinPeriods, mSinOffsets,
                                 mDuration )

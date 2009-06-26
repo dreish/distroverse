@@ -72,7 +72,7 @@ public final class RedirectUrl extends Str implements EnvoySendable
    @Override
    public String prettyPrint()
       {
-      return "(RedirectUrl "
+      return "(org.distroverse.dvtp.RedirectUrl. "
              + Util.prettyPrintList( getUrl() ) + ")";
       }
    }

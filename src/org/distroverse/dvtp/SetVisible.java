@@ -79,7 +79,8 @@ public class SetVisible implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(SetVisible " + mId + " " + mFlag + ")";
+      return "(org.distroverse.dvtp.SetVisible. "
+             + mId + " " + mFlag + ")";
       }
 
    /* (non-Javadoc)

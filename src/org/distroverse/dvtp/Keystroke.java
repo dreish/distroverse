@@ -66,7 +66,7 @@ public class Keystroke implements ClientSendable
 
    public String prettyPrint()
       {
-      return "(KeyStroke " + mKeyNum + ")";
+      return "(org.distroverse.dvtp.KeyStroke. " + mKeyNum + ")";
       }
 
    private final int mKeyNum;

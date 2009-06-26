@@ -60,6 +60,13 @@ public final class SetUrl extends Str implements ClientSendable
       }
 
    @Override
+   public String prettyPrint()
+      {
+      return "(org.distroverse.dvtp.SetUrl. "
+             + toString() + ")";
+      }
+
+   @Override
    public int hashCode()
       {
       return super.hashCode() ^ SetUrl.class.hashCode();

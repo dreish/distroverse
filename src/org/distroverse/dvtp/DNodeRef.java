@@ -125,7 +125,8 @@ public final class DNodeRef implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(DNodeRef " + mRemoteHost + " " + mId + " "
+      return "(org.distroverse.dvtp.DNodeRef. "
+             + mRemoteHost + " " + mId + " "
              + Util.prettyPrintList( mLastChangeTime, mDNode ) + ")";
       }
 

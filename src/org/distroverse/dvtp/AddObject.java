@@ -216,7 +216,7 @@ public final class AddObject implements EnvoySendable
 
    public String prettyPrint()
       {
-      return "(AddObject "
+      return "(org.distroverse.dvtp.AddObject. "
              + Util.prettyPrintList( mHasShape, mShape, mId, mParentId,
                                      mMoveSeq ) + ")";
       }

@@ -73,7 +73,7 @@ public class Cookie implements ClientSendable
     */
    public String prettyPrint()
       {
-      return "(" + getClass().getSimpleName() + " "
+      return "(" + getClass().getName() + ". "
              + (mExists ? Util.prettyPrintList( mKey, mExists, mValue )
                         : Util.prettyPrintList( mKey, mExists ))
              + ")";

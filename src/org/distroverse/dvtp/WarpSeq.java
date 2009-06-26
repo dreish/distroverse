@@ -83,7 +83,7 @@ public final class WarpSeq implements DvtpExternalizable
     */
    public String prettyPrint()
       {
-      return "(WarpSeq " + mWarps.length + " "
+      return "(org.distroverse.dvtp.WarpSeq. " + mWarps.length + " "
              + Util.prettyPrintList( mWarps, mRepeatType ) + ")";
       }
 

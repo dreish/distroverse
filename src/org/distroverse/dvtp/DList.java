@@ -87,7 +87,8 @@ public class DList implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(DList " + prettyPrintContents() + ")";
+      return "(org.distroverse.dvtp.DList. "
+             + prettyPrintContents() + ")";
       }
 
    private final DvtpExternalizable[] mContents;

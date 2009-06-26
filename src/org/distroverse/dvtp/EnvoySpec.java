@@ -101,7 +101,7 @@ public class EnvoySpec implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(EnvoySpec "
+      return "(org.distroverse.dvtp.EnvoySpec. "
              + Util.prettyPrintList( mEnvoyUrl, mResourceRegexp,
                                      mEnvoyName ) + ")";
       }

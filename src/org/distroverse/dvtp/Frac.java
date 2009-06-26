@@ -154,7 +154,8 @@ public final class Frac implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Frac " + mNumerator + " " + mDenominatorBits + ")";
+      return "(org.distroverse.dvtp.Frac. "
+             + mNumerator + " " + mDenominatorBits + ")";
       }
 
    private final long mNumerator;

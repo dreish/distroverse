@@ -80,7 +80,7 @@ public final class MoveObject implements EnvoySendable
 
    public String prettyPrint()
       {
-      return "(MoveObject "
+      return "(org.distroverse.dvtp.MoveObject. "
              + Util.prettyPrintList( mId, mMoveSeq ) + ")";
       }
 

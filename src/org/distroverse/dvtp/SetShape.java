@@ -84,7 +84,7 @@ public final class SetShape implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(SetShape " + mId + " "
+      return "(org.distroverse.dvtp.SetShape. " + mId + " "
              + Util.prettyPrintList( mShape, mWarpSeq ) + ")";
       }
 

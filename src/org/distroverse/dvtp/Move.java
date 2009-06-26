@@ -441,7 +441,7 @@ public class Move implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Move "
+      return "(org.distroverse.dvtp.Move. "
              + Util.prettyPrintList( mMoveDegree, mMovePolyVecs,
                    mMoveSins, mMoveSinVecs, mMoveSinPeriods,
                    mMoveSinOffsets, mRotDegree, mRotPolyQuats, mRotSins,

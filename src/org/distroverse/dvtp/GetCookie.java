@@ -64,7 +64,8 @@ public final class GetCookie implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(GetCookie " + Util.prettyPrintList( mKey ) + ")";
+      return "(org.distroverse.dvtp.GetCookie. "
+             + Util.prettyPrintList( mKey ) + ")";
       }
 
    @Override

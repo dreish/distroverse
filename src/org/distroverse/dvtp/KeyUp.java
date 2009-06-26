@@ -37,6 +37,6 @@ public class KeyUp extends Keystroke
    @Override
    public String prettyPrint()
       {
-      return "(KeyUp " + getKey() + ")";
+      return "(org.distroverse.dvtp.KeyUp. " + getKey() + ")";
       }
    }

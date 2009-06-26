@@ -46,6 +46,6 @@ public class Click2 extends Click
    public String prettyPrint()
       {
       // XXX don't do this
-      return super.prettyPrint().replaceFirst( " ", "2 " );
+      return super.prettyPrint().replaceFirst( "k", "k2" );
       }
    }

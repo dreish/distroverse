@@ -84,7 +84,7 @@ public class Click implements ClientSendable
 
    public String prettyPrint()
       {
-      return "(Click "
+      return "(org.distroverse.dvtp.Click. "
              + Util.prettyPrintList( mDirection, mForce ) + ")";
       }
 

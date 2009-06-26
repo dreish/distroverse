@@ -60,7 +60,7 @@ public final class DeleteObject implements EnvoySendable
 
    public String prettyPrint()
       {
-      return "(DeleteObject " + mId + ")";
+      return "(org.distroverse.dvtp.DeleteObject. " + mId + ")";
       }
 
    private final long mId;

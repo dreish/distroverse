@@ -78,7 +78,8 @@ public final class ReparentObject implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(ReparentObject " + mId + " " + mParentId + ")";
+      return "(org.distroverse.dvtp.ReparentObject. "
+             + mId + " " + mParentId + ")";
       }
 
    /* (non-Javadoc)

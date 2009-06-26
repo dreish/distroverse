@@ -159,7 +159,7 @@ public final class Shape implements DvtpExternalizable
    public String prettyPrint()
       {
       StringBuilder ret = new StringBuilder();
-      ret.append( "(Shape " );
+      ret.append( "(org.distroverse.dvtp.Shape. " );
       ret.append( Util.prettyPrintList( mPoints ) );
       ret.append( " '(" );
       for ( int i : mVertexCounts )

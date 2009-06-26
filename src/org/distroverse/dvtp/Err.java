@@ -84,7 +84,8 @@ public class Err implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Err " + Util.prettyPrintList( mMessage, mCode ) + ")";
+      return "(org.distroverse.dvtp.Err. "
+             + Util.prettyPrintList( mMessage, mCode ) + ")";
       }
 
    private final String mMessage;

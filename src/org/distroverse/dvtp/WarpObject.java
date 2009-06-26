@@ -80,7 +80,7 @@ public final class WarpObject implements EnvoySendable
     */
    public String prettyPrint()
       {
-      return "(WarpObject " + mId + " "
+      return "(org.distroverse.dvtp.WarpObject. " + mId + " "
              + Util.prettyPrintList( mWarpSeq ) + ")";
       }
 

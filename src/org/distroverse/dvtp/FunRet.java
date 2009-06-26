@@ -46,6 +46,7 @@ public class FunRet extends DList
    @Override
    public String prettyPrint()
       {
-      return "(FunRet " + prettyPrintContents() + ")";
+      return "(org.distroverse.dvtp.FunRet. "
+             + prettyPrintContents() + ")";
       }
    }

@@ -39,6 +39,11 @@ public final class Quat implements DvtpExternalizable
       mQuat = new Quaternion( q );
       }
 
+   public Quat( float x, float y, float z, float w )
+      {
+      mQuat = new Quaternion( x, y, z, w );
+      }
+
    public Quaternion asQuaternion()
       {  return new Quaternion( mQuat );  }
 
@@ -84,7 +89,8 @@ public final class Quat implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Quat " + mQuat + ")";
+      return "(org.distroverse.dvtp.Quat. " + mQuat.x + " " + mQuat.y
+             + " " + mQuat.z + " " + mQuat.w + ")";
       }
 
    private final Quaternion mQuat;

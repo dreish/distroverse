@@ -104,12 +104,13 @@ public final class PointArray implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(PointArray " + printFloatBuffer() + ")";
+      return "(org.distroverse.dvtp.PointArray. "
+             + printFloatBuffer() + ")";
       }
 
    private String printFloatBuffer()
       {
-      StringBuilder ret = new StringBuilder( "{" );
+      StringBuilder ret = new StringBuilder( "[" );
       float[] fa = new float[ mFb.limit() ];
       mFb.get( fa );
       mFb.rewind();
@@ -119,7 +120,7 @@ public final class PointArray implements DvtpExternalizable
          ret.append( ' ' );
          }
       ret.deleteCharAt( ret.length() - 1 );
-      ret.append( '}' );
+      ret.append( ']' );
       return ret.toString();
       }
 

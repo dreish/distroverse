@@ -55,6 +55,7 @@ public final class DisplayUrl extends Str implements EnvoySendable
    @Override
    public String prettyPrint()
       {
-      return "(DisplayUrl " + Util.prettyPrintList( getUrl() ) + ")";
+      return "(org.distroverse.dvtp.DisplayUrl. "
+             + Util.prettyPrintList( getUrl() ) + ")";
       }
    }

@@ -95,7 +95,7 @@ public class Str implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(Str "
+      return "(org.distroverse.dvtp.Str. "
              + Util.prettyPrintList( mVal ) + ")";
       }
 

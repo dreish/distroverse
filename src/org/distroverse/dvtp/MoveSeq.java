@@ -225,7 +225,7 @@ public final class MoveSeq implements DvtpExternalizable
 
    public String prettyPrint()
       {
-      return "(MoveSeq " + mMoves.length + " "
+      return "(org.distroverse.dvtp.MoveSeq. " + mMoves.length + " "
              + Util.prettyPrintList( mMoves, mRepeatType ) + ")";
       }
 

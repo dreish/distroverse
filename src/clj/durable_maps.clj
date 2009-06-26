@@ -246,7 +246,7 @@
      (let [dmap (write-query :dmap)
            row (write-query :row)
            keycol (-> dmap :spec :key)]
-       (when-not (exists? row keycol)
+       (when (and row (not (exists? row keycol)))
          (throw (Exception. (str "Attempted to add a row to the write"
                                  " queue with no key column")))))
      (commute *write-queue* conj write-query)))
