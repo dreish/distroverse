@@ -102,8 +102,9 @@
               > But this does raise questions about whether parent-ref
                 makes sense; maybe I should just ditch it until it
                 proves necessary
-            - Children need their own gen-echildren calls
+            + Children need their own gen-echildren calls
               in :echildren, unless a terminal node
+              > Tested; can make grandchildren of root node now!
             + Obviously DvtpExternalizable objects need a print-dup
               + Maybe the way to do this is in binary
                 + dvtp-to-bytearray
@@ -123,7 +124,7 @@
                 dot
               x Will need constructors that take any iterable
                 collection, not just arrays
-            - :obj use print-dup
+            - :obj should use print-dup
             - Should probably continue to make the spec just a label;
               in fact, it should only exist as an arg in :echildren
       - Recursively convert all descendant nodes to concrete

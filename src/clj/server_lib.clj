@@ -564,38 +564,42 @@
 
 (defn- new-gen-node
   "Return a new ephemeral node for the given parameters."
-  [parent depth spec lspec subnode-index seed r moveseq]
-  {:name (lspec :name)
-   :generator (lspec :generator)
-   :layer (lspec :layer)
-   :radius r
-   :seed seed
-   :moveseq moveseq
-   :ephemeral true
-   :seed-mutation-shift (-> (parent :seed-mutation-shift)
-                            (+ 4)
-                            (rem 59))
-   :depth depth
-   :parent-ref parent
-   :parent (parent :nodeid)             ; might be nil
-   :echildren `(gen-echildren spec-name )  ; XXX
-   ; XXX need the path from a concrete node here?
-   })
+  [parent depth spec lspec subnode-index seed r moveseq spec-name]
+  (let [seed-mut-shift (-> (parent :seed-mutation-shift)
+                           (+ 4)
+                           (rem 59))]
+    {:name (lspec :name)
+     :generator (lspec :generator)
+     :layer (lspec :layer)
+     :radius r
+     :seed seed
+     :moveseq moveseq
+     :ephemeral true
+     :seed-mutation-shift seed-mut-shift
+     :depth depth
+     :parent-ref parent
+     :parent (parent :nodeid)           ; might be nil
+     :echildren (list `gen-echildren spec-name r (lspec :layer)
+                      depth seed seed-mut-shift)
+     ;; XXX need the path from a concrete node here?
+     }))
 
 (defn new-top-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent depth spec lspec pos subnode-index]
+  [parent depth spec lspec pos subnode-index spec-name]
   (let [seed (subseed parent subnode-index)
         r    (pick-radius lspec (inc seed))]
     (new-gen-node parent depth spec lspec subnode-index seed r
-                  (pos-quat-to-moveseq pos (random-quat (+ seed 2))))))
+                  (pos-quat-to-moveseq pos (random-quat (+ seed 2)))
+                  spec-name)))
 
 (defn new-sub-gen-node
   "Returns a new highest-level node for a given layer spec."
-  [parent depth spec lspec pos subnode-index r]
+  [parent depth spec lspec pos subnode-index r spec-name]
   (let [seed (subseed parent subnode-index)]
     (new-gen-node parent depth spec lspec subnode-index seed r
-                  (pos-to-moveseq pos))))
+                  (pos-to-moveseq pos)
+                  spec-name)))
 
 (defn pseudorandom-pos
   "Generate a reproduceable pseudorandom location for a new subnode.
@@ -643,10 +647,10 @@
            (if next-layer?
              #(new-top-gen-node parent depth spec
                                 (spec (inc parent-layer))
-                                %1 %2)
+                                %1 %2 spec-name)
              #(new-sub-gen-node parent depth spec
                                 layer-spec
-                                %1 %2 my-radius))]
+                                %1 %2 my-radius spec-name))]
        (map subnode-gen
             (map pseudorandom-pos
                  (for [xo [-1 1] yo [-1 1] zo [-1 1]]
