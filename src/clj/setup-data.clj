@@ -57,10 +57,10 @@
                         :depth ["VARCHAR(16)" :obj]
                         ; XXX
                         }
-                 ; FIXME :checked-cols should be handled internally by
-                 ; dm (any :seq col needs this check/fix thing), but
-                 ; it's easier to put it here for now
-                 ; :checked-cols `[[:echildren dm/seq-check dm/seq-fix]]
+                 ;; FIXME :checked-cols should be handled internally
+                 ;; by dm (any :seq col needs this check/fix thing),
+                 ;; but it's easier to put it here for now
+                 ;; :checked-cols `[[:echildren dm/seq-check dm/seq-fix]]
                  :key :nodeid})
 
 (dm/dmsync
@@ -80,6 +80,21 @@
              :depth 0
              :echildren '(gen-echildren :small-universe-spec-1
                                         #=(eval (Math/exp 40.0))
-                                        0 0 1 1)
+                                        0 0 1 1 1)
              :radius #=(eval (Math/exp 40.0))}))
 
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
+            {:k :next-nodeid
+             :v 1}))
+
+
+;; Convert all descendents of the given nodeid to concrete:
+
+(defn concretize-descendents
+  ([nodeid]
+     (dm/dmsync
+      (if (:echildren (selock-node nodeid))
+        (concretize-children nodeid)))
+     (doseq [c (:children (dm/dmsync (get-node nodeid)))]
+       (concretize-descendents c))))

@@ -87,9 +87,9 @@
           > Attempting to insert a map with no :k (still had :key)
           + Don't allow bad queries to be added to the queue; die
             earlier
-      - Convert immediate children to concrete
-        - (concretize-children 1)
-          - (children-of (get-node 1))
+      + Convert immediate children to concrete
+        + (concretize-children 1)
+          + (children-of (get-node 1))
             x Needs :ephemeral property
             + This shouldn't check the node's :ephemeral property,
               it should look for either :children or :echildren
@@ -98,7 +98,7 @@
                 + Add to gen-echildren call in root node
                 + Add to gen-echildren parameters
                 + Add to constructed fake-parent
-            - :parent is nil; could be given in this case
+            x :parent is nil; could be given in this case
               > But this does raise questions about whether parent-ref
                 makes sense; maybe I should just ditch it until it
                 proves necessary
@@ -124,10 +124,37 @@
                 dot
               x Will need constructors that take any iterable
                 collection, not just arrays
-            - :obj should use print-dup
-            - Should probably continue to make the spec just a label;
+            + :obj should use print-dup
+            + Should probably continue to make the spec just a label;
               in fact, it should only exist as an arg in :echildren
+          + Fix arity mismatch calling gen-simple-starsystem
+          + If node has :echildren, create each one and add it as a
+            new node, and replace the :echildren column with :children
+            + Top-level echildren should have parent nodeid
+              + gen-echildren takes a nodeid
+              + generators use (parent :nodeid)
+            + add-node
       - Recursively convert all descendant nodes to concrete
+        - Once again, insertion of a row that causes the writer thread
+          to throw an exception proves to be a nasty problem; in this
+          case, a row had a radius that would not fit because it was a
+          float, so its print-dup was long
+          - Not-really-addressing-the-root-problem solution: make
+            all :obj columns at least TEXT
+          - Also tangential: have an :int column that encodes as a
+            string, but doesn't use print-dup; use that for :nodeid
+          - Preferable: come up with some way to prevent this from
+            destroying the whole system
+            - Maybe do this: shut down the server, write out the
+              failed write and any subsequent writes to a log
+            - Or this: keep the server running, dump writes to a file
+              with print-dup, and recover manually
+              - Before going too far with this, it might be a good
+                time to switch to agents
+              - Make a note for later: any rows with failed writes
+                will need to be protected from being expunged from the
+                write cache (when I finally get around to implementing
+                that)
     - Make a star system just a single polyhedron
       - How do I send a polyhedron?  Or any node for that matter?
         > First pass at an envoy will just respond to DNode (from

@@ -598,7 +598,7 @@
   []
   (do
     (io!)
-    (dosync (alter @*shutting-down* (fn [_] (tm))))
+    (dosync (alter @*shutting-down* (constantly (tm))))
     (flush-writes-before! (tm))
     (assert (not @*write-queue*))))
 

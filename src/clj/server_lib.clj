@@ -227,16 +227,28 @@
 (def +zero-vec+ (Vector3f. 0 0 0))
 
 (defn get-node
-  [id]
-  (*id-to-node* (normint id)))
+  "Get the node with the given node id."
+  ([id]
+     (*id-to-node* (normint id))))
+
+(defn selock-node
+  "Get the node with the given node id, ensuring that it does not
+  change throughout the current transaction."
+  ([id]
+     (dm/selock *id-to-node* (normint id))))
+
+(defn add-node
+  "Add the given node to the node tree."
+  ([n]
+     (dm/insert *id-to-node* n)))
 
 (def get-radius :radius)
 
 (def get-move :move)
 
 (defn vec-abs
-  [#^Vector3f v]
-  (.length v))
+  ([#^Vector3f v]
+     (.length v)))
 
 (defn get-xform
   [n t]
@@ -419,8 +431,7 @@
 (defn pick-nodeid
   "Return a new, unused node id."
   []
-  (:val
-   (dm/update *node-tree-vars* :next-nodeid inc-in :val)))
+  (:v (dm/update *node-tree-vars* :next-nodeid inc-in :v)))
 
 (defn replace-subnode-with-new
   "Replace whatever was in the subnode at index idx of parent node p
@@ -438,11 +449,28 @@
 (defn convert-to-concrete
   "Takes an ephemeral node and returns a structure that can be used as
   a concrete node (without adding it to the node tree)."
-  [e]
-  (assoc e
-    :nodeid (pick-nodeid)
-    :ephemeral false
-    :children (vec (gen-children e))))
+  ([e]
+     (assoc e
+       :nodeid (pick-nodeid)
+       :ephemeral false)))
+
+(defn concretize-children
+  "Replaces the :echildren column of the given node id with
+  :children."
+  ([nodeid]
+     (let [n (selock-node nodeid)
+           _ (when-not (n :echildren)
+               (throw (Exception. (str "Node " nodeid " does not have"
+                                       " ephemeral children"))))
+           ech (children-of n)
+           cch (map convert-to-concrete ech)
+           new-children (map :nodeid cch)]
+       (doall (map add-node cch))
+       (dm/update *id-to-node*
+                  nodeid
+                  assoc
+                  :echildren nil
+                  :children (vec new-children)))))
 
 ;; (defn make-concrete
 ;;   "Takes an ephemeral node and makes it concrete.  Returns the new
@@ -580,7 +608,7 @@
      :parent-ref parent
      :parent (parent :nodeid)           ; might be nil
      :echildren (list `gen-echildren spec-name r (lspec :layer)
-                      depth seed seed-mut-shift)
+                      depth seed seed-mut-shift nil)
      ;; XXX need the path from a concrete node here?
      }))
 
@@ -620,13 +648,14 @@
 
 (defn gen-echildren
   [spec-dm-varname par-radius par-layer par-depth par-seed
-   par-seed-mut-shift]
+   par-seed-mut-shift par-id]
   (let [spec (dm/dmsync (:v (ntvars spec-dm-varname)))
         fakeparent {:radius par-radius
                     :layer par-layer
                     :depth par-depth
                     :seed par-seed
-                    :seed-mutation-shift par-seed-mut-shift}
+                    :seed-mutation-shift par-seed-mut-shift
+                    :nodeid par-id}
         generator (resolve (:generator (spec par-layer)))]
     (generator fakeparent spec par-layer spec-dm-varname)))
 
@@ -675,12 +704,13 @@
 
 (defn gen-simple-starsystem
   "Returns a sequence of subnodes making up the given star system."
-  ([parent spec]
+  ([parent spec parent-layer spec-name]
      (list
-      {:radius 10.0
+      {:name "star"
+       :radius 7e9
        :moveseq (pos-to-moveseq [0 0 0])
        :ephemeral true
-       :shape (sphere :rows 4)
+       :shape (sphere :rows 4 :radius 7e9)
        :depth (inc (parent :depth))
        :parent-ref parent
        :parent (parent :nodeid)

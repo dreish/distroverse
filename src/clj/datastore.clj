@@ -103,7 +103,8 @@
 
 (defmethod translate-type-out :obj
   [o type]
-  (pr-str o))
+  (binding [*print-dup* true]
+    (pr-str o)))
 
 (defmethod translate-type-in :keyword
   [s type]
