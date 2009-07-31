@@ -35,6 +35,8 @@
   (:use [server-lib])
   (:use [clojure.contrib.def]))
 
+; (require :reload-all 'server-lib)
+
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
 ; Harmless to run this if it has already been run:
@@ -44,17 +46,20 @@
 
 (dm/create-map! (str ws-ns "node-tree/vars")
                 {:cols {:k ["VARCHAR(32)" :keyword]
-                        :v ["MEDIUMTEXT" :obj]}
+                        :v ["MEDIUMTEXT"  :obj]}
                  :key :k})
 
+;; (dm/drop-map! (str ws-ns "node-tree/id-to-node")  :nodeid)
+
 (dm/create-map! (str ws-ns "node-tree/id-to-node")
-                {:cols {:nodeid ["VARCHAR(32)" :obj]
-                        :children ["MEDIUMTEXT" :obj]
-                        :echildren ["MEDIUMTEXT" :obj]
-                        :parent ["VARCHAR(32)" :obj]
-                        :shape ["MEDIUMTEXT" :obj]
-                        :radius ["VARCHAR(32)" :obj]
-                        :depth ["VARCHAR(16)" :obj]
+                {:cols {:nodeid    ["VARCHAR(255)" :num]
+                        :children  ["MEDIUMTEXT"   :obj]
+                        :echildren ["MEDIUMTEXT"   :obj]
+                        :parent    ["VARCHAR(255)" :num]
+                        :shape     ["MEDIUMTEXT"   :obj]
+                        :moveseq   ["MEDIUMTEXT"   :obj]
+                        :radius    ["VARCHAR(255)" :num]
+                        :depth     ["VARCHAR(255)" :num]
                         ; XXX
                         }
                  ;; FIXME :checked-cols should be handled internally
@@ -67,11 +72,6 @@
  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
             {:k :small-universe-spec-1
              :v small-universe-spec}))
-
-;; (dm/dmsync
-;;  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
-;;             {:kk :small-universe-spec-1
-;;              :vv small-universe-spec}))
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/id-to-node"))
@@ -98,3 +98,17 @@
         (concretize-children nodeid)))
      (doseq [c (:children (dm/dmsync (get-node nodeid)))]
        (concretize-descendents c))))
+
+(time (concretize-descendents 1))
+
+(concretize-descendents 148)
+
+(concretize-descendents 156)
+
+(concretize-descendents 157)
+
+(dm/dmsync
+ (concretize-descendents 158)
+ (concretize-descendents 159))
+
+(dm/dmsync (get-node 1))

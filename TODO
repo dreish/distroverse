@@ -7,7 +7,7 @@
     with the client
     + Replace universe def with something very limited
       + defvar small-universe-spec
-    - Instantiate simple universe and convert all nodes to concrete
+    + Instantiate simple universe and convert all nodes to concrete
       + Create node tree dm
         + echildren: optional generator function
           + Takes spec ID (look up in node-tree/vars), parent radius,
@@ -134,39 +134,93 @@
               + gen-echildren takes a nodeid
               + generators use (parent :nodeid)
             + add-node
-      - Recursively convert all descendant nodes to concrete
-        - Once again, insertion of a row that causes the writer thread
+      + Recursively convert all descendant nodes to concrete
+        + Once again, insertion of a row that causes the writer thread
           to throw an exception proves to be a nasty problem; in this
           case, a row had a radius that would not fit because it was a
           float, so its print-dup was long
-          - Not-really-addressing-the-root-problem solution: make
-            all :obj columns at least TEXT
-          - Also tangential: have an :int column that encodes as a
-            string, but doesn't use print-dup; use that for :nodeid
-          - Preferable: come up with some way to prevent this from
-            destroying the whole system
-            - Maybe do this: shut down the server, write out the
+          + Come up with some way to prevent this from destroying the
+            whole system
+            + Maybe do this: shut down the server, write out the
               failed write and any subsequent writes to a log
-            - Or this: keep the server running, dump writes to a file
+            x Or this: keep the server running, dump writes to a file
               with print-dup, and recover manually
-              - Before going too far with this, it might be a good
+              + Before going too far with this, it might be a good
                 time to switch to agents
-              - Make a note for later: any rows with failed writes
+              x Make a note for later: any rows with failed writes
                 will need to be protected from being expunged from the
                 write cache (when I finally get around to implementing
                 that)
-    - Make a star system just a single polyhedron
-      - How do I send a polyhedron?  Or any node for that matter?
-        > First pass at an envoy will just respond to DNode (from
-          server) by sending client an AddObject
-        + Add DNode handling in envoy
+          + Retry the thing that crashed it previously; confirm that
+            it writes a log and stops the process
+            > Does appear to shut down
+            + Does not include write that caused exception
+            + Writes out numerous aborted-writes-logs with empty
+              queues and appears to keep accepting writes
+              + If things worked correctly, there couldn't possibly
+                have been more than one log
+                > Of course: there were queued agent-write! calls sent
+                  to the agent after it failed; the write queue by
+                  chance didn't have any other writes queued when the
+                  failed one was encountered; the failed write never
+                  got cleared from the queue
+                + The agent itself should have a significant value
+              > Still exhibits the same symptoms
+              + Try breaking it in a more controlled fashion
+                + Reset node table again
+                + Make concretize-children not recursive
+                + Call it once for each depth
+                  > Failure happens on attempting to add a
+                    gen-simple-starsystem node
+                + Reload; don't reset
+                + Add two star systems in one transaction
+                + Add an atomic *aborting* and only write when
+                  atomically setting that flag
+                + Try the full descent test again
+                  > Looks much better this time, and only writes one
+                    log
+          + Not-really-addressing-the-root-problem solution: make
+            all :obj columns at least TEXT or VARCHAR(255)
+          + Try again
+            > It works, but isn't as fast as I'd hoped (13.508 seconds
+              to concretize all 1097 nodes)
+          + Find out if shutting off query-printing makes it faster
+            > Much better: 2.623 seconds
+          + Also tangential: have a :num column that encodes as a
+            string, but doesn't use print-dup; use that
+            for :nodeid, :parent, :radius, and :depth
+          x Try splitting it into eight threads
+    + Make a star system just a single polyhedron
+    + How do I send a polyhedron?  Or any node for that matter?
+      > First pass at an envoy will just respond to DNode (from
+        server) by sending client an AddObject
+      + Add DNode handling in envoy
     - Get it to show up in the client
-      - On connect, call dump-universe
-        - Traverse entire universe (from hardcoded root node #1)
-        - Convert each node to a DNode and send it to the client
-    - Add a trivial avatar to the world
-    - Add avatar movement
+      + On connect, call dump-universe
+      + Receive "dump-universe" funcall on the server
+        + Traverse entire universe (from hardcoded root node #1)
+          + (node-tree-seq nodeid)
+            x Maybe consider taking a node instead of a nodeid, for a
+              cleaner implementation
+            + This seems like it won't work; traversing the node tree
+              is transactional, and a lazy seq can't be guaranteed to
+              exist within one transaction
+              + Since this is just a rough first draft anyway, just
+                realize all nodes in one transaction and add that
+                realized seq to the write queue
+        + Convert each node to a DNode and send it to the client
+          + Finish node-encode
+          + node-to-addobject
+          + noderef-encode
+          + Converting node 1 results in a DNode object with nil for
+            the AddObject, which causes a null pointer exception on
+            externalize; it should be allowed
+      - Receive DNode on envoy; display nodes in client
+  - Add a trivial avatar to the world
+  - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str
+    (instead of inserting it into the database and dying on attempting
+    to read it back out)
   - Hopefully-emerging node design:
     - Need a depth attribute
       - Property stored in concrete nodes
@@ -1116,12 +1170,18 @@
 
 ------------------------------------------------------------------------
 - Future:
-  - Add callback handling in writer thread
-    - If write has a :callback, call it with true if query performed,
-      false if canceled
-      - send for :callback, send-off for :callback-off
-  - Try replacing the writer thread with an agent; send clean-queue
-    function after every outer transaction
+  - Enhancements for dm
+    - Do input validation; each column should have a validation
+      function either throwing an exception or returning a data
+      structure to be added to the write message
+    - Add a :row type that encodes and decodes to the entire row (with
+      other columns possible as well)
+      - Decoder functions take an input row, return result of adding
+        the decoded column to that row
+    - Add callback handling in writer thread/agent
+      - If write has a :callback, call it with true if query performed,
+        false if canceled
+        - send for :callback, send-off for :callback-off
   - Make dm-insert and bk-insert, etc., multimethods
   - Server for mass-audience events:
     - Performance recorded on a short delay in an arena with no audience
@@ -1168,19 +1228,7 @@
       all received at the other end
   - For paranoid security, suspend all untrusted threads while
     performing public-key computations
-  - Switch to a better language targeting the JVM, once something mature
-    emerges
-    > Probably Rhino
-    > Also hyped are Scala, and ... okay, nothing is as hyped as Scala,
-      but maybe that's just because they all got together and ambushed
-      the comments on
-      http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
-    > Maybe Jython or JRuby
-    > Maybe the architecture is:
-      > Java or fully Java-callable libraries
-      > Other projects in other languages, at a higher level
-    > Looks like I'm going with Clojure
-  - Envoy: short-range chat:
+ - Envoy: short-range chat:
     - Nearest N people (six or seven -- what a person can normally keep
       track of in conversation) appear along the bottom and scroll up,
       horizontally aligned with the person speaking (arrows for people
@@ -1362,3 +1410,17 @@
       > This is unfortunate, but
       > They couldn't be bound to the .dvapp if that were itself a
         document type handled by the DV client
+  + Try replacing the writer thread with an agent; send clean-queue
+    function after every outer transaction
+  + Switch to a better language targeting the JVM, once something mature
+    emerges
+    > Probably Rhino
+    > Also hyped are Scala, and ... okay, nothing is as hyped as Scala,
+      but maybe that's just because they all got together and ambushed
+      the comments on
+      http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
+    > Maybe Jython or JRuby
+    > Maybe the architecture is:
+      > Java or fully Java-callable libraries
+      > Other projects in other languages, at a higher level
+    > Looks like I'm going with Clojure

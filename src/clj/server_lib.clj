@@ -48,7 +48,8 @@
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
 (declare parent-of
-         gen-children)
+         gen-children
+         get-node)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -89,6 +90,7 @@
    (.add (.getNetOutQueue session)
          message)))
 
+; XXX This is really dumb.  Why not a function?
 (defmacro async-call! [session [assign-var message] & code]
   "Send message in session, asynchronously bind the result to
   assign-var, and call code.  Side effects: calls add-callback! with
@@ -130,7 +132,7 @@
      (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
                             (Quat. q)))))
 
-(defn node-to-addobject
+(defn #^AddObject node-to-addobject
   "Turns a node hash into an AddObject message."
   [nh]
   (if (nh :shape)
@@ -138,14 +140,21 @@
                 #^Shape (nh :shape)
                 (ULong. (nh :id))
                 (ULong. (nh :parentid))
-                (nh :moveseq)  ; MoveSeq?
-                (nh :warpseq)))
+                #^MoveSeq (nh :moveseq)
+                #^WarpSeq (nh :warpseq)))
   ; XXX
   )
 
 (defn noderef-encode
   "Turns a node hash into a DNodeRef object."
   [nh]
+  (when nh
+    (org.distroverse.dvtp.DNodeRef.
+       "0"
+       (nh :nodeid)
+       (org.distroverse.dvtp.Real. 0.0 0) ; XXX need last-write
+                                          ; timestamp
+       nil))
   ; XXX
   ; XXX how to noderef to an ephem node? (this)  Will I need to change
   ; the definition of DNodeRef?
@@ -158,8 +167,9 @@
           (nh :radius)
           (noderef-encode nh)
           (noderef-encode (parent-of nh))
-          (into-array (map noderef-encode ))
-          (nh :depth))) ; children
+          (into-array (map (comp noderef-encode get-node)
+                           (nh :children)))
+          (nh :depth)))
 
 (defmulti dvtp-convert
   "Convert a string or number into a Str, ULong, or Flo, pass through
@@ -428,6 +438,14 @@
                         (constantly true))]
     (smallest-node candidate-seq)))
 
+(defn node-tree-seq
+  "Return a NON-LAZY seq of all the descendants of the node with the
+  given ID."
+  ([nodeid]
+     (cons nodeid
+           (mapcat (comp node-tree-seq :nodeid)
+                   (children-of (get-node nodeid))))))
+
 (defn pick-nodeid
   "Return a new, unused node id."
   []
@@ -471,22 +489,6 @@
                   assoc
                   :echildren nil
                   :children (vec new-children)))))
-
-;; (defn make-concrete
-;;   "Takes an ephemeral node and makes it concrete.  Returns the new
-;;   concrete node."
-;;   [node]
-;;   (let [idx (get-index-in-parent node)
-;;         p (if (ephem? (parent-of node))
-;;             (make-concrete (parent-of node))
-;;             (parent-of node))
-;;         new-node (convert-to-concrete node)]
-;;     (dm/insert *id-to-node* new-node)
-;;     (replace-subnode-with-new p
-;;                               idx
-;;                               new-node
-;;                               (get-move node))
-;;     new-node))
 
 (defn make-concrete
   [node]

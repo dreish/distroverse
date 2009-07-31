@@ -29,7 +29,11 @@ public final class DNode implements DvtpExternalizable
    throws IOException, ClassNotFoundException
       {
       super();
-      mBeing = new AddObject( in, false );
+      boolean has_being = Bool.externalAsBoolean( in );
+      if ( has_being )
+         mBeing = new AddObject( in, false );
+      else
+         mBeing = null;
       mRadius = Flo.externalAsFloat( in );
       mThis = new DNodeRef( in );
       boolean has_parent = Bool.externalAsBoolean( in );
@@ -192,7 +196,13 @@ public final class DNode implements DvtpExternalizable
     */
    public void writeExternal( OutputStream out ) throws IOException
       {
-      mBeing.writeWithoutId( out );
+      if ( mBeing == null )
+         Bool.booleanAsExternal( out, false );   // has_being
+      else
+         {
+         Bool.booleanAsExternal( out, true );    // has_being
+         mBeing.writeWithoutId( out );
+         }
       Flo.floatAsExternal( out, mRadius );
       mThis.writeExternal( out );
       if ( mParent == null )

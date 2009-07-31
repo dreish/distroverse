@@ -32,6 +32,7 @@
 (ns durable-maps
   (:require [datastore :as ds])
   (:use clojure.contrib.def
+        clojure.contrib.duck-streams
         util
         sql))
 
@@ -61,7 +62,9 @@
 
 (defvar- *tables* (atom {}))
 (defvar- *write-queue* (ref (queue)))
+(defvar- *writer* (agent true))
 (defvar- *shutting-down* (ref nil))
+(defvar- *aborting* (atom nil))
 (defvar- *ds-open-args* (ref nil))
 (defvar- *db* (ref nil))
 (defvar- *schema-change-mutex* (Object.))
@@ -73,7 +76,8 @@
          database-select
          local-select
          select
-         flush-writes-before!)
+         flush-writes-before!
+         agent-write!)
 
 (defn assoc-new [m mkey value]
   "Given a Clojure map, a key, and a value, add the key-value mapping
@@ -167,14 +171,19 @@
                                 database-select
                                 (memoize database-select))
               *transaction-level* (inc *transaction-level*)]
-      (let [trans-time (swap-in-time *transaction-times*)]
-        (try
-         (dosync
-          (if (ensure *shutting-down*)
-            (throw (IllegalStateException.
-                    "Transaction attempted while shutting down.")))
-          (f))
-         (finally (swap! *transaction-times* disj trans-time)))))))
+      (let [trans-time (swap-in-time *transaction-times*)
+            ret (try
+                 (dosync
+                  (if (ensure *shutting-down*)
+                    (throw (IllegalStateException.
+                            #=(str "Transaction attempted"
+                                   " while shutting down."))))
+                  (f))
+                 (finally (swap! *transaction-times*
+                                 disj trans-time)))]
+        (when (= 1 *transaction-level*)
+          (send *writer* agent-write!))
+        ret))))
 
 (defmacro dmsync
   "Runs the exprs (in an implicit do) in a transaction that
@@ -559,7 +568,16 @@
    (loop []
      (if-let [next-write (get-next-write-before t)]
        (do
-         (data-write! next-write)
+         (try
+          (data-write! next-write)
+          (catch Exception e
+            (throw (Exception.
+                    (str "Database write failed: "
+                         (pr-dup
+                          (pr-str (assoc next-write
+                                    :dmap-name (-> next-write :dmap :name)
+                                    :dmap nil))))
+                    e))))
          (recur))))))
 
 
@@ -577,19 +595,46 @@
                                 current-time)]
       (flush-writes-before! oldest-trans-time))))
 
-;; TODO - for increased joy, get rid of the polling thread
-(defvar- writer-thread
-  (Thread.
-     #(loop []
-        (flush-ready-writes!)
-        (Thread/sleep 2000)
-        (when-not @*shutting-down*
-          (recur)))
-     "writer-thread")
-  "Thread that wakes every two seconds and polls for writes old enough
-  that they are no longer entangled in any ongoing transactions,
-  writing them to disk and removing them from the write queue.  Thread
-  exits when *shutting-down* is true.")
+;; TODO - for increased joy, get rid of the polling thread ...
+;; (defvar- writer-thread
+;;   (Thread.
+;;      #(loop []
+;;         (flush-ready-writes!)
+;;         (Thread/sleep 2000)
+;;         (when-not @*shutting-down*
+;;           (recur)))
+;;      "writer-thread")
+;;   "Thread that wakes every two seconds and polls for writes old enough
+;;   that they are no longer entangled in any ongoing transactions,
+;;   writing them to disk and removing them from the write queue.  Thread
+;;   exits when *shutting-down* is true.")
+
+(defn abort!
+  "Shuts down the database connection immediately, dumping all pending
+  writes to a log file."
+  ([]
+     (abort! "<no message given>"))
+  ([msg]
+     (io!)
+     (dosync (ref-set *shutting-down* (tm)))
+     (when (compare-and-set! *aborting* nil true)
+       (pr-dup
+        (write-lines (writer (str "aborted-writes-log-" (tm) "-" (pid)))
+                     (list* msg
+                            (apply str (take 71 (cycle [\- \^])))
+                            (map pr-str @*write-queue*)))))))
+
+;; ... and replace it with this:
+(defn- agent-write!
+  ([writer]
+     (and writer
+          (not @*shutting-down*)
+          (not @*aborting*)
+          (try (flush-ready-writes!)
+               true
+               (catch Exception e
+                 (abort! (stack-trace-as-str e))
+                 false)))))
 
 (defn shutdown!
   "Flushes all pending writes and shuts down the database connection.
@@ -598,12 +643,13 @@
   []
   (do
     (io!)
-    (dosync (alter @*shutting-down* (constantly (tm))))
+    (dosync (ref-set *shutting-down* (tm)))
     (flush-writes-before! (tm))
-    (assert (not @*write-queue*))))
+    (assert (not (seq @*write-queue*)))))
 
 (defn startup!
-  "Starts the database, if it hasn't already been started."
+  "Starts the database, if it hasn't already been started.  Can be
+  used to restart after an abort or shutdown."
   ([& ds-args]
      (let [new-conn (apply ds/open! ds-args)]
        (try
@@ -614,9 +660,11 @@
                                    " arguments than previously")))
            (if (= nil (ensure *db*))
              (do (ref-set *db* new-conn)
-                 (when-not (.isAlive writer-thread)
-                   (.start writer-thread))
+                 ;;(when-not (.isAlive writer-thread)
+                 ;;  (.start writer-thread))
                  (ref-set *ds-open-args* ds-args)
+                 (ref-set *shutting-down* nil)
+                 (reset! *aborting* nil)
                  nil)
              (ds/close! new-conn))))
         (catch Exception e

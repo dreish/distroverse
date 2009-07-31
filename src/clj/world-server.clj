@@ -213,12 +213,34 @@
            true)
           false))))
 
-(defn handle-standard!
+(defmulti dvtp-dispatch-val
+  "Return the dispatch value for the given DVTP message object.  For
+  many classes, this is just the class of the message object.  For
+  others, it is a combination of the class and some subset of the
+  value."
+  class)
+
+(defmethod dvtp-dispatch-val :default
+  [o]
+  (class o))
+
+(defmethod dvtp-dispatch-val org.distroverse.dvtp.FunCall
+  [#^org.distroverse.dvtp.FunCall o]
+  [org.distroverse.dvtp.FunCall
+   (str (.getContents o 0))])
+
+(defmulti handle-standard!
   "Handle the given message using a standard, fixed code map, and
-  return true."
+  return true.  Arguments: session, att, message-ob"
+  (fn [session att ob]
+    (dvtp-dispatch-val ob)))
+
+(defmethod handle-standard! [org.distroverse.dvtp.FunCall
+                             "dump-universe"]
   [session att ob]
-  ; XXX something with multimethods?
-  )
+  (dvtp-send! session
+              (dm/dmsync (doall (map node-encode
+                                     (node-tree-seq 1))))))
 
 (defn handle-object!
   "Handle an object received from an envoy.  TODO log unhandled messages?"

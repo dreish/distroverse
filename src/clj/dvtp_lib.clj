@@ -39,7 +39,7 @@
 (import '(com.jme.math Quaternion Vector3f))
 (import '(org.distroverse.dvtp DvtpExternalizable Quat Vec Move MoveSeq
                                AskInv ReplyInv GetCookie Cookie FunCall
-                               FunRet DvtpObject))
+                               FunRet DvtpObject Real))
 (import '(org.distroverse.core.net NetSession DvtpChannel))
 (import '(java.io ByteArrayInputStream ByteArrayOutputStream))
 
@@ -220,3 +220,11 @@
 (prefer-method print-method
                org.distroverse.dvtp.DvtpExternalizable
                java.lang.Object)
+
+
+(defn now
+  "Return the current time as a Real, the format that is used by DVTP,
+  e.g., as the argument to MoveSeq.transformAt()."
+  []
+  (Real. (BigDecimal. (BigInteger/valueOf (System/currentTimeMillis))
+                      3)))

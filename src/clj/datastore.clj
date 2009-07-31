@@ -98,13 +98,20 @@
 
 (defmethod translate-type-in :obj
   [s type]
-  ; FIXME - would prefer to use a non-evaluating read here
   (read-string (str s)))
 
 (defmethod translate-type-out :obj
   [o type]
   (binding [*print-dup* true]
     (pr-str o)))
+
+(defmethod translate-type-in :num
+  [s type]
+  (read-string (str s)))
+
+(defmethod translate-type-out :num
+  [o type]
+  (pr-str o))
 
 (defmethod translate-type-in :keyword
   [s type]

@@ -33,8 +33,8 @@
   (:use clojure.contrib.def
         util))
 
-(defvar- debug-prn prn)
-;(defn- debug-prn [& args] nil)
+;(def sql-debug-prn prn)
+(defn sql-debug-prn [& args] nil)
 
 (defn get-sql-conn
   "Returns a new SQL connection object of unspecified type; only
@@ -120,7 +120,7 @@
      (get-query conn q []))
 
   ([conn q pvals]
-     (debug-prn (symbol "Getting query:") q (symbol "::") pvals)
+     (sql-debug-prn (symbol "Getting query:") q (symbol "::") pvals)
      (in-sql-retry-loop
         conn
         #(with-open [s (fill-placeholders (@conn :conn) q pvals)]
@@ -139,7 +139,7 @@
      (run-stmt! conn q []))
 
   ([conn q pvals]
-     (debug-prn (symbol "Running query:") q (symbol "::") pvals)
+     (sql-debug-prn (symbol "Running query:") q (symbol "::") pvals)
      (in-sql-retry-loop
         conn
         #(with-open [s (fill-placeholders (@conn :conn) q pvals)]

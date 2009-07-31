@@ -76,8 +76,7 @@ public class WorldEnvoy extends SingleServerEnvoyBase
    @Override
    protected void initWorld() throws IOException
       {
-      // TODO Auto-generated method stub
-
+      sendToServer( new FunCall( new Str( "dump-universe" ) ) );
       }
 
    /* (non-Javadoc)

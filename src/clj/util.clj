@@ -32,8 +32,6 @@
 (ns util
   (:use clojure.contrib.def))
 
-(import '(org.distroverse.dvtp Real))
-
 (defn queue
   "Creates a new queue containing the args."
   ([]
@@ -91,6 +89,12 @@
        (list form x)))
   ([x form & more]
      `(+> (+> ~x ~form) ~@more)))
+
+(defmacro ->>
+  "Rotate the first argument two forward to become the third argument.
+  Useful with -> and various functions that operate on seqs."
+  ([a b c & more]
+     (list* b c a more)))
 
 (defn min-by
   "Return the least member of the sequence s by comparing the results
@@ -151,16 +155,28 @@
   []
   (System/currentTimeMillis))
 
-(defn now
-  "Return the current time as a Real, the format that is used by DVTP,
-  e.g., as the argument to MoveSeq.transformAt()."
-  []
-  (Real. (BigDecimal. (BigInteger/valueOf (System/currentTimeMillis))
-                      3)))
-
 (defn normint
   "Normalize an integer to the exact class and value that would be
   returned by the reader on reading that integer."
   ([n]
      (read-string (print-str (+ n 0)))))
 
+(let [pidval (delay (.. java.lang.management.ManagementFactory
+                        getRuntimeMXBean
+                        getName))]
+  (defn pid
+    "Return the the Sun JVM RuntimeMXBean Name for this process."
+    []
+    @pidval))
+
+(defmacro pr-dup
+  "Set *print-dup* to true and evaluate the given forms."
+  [& forms]
+  `(binding [*print-dup* true]
+     ~@forms))
+
+(defn stack-trace-as-str
+  "Returns the stack trace for the given exception, as a str"
+  [#^Throwable e]
+  (with-out-str
+   (.printStackTrace e (java.io.PrintWriter. *out*))))
