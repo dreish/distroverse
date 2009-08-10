@@ -29,19 +29,35 @@
 
 ;; </copyleft>
 
-(use 'server-lib)
-(use 'clojure.contrib.def)
-(use 'durable-maps)
-(use 'bigkey-dm)
-(use 'def-universe)
-(use 'node-tree)
-(import-dtvp)
+(ns world-server
+  (:require [durable-maps :as dm]
+            [bigkey-dm    :as bk])
+  (:use [server-lib]
+        [clojure.contrib.def]
+        [def-universe]
+        [node-tree]
+        [dvtp-lib]))
+;; (use 'server-lib)
+;; (use 'clojure.contrib.def)
+;; (use 'durable-maps)
+;; (use 'bigkey-dm)
+;; (use 'def-universe)
+;; (use 'node-tree)
+(import-dvtp)
 
-(defvar *key-to-id* (bk-get-map "key-to-id")
+(dm/startup! :sql "dm" "dm" "nZe3a5dL")
+
+(bk/startup!)
+
+(dm/init!)
+
+(bk/init!)
+
+(defvar *key-to-id* (dm/dmsync (bk/get-map (str ws-ns "key-to-id")))
   "Map of public keys to userid numbers")
-(defvar *userdata* (dm-get-map "userdata")
+(defvar *userdata* (dm/get-map (str ws-ns "userdata"))
   "Map of userid numbers to other account data")
-(defvar *avatars* (dm-get-map "avatars")
+(defvar *avatars* (dm/get-map (str ws-ns "avatars"))
   "Set of node IDs for all in-world avatars (those having non-nil
   parents)")
 (defvar *sessions* (ref #{})
@@ -97,14 +113,14 @@
   (let [userid (att :userid)
         pos (att :lastpos)
         avatar-nid
-          (dm-dosync
+          (dm/dmsync
            (let [avatar-nid             ; FIXME This seems clumsy.
                    (reparent (get-node (pos :node))
                              (pos :move)
                              (or (att :avatarnode)
                                  (new-object (att :avatarshape))))]
              (commute *sessions* conj session)
-             (dm-insert *avatars* {:nodeid avatar-nid})
+             (dm/insert *avatars* {:nodeid avatar-nid})
              (alter att assoc
                     :avatar (get-node avatar-nid)
                     :avatar-nid avatar-nid)
@@ -122,7 +138,7 @@
   connections.  NB: The listener does not exist yet."
   []
   ;; FIXME Doesn't actually need ! yet, but I'm assuming it will
-  (dm-dosync
+  (dm/dmsync
    (deparent-all-avatars)))
 
 (defn shutdown!
@@ -131,7 +147,7 @@
   [t]
   (disable-server-listener)
   (disconnect-users)
-  (dm-shutdown!))
+  (dm/shutdown!))
 
 (defn new-user-from-skel
   "Return a copy of the skeleton user account, with the given ID"
@@ -144,13 +160,13 @@
 (defn setup-new-user
   "Sets up a new user."
   [session att id]
-  (dm-dosync
+  (dm/dmsync
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-         (dm-insert *key-to-id* {:key (id :pubkey),
+         (dm/insert *key-to-id* {:key (id :pubkey),
                                  :id new-userid})
-         (dm-insert *userdata* (new-user-from-skel id new-userid))
+         (dm/insert *userdata* (new-user-from-skel id new-userid))
          (alter att assoc :userid new-userid))))))
 
 (defn get-id

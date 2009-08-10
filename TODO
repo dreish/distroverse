@@ -215,7 +215,15 @@
           + Converting node 1 results in a DNode object with nil for
             the AddObject, which causes a null pointer exception on
             externalize; it should be allowed
-      - Receive DNode on envoy; display nodes in client
+      + Receive DNode on envoy; display nodes in client
+      - Get the server running
+        - (org.distroverse.distroplane.WorldServer/main nil)
+          + Does not compile; create-map! added to wrong namespace?
+            + dm and bk now clash; use (ns) thing from setup-data
+          + Need to create key-to-id bk map
+            + Use ws-ns?
+          + Create userdata and avatars (regular maps)
+      - Get the client running
   - Add a trivial avatar to the world
   - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str

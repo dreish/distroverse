@@ -39,7 +39,10 @@
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
 
-; Harmless to run this if it has already been run:
+; This always needs to be run:
+(bk/startup!)
+
+; Harmless to run these if they have already been run:
 (dm/init!)
 
 (bk/init!)
@@ -67,6 +70,24 @@
                  ;; but it's easier to put it here for now
                  ;; :checked-cols `[[:echildren dm/seq-check dm/seq-fix]]
                  :key :nodeid})
+
+(bk/create-map! (str ws-ns "key-to-id")
+                {:abstract-keycol :k
+                 :key-munger `(bk/md5-munger 12)
+                 :key-type ["VARCHAR(12)" :str]
+                 :val-type ["LONGTEXT" :obj]})
+
+(dm/create-map! (str ws-ns "userdata")
+                {:cols {:id      ["VARCHAR(255)" :num]
+                        :k       ["MEDIUMTEXT"   :obj]
+                        :nodeid  ["VARCHAR(255)" :num]
+                        :extra   ["MEDIUMTEXT"   :obj]
+                        }
+                 :key :id})
+
+(dm/create-map! (str ws-ns "avatars")
+                {:cols {:id ["VARCHAR(255)" :num]}
+                 :key :id})
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))

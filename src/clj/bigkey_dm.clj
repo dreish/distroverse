@@ -145,16 +145,30 @@
   "Creates a new big-key table.  This cannot be done inside a
   transaction.  Returns nil."
   [name spec]
-  (do
-    (io!)
-    (let [tname (name-transform name)
-          dm-spec {:cols {:hashed_key (spec :key-type)
-                          :val_hash (spec :val-type)}
-                   :key :hashed_key}]
-      (dm/dmsync
-       (dm/insert @*maps* {:exname name
-                             :spec spec}))
-      (dm/create-map! tname dm-spec))))
+  (io!
+   (let [tname (name-transform name)
+         dm-spec {:cols {:hashed_key (spec :key-type)
+                         :val_hash (spec :val-type)}
+                  :key :hashed_key}]
+     (dm/dmsync
+      (dm/insert @*maps* {:exname name
+                          :spec spec}))
+     (dm/create-map! tname dm-spec))))
+
+(defn drop-map!
+  "Deletes a big-key table.  This cannot be done inside a transaction.
+  Requires the key column name as a safety measure.  Returns nil."
+  [name k]
+  (io!
+   (let [bkm (dm/dmsync (@*maps* name))]
+     (when-not (-> bkm :spec :abstract-keycol (= k))
+       (throw (Exception. (str "Key " k " is not correct for table "
+                               name)))))
+   (let [tname (name-transform name)]
+     (dm/drop-map! tname :hashed_key)
+     (dm/dmsync
+      (dm/delete @*maps* name)))
+   nil))
 
 (defn delete
   "Deletes an entry from the map."

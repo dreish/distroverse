@@ -174,7 +174,6 @@ public class WorldEnvoy extends SingleServerEnvoyBase
 
    private void displayNode( DNode dn )
       {
-      // TODO Auto-generated method stub
       ULong client_id_for_node
          = serverIdToClient( dn.getThisRef().getId(),
                              dn.getThisRef().getRemoteHost() );

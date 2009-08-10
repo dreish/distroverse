@@ -61,11 +61,12 @@
       (response-code message)
       (throw (Exception. (str "No response to " (class message)))))))
 
+;;; XXX this is dumb; don't do it this way
 (defvar message-set
   #{'AddObject. 'AskInv.        'Blob.  'ClearShape.    'Click.
     'Click2.    'Cookie.        'DLong. 'DNode. 'DNodeRef.
     'Dict.      'Frac.  'GetCookie.     'Real.  'ReparentObject.
-    'ReplyInv.  'SetShape.      'SetVisible.    'ULong. 'ConPerm.
+    'ReplyInv.  'SetShape.      'SetVisible.    'ULong.
     'DList.     'DeleteObject.  'DisplayUrl.    'DvtpExternalizable.
     'DvtpObject.        'Err.   'False. 'Flo.   'FunCall.
     'FunRet.    'KeyDown.       'KeyUp. 'Keystroke.     'MoreDetail.
