@@ -210,6 +210,6 @@
   (fn [s]
     (let [md (java.security.MessageDigest/getInstance "MD5")
           dig (.digest md (.getBytes s))]
-      (apply str (take width (hex-encode-bytes (seq dig)))))))
+      (strcat (take width (hex-encode-bytes (seq dig)))))))
 
 

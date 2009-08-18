@@ -32,11 +32,10 @@
 (ns world-server
   (:require [durable-maps :as dm]
             [bigkey-dm    :as bk])
-  (:use [server-lib]
-        [clojure.contrib.def]
-        [def-universe]
-        [node-tree]
-        [dvtp-lib]))
+  (:use [clojure.contrib.def]
+        [server-lib]
+        [dvtp-lib]
+        [util]))
 ;; (use 'server-lib)
 ;; (use 'clojure.contrib.def)
 ;; (use 'durable-maps)

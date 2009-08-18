@@ -256,8 +256,8 @@
         cols (filter #(not= keycol %)
                      (keys (spec :cols)))
         keyval (row keycol)
-        col-sets-str (apply str (interpose ", " (map #(str % " = ?")
-                                                     (map name cols))))
+        col-sets-str (strcat (interpose ", " (map #(str % " = ?")
+                                                  (map name cols))))
         num-cols (count cols)
         query-str (str "UPDATE " table " SET " col-sets-str
                        " WHERE " (name keycol) " = ?")]
@@ -292,10 +292,10 @@
         spec (dmap :spec)
         cols (keys (spec :cols))
         keycol (spec :key)
-        cols-str (apply str (interpose ", " (map name cols)))
+        cols-str (strcat (interpose ", " (map name cols)))
         num-cols (count cols)
-        val-?s (apply str (interpose ", " (take num-cols
-                                                (repeat "?"))))
+        val-?s (strcat (interpose ", " (take num-cols
+                                             (repeat "?"))))
         query-str (str "INSERT INTO " table
                        " (" cols-str ") VALUES (" val-?s ")")]
     {:dmap dmap
@@ -341,7 +341,7 @@
         clause-seq  (if keycol
                       (concat name-type-clauses (list key-clause))
                       name-type-clauses)]
-    (apply str (interpose ", " clause-seq))))
+    (strcat (interpose ", " clause-seq))))
 
 (defn- create-table!
   "Create a table, given a name and a :spec map.  An optional third
@@ -355,7 +355,7 @@
      (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
            cols (column-format spec)]
        (run-stmt! db
-                  (apply str cmd " " name " (" cols ")")))))
+                  (strcat cmd " " name " (" cols ")")))))
 
 (defmethod newtable! :sql
   ([ds tablename tablespec]
@@ -382,7 +382,7 @@
 
 (defmethod munge :sql
   [ds name]
-  (apply str (take 16 (re-seq #"[a-zA-Z]" name))))
+  (strcat (take 16 (re-seq #"[a-zA-Z]" name))))
 
 (defmethod munge :dcookies
   [ds name]

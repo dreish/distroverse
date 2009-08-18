@@ -621,7 +621,7 @@
        (pr-dup
         (write-lines (writer (str "aborted-writes-log-" (tm) "-" (pid)))
                      (list* msg
-                            (apply str (take 71 (cycle [\- \^])))
+                            (strcat (take 71 (cycle [\- \^])))
                             (map pr-str @*write-queue*)))))))
 
 ;; ... and replace it with this:

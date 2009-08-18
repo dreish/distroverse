@@ -81,7 +81,7 @@
 (defmacro import-dvtp
   "Import all DVTP classes that might be used by the server."
   []
-  (let [classes (map #(+> % name seq drop-last (apply str _) symbol)
+  (let [classes (map #(+> % name seq drop-last strcat symbol)
                      message-set)]
     `(import '(org.distroverse.dvtp ~@classes))))
 
@@ -112,11 +112,10 @@
   [msg #^DvtpChannel chan]
   (.send chan msg))
 
-(defn add-callback
+(defn-XXX add-callback
   "XXX TODO"
   []
-  ; XXX
-  (throw (Exception. "implement add-callback")))
+  )
 
 (defn functional-sync-call
   "Send the given inquiry message along the given channel,
@@ -150,8 +149,8 @@
                           (map #(bit-and (bit-shift-right intval %)
                                          63)
                                (iterate #(+ % 6) 0)))]
-         (apply str (map #(aget b64encode %)
-                         idxseq)))))
+         (strcat (map #(aget b64encode %)
+                      idxseq)))))
   (defn- dec-4chars
     ([chs]
        (let [idxseq (map b64decode chs)
@@ -169,7 +168,7 @@
        (let [bas (concat (seq ba)
                          [(byte 1) (byte 0) (byte 0)])
              basg (partition 3 bas)]
-         (apply str (map enc-3bytes basg)))))
+         (strcat (map enc-3bytes basg)))))
   (defn u64bin
     "Decode a base-64 string into a binary byte array."
     ([s]

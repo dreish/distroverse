@@ -68,7 +68,7 @@
             bytes)))
 
 (defn inc-in
-  "Return the given hash with the given field incremented."
+  "Returns the given hash with the given field incremented."
   [h field]
   (assoc h
     field (inc (h field))))
@@ -91,13 +91,13 @@
      `(+> (+> ~x ~form) ~@more)))
 
 (defmacro ->>
-  "Rotate the first argument two forward to become the third argument.
+  "Rotates the first argument two forward to become the third argument.
   Useful with -> and various functions that operate on seqs."
   ([a b c & more]
      (list* b c a more)))
 
 (defn min-by
-  "Return the least member of the sequence s by comparing the results
+  "Returns the least member of the sequence s by comparing the results
   of applying f to the members of s.  Best for cheap functions; f will
   be called twice on each element in s."
   [f s]
@@ -115,7 +115,7 @@
 
 (let [o (Object.)]
   (defn exists?
-    "Does the given key exist in the given hash?"
+    "Returns true if the given key exists in the given hash."
     ([k h]
        (not= o (h k o)))))
 
@@ -126,7 +126,7 @@
   (take-while seq (iterate rest coll)))
 
 (defn do-or
-  "(or) as a function, evaluating all its arguments, but returning the
+  "(or) as a function; evaluates all its arguments, but returns the
   first true one just as (or) does."
   [& args]
   (reduce #(or %1 %2) args))
@@ -138,25 +138,28 @@
 (defn apply-lambda
   "Returns a function of no arguments that, when called, will return
   the result of applying the function named by (first s) to (rest s).
-  E.g., ((apply-lambda '(+ 1 2))) => 3."
+  E.g., ((apply-lambda `(+ 1 2))) => 3.  Useful mainly for runtime
+  function application without the overhead of compilation."
   [s]
-  (fn [] (apply (resolve (first s))
-                (rest s))))
+  (let [f (-> s first resolve deref)
+        args (rest s)]
+    (fn []
+      (.applyTo #^clojure.lang.IFn f args))))
 
 (defn firstarg
-  "Return the first of any arbitrary number of arguments."
+  "Returns the first of any arbitrary number of arguments."
   [x & _]
   x)
 
 (defn tm
-  "Return a time value such that each call to (tm) returns a number
+  "Returns a time value such that each call to (tm) returns a number
   greater than or equal to all numbers previously returned.  The units
   of the time value are not specified."
   []
   (System/currentTimeMillis))
 
 (defn normint
-  "Normalize an integer to the exact class and value that would be
+  "Normalizes an integer to the exact class and value that would be
   returned by the reader on reading that integer."
   ([n]
      (read-string (print-str (+ n 0)))))
@@ -165,18 +168,32 @@
                         getRuntimeMXBean
                         getName))]
   (defn pid
-    "Return the the Sun JVM RuntimeMXBean Name for this process."
+    "Returns the the Sun JVM RuntimeMXBean Name for this process."
     []
     @pidval))
 
 (defmacro pr-dup
-  "Set *print-dup* to true and evaluate the given forms."
+  "Sets *print-dup* to true and evaluate the given forms."
   [& forms]
   `(binding [*print-dup* true]
      ~@forms))
 
 (defn stack-trace-as-str
-  "Returns the stack trace for the given exception, as a str"
+  "Returns the stack trace for the given exception, as a str."
   [#^Throwable e]
   (with-out-str
    (.printStackTrace e (java.io.PrintWriter. *out*))))
+
+(defn strcat
+  "String-concatenates the given sequence."
+  [s]
+  (apply str s))
+
+(defmacro defn-XXX
+  "Defines a function that just throws an exception.  Used for
+  stubbing unimplemented functions."
+  [fnname & ignored]
+  `(defn ~fnname
+     [& ~'args]
+     (throw (Exception. ~(str fnname " is unimplemented.")))))
+

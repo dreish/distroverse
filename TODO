@@ -223,6 +223,11 @@
           + Need to create key-to-id bk map
             + Use ws-ns?
           + Create userdata and avatars (regular maps)
+          - new-object: takes a shape, returns a node ID (no parent)
+          - Implement reparent
+            - Set depth to (inc parent-depth)
+            - Concretize parent's children if necessary
+            - Add to parent's children
       - Get the client running
   - Add a trivial avatar to the world
   - Add avatar movement

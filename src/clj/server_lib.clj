@@ -132,7 +132,7 @@
      (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
                             (Quat. q)))))
 
-(defn #^AddObject node-to-addobject
+(defn-XXX #^AddObject node-to-addobject
   "Turns a node hash into an AddObject message."
   [nh]
   (if (nh :shape)
@@ -145,7 +145,7 @@
   ; XXX
   )
 
-(defn noderef-encode
+(defn-XXX noderef-encode
   "Turns a node hash into a DNodeRef object."
   [nh]
   (when nh
@@ -234,23 +234,42 @@
 (defvar- *node-tree-vars* (dm/get-map (str ws-ns "node-tree/vars"))
   "Durable variables.")
 
+(defn pick-nodeid
+  "Return a new, unused node id.  Requires a dmsync transaction."
+  []
+  (:v (dm/update *node-tree-vars* :next-nodeid inc-in :v)))
+
 (def +zero-vec+ (Vector3f. 0 0 0))
 
 (defn get-node
-  "Get the node with the given node id."
+  "Get the node with the given node id.  Requires a dmsync
+  transaction."
   ([id]
      (*id-to-node* (normint id))))
 
 (defn selock-node
   "Get the node with the given node id, ensuring that it does not
-  change throughout the current transaction."
+  change throughout the current transaction.  Requires a dmsync
+  transaction."
   ([id]
      (dm/selock *id-to-node* (normint id))))
 
 (defn add-node
-  "Add the given node to the node tree."
+  "Add the given node to the node tree.  Requires a dmsync transaction."
   ([n]
      (dm/insert *id-to-node* n)))
+
+(defn new-object
+  "Create a new node with the given shape and add it to the node tree,
+  with no parent, returning its new node id.  Requires a dmsync
+  transaction."
+  ([sh]
+     (let [nid (pick-nodeid)]
+       (add-node {:nodeid nid
+                  :shape sh
+                  :depth 0
+                  :radius (.getRadius sh)})
+       nid)))
 
 (def get-radius :radius)
 
@@ -274,14 +293,14 @@
 
 (def node-depth :depth)
 
-(defn node-pos
-  "Return the position of the given node at time (time)"
+(defn-XXX node-pos
+  "Returns the position of the given node at time (time)."
   [n]
-  ;; XXX
   )
 
 (defn parent-of
-  "Returns the parent node of the given node"
+  "Returns the parent node of the given node.  Requires a dmsync
+  transaction."
   [n]
   (or (if (n :parent)
         (get-node (n :parent)))
@@ -295,14 +314,16 @@
     (map get-node (n :children))))
 
 (defn root-of
-  "Returns the root node of the given node."
+  "Returns the root node of the given node.  Requires a dmsync
+  transaction."
   [n]
   (if-let [p (parent-of n)]
     (recur p)
     n))
 
 (defn parent-chain
-  "Returns a seq of the ancestors for the given node."
+  "Returns a seq of the ancestors for the given node.  Requires a
+  dmsync transaction."
   [n]
   (lazy-seq
     (if-let [p (parent-of n)]
@@ -446,11 +467,6 @@
            (mapcat (comp node-tree-seq :nodeid)
                    (children-of (get-node nodeid))))))
 
-(defn pick-nodeid
-  "Return a new, unused node id."
-  []
-  (:v (dm/update *node-tree-vars* :next-nodeid inc-in :v)))
-
 (defn replace-subnode-with-new
   "Replace whatever was in the subnode at index idx of parent node p
   with the given new-node, which should already be in the node tree."
@@ -490,33 +506,32 @@
                   :echildren nil
                   :children (vec new-children)))))
 
-(defn make-concrete
+(defn-XXX make-concrete
   [node]
-  ;; XXX
   )
 
-(defn add-subnode
+(defn-XXX add-subnode
   "Add node c as a child of node p, with move m.  Returns the new node
   ID."
   [p m c]
   (let [p (if (ephem? p)
             (make-concrete p)
             p)]
-    ;; XXX
-  ))
+    
+    ))
 
-(defn add-object
+(defn-XXX add-object
   "Add shape as a child of node, with move move.  Returns the new node
   ID."
   [node move shape]
-  ;; XXX
+  
   )
 
-(defn reparent
+(defn-XXX reparent
   "Make the node with the given ID a child of the given new-parent,
   with move move.  Returns the given node id."
   [new-parent move node]
-  ;; XXX
+  
   )
 
 (defn rel-vector
@@ -699,9 +714,9 @@
        (apply (resolve fname)
               fargs))))
 
-(defn gen-starsystem
+(defn-XXX gen-starsystem
   ""
-  ;; XXX
+
   )
 
 (defn gen-simple-starsystem
@@ -722,9 +737,8 @@
   "Throws an exception if the structure constants would violate the
   rule that all subnodes of a parent node must fit within the parent
   node."
-  [s name]
-  (let [[size offset randfactor] s
-        totaloffset (+ offset (/ randfactor 2))
+  [[size offset randfactor :as s] name]
+  (let [totaloffset (+ offset (/ randfactor 2))
         maxdistance (+ (Math/sqrt (* totaloffset totaloffset 3))
                        size)]
     (if (> maxdistance 1.0)
