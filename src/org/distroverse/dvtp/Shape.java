@@ -148,6 +148,11 @@ public final class Shape implements DvtpExternalizable
       return ret;
       }
 
+   public float getRadius()
+      {
+      return mPoints.getRadius();
+      }
+
    public void writeExternal( OutputStream out ) throws IOException
       {
       mPoints.writeExternal( out );

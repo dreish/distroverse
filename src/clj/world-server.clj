@@ -36,12 +36,6 @@
         [server-lib]
         [dvtp-lib]
         [util]))
-;; (use 'server-lib)
-;; (use 'clojure.contrib.def)
-;; (use 'durable-maps)
-;; (use 'bigkey-dm)
-;; (use 'def-universe)
-;; (use 'node-tree)
 (import-dvtp)
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")

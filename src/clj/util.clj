@@ -32,6 +32,8 @@
 (ns util
   (:use clojure.contrib.def))
 
+(import '(org.distroverse.core Log))
+
 (defn queue
   "Creates a new queue containing the args."
   ([]
@@ -162,7 +164,11 @@
   "Normalizes an integer to the exact class and value that would be
   returned by the reader on reading that integer."
   ([n]
-     (read-string (print-str (+ n 0)))))
+     (let [ret (read-string (print-str (+ n 0)))]
+       (when-not (.equals n ret)
+         (Log/p (str "normint saw a non-normalized integer: " n)
+                Log/SERVER -80))
+       ret)))
 
 (let [pidval (delay (.. java.lang.management.ManagementFactory
                         getRuntimeMXBean

@@ -174,11 +174,12 @@ public class WorldServer extends DvtpServer
       try
          {
          RT.loadResourceScript( "world-server.clj" );
-         mInitConnectionBang = RT.var( "user", "init-connection!" );
-         mHandleObjectBang   = RT.var( "user", "handle-object!" );
-         mHandleGet          = RT.var( "user", "handle-get" );
-         mHandleLocation     = RT.var( "user", "handle-location" );
-         startup_bang        = RT.var( "user", "startup!" );
+         final String ws_ns = "world-server";
+         mInitConnectionBang = RT.var( ws_ns, "init-connection!" );
+         mHandleObjectBang   = RT.var( ws_ns, "handle-object!" );
+         mHandleGet          = RT.var( ws_ns, "handle-get" );
+         mHandleLocation     = RT.var( ws_ns, "handle-location" );
+         startup_bang        = RT.var( ws_ns, "startup!" );
          }
       catch ( Exception e )
          {

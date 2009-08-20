@@ -223,12 +223,13 @@
           + Need to create key-to-id bk map
             + Use ws-ns?
           + Create userdata and avatars (regular maps)
-          - new-object: takes a shape, returns a node ID (no parent)
+          + new-object: takes a shape, returns a node ID (no parent)
+            + Needs Shape.getRadius()
           - Implement reparent
             - Set depth to (inc parent-depth)
             - Concretize parent's children if necessary
             - Add to parent's children
-      - Get the client running
+     - Get the client running
   - Add a trivial avatar to the world
   - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str
@@ -1239,9 +1240,14 @@
       2, 10, 100, maximum that will fit in memory
     - Test that a sequence of objects inserted into a NetOutQueue are
       all received at the other end
+  - Teaching mode: function that takes a current application context
+    and a set of skill mastery levels and returns a hint for a
+    relevant skill that has not yet been demonstrated.
+    > E.g., right-clicking on objects to get a menu, entering URLs,
+      saving bookmarks, using bookmarks, etc.
   - For paranoid security, suspend all untrusted threads while
     performing public-key computations
- - Envoy: short-range chat:
+  - Envoy: short-range chat:
     - Nearest N people (six or seven -- what a person can normally keep
       track of in conversation) appear along the bottom and scroll up,
       horizontally aligned with the person speaking (arrows for people

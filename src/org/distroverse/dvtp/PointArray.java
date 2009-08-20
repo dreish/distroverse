@@ -73,6 +73,27 @@ public final class PointArray implements DvtpExternalizable
    public int getClassNumber()
       {  return 4;  }
 
+   public float getRadius()
+      {
+      float[] fa = new float[ mFb.limit() ];
+      synchronized ( mFb )
+         {
+         mFb.get( fa );
+         mFb.rewind();
+         }
+      float max_radius = 0;
+      for ( int i = 0; i < fa.length; i += 3 )
+         {
+         // TODO simple optimization available here: 
+         float radius = new Vector3f( fa[ i ], fa[ i + 1 ],
+                                      fa[ i + 2 ] ).length();
+         if ( radius > max_radius )
+            max_radius = radius;
+         }
+      
+      return max_radius;
+      }
+
    @Override
    public boolean equals( Object o )
       {
@@ -112,8 +133,11 @@ public final class PointArray implements DvtpExternalizable
       {
       StringBuilder ret = new StringBuilder( "[" );
       float[] fa = new float[ mFb.limit() ];
-      mFb.get( fa );
-      mFb.rewind();
+      synchronized ( mFb )
+         {
+         mFb.get( fa );
+         mFb.rewind();
+         }
       for ( float f : fa )
          {
          ret.append( f );

@@ -257,7 +257,9 @@
 (defn add-node
   "Add the given node to the node tree.  Requires a dmsync transaction."
   ([n]
-     (dm/insert *id-to-node* n)))
+     (dm/insert *id-to-node*
+                (assoc n :nodeid
+                       (normint (n :nodeid))))))
 
 (defn new-object
   "Create a new node with the given shape and add it to the node tree,
