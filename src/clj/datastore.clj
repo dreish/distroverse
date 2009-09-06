@@ -349,13 +349,12 @@
   CREATE TABLE IF NEW."
   ([db name spec]
      (create-table! name spec false))
-
   ([db name spec if-new]
      (io!)
      (let [cmd (if if-new "CREATE TABLE IF NOT EXISTS" "CREATE TABLE")
            cols (column-format spec)]
        (run-stmt! db
-                  (strcat cmd " " name " (" cols ")")))))
+                  (str cmd " " name " (" cols ")")))))
 
 (defmethod newtable! :sql
   ([ds tablename tablespec]
@@ -444,6 +443,30 @@
      )
   ([ds table keyval]
      ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; get-pkey-seq
+
+(defmulti get-pkey-seq
+  "Returns a seq of the values of the given column in all rows of the
+  given table."
+  on-datastore)
+
+(defmethod get-pkey-seq :sql
+  ([ds table col]
+     (let [tablename (table :table)
+           db (ds :db)
+           colkeyword (keyword col)
+           coltype (+> table :spec :cols colkeyword (_ 1))
+           query-str (str "SELECT " col " FROM " tablename)
+           key-seq (get-query-seq db query-str)]
+       (map #(translate-type-in (first %)
+                                coltype)
+            (key-seq :rows)))))
+
+(defmethod get-pkey-seq :dcookies
+  ;; This might require support in DVTP
+  ([& args]
+     (throw (Exception. "get-pkey-seq not implemented for :dcookies"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; drop!
 

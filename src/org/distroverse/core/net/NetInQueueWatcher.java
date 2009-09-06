@@ -52,6 +52,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
       {
       super();
       mWatchedQueues = new LinkedList< NetInQueue< T > >();
+      mShuttingDown  = false;
       }
    
    /* (non-Javadoc)
@@ -62,7 +63,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
       {
       try
          {
-         while ( true )
+         while ( ! mShuttingDown )
             {
             clearAllQueues();
             sleepUntilInterrupted();
@@ -78,6 +79,19 @@ public abstract class NetInQueueWatcher< T > extends Thread
          Log.p( e, Log.NET, 60 );
          }
       }
+   
+   /**
+    * Shuts down the watcher thread, and returns whether the thread was
+    * already shutting down.
+    * @return
+    */
+   public boolean shutdown()
+      {
+      boolean ret = mShuttingDown;
+      mShuttingDown = true;
+      return ret;
+      }
+
 
 
    private void clearAllQueues() throws IOException
@@ -140,4 +154,5 @@ public abstract class NetInQueueWatcher< T > extends Thread
       }
 
    private LinkedList< NetInQueue< T > > mWatchedQueues;
+   private boolean                       mShuttingDown;
    }

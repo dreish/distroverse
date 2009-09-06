@@ -364,7 +364,6 @@
                            dmap
                            (name (spec :key))
                            key-value)
-;        row-map (mapify-row row spec)
         row-map-ref (ref row-map)
         reads (dmap :read)]
     (when (pos? (count row-map))
@@ -432,6 +431,30 @@
                            :required true
                            :keyval keyval})
       dmap-c)))
+
+; pkeys - return a seq of primary keys for the given map
+
+(defn pkeys
+  "Returns a seq of primary keys for all rows in the given map.
+  In much the same way as a function that uses line-seq might, pkeys
+  allocates a resource that will not be freed until the entire seq is
+  consumed.  BE SURE TO CONSUME THE ENTIRE SEQUENCE WITHIN A SINGLE
+  TRANSACTION."
+  [dmap-c]
+  (do
+    (require-dmtrans)
+    (let [dmap (dmap-c)
+          keyname (-> dmap :spec :key name)]
+      ;; Should probably try to do something to ensure that the whole
+      ;; sequence is used within a single transaction, but how?
+      (concat (filter #(-> dmap :write deref (get %) deref nil? not)
+                      (keys @(dmap :write)))
+              (filter #(and (-> dmap :write deref (get %) not)
+                            (-> dmap :read deref (get %) deref nil? not))
+                      (keys @(dmap :read)))
+              (filter #(and (-> dmap :write deref (get %) not)
+                            (-> dmap :read deref (get %) not))
+                      (ds/get-pkey-seq @*db* dmap keyname))))))
 
 (defn create-map!
   "Create a new table.  This cannot be done inside a transaction.

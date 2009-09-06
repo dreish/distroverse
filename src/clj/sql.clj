@@ -73,11 +73,17 @@
   "Return a sequence of results.  CAUTION: probably not safe to lazily
   evaluate this after closing an rs.  DANGER: ResultSet is mutable, so
   assume this function owns rs forever after it is passed to it."
-  [rs n-cols]
-  (lazy-seq
-    (if (.next rs)
-      (cons (rs-row rs n-cols)
-            (rs-seq rs n-cols)))))
+  ([rs n-cols]
+     (lazy-seq
+      (if (.next rs)
+        (cons (rs-row rs n-cols)
+              (rs-seq rs n-cols)))))
+  ([rs n-cols to-close]
+     (lazy-seq
+      (close-on-error to-close
+         (if (.next rs)
+           (cons (rs-row rs n-cols)
+                 (rs-seq rs n-cols to-close)))))))
 
 (defn rs-vec
   "Return a vector of results."
@@ -111,14 +117,37 @@
           (throw result)))
       (first result))))
 
+(defn get-query-seq
+  "Run a query producing results, and no side effects, and return the
+  results a hash in which :rows is a seq of row vectors, and :colnames
+  is a vector of column names.  The optional third argument provides
+  values to substitute for placeholders."
+  ([conn q]
+     (get-query-seq conn q []))
+  ([conn q pvals]
+     (sql-debug-prn (symbol "Getting query:") q (symbol "::") pvals)
+     (in-sql-retry-loop
+        conn
+        #(let [s (fill-placeholders (@conn :conn) q pvals)]
+           (close-on-error s
+              (let [rs (.executeQuery s)
+                    colnames (column-names rs)
+                    num-cols (num-columns rs)
+                    rss (concat (rs-seq rs num-cols s)
+                                (lazy-seq
+                                 (do (.close s)
+                                     nil)))]
+                {:colnames colnames
+                 :rows rss}))))))
+
+
 (defn get-query
-  "Run a query with results, and return the results as a hash in
-  which :rows is a vector of row vectors, and :colnames is a vector of
-  column names.  The optional third argument provides values to
-  substitute for placeholders."
+  "Run a query with results, and no side effects, and return the
+  results as a hash in which :rows is a vector of row vectors,
+  and :colnames is a vector of column names.  The optional third
+  argument provides values to substitute for placeholders."
   ([conn q]
      (get-query conn q []))
-
   ([conn q pvals]
      (sql-debug-prn (symbol "Getting query:") q (symbol "::") pvals)
      (in-sql-retry-loop

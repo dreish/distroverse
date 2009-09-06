@@ -39,7 +39,7 @@
 (import '(com.jme.math Quaternion Vector3f))
 (import '(org.distroverse.dvtp DvtpExternalizable Quat Vec Move MoveSeq
                                AskInv ReplyInv GetCookie Cookie FunCall
-                               FunRet DvtpObject Real))
+                               FunRet DvtpObject Real Str))
 (import '(org.distroverse.core.net NetSession DvtpChannel))
 (import '(java.io ByteArrayInputStream ByteArrayOutputStream))
 
@@ -101,7 +101,7 @@
         :else
           false))
 
-(defmacro lookup-response [message]
+(defn lookup-response [message]
   "Look up the response matcher to the given message, at compile time
   if possible, or else at runtime."
   (if (const-message? message)

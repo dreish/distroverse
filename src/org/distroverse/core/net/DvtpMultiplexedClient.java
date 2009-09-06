@@ -83,4 +83,10 @@ extends DvtpMultiplexedConnection< O, P, S >
       remote.connect( remote_address );
       return addSocket( remote );
       }
+
+   @Override
+   public void shutdownListener()
+      {
+      // do nothing; there is no listener on the client
+      }
    }

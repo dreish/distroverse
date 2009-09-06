@@ -71,16 +71,13 @@
   "Add the given callback to the session so that if, later, a message
   matching matcher is received in session, callback will be called
   (through handle-object!)."
-  ; XXX I think this needs to be rewritten due to my removal of
-  ; WorldSession.  For example, there's no longer a .getPayload method
-  ; anywhere.
-  (let [callbacks-ref (@(.getPayload session) :callbacks)]
+  (let [callbacks-ref (@(.getAttachment session) :callbacks)]
     (dosync
      (let [new-callback
-           (if (@callbacks-ref matcher)
-             ; Add the new callback after any existing ones
-             #(do-or (@callbacks-ref matcher)
-                     callback)
+           (if-let [existing-callback (@callbacks-ref matcher)]
+             ;; Add the new callback after any existing ones
+             #(do-or (existing-callback)
+                     (callback))
              callback)]
        (alter callbacks-ref assoc matcher new-callback)))))
 
@@ -101,7 +98,7 @@
   `(do
      (add-callback! ~session
                     ~(lookup-response message)
-                    (fn (~assign-var) ~@code))
+                    (fn [~assign-var] ~@code))
      (dvtp-send! ~session ~message)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -234,10 +231,26 @@
 (defvar- *node-tree-vars* (dm/get-map (str ws-ns "node-tree/vars"))
   "Durable variables.")
 
+(defn get-ws-var
+  "Returns the durable var with the given (keyword) name."
+  [k]
+  (:v (*node-tree-vars* k)))
+
+(defn- serial-no-var
+  "Gets and increments a *node-tree-vars* entry."
+  [k]
+  (:v (dm/update *node-tree-vars* k inc-in :v)))
+
 (defn pick-nodeid
-  "Return a new, unused node id.  Requires a dmsync transaction."
+  "Returns a new, unused node id.  Requires a dmsync transaction."
   []
-  (:v (dm/update *node-tree-vars* :next-nodeid inc-in :v)))
+  (serial-no-var :next-nodeid))
+
+(defn get-new-userid
+  "Returns a new, unused numeric user id.  Requires a dmsync
+  transaction."
+  []
+  (serial-no-var :next-userid))
 
 (def +zero-vec+ (Vector3f. 0 0 0))
 
@@ -508,10 +521,17 @@
                   :echildren nil
                   :children (vec new-children)))))
 
-(defn-XXX make-concrete
-  [node]
-  )
+(defn maybe-concretize-children
+  "Calls concretize-children if the node with the given id has
+  ephemeral children.  Requires a dmsync transaction."
+  ([nodeid]
+     (when (:echildren (get-node nodeid))
+       (concretize-children nodeid))))
 
+;;; Kill these two?  Rewrite?  Useful at all?
+(defn-XXX make-concrete
+  ([node]
+     ))
 (defn-XXX add-subnode
   "Add node c as a child of node p, with move m.  Returns the new node
   ID."
@@ -519,25 +539,37 @@
   (let [p (if (ephem? p)
             (make-concrete p)
             p)]
-    
     ))
 
-(defn-XXX add-object
-  "Add shape as a child of node, with move move.  Returns the new node
-  ID."
-  [node move shape]
-  
-  )
-
-(defn-XXX reparent
-  "Make the node with the given ID a child of the given new-parent,
-  with move move.  Returns the given node id."
+(defn reparent
+  "Makes the node with the given ID a child of the given new-parent,
+  with move move.  Returns the given node id.  Requires a dmsync
+  transaction."
   [new-parent move node]
-  
-  )
+  (do
+    (maybe-concretize-children new-parent)
+    (let [np (and new-parent (get-node new-parent))
+          nd (if np (-> np :depth inc)
+                    1)]
+      (when np
+        (dm/update *id-to-node* new-parent assoc
+                   :children (conj (np :children)
+                                   node)))
+      (dm/update *id-to-node* node assoc
+                 :parent new-parent
+                 :depth nd
+                 :move move))))
+
+(defn add-object
+  "Adds shape as a child of node, with move move.  Returns the new node
+  ID.  Requires a dmsync transaction."
+  [node move shape]
+  (let [nob (new-object shape)]
+    (reparent node move nob)
+    nob))
 
 (defn rel-vector
-  "Return a vector from node a to node b.  Throws an error if a and b
+  "Returns a vector from node a to node b.  Throws an error if a and b
   turn out not to be in the same tree."
   ([a b]
      (rel-vector a b +Midentity+ +Midentity+))
@@ -549,17 +581,16 @@
            (= a b)
              (M* a->root root->b +zero-vec+)
            :else
-             (let [ad (node-depth a)
-                   bd (node-depth b)]
-               (if (< ad bd)
-                 (recur a
-                        (parent-of b)
-                        a->root
-                        (M* (cur-xform b) root->b))
-                 (recur (parent-of a)
-                        b
-                        (M* a->root (invert (cur-xform a)))
-                        root->b))))))
+             (if (< (node-depth a)
+                    (node-depth b))
+               (recur a
+                      (parent-of b)
+                      a->root
+                      (M* (cur-xform b) root->b))
+               (recur (parent-of a)
+                      b
+                      (M* a->root (invert (cur-xform a)))
+                      root->b)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -71,6 +71,7 @@ extends Thread
       mParserClass   = parser_class;
       mStreamerClass = streamer_class;
       mSelecting     = false;
+      mShuttingDown  = false;
       mLock          = new ReentrantReadWriteLock();
       }
 
@@ -106,7 +107,7 @@ extends Thread
    @Override
    public void run()
       {
-      while ( true )
+      while ( ! mShuttingDown )
          {
          Lock l = mLock.writeLock();
          synchronized ( mSelecting )
@@ -117,7 +118,7 @@ extends Thread
          l.lock();
          try
             {
-            mSelector.select();
+            mSelector.select( 10000 );
             }
          catch ( InterruptedIOException e )
             {
@@ -136,6 +137,7 @@ extends Thread
             }
          processIo();
          }
+      shutdownListener();
       }
 
    public ReadLock pauseGetLock()
@@ -159,6 +161,21 @@ extends Thread
       {
       l.unlock();
       }
+   
+   /**
+    * Shuts down the server and associated watcher thread, and returns
+    * whether the server was already shutting down.
+    * @return
+    */
+   public boolean shutdown()
+      {
+      boolean ret = mShuttingDown;
+      mShuttingDown = true;
+      mWatcher.shutdown();
+      return ret;
+      }
+   
+   public abstract void shutdownListener();
 
    protected void processIo()
       {
@@ -180,10 +197,14 @@ extends Thread
             }
          catch ( Exception e )
             {
-            // FIXME This message seems unnecessarily stupid
-            Log.p( "Canceling an unknown key due to an exception: " + e
-                   + " - " + e.getMessage(), Log.NET, -10 );
-            Log.p( e, Log.NET, -10 );
+            // FIXME This still seems really stupid.  When a connection
+            // is unexpectedly closed, this is the exception I get.
+            if ( ! e.getMessage().equals( "readable stream empty" ) )
+               {
+               Log.p( "Canceling an unknown key due to an exception: "
+                      + e + " - " + e.getMessage(), Log.NET, -10 );
+               Log.p( e, Log.NET, -10 );
+               }
             key_iterator.remove();
             key.cancel();
             try
@@ -287,4 +308,5 @@ extends Thread
    protected Selector                mSelector;
    private   Boolean                 mSelecting;
    private   ReentrantReadWriteLock  mLock;
+   private   boolean                 mShuttingDown;
    }

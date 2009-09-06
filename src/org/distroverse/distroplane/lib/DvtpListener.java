@@ -50,6 +50,8 @@ public interface DvtpListener
     * unless the server aborts for some reason.
     */
    public abstract void serve();
+   
+   public boolean shutdown();
 
    public DvtpServer getServer();
 

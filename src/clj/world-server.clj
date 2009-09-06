@@ -61,21 +61,26 @@
   [session]
   (dosync
    (let [ret @(session :funcall-counter)]
-     (alter (session :funcall-counter) (inc ret))
+     (alter (session :funcall-counter)
+            (inc ret))
      ret)))
 
 (defmacro fun-call
   "Generates a FunCall constructor.  Assumes 'session is bound to a
   session."
-  [rform]
-  `(FunCall. (ULong. (gen-fun-call-id ~'session))
-             ~@(dvtp-wrap rform)))
+  [& rform]
+  `(FunCall. (into-array DvtpExternalizable
+                (cons (ULong. (gen-fun-call-id ~'session))
+                      ~@(dvtp-wrap rform)))))
 
 (defmacro dstmt!
   "Sends a DVTP FunCall statement.  Assumes 'session is bound to a
   session."
   [& rform]
-  `(dvtp-send! ~'session (FunCall. (ULong. 0) ~@(dvtp-wrap rform))))
+  `(dvtp-send! ~'session
+               (FunCall. (into-array DvtpExternalizable
+                                     [ (ULong. 0)
+                                       ~@(dvtp-wrap rform) ]))))
 
 (defmacro ac!
   "Abbreviation for (async-call! session args...).  Assumes 'session
@@ -89,7 +94,7 @@
   [id challenge response]
   true)
 
-(defn gen-id-challenge
+(defn #^String gen-id-challenge
   "Generate a challenge string for the given id and session."
   [id session]
   (str (.get id (Str. "preferred-name"))
@@ -126,13 +131,41 @@
   [id]
   (not (*key-to-id* (id :pubkey))))
 
+(defn get-all-avatars
+  "Returns all _in-world_ avatars (as nodeids).  Requires a dmsync
+  transaction."
+  []
+  (dm/pkeys *avatars*))
+
+(defn remove-avatar-node
+  [nodeid]
+  (do
+    (dm/delete *avatars* nodeid)
+    (reparent nil nil nodeid)))
+
+(defn deparent-all-avatars
+  "Removes all avatars from the world.  Requires a dmsync transaction."
+  []
+  (dorun
+   (map #(dm/dmsync (remove-avatar-node %))
+        (dorun (dm/dmsync (get-all-avatars))))))
+
 (defn startup!
-  "Perform basic initialization operations before accepting
+  "Performs basic initialization operations before accepting
   connections.  NB: The listener does not exist yet."
   []
   ;; FIXME Doesn't actually need ! yet, but I'm assuming it will
-  (dm/dmsync
-   (deparent-all-avatars)))
+  (deparent-all-avatars))
+
+(defn-XXX disable-server-listener
+  ""
+  []
+  )
+
+(defn-XXX disconnect-users
+  ""
+  []
+  )
 
 (defn shutdown!
   "Shut down the server, and flush all database queries.  t: timeout
@@ -145,7 +178,7 @@
 (defn new-user-from-skel
   "Return a copy of the skeleton user account, with the given ID"
   [id userid]
-  (let [skel-userid (get-userid-by-name "skel")]
+  (let [skel-userid (get-ws-var :skel-userid)]
     (assoc (*userdata* skel-userid)
       :pubkey (id :pubkey)
       :userid userid)))
@@ -185,6 +218,11 @@
     (dvtp-send! session
         (map node-encode (parent-chain (att :avatar))))))
 
+(defn-XXX reject-id!
+  "Tells the client it failed to log in."
+  []
+  )
+
 (defn init-connection!
   "Performs basic new-connection setup: getting and verifying the
   user's identity, looking up the user's position, and adding the
@@ -192,20 +230,28 @@
   the use of async-call! of course, as well as actually putting the
   user into the world, and possibly even setting up the new user
   identity."
-  [session token]
-  (ac! [id-reply (AskInv. "ID" "id")]
-    (let [id (get-id id-reply)
-          challenge (gen-id-challenge id session)]
-      (ac! [id-response (fun-call ("challenge" "id" (Str. challenge)))]
-        (if (valid-id? id challenge id-response)
-          (let [att (new-session-attachment session id)]
-            (do
-              (.setAttachment session (class att) att)
-              (if (new-user? id)
-                (setup-new-user session att id))
-              (add-self-to-world! att session)
-              (start-rendering! att session)))
-          (reject-id! session))))))
+  ([session token]
+     (let [att (new-session-attachment session nil)]
+       (.setAttachment session (class att) att)
+       (ac! [id-reply (AskInv. "ID" (Str. "id"))]
+         (let [id (get-id id-reply)
+               challenge (gen-id-challenge id session)]
+           (ac! [id-response (fun-call "challenge" "id" (Str. challenge))]
+             (if (valid-id? id challenge id-response)
+               (do
+                 (dosync
+                  (alter att assoc :id id))
+                 (if (new-user? id)
+                   (setup-new-user session att id))
+                 (add-self-to-world! att session)
+                 (start-rendering! att session))
+               (reject-id! session))))))))
+
+(defn-XXX trim-to-matcher
+  ""
+  [msg]
+  
+  )
 
 (defn handle-callback!
   "Look for the given ob in the given session's callback map, and if
@@ -261,9 +307,10 @@
 (defn handle-location
   "Handle an anonymous LOCATION request."
   [noq loc]
-  (.offer noq (Str. "http://www.distroverse.org/envoys/WorldEnvoy.jar"
+  (.offer noq (Str.
+               (str "http://www.distroverse.org/envoys/WorldEnvoy.jar"
                     ".*"
-                    "org.distroverse.envoy.WorldEnvoy")))
+                    "org.distroverse.envoy.WorldEnvoy"))))
 
 (defn handle-get
   "Handle an anonymous GET request."

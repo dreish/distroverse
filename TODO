@@ -216,8 +216,8 @@
             the AddObject, which causes a null pointer exception on
             externalize; it should be allowed
       + Receive DNode on envoy; display nodes in client
-      - Get the server running
-        - (org.distroverse.distroplane.WorldServer/main nil)
+      + Get the server running
+        + (org.distroverse.distroplane.WorldServer/main nil)
           + Does not compile; create-map! added to wrong namespace?
             + dm and bk now clash; use (ns) thing from setup-data
           + Need to create key-to-id bk map
@@ -225,11 +225,54 @@
           + Create userdata and avatars (regular maps)
           + new-object: takes a shape, returns a node ID (no parent)
             + Needs Shape.getRadius()
-          - Implement reparent
-            - Set depth to (inc parent-depth)
-            - Concretize parent's children if necessary
-            - Add to parent's children
-     - Get the client running
+          + Implement reparent
+            + Set depth to (inc parent-depth)
+            + Concretize parent's children if necessary
+            + Add to parent's children
+          + ac! doesn't appear to compile even for basic cases
+          + fun-call doesn't work
+            > Needed into-array
+          + get-all-avatars is unimplemented (needed by startup!)
+            + Need a keys equivalent for dm: pkeys
+              + List of all keys in :writes or :reads that don't map
+                to nil
+              + datastore/get-pkey-seq
+                + Filter these based on not being present in :writes
+                  or :reads
+                + close-on-error x &code -- a little like with-open,
+                  but don't close on a normal return, and don't
+                  combine with binding
+                + Try it; can I get the seq of all node ids?
+                  + Verify count against a SQL query
+                  + Needs the values returned to be decoded (and not
+                    in sublists)
+      + Try connecting to the server by telnet
+        + Even after killing the thread that contains the server, it's
+          still printing "clearAllQueues() called" every few seconds
+          > Server was designed to be started up and left running as a
+            standalone process, then killed, not called as a function in
+            a Lisp REPL
+          + Watcher thread needs to stop
+          + Server thread goes into DvtpListener.serve(), ends up in
+            a while-true loop in DvtpMultiplexedConnection.run()
+            + Add mShuttingDown in DvtpMultiplexedConnection, and public
+              shutdown()
+              > Also shuts down the watcher
+            + Make DvtpServer.createServer() return the server instead
+              of running it
+            + Add WorldServer/shutdownInstance
+        + It connects, and LOCATION works, but ENVOYOPEN kills it
+          > Got it sending the ID/id inv request now
+        + Even after calling shutdownInstance, something is still
+          accepting connections on port 1808
+          x Run in the Eclipse debugger and poke around
+          + Add something to shut down the listening socket
+        + Client dropping connection just after ENVOYOPEN causes an
+          ugly-looking exception in the server
+          > Canceling an unknown key due to an exception
+          > Got a stupid fix for it; oh well
+      - Get the client running
+      - Try connecting to the server using the client
   - Add a trivial avatar to the world
   - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str

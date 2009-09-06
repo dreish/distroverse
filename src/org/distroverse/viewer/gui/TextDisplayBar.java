@@ -32,11 +32,7 @@
  */
 package org.distroverse.viewer.gui;
 
-import java.util.concurrent.Callable;
-
 import org.fenggui.TextEditor;
-
-import com.jme.util.GameTaskQueueManager;
 
 public class TextDisplayBar extends Element
    {

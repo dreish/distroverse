@@ -71,6 +71,21 @@ implements DvtpListener
 
    public void setServer( DvtpServer server )
       {  mServer = server;  }
+   
+   @Override
+   public void shutdownListener()
+      {
+      try
+         {
+         // XXX seems like this should be the first thing that happens
+         // when shutting down.
+         mServerSocket.close();
+         }
+      catch ( IOException e )
+         {
+         e.printStackTrace();
+         }
+      }
 
    /* (non-Javadoc)
     * @see org.distroverse.distroplane.lib.DvtpListener#serve()
@@ -82,9 +97,9 @@ implements DvtpListener
          {
          mServerChannel  = ServerSocketChannel.open();
          mSelector       = Selector.open();
-         // Bind the socket to the DvtpServer's port number
-         ServerSocket ss = mServerChannel.socket();
-         ss.bind( new InetSocketAddress( mServer.getListenPort() ) );
+         mServerSocket = mServerChannel.socket();
+         mServerSocket.bind( new InetSocketAddress( 
+                                            mServer.getListenPort() ) );
          mServerChannel.configureBlocking( false );
          // SocketChannel client = server_channel.accept();
          mServerChannel.register( mSelector, SelectionKey.OP_ACCEPT );
@@ -116,4 +131,5 @@ implements DvtpListener
 
    private ServerSocketChannel  mServerChannel;
    private DvtpServer           mServer;
+   private ServerSocket         mServerSocket;
    }

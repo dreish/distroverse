@@ -187,12 +187,19 @@ public class WorldServer extends DvtpServer
          return;
          }
       startup_bang.run();
-      createServer( WorldServer.class,
-                    "DVTP/0.01 WorldServer 0.02" );
+      mServer = createServer( WorldServer.class,
+                                   "DVTP/0.01 WorldServer 0.02" );
+      mServer.serve();
       }
-
+   
+   public static boolean shutdownInstance()
+      {
+      return mServer.shutdown();
+      }
+   
    private static Var mInitConnectionBang;
    private static Var mHandleObjectBang;
    private static Var mHandleGet;
    private static Var mHandleLocation;
+   private static DvtpServer mServer;
    }

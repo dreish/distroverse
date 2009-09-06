@@ -195,11 +195,24 @@
   [s]
   (apply str s))
 
+(defmacro close-on-error
+  "Vaguely similar to with-open, but without the binding vector, and
+  NOT closing conn on a normal return.  Can be useful in auto-closing
+  lazy seqs."
+  ([conn & forms]
+     `(try
+       ~@forms
+       (catch Exception e#
+         (do
+           (.close ~conn)
+           (throw e#))))))
+
 (defmacro defn-XXX
   "Defines a function that just throws an exception.  Used for
   stubbing unimplemented functions."
   [fnname & ignored]
   `(defn ~fnname
+     "Unimplemented"
      [& ~'args]
      (throw (Exception. ~(str fnname " is unimplemented.")))))
 

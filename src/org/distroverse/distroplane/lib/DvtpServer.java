@@ -77,7 +77,7 @@ public abstract class DvtpServer
     * @param server_class - A subclass of DvtpServer
     * @param greeting - String to send to clients when they connect
     */
-   public static <S extends DvtpServer> void
+   public static <S extends DvtpServer> DvtpServer
    createServer( Class<S> server_class, String greeting )
       {
       DvtpListener l
@@ -96,22 +96,28 @@ public abstract class DvtpServer
          Log.p( "Could not construct server of class " + server_class
                 + ": " + e, Log.NET, 100 );
          Log.p( e, Log.NET, 100 );
-         return;
+         return null;
          }
       NetInQueueWatcher< Object > watcher_thread =
          new DvtpServerInQueueObjectWatcher( server );
       watcher_thread.start();
       l.setWatcher( watcher_thread );
       l.setGreeting( greeting );
-      l.serve();  // Does not return.
+      return server;
+//      l.serve();  // Does not return.
       }
 
    /**
-    * Call the listen() method in the DvtpListener implementation.
+    * Call the serve() method in the DvtpListener implementation.
     */
-   public void listen()
+   public void serve()
       {
       mListener.serve();
+      }
+   
+   public boolean shutdown()
+      {
+      return mListener.shutdown();
       }
 
    /**
