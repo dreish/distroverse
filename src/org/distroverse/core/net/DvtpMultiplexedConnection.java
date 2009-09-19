@@ -122,21 +122,7 @@ extends Thread
       {
       while ( ! mShuttingDown )
          {
-         /* FIXME I believe this spinlock is only needed because
-          * synchronized (o) {} doesn't work in code that executes
-          * inside an object that is a subclass of Thread.  It appears
-          * the JVM gets confused and thinks two threads running code in
-          * the same DvtpMultiplexedConnection object are actually the
-          * same thread, and that therefore reentrant synchronization
-          * applies.
-          * 
-          * Fix this by making DvtpMultiplexedConnection no longer a
-          * subclass of Thread.  Have it contain a subclass of Thread
-          * with a run() method that calls this method (renamed), and
-          * make this object's start method call that object's start.
-          * 
-          * Then delete the spinlock.  The synchronized blocks should be
-          * sufficient to guarantee that the object works as advertised.
+         /* FIXME Find out why this spinlock is needed, and remove it.
           */
          while ( mGettingLock )
             {
@@ -225,8 +211,7 @@ extends Thread
           * and the write lock would be reestablished before this thread
           * could get a read lock is avoided.
           * 
-          * (Or at least, it would if the JVM didn't think any code
-          * running in this object is part of the same thread.)
+          * (Or at least, that's how it is supposed to work.)
           */
          if ( ! ret.tryLock( 50, TimeUnit.MILLISECONDS ) )
             throw PAUSE_GET_LOCK_FAILED;
