@@ -44,14 +44,15 @@ public class Viewer
    {
    /**
     * @param args
+    * @throws InterruptedException 
     */
-   public static void main( String[] args )
+   public static void main( String[] args ) throws InterruptedException
       {
       ViewerWindow w = new ViewerWindow();
       try
          {
-         // w.requestUrl( "dvtp://localhost/" );
-         w.requestUrl( "about:hello" );
+         w.requestUrl( "dvtp://localhost/" );
+//         w.requestUrl( "about:hello" );
          }
       catch ( Exception e )
          {

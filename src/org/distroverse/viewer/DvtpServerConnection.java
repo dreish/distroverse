@@ -202,7 +202,7 @@ public class DvtpServerConnection
          }
       catch ( ClassNotFoundException e )    // From query()
          {
-         throw new ProtocolException( "Server did not return a"
+         throw new ProtocolException( "Server did not return an"
                        + " EnvoySpec in response to a LOCATION query" );
          }  
       }
@@ -216,7 +216,7 @@ public class DvtpServerConnection
          }
       catch ( ClassNotFoundException e )    // From query()
          {
-         throw new ProtocolException( "Server did not return a"
+         throw new ProtocolException( "Server did not return an"
                        + " EnvoySpec in response to a LOCATION query" );
          }  
       }
@@ -291,11 +291,12 @@ public class DvtpServerConnection
          }
       catch ( ClassCastException e )
          {
-         throw new ProtocolException( "Server did not return a"
-                       + " EnvoySpec in response to a LOCATION query" );
+         throw new ProtocolException( "Server did not return an"
+                       + " EnvoySpec in response to a LOCATION query;"
+                       + " got: " + VUtil.formatDvObject( response ) );
          }
       }
-
+   
    private Blob receiveBlob( Object response ) throws ProtocolException
       {
       try
@@ -305,7 +306,8 @@ public class DvtpServerConnection
       catch ( ClassCastException e )
          {
          throw new ProtocolException( "Server did not return a blob in"
-                                      + " response to a GET query" );
+                               + " response to a GET query; got: "
+                               + VUtil.formatDvObject( response ) );
          }
       }
 

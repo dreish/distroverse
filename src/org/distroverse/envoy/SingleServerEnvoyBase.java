@@ -46,7 +46,6 @@ import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DisplayUrl;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.SetUrl;
-import org.distroverse.dvtp.Str;
 
 /**
  * Converts setUrl objects from client into the act of connecting to a
@@ -75,19 +74,23 @@ public abstract class SingleServerEnvoyBase extends NetEnvoyBase
     * @throws URISyntaxException
     * @throws IOException
     */
-   protected void setServer( String host, int port ) throws IOException
+   protected synchronized void setServer( String host, int port )
+   throws IOException
       {
       if ( mRemoteSession != null )
          mRemoteSession.close();
+      
+      mCurrentHost = host;
+      mCurrentPort = port;
 
       Log.p( "connecting to server: " + host + ":" + port,
              Log.ENVOY, -50 );
       SocketAddress remote_addr = new InetSocketAddress( host, port );
       mRemoteSession = connect( remote_addr );
-      Log.p( "sending ENVOYOPEN command to " + host + ":" + port,
-             Log.ENVOY, -50 );
-      mRemoteSession.getNetOutQueue()
-              .add( new Str( "ENVOYOPEN" ) );
+      // Connect already does this:
+//      Log.p( "sending ENVOYOPEN command to " + host + ":" + port,
+//             Log.ENVOY, -50 );
+//      mRemoteSession.getNetOutQueue().add( "ENVOYOPEN" );
       }
 
    /**
@@ -96,7 +99,7 @@ public abstract class SingleServerEnvoyBase extends NetEnvoyBase
     */
    protected abstract void initWorld() throws IOException;
 
-   protected void setUrl( String new_url )
+   protected synchronized void setUrl( String new_url )
    throws URISyntaxException, IOException
       {
       URI new_uri = new URI( new_url );
@@ -113,7 +116,7 @@ public abstract class SingleServerEnvoyBase extends NetEnvoyBase
       initWorld();
       }
 
-   public void offer( ClientSendable o ) throws IOException
+   public synchronized void offer( ClientSendable o ) throws IOException
       {
       if ( o instanceof SetUrl )
          {

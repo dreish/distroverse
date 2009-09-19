@@ -139,7 +139,10 @@ public abstract class DvtpServer
          handleEnvoyOpen( command.substring( "envoyopen ".length() ),
                           noq );
       else if ( command.equalsIgnoreCase( "envoyopen" ) )
+         {
+         noq.getSession().setEnvoyMode();
          handleEnvoyOpen( null, noq );
+         }
       else
          handleUnrecognizedCommand( command, noq );
       }
@@ -169,7 +172,9 @@ public abstract class DvtpServer
    /**
     * Handles the ENVOYOPEN command, which is the handshake that begins
     * a session between envoy and server.  The response, and every
-    * aspect of the protocol after that point, are completely
+    * aspect of the protocol after that point, are entirely up to the
+    * individual implementation.  All further messages received from the
+    * peer will be handled through handleEnvoyObject.
     * @param token
     */
    public abstract void handleEnvoyOpen( String token,
@@ -179,7 +184,7 @@ public abstract class DvtpServer
    /**
     * Handles any arbitrary object from an envoy.  This is the only
     * method called on a DvtpServer from a session that has entered
-    * envoy mode by calling setEnvoyMode() on the NetSession object.
+    * envoy mode by receiving an ENVOYOPEN command.
     * @param net_in_object
     * @param session
     */

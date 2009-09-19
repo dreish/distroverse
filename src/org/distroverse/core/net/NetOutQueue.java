@@ -79,6 +79,7 @@ public class NetOutQueue< T >
    synchronized public boolean offer( T o )
    throws ClosedChannelException
       {
+      Log.p( "offer on queue " + this + ": " + o, Log.NET, -10 );
       if ( mContents.size() >= mMaxLength )
          return false;
       mContents.add( o );

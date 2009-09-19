@@ -271,8 +271,108 @@
           ugly-looking exception in the server
           > Canceling an unknown key due to an exception
           > Got a stupid fix for it; oh well
-      - Get the client running
+      + Logging stops when it reaches the limit, and there's no way to
+        restart
+        + (Log/setNumLogMessages 0)
+        + (Log/setLogging true)
+        + (Log/resetLogging)
+      + Get the client running
+        + ViewerWindow constructor throws exception calling
+          DvWindow.addWidget( null )
+          + Is anyone calling DvWindow.initGame()?
+            > Only BaseGame.start()
+          + Is anyone calling DvWindow.start()?
+            + Race condition: I was calling window_copy.start() in a
+              thread, and then immediately initializing the GUI, but
+              parts of mWindow get set up in start() (why not the
+              constructor?)
+              > Because jME doesn't work that way
+              + Add DvWindow.waitForInit()
       - Try connecting to the server using the client
+        + Server did not return a [sic] EnvoySpec in response to a
+          LOCATION query
+        + Locks up in EnvoyControllerPipeline constructor, trying to do
+          a LOCATION query
+          + Server has stopped responding to LOCATION; still sends
+            greeting
+        + ConcurrentModificationException from
+          NetInQueueWatcher.clearAllQueues() line 102
+        + Server carps about protocol errors: receiving Str while in
+          conversation mode
+          > Why not just handle these?
+        + Got two "Unrecognized message from server" messages
+          + One is for the greeting Str
+          + Other is for AskInv ID
+        + Server occasionally becomes unresponsive, find out why
+          + Next time it happens, try to identify a trigger
+            + Receiving a non-string in conversation mode; clearly this
+              is an idiotic reason to kill the entire watcher thread
+              + Don't throw an exception; just close the channel
+        + Server carps about receiving a FunCall in conversation mode
+          + How is that possible?  I thought only the server sent
+            FunCalls
+            > PassThroughEnvoy sends ("init"), and WorldEnvoy sends
+              ("dump-universe")
+          x Did the client fail to send ENVOYOPEN?
+            > I see _two_ ENVOYOPEN commands (how could that happen?)
+          + Restart server in new Clojure session; find out what the
+            exact funcall is
+            + Current jME install isn't compatible with Snow Leopard
+              + Try 32-bit Java 1.5 workaround from OneSwarm wiki
+                > Back to normal
+              x If that doesn't work, upgrade to jME 2.0.1
+            + Getting dump-universe in conversation mode
+              + Called from WorldEnvoy.initWorld only
+                + Called only from SingleServerEnvoyBase.setUrl
+                  + Called only from SingleServerEnvoyBase.offer, in
+                    response to getting a SetUrl message from the client
+                    > This should only happen strictly after ENVOYOPEN
+                      is sent
+                    + Add a breakpoint at NetOutQueue.add
+                    + Watch a run to make sure it sends ENVOYOPEN along
+                      the _same_ channel that ends up getting the setUrl
+                      + Given that the behavior doesn't appear with the
+                        breakpoint set, this is most likely a race
+                        condition
+                        + Nothing ever sets mCurrentHost or
+                          mCurrentPort, so the connection just keeps
+                          getting reopened over and over
+                        + It's still happening
+                          + Make a test client in clojure
+                            + Event-queue interface to Net*Queue
+                              + class InvertingInQueueObjectWatcher,
+                                constructed with a java.util.Queue
+                          + Run it in another session (not from Emacs)
+                            + Mysteriously sometimes takes minutes to
+                              send a message
+                              + Impossible-looking race condition;
+                                somehow the selecting thread gets
+                                through the synchronized ( mSelecting
+                                ) block while another thread is also
+                                synchronized on mSelecting
+                                > Theory: any code executing inside an
+                                  object that is a subclass of Thread
+                                  looks like it is a part of that
+                                  Thread, even if it was called from
+                                  within another thread, so the
+                                  synchronized keywords, they do
+                                  nothing
+                                + Fix by setting a flag before waking
+                                  up the selector; busy-wait for the
+                                  flag to clear instead of
+                                  synchronized blocking, sad though it
+                                  may be
+                            + WorldServer _does_ think it is in
+                              conversation mode even after an
+                              ENVOYOPEN
+                              + Handle setting conversation mode
+                                automatically when the ENVOYOPEN
+                                message is received
+        - trim-to-matcher is unimplemented
+        - NPE in EnvoyControllerPipeline.dispatchObject()?  How is that
+          possible?
+        - Make sure the ID response maps to something that is actually
+          in the id table
   - Add a trivial avatar to the world
   - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str

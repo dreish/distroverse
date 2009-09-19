@@ -43,7 +43,7 @@ import org.distroverse.viewer.gui.DvWindow;
  */
 public class ViewerWindow
    {
-   public ViewerWindow()
+   public ViewerWindow() throws InterruptedException
       {
       mWindow = new DvWindow();
       final DvWindow window_copy = mWindow;
@@ -58,6 +58,7 @@ public class ViewerWindow
 //      final DebugGameState debug = new DebugGameState();
 //      GameStateManager.getInstance().attachChild( debug );
 //      debug.setActive( true );
+      mWindow.waitForInit();
       mGui = new ViewerGui( mWindow );
       mWorld = new WorldGraph( mGui.getWorldRootNode() );
       }

@@ -38,6 +38,10 @@ public class ReplyInv extends Cookie
       super( (DvtpExternalizable) null );
       }
 
+   /**
+    * No such value message
+    * @param key
+    */
    public ReplyInv( DvtpExternalizable key )
       {
       super( key );

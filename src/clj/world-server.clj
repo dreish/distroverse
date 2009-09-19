@@ -307,10 +307,9 @@
 (defn handle-location
   "Handle an anonymous LOCATION request."
   [noq loc]
-  (.offer noq (Str.
-               (str "http://www.distroverse.org/envoys/WorldEnvoy.jar"
-                    ".*"
-                    "org.distroverse.envoy.WorldEnvoy"))))
+  (.offer noq (EnvoySpec. "http://www.distroverse.org/envoys/WorldEnvoy.jar"
+                          ".*"
+                          "org.distroverse.envoy.WorldEnvoy")))
 
 (defn handle-get
   "Handle an anonymous GET request."

@@ -41,11 +41,20 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.distroverse.core.Log;
+
+class PauseGetLockException extends Exception
+{
+private static final long serialVersionUID = 4767636755269645717L;
+
+public PauseGetLockException( String message )
+   {  super( message );  }
+}
 
 /**
  * The I/O core: a class that manages either outbound or incoming
@@ -62,7 +71,10 @@ DvtpMultiplexedConnection< O,
                            S extends ObjectStreamer< O > >
 extends Thread
    {
+
    public static final int DEFAULT_QUEUE_SIZE = 10;
+   private static final PauseGetLockException PAUSE_GET_LOCK_FAILED
+      = new PauseGetLockException( "waited too long" );
 
    public DvtpMultiplexedConnection( Class< P > parser_class,
                                      Class< S > streamer_class )
@@ -72,6 +84,7 @@ extends Thread
       mStreamerClass = streamer_class;
       mSelecting     = false;
       mShuttingDown  = false;
+      mGettingLock   = false;
       mLock          = new ReentrantReadWriteLock();
       }
 
@@ -109,6 +122,34 @@ extends Thread
       {
       while ( ! mShuttingDown )
          {
+         /* FIXME I believe this spinlock is only needed because
+          * synchronized (o) {} doesn't work in code that executes
+          * inside an object that is a subclass of Thread.  It appears
+          * the JVM gets confused and thinks two threads running code in
+          * the same DvtpMultiplexedConnection object are actually the
+          * same thread, and that therefore reentrant synchronization
+          * applies.
+          * 
+          * Fix this by making DvtpMultiplexedConnection no longer a
+          * subclass of Thread.  Have it contain a subclass of Thread
+          * with a run() method that calls this method (renamed), and
+          * make this object's start method call that object's start.
+          * 
+          * Then delete the spinlock.  The synchronized blocks should be
+          * sufficient to guarantee that the object works as advertised.
+          */
+         while ( mGettingLock )
+            {
+            try
+               {
+               Thread.sleep( 1 );
+               }
+            catch ( InterruptedException e1 )
+               {
+               // nothing
+               }
+            }
+
          Lock l = mLock.writeLock();
          synchronized ( mSelecting )
             {
@@ -142,17 +183,53 @@ extends Thread
 
    public ReadLock pauseGetLock()
       {
+      for ( int i = 0; i < 100; ++i )
+         {
+         try
+            {
+            mGettingLock = true;
+            return tryPauseGetLock();
+            }
+         catch ( InterruptedException e )
+            {
+            // nothing
+            }
+         catch ( PauseGetLockException e )
+            {
+            // nothing
+            }
+         finally
+            {
+            mGettingLock = false;
+            }
+         }
+      
+      throw new RuntimeException( PAUSE_GET_LOCK_FAILED );
+      }
+   
+   public ReadLock tryPauseGetLock()
+   throws InterruptedException, PauseGetLockException
+      {
       ReadLock ret = mLock.readLock();
       synchronized ( mSelecting )
          {
          if ( mSelecting )
+            {
+            Log.p( "waking up selector", Log.NET, -20 );
             mSelector.wakeup();
+            }
+         else
+            Log.p( "not selecting; no wakeup needed", Log.NET, -20 );
          /* By locking inside the mSelecting critical section here, the
           * race condition whereby processIo() would return immediately
           * and the write lock would be reestablished before this thread
           * could get a read lock is avoided.
+          * 
+          * (Or at least, it would if the JVM didn't think any code
+          * running in this object is part of the same thread.)
           */
-         ret.lock();
+         if ( ! ret.tryLock( 50, TimeUnit.MILLISECONDS ) )
+            throw PAUSE_GET_LOCK_FAILED;
          }
       return ret;
       }
@@ -199,7 +276,8 @@ extends Thread
             {
             // FIXME This still seems really stupid.  When a connection
             // is unexpectedly closed, this is the exception I get.
-            if ( ! e.getMessage().equals( "readable stream empty" ) )
+            if ( e.getMessage() == null
+                 || ! e.getMessage().equals( "readable stream empty" ) )
                {
                Log.p( "Canceling an unknown key due to an exception: "
                       + e + " - " + e.getMessage(), Log.NET, -10 );
@@ -309,4 +387,5 @@ extends Thread
    private   Boolean                 mSelecting;
    private   ReentrantReadWriteLock  mLock;
    private   boolean                 mShuttingDown;
+   private   boolean                 mGettingLock;
    }

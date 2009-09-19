@@ -35,6 +35,7 @@ package org.distroverse.core.net;
 import java.io.IOException;
 import java.net.ProtocolException;
 
+import org.distroverse.core.Util;
 import org.distroverse.distroplane.lib.*;
 
 /**
@@ -72,7 +73,8 @@ extends NetInQueueWatcher< Object >
          throw new ProtocolException( "Received a non-string object"
                       + " of type "
                       + net_in_object.getClass().getCanonicalName()
-                      + " while in conversation mode" );
+                      + " while in conversation mode: "
+                      + Util.prettyPrintList( net_in_object ) );
          }
       }
 

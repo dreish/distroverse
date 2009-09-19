@@ -57,10 +57,10 @@ public class EnvoyControllerPipeline extends ControllerPipeline
    throws URISyntaxException, IOException, ClassNotFoundException,
           Exception
       {
+      mDispatcher = new ViewerDispatcher( window, this );
       mEnvoy = new EnvoyClientConnection( url,
                              EnvoyControllerPipeline.getEnvoyUrl( url ),
                                           this );
-      mDispatcher = new ViewerDispatcher( window, this );
       requestUrl( url );
       }
 
@@ -115,6 +115,6 @@ public class EnvoyControllerPipeline extends ControllerPipeline
       mDispatcher.dispatchObject( o );
       }
 
-   private EnvoyClientConnection mEnvoy;
-   private ViewerDispatcher      mDispatcher;
+   private EnvoyClientConnection   mEnvoy;
+   final private ViewerDispatcher  mDispatcher;
    }

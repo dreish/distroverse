@@ -32,6 +32,7 @@
  */
 package org.distroverse.viewer;
 
+import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.Move;
 import org.distroverse.dvtp.MoveSeq;
 import org.distroverse.dvtp.Quat;
@@ -66,4 +67,16 @@ public final class VUtil
                                 + (a.y - b.y) * (a.y - b.y)
                                 + (a.z - b.z) * (a.z - b.z) );
       }
+
+   public static String formatDvObject( Object o )
+   {
+   if ( o == null )
+      return "null";
+   else if ( o instanceof DvtpExternalizable )
+      return ((DvtpExternalizable) o).prettyPrint();
+   else if ( o instanceof String )
+      return "\"" + (String) o + "\"";
+   else
+      return o.toString();
+   }
    }

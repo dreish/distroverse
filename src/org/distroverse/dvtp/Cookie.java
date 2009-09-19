@@ -67,6 +67,15 @@ public class Cookie implements ClientSendable
     */
    public int getClassNumber()
       {  return 27;  }
+   
+   public DvtpExternalizable getKey()
+      {  return mKey;  }
+   
+   public DvtpExternalizable getValue()
+      {  return mValue;  }
+   
+   public boolean exists()
+      {  return mExists;  }
 
    /* (non-Javadoc)
     * @see org.distroverse.dvtp.DvtpExternalizable#prettyPrint()

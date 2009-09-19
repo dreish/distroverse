@@ -33,11 +33,12 @@
 package org.distroverse.core.net;
 
 import java.io.IOException;
+import java.net.ProtocolException;
 import java.nio.channels.ClosedChannelException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-import org.distroverse.core.*;
+import org.distroverse.core.Log;
 
 /**
  * A thread that watches a NetInQueue< T >, calling the abstract method
@@ -92,15 +93,21 @@ public abstract class NetInQueueWatcher< T > extends Thread
       return ret;
       }
 
-
-
+   @SuppressWarnings("unchecked")
    private void clearAllQueues() throws IOException
       {
-      // FIXME Is it safe to do this without synchronizing?
-      // FIXME Looks like this is better done with an int indexed vector
       Log.p( "clearAllQueues() called", Log.NET, -50 );
-      for ( NetInQueue< T > niq : mWatchedQueues )
+      
+      Object[] qs;
+
+      synchronized ( mWatchedQueues )
          {
+         qs = mWatchedQueues.toArray();
+         }
+      
+      for ( Object niq_o : qs )
+         {
+         NetInQueue< T > niq = (NetInQueue< T >) niq_o;
          try
             {
             while ( true )
@@ -109,17 +116,26 @@ public abstract class NetInQueueWatcher< T > extends Thread
                handleNetInObject( net_in_object, niq );
                }
             }
+         catch ( ProtocolException e )
+            {
+            Log.p( e, Log.NET, 10 );
+            niq.getRemote().close();
+            synchronized ( mWatchedQueues )
+               {
+               mWatchedQueues.remove( niq );
+               }
+            niq.removeQueueWatcher( this );
+            }
          catch ( NoSuchElementException e )
             {  /* Ignore; finished with this queue. */  }
          catch ( ClosedChannelException e )
             {
             synchronized ( mWatchedQueues )
                {
-               // FIXME Is it safe to do this while iterating?
                mWatchedQueues.remove( niq );
-               niq.removeQueueWatcher( this );
-               throw e;
                }
+            niq.removeQueueWatcher( this );
+            throw e;
             }
          }
       }
@@ -149,10 +165,13 @@ public abstract class NetInQueueWatcher< T > extends Thread
    
    public void addQueue( NetInQueue< T > niq )
       {
-      mWatchedQueues.add( niq );
+      synchronized ( mWatchedQueues )
+         {
+         mWatchedQueues.add( niq );
+         }
       niq.addQueueWatcher( this );
       }
 
-   private LinkedList< NetInQueue< T > > mWatchedQueues;
-   private boolean                       mShuttingDown;
+   private final LinkedList< NetInQueue< T > > mWatchedQueues;
+   private boolean                             mShuttingDown;
    }

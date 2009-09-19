@@ -47,6 +47,15 @@ public class DvtpEnvoyInQueueObjectWatcher
 extends NetInQueueWatcher< Object >
    {
    /**
+    * Default constructor is disallowed; must have an envoy object.
+    */
+   @SuppressWarnings("unused")
+   private DvtpEnvoyInQueueObjectWatcher()
+      {
+      // nothing
+      }
+   
+   /**
     * Create a thread object that, when started, will watch any queues
     * that are added to it and dispatch each object o in those queues
     * with p.receiveFromServer( o ).

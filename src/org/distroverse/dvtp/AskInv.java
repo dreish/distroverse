@@ -54,6 +54,9 @@ public class AskInv implements EnvoySendable
     */
    public int getClassNumber()
       {  return 134;  }
+   
+   public String getType()
+      {  return mType;  }
 
    public DvtpExternalizable getKey()
       {  return mKey;  }

@@ -188,7 +188,7 @@ public class WorldServer extends DvtpServer
          }
       startup_bang.run();
       mServer = createServer( WorldServer.class,
-                                   "DVTP/0.01 WorldServer 0.02" );
+                              "DVTP/0.01 WorldServer 0.02" );
       mServer.serve();
       }
    

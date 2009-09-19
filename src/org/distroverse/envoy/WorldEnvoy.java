@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.distroverse.core.Log;
 import org.distroverse.core.NodeTreeUtils;
 import org.distroverse.core.net.NetSession;
+import org.distroverse.dvtp.AskInv;
 import org.distroverse.dvtp.ClientSendable;
 import org.distroverse.dvtp.DList;
 import org.distroverse.dvtp.DNode;
@@ -48,8 +49,10 @@ import org.distroverse.dvtp.DNodeRef;
 import org.distroverse.dvtp.DvtpExternalizable;
 import org.distroverse.dvtp.FunCall;
 import org.distroverse.dvtp.FunRet;
+import org.distroverse.dvtp.ReplyInv;
 import org.distroverse.dvtp.Str;
 import org.distroverse.dvtp.ULong;
+import org.distroverse.viewer.VUtil;
 
 import com.jme.math.Vector3f;
 
@@ -88,7 +91,8 @@ public class WorldEnvoy extends SingleServerEnvoyBase
       switch ( o.getClassNumber() )
          {
          default:
-            Log.p( "Unrecognized message from client",
+            Log.p( "Unrecognized message from client"
+                   + VUtil.formatDvObject( o ),
                    Log.UNHANDLED, -10 );
          }
       }
@@ -103,6 +107,9 @@ public class WorldEnvoy extends SingleServerEnvoyBase
       {
       switch ( o.getClassNumber() )
          {
+         case 2:
+            // Bare strings are ignored.
+            break;
          case 30:
             receiveDNodeFromServer( s, (DNode) o );
             break;
@@ -112,9 +119,31 @@ public class WorldEnvoy extends SingleServerEnvoyBase
          case 129:
             receiveFunCallFromServer( s, (FunCall) o );
             break;
+         case 134:
+            receiveAskInvFromServer( s, (AskInv) o );
+            break;
          default:
-            Log.p( "Unrecognized message from server",
+            Log.p( "Unrecognized message from server: "
+                   + VUtil.formatDvObject( o ),
                    Log.NET | Log.UNHANDLED | Log.SERVER, 10 );
+         }
+      }
+
+   private void receiveAskInvFromServer( NetSession< Object > s,
+                                         AskInv o )
+   throws ClosedChannelException
+      {
+      // TODO Real inventory; prompt for confirmation before sending
+      if ( o.getKey().equals( new Str( "ID" ) ) )
+         {
+         s.getNetOutQueue()
+          .add( new ReplyInv( o.getKey(),
+                              new Str( "foo" ) ) );
+         }
+      else
+         {
+         s.getNetOutQueue()
+          .add( new ReplyInv( o.getKey() ) );
          }
       }
 
@@ -260,6 +289,11 @@ public class WorldEnvoy extends SingleServerEnvoyBase
          mAvatar = new DNodeRef( null, avatar_id, null, null );
 
          return new FunRet( fc_id );
+         }
+      else if ( fc_name.equals( "challenge" ) )
+         {
+         // TODO no real challenge-response yet
+         return new FunRet( fc_id, new Str( "foo" ) );
          }
 
       return null;

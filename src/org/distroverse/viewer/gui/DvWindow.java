@@ -32,6 +32,9 @@
  */
 package org.distroverse.viewer.gui;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.fenggui.Display;
 import org.fenggui.Widget;
 import org.fenggui.render.lwjgl.LWJGLBinding;
@@ -61,6 +64,9 @@ public class DvWindow extends BaseGame
     */
    public DvWindow()
       {
+      mInitializationLock = new ReentrantLock();
+      mInitialized = false;
+      mInitializedCondition = mInitializationLock.newCondition();
       mRootNode = new Node( "mRootNode" );
       publicRoot = mRootNode;
       }
@@ -120,6 +126,8 @@ public class DvWindow extends BaseGame
       {
       mDisp     = new org.fenggui.Display( new LWJGLBinding() );
       mInput    = new FengJMEInputHandler( mDisp );
+      
+      markInitialized();
 
       enableZBuffering( mRootNode );
 
@@ -139,6 +147,34 @@ public class DvWindow extends BaseGame
 //
 //      mRootNode.updateRenderState();
 
+      }
+   
+   /**
+    * Don't return until the object is finished initializing; part of
+    * the initialization must happen in start(), which unfortunately
+    * doesn't return.
+    * @throws InterruptedException 
+    */
+   public void waitForInit() throws InterruptedException
+      {
+      mInitializationLock.lock();
+      try
+         {
+         if ( ! mInitialized )
+            mInitializedCondition.await();
+         }
+      finally
+         {
+         mInitializationLock.unlock();
+         }
+      }
+   
+   private void markInitialized()
+      {
+      mInitializationLock.lock();
+      mInitialized = true;
+      mInitializedCondition.signalAll();
+      mInitializationLock.unlock();
       }
 
    private void enableZBuffering( Node node )
@@ -239,11 +275,14 @@ public class DvWindow extends BaseGame
       mDisp.addWidget( wid );
       }
 
-   private Timer               mTimer;
-   private FengJMEInputHandler mInput;
-   private Node                mRootNode;
-   private Display             mDisp;
-   private Camera              mCam;
+   private Timer                  mTimer;
+   private FengJMEInputHandler    mInput;
+   private Node                   mRootNode;
+   private Display                mDisp;
+   private Camera                 mCam;
+   private ReentrantLock          mInitializationLock;
+   private Condition              mInitializedCondition;
+   private boolean                mInitialized;
 
    public static Node publicRoot;
    }

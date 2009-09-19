@@ -62,6 +62,22 @@ public class Log
       e.printStackTrace();
       }
    
+   public static void setNumLogMessages( int n )
+      {
+      mNumLogMessages = n;
+      }
+   
+   public static void setLogging( boolean l )
+      {
+      mLogging = l;
+      }
+   
+   public static void resetLogging()
+      {
+      setNumLogMessages( 0 );
+      setLogging( true );
+      }
+
    private static int     mNumLogMessages = 0;
    private static boolean mLogging        = true;
    }
