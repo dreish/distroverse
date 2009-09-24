@@ -134,7 +134,7 @@ public class WorldEnvoy extends SingleServerEnvoyBase
    throws ClosedChannelException
       {
       // TODO Real inventory; prompt for confirmation before sending
-      if ( o.getKey().equals( new Str( "ID" ) ) )
+      if ( o.getKey().equals( new Str( "id" ) ) )
          {
          s.getNetOutQueue()
           .add( new ReplyInv( o.getKey(),

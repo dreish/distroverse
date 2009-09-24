@@ -368,7 +368,18 @@
                               + Handle setting conversation mode
                                 automatically when the ENVOYOPEN
                                 message is received
-        - trim-to-matcher is unimplemented
+        + trim-to-matcher is unimplemented
+        + Session is not the same as its attachment
+          + satget
+        + FunCall->FunRet response maker doesn't work
+        + Looks like the server gets more than one copy of the
+          ReplyInv, the first of which is handled correctly;
+          subsequent one(s) die because there's no longer a callback
+          + Apparently because the callback returns nil and I'm
+            foolishly using that to indicate "no, it wasn't for me
+            after all", which probably isn't a useful capability
+        + Add FunRet to test script
+        - Find out why FunRet 1 doesn't hit the callback for FunCall 1
         - NPE in EnvoyControllerPipeline.dispatchObject()?  How is that
           possible?
         - Make sure the ID response maps to something that is actually

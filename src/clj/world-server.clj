@@ -56,13 +56,18 @@
 (defvar *sessions* (ref #{})
   "Set of sessions for all active connections")
 
+(defmacro satget
+  "Get a field from the current session attachment."
+  [field]
+  `(-> ~'session .getAttachment deref ~field))
+
 (defn gen-fun-call-id
   "Return a fun-call serial number unique within the given session."
   [session]
   (dosync
-   (let [ret @(session :funcall-counter)]
-     (alter (session :funcall-counter)
-            (inc ret))
+   (let [ret @(satget :funcall-counter)]
+     (alter (satget :funcall-counter)
+            inc)
      ret)))
 
 (defmacro fun-call
@@ -70,8 +75,8 @@
   session."
   [& rform]
   `(FunCall. (into-array DvtpExternalizable
-                (cons (ULong. (gen-fun-call-id ~'session))
-                      ~@(dvtp-wrap rform)))))
+                  (list (ULong. (long (gen-fun-call-id ~'session)))
+                        ~@(dvtp-wrap rform)))))
 
 (defmacro dstmt!
   "Sends a DVTP FunCall statement.  Assumes 'session is bound to a
@@ -89,15 +94,16 @@
   `(async-call! ~'session ~@args))
 
 (defn valid-id?
-  "Does the given response authenticate id against challenge?  XXX
-  implement this"
+  "Does the given response authenticate id against challenge?
+  XXX implement this"
   [id challenge response]
   true)
 
 (defn #^String gen-id-challenge
   "Generate a challenge string for the given id and session."
   [id session]
-  (str (.get id (Str. "preferred-name"))
+  "bogus challenge @ 40:20:30 # 123"
+  #_(str (.get id (Str. "preferred-name"))
        " @ "
        (.getPeerAddress session)
        " t "
@@ -197,8 +203,8 @@
 
 (defn get-id
   [dvtp-id]
-  (let [val (.getVal dvtp-id)]
-    {:pubkey (val (Str. "pubkey"))}))
+  (let [val (.getValue dvtp-id)]
+    {:pubkey val}))
 
 (defn new-session-attachment
   "Return a new session attachment object."
@@ -247,11 +253,20 @@
                  (start-rendering! att session))
                (reject-id! session))))))))
 
-(defn-XXX trim-to-matcher
-  ""
+(defmulti trim-to-matcher
+  "Returns an object of the same class as msg, with the same values as
+  msg for the fields used to correlate messages to their responses,
+  and with canonical values for the other fields."
+  class)
+
+(defmethod trim-to-matcher ReplyInv
   [msg]
-  
-  )
+  (ReplyInv. #^DvtpExternalizable (.getKey msg)))
+
+(defmethod trim-to-matcher FunRet
+  [msg]
+  (FunRet. (into-array DvtpExternalizable
+                       [ (.getContents msg 0) ])))
 
 (defn handle-callback!
   "Look for the given ob in the given session's callback map, and if
@@ -261,12 +276,11 @@
   [session att ob]
   (let [matcher   (trim-to-matcher ob)
         callbacks (@att :callbacks)]
-    (if-let [callback! (@callbacks matcher)]
-        (if (callback!)
-          (dosync
-           (alter callbacks dissoc matcher)
-           true)
-          false))))
+    (when-let [callback! (@callbacks matcher)]
+      (callback! ob)
+      (dosync
+       (alter callbacks dissoc matcher))
+      true)))
 
 (defmulti dvtp-dispatch-val
   "Return the dispatch value for the given DVTP message object.  For
@@ -290,6 +304,12 @@
   (fn [session att ob]
     (dvtp-dispatch-val ob)))
 
+(defmethod handle-standard! :default
+  [session att ob]
+  (throw (Exception.
+          (str "No handle-standard! dispatch for "
+               (pr-str ob)))))
+
 (defmethod handle-standard! [org.distroverse.dvtp.FunCall
                              "dump-universe"]
   [session att ob]
@@ -299,9 +319,10 @@
 
 (defn handle-object!
   "Handle an object received from an envoy.  TODO log unhandled messages?"
-  [session att ob]
-  (or (handle-callback! session att ob)
-      (handle-standard! session att ob)))
+  ([session att ob]
+     (println (str "(handle-object! " (pr-str ob) ")"))
+     (or (handle-callback! session att ob)
+         (handle-standard! session att ob))))
 
 
 (defn handle-location

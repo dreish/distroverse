@@ -95,8 +95,7 @@ public class NetSession< T >
       }
 
    /**
-    * Old-skool attachment getter, for people who are set in their ways.
-    * You should probably use getAttachmentOrNull().
+    * Returns the attachment as an Object.
     * @return -
     */
    public Object getAttachment()

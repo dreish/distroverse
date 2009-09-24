@@ -103,123 +103,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Convenience constructors for DVTP objects
-
-(defn pos-to-moveseq
-  "Creates a stationary MoveSeq for the given coordinates, which may
-  be given as three arguments, or as a list of three numbers, or two
-  lists, the second one being four numbers defining a quaternion."
-  ([[x y z] [qw qx qy qz]]
-     (MoveSeq. (Move/getNew (Vec. (Vector3f. (float x)
-                                             (float y)
-                                             (float z)))
-                            (Quat. (Quaternion. (float qw)
-                                                (float qx)
-                                                (float qy)
-                                                (float qz))))))
-  ([s]
-     (pos-to-moveseq s [0 0 0 1]))
-  ([x y z]
-     (pos-to-moveseq [x y z])))
-
-(defn pos-quat-to-moveseq
-  "Creates a stationary MoveSeq for the given coordinates and
-  Quaternion."
-  ([[x y z] #^Quaternion q]
-     (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
-                            (Quat. q)))))
-
-(defn-XXX #^AddObject node-to-addobject
-  "Turns a node hash into an AddObject message."
-  [nh]
-  (if (nh :shape)
-    (AddObject. true
-                #^Shape (nh :shape)
-                (ULong. (nh :id))
-                (ULong. (nh :parentid))
-                #^MoveSeq (nh :moveseq)
-                #^WarpSeq (nh :warpseq)))
-  ; XXX
-  )
-
-(defn-XXX noderef-encode
-  "Turns a node hash into a DNodeRef object."
-  [nh]
-  (when nh
-    (org.distroverse.dvtp.DNodeRef.
-       "0"
-       (nh :nodeid)
-       (org.distroverse.dvtp.Real. 0.0 0) ; XXX need last-write
-                                          ; timestamp
-       nil))
-  ; XXX
-  ; XXX how to noderef to an ephem node? (this)  Will I need to change
-  ; the definition of DNodeRef?
-  )
-
-(defn node-encode
-  "Turns a node hash into a DNode message."
-  [nh]
-  (DNode. (node-to-addobject nh)
-          (nh :radius)
-          (noderef-encode nh)
-          (noderef-encode (parent-of nh))
-          (into-array (map (comp noderef-encode get-node)
-                           (nh :children)))
-          (nh :depth)))
-
-(defmulti dvtp-convert
-  "Convert a string or number into a Str, ULong, or Flo, pass through
-  a list starting with a Dvtp class, and throw an exception for
-  anything else."
-  (fn [x] (class x)))
-
-;; dvtp-wrap
-
-(defmethod dvtp-convert clojure.lang.PersistentList
-  ;; (to catch a likely error)
-  [x]
-  (if (message-set (first x))
-    x
-    (throw (Exception. (str "Cannot convert list " x
-                            ", try a vector")))))
-
-(defmethod dvtp-convert Integer [x]
-  `(Ulong. ~x))
-
-(defmethod dvtp-convert Boolean [x]
-  (if x `(True.) `(False.)))
-
-(defmethod dvtp-convert String [x]
-  `(Str. ~x))
-
-(defmethod dvtp-convert Double [x]
-  `(Flo. (float x)))
-
-(defn dvtp-wrap
-  "Converts a sequence including strings, booleans, and numbers into a
-  sequence including Strs, Bools, ULongs, and Flos."
-  [s]
-  (map dvtp-convert s))
-
-;; Shapes
-
-(defn sphere
-  "Returns an approximately spherical Shape."
-  ([opts]
-     (let [rows   (or (opts :rows)   3)
-           radius (or (opts :radius) 1.0)
-           aspect (or (opts :aspect) 1.0)]
-       (-> (doto (BallFactory.)
-             (.setEquatorialRadius radius)
-             (.setNumRows rows)
-             (.setAspectRatio aspect))
-           .generate)))
-  ([o1 & orest]
-     (sphere (apply hash-map o1 orest))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;; Node-tree operations
 
 (defvar ws-ns "ws-a/"
@@ -567,6 +450,17 @@
   (let [nob (new-object shape)]
     (reparent node move nob)
     nob))
+
+(defn node-encode
+  "Turns a node hash into a DNode message."
+  [nh]
+  (DNode. (node-to-addobject nh)
+          (nh :radius)
+          (noderef-encode nh)
+          (noderef-encode (parent-of nh))
+          (into-array (map (comp noderef-encode get-node)
+                           (nh :children)))
+          (nh :depth)))
 
 (defn rel-vector
   "Returns a vector from node a to node b.  Throws an error if a and b
