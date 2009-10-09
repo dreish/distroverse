@@ -96,7 +96,7 @@ public abstract class NetInQueueWatcher< T > extends Thread
    @SuppressWarnings("unchecked")
    private void clearAllQueues() throws IOException
       {
-      Log.p( "clearAllQueues() called", Log.NET, -50 );
+      Log.p( "clearAllQueues() called", Log.NET, -150 );
       
       Object[] qs;
 

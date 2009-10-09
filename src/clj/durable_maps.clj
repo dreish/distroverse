@@ -293,26 +293,32 @@
 (defn insert
   "Add a new map entry, throwing an exception if an entry with the
   given key already exists.  Returns dmap-c."
-  [dmap-c row] 
-  (do
-    (require-dmtrans)
-    (let [dmap (dmap-c)
-          row (fixrow row nil (-> dmap :spec :checked-cols))
-          writes (dmap :write)
-          rowkey (row (-> dmap :spec :key))
-          in-writes (writes rowkey)
-          write-query {:type :insert
-                       :dmap dmap
-                       :time (tm)
-                       :required true
-                       :row row}]
-      (if (dmap-c rowkey)
-        (throw (Exception. (str "insert: Row exists: " rowkey))))
-      (if in-writes
-        (ref-set in-writes row)
-        (commute writes assoc-new-or-retry rowkey (ref row)))
-      (add-to-write-queue write-query))
-    dmap-c))
+  ([dmap-c row] 
+     (do
+       (require-dmtrans)
+       (let [dmap (dmap-c)
+             row (fixrow row nil (-> dmap :spec :checked-cols))
+             writes (dmap :write)
+             rowkey (row (-> dmap :spec :key))
+             in-writes (writes rowkey)
+             write-query {:type :insert
+                          :dmap dmap
+                          :time (tm)
+                          :required true
+                          :row row}]
+         (if (dmap-c rowkey)
+           (throw (Exception. (str "insert: Row exists: " rowkey))))
+         (if in-writes
+           (ref-set in-writes row)
+           (commute writes assoc-new-or-retry rowkey (ref row)))
+         (add-to-write-queue write-query))
+       dmap-c))
+  ([dmap-c row1 row2 & more]
+     (do
+       (insert dmap-c row1)
+       (insert dmap-c row2)
+       (when (seq more)
+         (apply insert dmap-c more)))))
 
 ; update - alter an existing map entry
 

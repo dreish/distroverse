@@ -31,7 +31,7 @@
  * </copyleft>
  */
 /**
- * 
+ *
  */
 package org.distroverse.core.net;
 
@@ -52,7 +52,7 @@ import org.distroverse.distroplane.lib.DvtpServer;
  * for new connections and process I/O on existing connections.
  * @author dreish
  */
-public class 
+public class
 DvtpMultiplexedListener< P extends ObjectParser< Object >,
                          S extends ObjectStreamer< Object > >
 extends DvtpMultiplexedConnection< Object, P, S >
@@ -60,7 +60,7 @@ implements DvtpListener
    {
    public static final int DEFAULT_NUM_THREADS = 8;
    /**
-    * 
+    *
     */
    public DvtpMultiplexedListener( Class< P > parser_class,
                                    Class< S > streamer_class )
@@ -71,7 +71,7 @@ implements DvtpListener
 
    public void setServer( DvtpServer server )
       {  mServer = server;  }
-   
+
    @Override
    public void shutdownListener()
       {
@@ -98,7 +98,7 @@ implements DvtpListener
          mServerChannel  = ServerSocketChannel.open();
          mSelector       = Selector.open();
          mServerSocket = mServerChannel.socket();
-         mServerSocket.bind( new InetSocketAddress( 
+         mServerSocket.bind( new InetSocketAddress(
                                             mServer.getListenPort() ) );
          mServerChannel.configureBlocking( false );
          // SocketChannel client = server_channel.accept();
@@ -109,14 +109,14 @@ implements DvtpListener
          }
       catch ( IOException e )
          {
-         Log.p( "Unhandled exception: " + e, 
+         Log.p( "Unhandled exception: " + e,
                 Log.NET | Log.UNHANDLED, 1 );
          Log.p( e, Log.NET | Log.UNHANDLED, 1 );
          // Returns without listening; it is assumed that the socket
          // could not be created.
          }
       }
-   
+
    @Override
    protected void acceptConnection( SelectionKey key )
    throws IOException
@@ -127,6 +127,12 @@ implements DvtpListener
       if ( client == null )  return;
       // TODO - might not always want to throw away the NetSession
       addSocket( client );
+      }
+
+   @Override
+   protected void handleClosedSession( NetSession< Object > session )
+      {
+      mServer.handleClosedConnection( session );
       }
 
    private ServerSocketChannel  mServerChannel;

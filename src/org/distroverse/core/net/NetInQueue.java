@@ -103,7 +103,7 @@ public class NetInQueue< T >
 
    synchronized public void stopNetworkReader()
       {
-      Log.p( "stopNetworkReader() called", Log.NET, -50 );
+      Log.p( "stopNetworkReader() called", Log.NET, -150 );
       if ( mReaderKey != null )
          mReaderKey.interestOps( 0 );
 //         mReaderKey.cancel();

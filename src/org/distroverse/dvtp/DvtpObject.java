@@ -114,7 +114,7 @@ public final class DvtpObject
    @SuppressWarnings("unchecked")
    public static DvtpExternalizable getNew( int class_number,
                                             InputStream in )
-   throws ClassNotFoundException, IOException
+   throws ClassNotFoundException
       {
       if ( mConstructors == null )
          initConstructors();
@@ -136,7 +136,10 @@ public final class DvtpObject
          }
       catch ( Exception e )
          {
-         throw new IOException( e.getMessage() );
+         throw new RuntimeException( e );
+//         throw new IOException( "Exception from constructor for DVTP"
+//                             + " class number " + class_number + ": "
+//                             + e.getMessage() );
          }
 
       assert( ret.getClassNumber() == class_number );
@@ -203,7 +206,7 @@ public final class DvtpObject
     */
    public static DvtpExternalizable parseObject( InputStream in,
                                                  int class_number )
-   throws IOException, ClassNotFoundException
+   throws ClassNotFoundException
       {
       return getNew( class_number, in );
       }
@@ -260,7 +263,7 @@ public final class DvtpObject
    @SuppressWarnings("unchecked")
    public static <T extends DvtpExternalizable>
    T[] readArray( InputStream in, int n, Class<T> t, int class_number )
-   throws IOException, ClassNotFoundException
+   throws ClassNotFoundException
       {
       T[] ret = (T[]) Array.newInstance( t, n );
       for ( int i = 0; i < n; ++i )

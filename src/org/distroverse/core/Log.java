@@ -30,7 +30,7 @@ public class Log
    public static void p( String message, int type, int level )
       {
       // TODO bring this method up to the above specification.
-      if ( mLogging )
+      if ( mLogging  &&  level > mLogCutoff )
          {
          ++mNumLogMessages;
          System.err.println( message );
@@ -57,9 +57,20 @@ public class Log
    @SuppressWarnings( "unused" )
    public static void p( Exception e, int type, int level )
       {
-      // TODO Turn the stack trace into a string and give it to p
+      // TODO Turn the stack trace into a string and give it to the
+      // other p
       mNumLogMessages += 10;
-      e.printStackTrace();
+      if ( mLogging  &&  level > mLogCutoff )
+         {
+         ++mNumLogMessages;
+         e.printStackTrace( System.err );
+         if ( mNumLogMessages >= 500 )
+            {
+            System.err.println( "Log size limit reached; logging"
+                                + " stopped" );
+            mLogging = false;
+            }
+         }
       }
    
    public static void setNumLogMessages( int n )
@@ -72,6 +83,11 @@ public class Log
       mLogging = l;
       }
    
+   public static void setLogCutoff( int c )
+      {
+      mLogCutoff = c;
+      }
+
    public static void resetLogging()
       {
       setNumLogMessages( 0 );
@@ -80,4 +96,5 @@ public class Log
 
    private static int     mNumLogMessages = 0;
    private static boolean mLogging        = true;
+   private static int     mLogCutoff      = -100;
    }

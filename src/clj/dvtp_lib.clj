@@ -40,7 +40,7 @@
 (import '(org.distroverse.dvtp DvtpExternalizable Quat Vec Move MoveSeq
                                AskInv ReplyInv GetCookie Cookie FunCall
                                FunRet DvtpObject Real Str AddObject
-                               DNode ULong))
+                               DNode ULong WarpSeq))
 (import '(org.distroverse.distroplane.lib BallFactory))
 (import '(org.distroverse.core.net NetSession DvtpChannel))
 (import '(java.io ByteArrayInputStream ByteArrayOutputStream))
@@ -262,25 +262,31 @@
      (MoveSeq. (Move/getNew (Vec. (Vector3f. x y z))
                             (Quat. q)))))
 
-(defn-XXX #^AddObject node-to-addobject
+(defn #^AddObject node-to-addobject
   "Turns a node hash into an AddObject message."
   [nh]
-  (if (nh :shape)
-    (AddObject. true
-                #^Shape (nh :shape)
-                (ULong. (nh :id))
-                (ULong. (nh :parentid))
-                #^MoveSeq (nh :moveseq)
-                #^WarpSeq (nh :warpseq)))
-  ; XXX
-  )
+  (let [ms #^MoveSeq (or (nh :moveseq)
+                         (pos-to-moveseq [0 0 0]))
+        p (or (nh :parent)
+              0)]
+    (if (nh :shape)
+      (AddObject. true
+                  #^Shape (nh :shape)
+                  (-> nh :nodeid long ULong.)
+                  (-> p long ULong.)
+                  ms
+                  #^WarpSeq (or (nh :warpseq)
+                                (WarpSeq.)))
+      (AddObject. (-> nh :nodeid long ULong.)
+                  (-> p long ULong.)
+                  ms))))
 
-(defn-XXX noderef-encode
+(defn noderef-encode
   "Turns a node hash into a DNodeRef object."
   [nh]
   (when nh
     (org.distroverse.dvtp.DNodeRef.
-       "0"
+       ""
        (nh :nodeid)
        (org.distroverse.dvtp.Real. 0.0 0) ; XXX need last-write
                                           ; timestamp

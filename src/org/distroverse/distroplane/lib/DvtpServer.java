@@ -114,7 +114,7 @@ public abstract class DvtpServer
       {
       mListener.serve();
       }
-   
+
    public boolean shutdown()
       {
       return mListener.shutdown();
@@ -204,6 +204,13 @@ public abstract class DvtpServer
       noq.add( new Err( "Unrecognized command: " + token, 501 ) );
       }
 
+   public void
+   handleClosedConnection( @SuppressWarnings("unused")
+                           NetSession< Object > session )
+      {
+      // Do nothing.
+      }
+
    /**
     * @return the listen port
     */
@@ -211,4 +218,5 @@ public abstract class DvtpServer
 
    private int          mListenPort;
    private DvtpListener mListener;
+
    }

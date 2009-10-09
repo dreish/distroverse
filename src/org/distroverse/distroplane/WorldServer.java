@@ -165,6 +165,22 @@ public class WorldServer extends DvtpServer
          }
       }
 
+   @Override
+   public void handleClosedConnection( NetSession< Object > session )
+      {
+      try
+         {
+         mDroppedConnection.invoke( session );
+         }
+      catch ( Exception e )
+         {
+         Log.p( e, Log.SERVER | Log.UNHANDLED, 100 );
+         Log.p( "(dropped-connection!) must not throw exceptions",
+                Log.SERVER | Log.UNHANDLED, 100 );
+         e.printStackTrace();
+         }
+      }
+
    /**
     * @param args - ignored
     */
@@ -180,6 +196,7 @@ public class WorldServer extends DvtpServer
          mHandleGet          = RT.var( ws_ns, "handle-get" );
          mHandleLocation     = RT.var( ws_ns, "handle-location" );
          startup_bang        = RT.var( ws_ns, "startup!" );
+         mDroppedConnection  = RT.var( ws_ns, "dropped-connection!" );
          }
       catch ( Exception e )
          {
@@ -191,15 +208,16 @@ public class WorldServer extends DvtpServer
                               "DVTP/0.01 WorldServer 0.02" );
       mServer.serve();
       }
-   
+
    public static boolean shutdownInstance()
       {
       return mServer.shutdown();
       }
-   
+
    private static Var mInitConnectionBang;
    private static Var mHandleObjectBang;
    private static Var mHandleGet;
    private static Var mHandleLocation;
+   private static Var mDroppedConnection;
    private static DvtpServer mServer;
    }

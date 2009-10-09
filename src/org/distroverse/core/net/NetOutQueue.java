@@ -101,7 +101,7 @@ public class NetOutQueue< T >
 
    synchronized public void stopNetworkWriter()
       {
-      Log.p( "stopNetworkWriter() called", Log.NET, -50 );
+      Log.p( "stopNetworkWriter() called", Log.NET, -150 );
       if ( mWriterKey != null )
          mWriterKey.interestOps( 0 );
 //         mWriterKey.cancel();

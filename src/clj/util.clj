@@ -34,6 +34,8 @@
 
 (import '(org.distroverse.core Log))
 
+(def tio-agent (agent nil))
+
 (defn queue
   "Creates a new queue containing the args."
   ([]
@@ -207,12 +209,34 @@
            (.close ~conn)
            (throw e#))))))
 
+(defn in-transaction?
+  []
+  (clojure.lang.LockingTransaction/isRunning))
+
+(defn tio-fn
+  "Calls the given no-arguments function synchronously if not in a
+  transaction, or asynchronously through an agent if in a
+  transaction."
+  [f]
+  (if (in-transaction?)
+    (send tio-agent (fn [x] (f)))
+    (f)))
+
+(defmacro tio
+  "Evaluates the given forms, synchronously if not in a transaction,
+  or asynchronously through an agent if in a transaction.  The forms
+  may include IO -- tio allows (asynchronous) IO within a
+  transaction."
+  [& forms]
+  `(tio-fn (fn [] ~@forms)))
+
 (defmacro defn-XXX
   "Defines a function that just throws an exception.  Used for
   stubbing unimplemented functions."
   [fnname & ignored]
-  `(defn ~fnname
-     "Unimplemented"
-     [& ~'args]
-     (throw (Exception. ~(str fnname " is unimplemented.")))))
+  `(let [notice# (str *ns* "/" '~fnname " is unimplemented")]
+     (defn ~fnname
+       "Unimplemented"
+       [& ~'args]
+       (throw (Exception. notice#)))))
 

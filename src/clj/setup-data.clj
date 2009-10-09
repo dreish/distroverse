@@ -109,6 +109,11 @@
             {:k :next-nodeid
              :v 1}))
 
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
+            {:k :next-userid
+             :v 1}))
+
 
 ;; Convert all descendents of the given nodeid to concrete:
 

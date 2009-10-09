@@ -128,7 +128,7 @@ public final class DNode implements DvtpExternalizable
 
    public MoveSeq getMoveSeq()
       {  return mBeing.getMoveSeq();  }
-   
+
    public AddObject getBeing()
       {  return mBeing;  }
 
@@ -212,6 +212,8 @@ public final class DNode implements DvtpExternalizable
          Bool.booleanAsExternal( out, true );    // has_parent
          mParent.writeExternal( out );
          }
+
+      ULong.longAsExternal( out, mDepth );
 
       Bool.booleanAsExternal( out, mGeneratedChildren );
       if ( mGeneratedChildren )

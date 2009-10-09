@@ -87,7 +87,6 @@
    (.add (.getNetOutQueue session)
          message)))
 
-; XXX This is really dumb.  Why not a function?
 (defmacro async-call! [session [assign-var message] & code]
   "Send message in session, asynchronously bind the result to
   assign-var, and call code.  Side effects: calls add-callback! with
@@ -95,11 +94,13 @@
 
   TODO optional timeout parameters: seconds to wait, and code to call
   if timed out."
-  `(do
-     (add-callback! ~session
-                    ~(lookup-response message)
+  `(let [msg# ~message
+         sess# ~session]
+     (io!)
+     (add-callback! sess#
+                    (lookup-response-func msg#)
                     (fn [~assign-var] ~@code))
-     (dvtp-send! ~session ~message)))
+     (dvtp-send! sess# msg#)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

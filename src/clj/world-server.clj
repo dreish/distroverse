@@ -84,7 +84,7 @@
   [& rform]
   `(dvtp-send! ~'session
                (FunCall. (into-array DvtpExternalizable
-                                     [ (ULong. 0)
+                                     [ (ULong. (long 0))
                                        ~@(dvtp-wrap rform) ]))))
 
 (defmacro ac!
@@ -111,31 +111,47 @@
        " # "
        (sec-random)))
 
-(defn add-self-to-world!
+(defn default-starting-pos
+  []
+  {:node 1
+   :move (pos-to-moveseq 0 0 0)})
+
+(defn default-avatar
+  []
+  (sphere {}))
+
+(defn add-self-to-world
   "Add the session's avatar to the world."
   [att session]
   (let [userid (att :userid)
-        pos (att :lastpos)
-        avatar-nid
+        pos (or (att :lastpos)
+                (default-starting-pos))
+        avatar
           (dm/dmsync
-           (let [avatar-nid             ; FIXME This seems clumsy.
-                   (reparent (get-node (pos :node))
+           (let [avatar                 ; FIXME This seems clumsy.
+                   (reparent (pos :node)
                              (pos :move)
                              (or (att :avatarnode)
-                                 (new-object (att :avatarshape))))]
+                                 (new-object (or (att :avatarshape)
+                                                 (default-avatar)))))]
              (commute *sessions* conj session)
-             (dm/insert *avatars* {:nodeid avatar-nid})
+             (dm/insert *avatars* {:id (:nodeid avatar)})
              (alter att assoc
-                    :avatar (get-node avatar-nid)
-                    :avatar-nid avatar-nid)
-             avatar-nid))]
-    (dstmt! "set-avatar" (ULong. avatar-nid))))
+                    :avatar avatar
+                    :avatar-nid (:nodeid avatar))
+             avatar))]
+    (tio (dstmt! "set-avatar" (ULong. (long (:nodeid avatar)))))))
+
+(defn get-id-pubkey
+  "Stub; returns the public key portion of the given ID."
+  [id]
+  "pubkey")
 
 (defn new-user?
   "Does the given identity dict exist as a user account?  Must be in a
   dm transaction."
   [id]
-  (not (*key-to-id* (id :pubkey))))
+  (not (*key-to-id* (get-id-pubkey id))))
 
 (defn get-all-avatars
   "Returns all _in-world_ avatars (as nodeids).  Requires a dmsync
@@ -186,8 +202,8 @@
   [id userid]
   (let [skel-userid (get-ws-var :skel-userid)]
     (assoc (*userdata* skel-userid)
-      :pubkey (id :pubkey)
-      :userid userid)))
+      :k (get-id-pubkey id)
+      :id userid)))
 
 (defn setup-new-user
   "Sets up a new user."
@@ -196,7 +212,7 @@
    (if (new-user? id)
      (let [new-userid (get-new-userid)]
        (do
-         (dm/insert *key-to-id* {:key (id :pubkey),
+         (bk/insert *key-to-id* {:k (get-id-pubkey id),
                                  :id new-userid})
          (dm/insert *userdata* (new-user-from-skel id new-userid))
          (alter att assoc :userid new-userid))))))
@@ -216,13 +232,15 @@
         :loading         true
         :funcall-counter (ref 0)}))
 
-(defn start-rendering!
+(defn start-rendering
   "Begins sending an envoy objects to display."
   [att session]
-  (do
-    (dstmt! "setprop" "loading" true)
-    (dvtp-send! session
-        (map node-encode (parent-chain (att :avatar))))))
+  (let [parents (doall
+                 (map node-encode (parent-chain (att :avatar))))]
+    (tio
+     (dstmt! "setprop" "loading" true)
+     (pr-dup (prn parents))
+     (dvtp-send! session parents))))
 
 (defn-XXX reject-id!
   "Tells the client it failed to log in."
@@ -244,14 +262,20 @@
                challenge (gen-id-challenge id session)]
            (ac! [id-response (fun-call "challenge" "id" (Str. challenge))]
              (if (valid-id? id challenge id-response)
-               (do
-                 (dosync
-                  (alter att assoc :id id))
+               (dm/dmsync
+                 (alter att assoc :id id)
                  (if (new-user? id)
                    (setup-new-user session att id))
-                 (add-self-to-world! att session)
-                 (start-rendering! att session))
+                 (add-self-to-world att session)
+                 (start-rendering att session))
                (reject-id! session))))))))
+
+(defn dropped-connection!
+  "Performs dropped-connection cleanup."
+  ([session]
+     ;; Turn avatar into a statue?  Add a timeout to remove the avatar
+     ;; from the world?
+     nil))
 
 (defmulti trim-to-matcher
   "Returns an object of the same class as msg, with the same values as

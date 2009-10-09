@@ -189,10 +189,10 @@ extends Thread
             mGettingLock = false;
             }
          }
-      
+
       throw new RuntimeException( PAUSE_GET_LOCK_FAILED );
       }
-   
+
    public ReadLock tryPauseGetLock()
    throws InterruptedException, PauseGetLockException
       {
@@ -201,16 +201,16 @@ extends Thread
          {
          if ( mSelecting )
             {
-            Log.p( "waking up selector", Log.NET, -20 );
+            Log.p( "waking up selector", Log.NET, -150 );
             mSelector.wakeup();
             }
          else
-            Log.p( "not selecting; no wakeup needed", Log.NET, -20 );
+            Log.p( "not selecting; no wakeup needed", Log.NET, -150 );
          /* By locking inside the mSelecting critical section here, the
           * race condition whereby processIo() would return immediately
           * and the write lock would be reestablished before this thread
           * could get a read lock is avoided.
-          * 
+          *
           * (Or at least, that's how it is supposed to work.)
           */
          if ( ! ret.tryLock( 50, TimeUnit.MILLISECONDS ) )
@@ -223,7 +223,7 @@ extends Thread
       {
       l.unlock();
       }
-   
+
    /**
     * Shuts down the server and associated watcher thread, and returns
     * whether the server was already shutting down.
@@ -236,7 +236,7 @@ extends Thread
       mWatcher.shutdown();
       return ret;
       }
-   
+
    public abstract void shutdownListener();
 
    protected void processIo()
@@ -261,8 +261,15 @@ extends Thread
             {
             // FIXME This still seems really stupid.  When a connection
             // is unexpectedly closed, this is the exception I get.
-            if ( e.getMessage() == null
-                 || ! e.getMessage().equals( "readable stream empty" ) )
+            if ( e.getMessage() != null
+                 &&  e.getMessage().equals( "readable stream empty" ) )
+               {
+               @SuppressWarnings( "unchecked" )
+               NetSession< Object > session
+                  = (NetSession< Object >) key.attachment();
+               handleClosedSession( session );
+               }
+            else
                {
                Log.p( "Canceling an unknown key due to an exception: "
                       + e + " - " + e.getMessage(), Log.NET, -10 );
@@ -281,9 +288,19 @@ extends Thread
          }
       }
 
+   /**
+    * Called from DvtpMultiplexedConnection when the peer closes a
+    * connection.  Default behavior is to do nothing.
+    * @param session
+    */
+   protected void handleClosedSession( NetSession< Object > session )
+      {
+      // Do nothing.
+      }
+
    private void readConnection( SelectionKey key ) throws Exception
       {
-      Log.p( "readConnection called", Log.NET, -50 );
+      Log.p( "readConnection called", Log.NET, -150 );
       @SuppressWarnings( "unchecked" )
       NetSession< Object > session
          = (NetSession< Object >) key.attachment();
@@ -292,7 +309,7 @@ extends Thread
 
    private void writeConnection( SelectionKey key ) throws Exception
       {
-      Log.p( "writeConnection called", Log.NET, -50 );
+      Log.p( "writeConnection called", Log.NET, -150 );
       @SuppressWarnings( "unchecked" )
       NetSession< Object > session
          = (NetSession< Object >) key.attachment();

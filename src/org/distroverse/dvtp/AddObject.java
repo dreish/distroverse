@@ -87,7 +87,8 @@ public final class AddObject implements EnvoySendable
       }
 
    public AddObject( InputStream in,
-                     @SuppressWarnings( "unused" ) boolean b )
+                     @SuppressWarnings( "unused" )
+                        boolean without_id_dummy )
    throws IOException, ClassNotFoundException
       {
       super();
@@ -108,7 +109,7 @@ public final class AddObject implements EnvoySendable
       mParentId = new ULong( 0 );
       mMoveSeq = new MoveSeq( in );
       }
-   
+
    public AddObject setIds( ULong id, ULong pid )
       {
       if ( mHasShape )

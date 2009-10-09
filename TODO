@@ -379,11 +379,44 @@
             foolishly using that to indicate "no, it wasn't for me
             after all", which probably isn't a useful capability
         + Add FunRet to test script
-        - Find out why FunRet 1 doesn't hit the callback for FunCall 1
+        + Find out why FunRet 1 doesn't hit the callback for FunCall 1
+          + Classic macro mistake (aside from writing it in the first
+            place): gen-fun-call-id, which has side-effects (and
+            should have a bang) gets called twice
+        + No :next-userid in the ws vars table
+        + id apparently doesn't have a :pubkey; causes NPEs
+          + Make and use a get-id-pubkey fn instead
+            > No help
+          + Bring in a tracing library
+        + Something in add-self-to-world! added a node with a nodeid
+          that was another node (the one that had just been added)
+        + Need a way to do async IO within a transaction
+          + tio
+        + Implement node-to-addobject
+          + Needs to supply the null warpseq when it is not in the
+            node
+        + Implement noderef-encode
+        + A seq of nodes doesn't seem to get sent through correctly
+          + Actually, it's just one object
+            > This actually falls within my 0.6% unit-test coverage,
+              but unit tests aren't much good if they don't get run
+        - Call dropped-connection! when the client drops the
+          connection
+        - Shouldn't successive connections using test_client use the
+          same account?
         - NPE in EnvoyControllerPipeline.dispatchObject()?  How is that
           possible?
         - Make sure the ID response maps to something that is actually
           in the id table
+  - test_client.clj could all be done completely server-side:
+    - Create a session with an InvertingInQueueObjectWatcher
+    - Make a thread just watch the queue and print anything that is
+      added to it
+    - Call handle-object! with that session
+  - Make dm and bk functions recognize when they're given each others'
+    objects (or use multimethods and eliminate the problem?)
+  - Report intelligible error if given a row to insert missing the
+    keycol
   - Add a trivial avatar to the world
   - Add avatar movement
   - dm/ds: die on attempting to encode an unreadable object as a str
