@@ -400,10 +400,73 @@
           + Actually, it's just one object
             > This actually falls within my 0.6% unit-test coverage,
               but unit tests aren't much good if they don't get run
-        - Call dropped-connection! when the client drops the
+        + Call dropped-connection! when the client drops the
           connection
-        - Shouldn't successive connections using test_client use the
+        x Shouldn't successive connections using test_client use the
           same account?
+        + add-self-to-world refers to keys in att that don't exist
+          + Those should probably be keys in a *userdata* entry
+            + The skeleton user used by new-user-from-skel should have
+              these things
+              x :avatarnode
+                > This is :nodeid
+              + :avatarshape (instead of default-avatar)
+              + new-user-record needs to create a new object with
+                shape :avatarshape; set nodeid to that
+              x new-user-from-skel should add the user to the userdata
+                table and return the new userid
+                > Just rename it to new-user-record to reflect what it
+                  is
+              + :lastpos (instead of default-starting-pos)
+              + Redo anything that refers to att :id; it should be a
+                userid number
+                + The thing sent back in response to the AskInv ID
+                  query is unclear; define it
+                  > For now, it contains only a public key -- some
+                    binary data and a public-key protocol identifier,
+                    such as "RSA"
+                + Get the public key out of the ID response and map
+                  that to a userid, or create one for it if none
+                  exists
+                + Attach just the userid to the session
+              + Why does setup-new-user take the att?
+                > It doesn't anymore
+            + Add ws-var :skel-userid
+        + Session shouldn't have the avatar node itself; storage and
+          passing of nodes instead of node ids is discouraged where
+          not necessary (from now on)
+          > Guidelines:
+            > Don't return a node from a transaction; nodes exit a
+              transaction only through I/O
+            > Don't add a node to any ref/atom data structure; only to
+              durable maps (and only in one canonical place)
+        + add-self-to-world should only be _placing_ the avatar (which
+          should already exist in null space) in-world, in its last
+          position (as listed in *userdata*)
+        + New user setup should be handling the object creation stuff
+          exclusively
+        - Now add-self-to-world throws a null ptr exception
+          + What's in the user table for the hardcoded default user?
+            > id 2
+            > Just id and pubkey; no pos, nodeid, avatarshape
+            > No doubt added before 
+            + delete-user
+              + Remove from *userdata*
+              + Remove from *key-to-id*
+              + Remove avatar node from world
+            + NPE from (dm/delete *key-to-id* "pubkey")
+              > It's a bk, not a dm; again suggests polymorphism would
+                be handy, or type checking at the very least
+          + Test with (add-self-to-world {:id 3} nil)
+            > This worked by itself
+          + add-self-to-world is still throwing NPEs
+            + What arguments is it getting?
+              + (att :id) is {:k pubkey, :id 3}, rather than just 3
+          - Now (start-rendering ...) throws an npe
+          - Why does it fail to add the user in an actual
+            conversation?
+        - Successive connections using test_client should use the same
+          avatar
         - NPE in EnvoyControllerPipeline.dispatchObject()?  How is that
           possible?
         - Make sure the ID response maps to something that is actually

@@ -53,8 +53,10 @@
 (defvar *avatars* (dm/get-map (str ws-ns "avatars"))
   "Set of node IDs for all in-world avatars (those having non-nil
   parents)")
-(defvar *sessions* (ref #{})
+(defvar *sessions* (atom #{})
   "Set of sessions for all active connections")
+
+(defn key-to-id [k] (:id (*key-to-id* k)))
 
 (defmacro satget
   "Get a field from the current session attachment."
@@ -111,47 +113,61 @@
        " # "
        (sec-random)))
 
-(defn default-starting-pos
-  []
-  {:node 1
-   :move (pos-to-moveseq 0 0 0)})
+(defn user
+  "Returns a field from a userdata entry, or the whole entry if no
+  field is given.  Requires a dmsync transaction."
+  ([uid]
+     (*userdata* uid))
+  ([uid field]
+     (when-let [uentry (user uid)]
+       (if (#{:id :k :nodeid} field)
+         (uentry field)
+         ( (uentry :extra)
+           field )))))
 
-(defn default-avatar
+(defn get-new-userid
+  "Returns a new, unused numeric user id.  Requires a dmsync
+  transaction."
   []
-  (sphere {}))
+  (loop [uid (serial-no-var :next-userid)]
+    (if (user uid)
+      (recur (serial-no-var :next-userid))
+      uid)))
+
+(defn delete-user
+  "Deletes the user with the given userid.  Does not delete anything
+  of the user's other than the userdata entry and avatar."
+  ([uid]
+     (dm/dmsync
+      (let [pubkey (user uid :k)
+            avatar (user uid :nodeid)]
+        (dm/delete *userdata* uid)
+        (bk/delete *key-to-id* pubkey)
+        (if avatar (delete-node avatar))))))
 
 (defn add-self-to-world
   "Add the session's avatar to the world."
   [att session]
-  (let [userid (att :userid)
-        pos (or (att :lastpos)
-                (default-starting-pos))
-        avatar
-          (dm/dmsync
-           (let [avatar                 ; FIXME This seems clumsy.
-                   (reparent (pos :node)
-                             (pos :move)
-                             (or (att :avatarnode)
-                                 (new-object (or (att :avatarshape)
-                                                 (default-avatar)))))]
-             (commute *sessions* conj session)
-             (dm/insert *avatars* {:id (:nodeid avatar)})
-             (alter att assoc
-                    :avatar avatar
-                    :avatar-nid (:nodeid avatar))
-             avatar))]
-    (tio (dstmt! "set-avatar" (ULong. (long (:nodeid avatar)))))))
+  (println (list 'add-self-to-world att session))
+  (let [uid (att :id)
+        pos (user uid :lastpos)
+        nodeid (user uid :nodeid)]
+    (when-not (:parent (get-node nodeid))
+      (reparent (pos :node)
+                (pos :move)
+                nodeid))))
 
-(defn get-id-pubkey
-  "Stub; returns the public key portion of the given ID."
-  [id]
-  "pubkey")
+(defn id-to-pubkey
+  "Stub; Converts the given ID DVTP message to a canonical pubkey
+  format."
+  ([id]
+     "pubkey"))
 
 (defn new-user?
   "Does the given identity dict exist as a user account?  Must be in a
   dm transaction."
   [id]
-  (not (*key-to-id* (get-id-pubkey id))))
+  (not (*key-to-id* (id-to-pubkey id))))
 
 (defn get-all-avatars
   "Returns all _in-world_ avatars (as nodeids).  Requires a dmsync
@@ -197,25 +213,27 @@
   (disconnect-users)
   (dm/shutdown!))
 
-(defn new-user-from-skel
-  "Return a copy of the skeleton user account, with the given ID"
-  [id userid]
-  (let [skel-userid (get-ws-var :skel-userid)]
-    (assoc (*userdata* skel-userid)
-      :k (get-id-pubkey id)
-      :id userid)))
+(defn new-user-record
+  "Returns a copy of the skeleton user account, with the given ID,
+  adding a new copy of the skeleton avatar to the world (with no
+  parent)."
+  [pubkey uid]
+  (let [skel-uid (get-ws-var :skel-userid)]
+    (assoc (user skel-uid)
+      :k pubkey
+      :id uid
+      :nodeid (new-object (user skel-uid :avatarshape)))))
 
 (defn setup-new-user
   "Sets up a new user."
-  [session att id]
+  [pubkey]
   (dm/dmsync
-   (if (new-user? id)
-     (let [new-userid (get-new-userid)]
+   (when (new-user? pubkey)
+     (let [new-uid (get-new-userid)]
        (do
-         (bk/insert *key-to-id* {:k (get-id-pubkey id),
-                                 :id new-userid})
-         (dm/insert *userdata* (new-user-from-skel id new-userid))
-         (alter att assoc :userid new-userid))))))
+         (bk/insert *key-to-id* {:k pubkey
+                                 :id new-uid})
+         (dm/insert *userdata* (new-user-record pubkey new-uid)))))))
 
 (defn get-id
   [dvtp-id]
@@ -236,7 +254,8 @@
   "Begins sending an envoy objects to display."
   [att session]
   (let [parents (doall
-                 (map node-encode (parent-chain (att :avatar))))]
+                 (map node-encode
+                      (-> att :avatar-nid get-node parent-chain)))]
     (tio
      (dstmt! "setprop" "loading" true)
      (pr-dup (prn parents))
@@ -255,18 +274,23 @@
   user into the world, and possibly even setting up the new user
   identity."
   ([session token]
+     (swap! *sessions* conj session)
      (let [att (new-session-attachment session nil)]
        (.setAttachment session (class att) att)
        (ac! [id-reply (AskInv. "ID" (Str. "id"))]
-         (let [id (get-id id-reply)
-               challenge (gen-id-challenge id session)]
-           (ac! [id-response (fun-call "challenge" "id" (Str. challenge))]
-             (if (valid-id? id challenge id-response)
+         (let [pubkey (id-to-pubkey id-reply)
+               challenge (gen-id-challenge pubkey session)]
+           (ac! [id-response (fun-call "challenge" "id"
+                                       (Str. challenge))]
+             (if (valid-id? pubkey challenge id-response)
                (dm/dmsync
-                 (alter att assoc :id id)
-                 (if (new-user? id)
-                   (setup-new-user session att id))
-                 (add-self-to-world att session)
+                 (if (new-user? pubkey)
+                   (setup-new-user pubkey))
+                 (let [uid (key-to-id pubkey)
+                       nodeid (user uid :nodeid)]
+                   (alter att assoc :id uid)
+                   (add-self-to-world att session)
+                   (tio (dstmt! "set-avatar" (ULong. (long nodeid)))))
                  (start-rendering att session))
                (reject-id! session))))))))
 
@@ -275,6 +299,7 @@
   ([session]
      ;; Turn avatar into a statue?  Add a timeout to remove the avatar
      ;; from the world?
+     (swap! *sessions* disj session)
      nil))
 
 (defmulti trim-to-matcher

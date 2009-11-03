@@ -81,8 +81,7 @@
                 {:cols {:id      ["VARCHAR(255)" :num]
                         :k       ["MEDIUMTEXT"   :obj]
                         :nodeid  ["VARCHAR(255)" :num]
-                        :extra   ["MEDIUMTEXT"   :obj]
-                        }
+                        :extra   ["MEDIUMTEXT"   :obj]}
                  :key :id})
 
 (dm/create-map! (str ws-ns "avatars")
@@ -92,7 +91,22 @@
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
             {:k :small-universe-spec-1
-             :v small-universe-spec}))
+             :v small-universe-spec}
+            {:k :next-nodeid
+             :v 2}
+            {:k :next-userid
+             :v 2}
+            {:k :skel-userid
+             :v 1}))
+
+(dm/dmsync
+ (dm/insert (dm/get-map (str ws-ns "userdata"))
+            {:id     1
+             :k      nil
+             :nodeid nil
+             :extra  {:avatarshape (sphere {})
+                      :lastpos {:node 2
+                                :move (pos-to-moveseq [0 0 0])}}}))
 
 (dm/dmsync
  (dm/insert (dm/get-map (str ws-ns "node-tree/id-to-node"))
@@ -103,17 +117,6 @@
                                         #=(eval (Math/exp 40.0))
                                         0 0 1 1 1)
              :radius #=(eval (Math/exp 40.0))}))
-
-(dm/dmsync
- (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
-            {:k :next-nodeid
-             :v 1}))
-
-(dm/dmsync
- (dm/insert (dm/get-map (str ws-ns "node-tree/vars"))
-            {:k :next-userid
-             :v 1}))
-
 
 ;; Convert all descendents of the given nodeid to concrete:
 

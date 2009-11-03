@@ -120,7 +120,7 @@
   [k]
   (:v (*node-tree-vars* k)))
 
-(defn- serial-no-var
+(defn serial-no-var
   "Gets and increments a *node-tree-vars* entry."
   [k]
   (:v (dm/update *node-tree-vars* k inc-in :v)))
@@ -130,22 +130,22 @@
   []
   (serial-no-var :next-nodeid))
 
-(defn get-new-userid
-  "Returns a new, unused numeric user id.  Requires a dmsync
-  transaction."
-  []
-  (serial-no-var :next-userid))
-
 (def +zero-vec+ (Vector3f. 0 0 0))
 
 (defn get-node
-  "Get the node with the given node id.  Requires a dmsync
+  "Returns the node with the given node id.  Requires a dmsync
   transaction."
   ([id]
      (*id-to-node* (normint id))))
 
+(defn delete-node
+  "Deletes the node with the given node id.  Requires a dmsync
+  transaction."
+  ([id]
+     (dm/delete *id-to-node* (normint id))))
+
 (defn selock-node
-  "Get the node with the given node id, ensuring that it does not
+  "Returns the node with the given node id, ensuring that it does not
   change throughout the current transaction.  Requires a dmsync
   transaction."
   ([id]

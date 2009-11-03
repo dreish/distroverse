@@ -34,6 +34,7 @@
 
 (import '(org.distroverse.core Log))
 
+;;; Agent that will handle transactional IO using the tio macro below.
 (def tio-agent (agent nil))
 
 (defn queue
@@ -44,7 +45,8 @@
      (loop [q (queue)
             a args]
        (if a
-         (recur (conj q (first a)) (next a))
+         (recur (conj q (first a))
+                (next a))
          q))))
 
 (defn cinc
@@ -53,16 +55,18 @@
   (-> c int inc char))
 
 (defn crange
-  "Given two characters, returns a character range.  Like range, the
-  end is not included."
+  "Given two characters, returns a character range.  Unlike range, the
+  end IS included."
   [#^Character begin #^Character end]
   (lazy-seq
-    (if (not= begin end)
-      (cons begin
-            (crange (cinc begin) end)))))
+   (cons begin
+         (if (= begin end)
+           nil
+           (crange (cinc begin)
+                   end)))))
 
-(let [nybs (vec (concat (crange \0 (cinc \9))
-                        (crange \a (cinc \f))))]
+(let [nybs (vec (concat (crange \0 \9)
+                        (crange \a \f)))]
   (defn hex-encode-bytes
     "Takes a sequence of bytes and returns a sequence of hex
     characters."
