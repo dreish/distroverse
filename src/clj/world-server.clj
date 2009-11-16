@@ -148,7 +148,6 @@
 (defn add-self-to-world
   "Add the session's avatar to the world."
   [att session]
-  (println (list 'add-self-to-world att session))
   (let [uid (att :id)
         pos (user uid :lastpos)
         nodeid (user uid :nodeid)]
@@ -253,9 +252,11 @@
 (defn start-rendering
   "Begins sending an envoy objects to display."
   [att session]
-  (let [parents (doall
-                 (map node-encode
-                      (-> att :avatar-nid get-node parent-chain)))]
+  (println (list 'start-rendering att session))
+  (let [parents (dm/dmsync (doall
+                            (map node-encode
+                                 (-> att deref :id user :nodeid get-node
+                                     parent-chain))))]
     (tio
      (dstmt! "setprop" "loading" true)
      (pr-dup (prn parents))
@@ -283,14 +284,16 @@
            (ac! [id-response (fun-call "challenge" "id"
                                        (Str. challenge))]
              (if (valid-id? pubkey challenge id-response)
-               (dm/dmsync
-                 (if (new-user? pubkey)
-                   (setup-new-user pubkey))
-                 (let [uid (key-to-id pubkey)
-                       nodeid (user uid :nodeid)]
-                   (alter att assoc :id uid)
-                   (add-self-to-world att session)
-                   (tio (dstmt! "set-avatar" (ULong. (long nodeid)))))
+               (do
+                 (dm/dmsync
+                    (if (new-user? pubkey)
+                      (setup-new-user pubkey))
+                    (let [uid (key-to-id pubkey)
+                          nodeid (user uid :nodeid)]
+                      (alter att assoc :id uid)
+                      (add-self-to-world att session)
+                      (tio (dstmt! "set-avatar"
+                                   (ULong. (long nodeid))))))
                  (start-rendering att session))
                (reject-id! session))))))))
 

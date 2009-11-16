@@ -500,7 +500,7 @@
      (create-map! name spec true)))
 
 (defn drop-map!
-  "Delete a map.  Requires that the key column name (a keyword) be
+  "Deletes a map.  Requires that the key column name (a keyword) be
   given as a safety measure."
   ([name k]
      (io!)
@@ -513,12 +513,31 @@
            (ds/drop! @*db* (t :inname))
            (if-let [other-t (@*tables* name)]
              (dosync
-              (ref-set (other-t :write) "fail")
-              (ref-set (other-t :read)  "fail")))
+              (ref-set (other-t :write)
+                       #(throw (Exception. "write to dropped map")))
+              (ref-set (other-t :read)
+                       #(throw (Exception. "read from dropped map")))))
            (swap! *tables* dissoc name)
            (dmsync (delete (close-dmap *table-map*)
                            name))
            nil)))))
+
+;;; list-maps - return a seq of durable map names
+
+(defn list-maps
+  "Returns a non-lazy seq of the names of all durable maps.  Requires
+  a dmsync transaction."
+  ([]
+     (locking *schema-change-mutex*
+       (require-dmtrans)
+       (doall (pkeys (close-dmap *table-map*))))))
+
+;;; spec - return the spec of a given table
+
+(defn spec
+  "Returns the spec for the map with the given name."
+  ([name]
+     (:spec (dmsync (select *table-map* name)))))
 
 ; init! - create core tables 'mtables' and 'mvar'
 

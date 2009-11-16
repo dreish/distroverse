@@ -445,7 +445,7 @@
           position (as listed in *userdata*)
         + New user setup should be handling the object creation stuff
           exclusively
-        - Now add-self-to-world throws a null ptr exception
+        + Now add-self-to-world throws a null ptr exception
           + What's in the user table for the hardcoded default user?
             > id 2
             > Just id and pubkey; no pos, nodeid, avatarshape
@@ -462,9 +462,85 @@
           + add-self-to-world is still throwing NPEs
             + What arguments is it getting?
               + (att :id) is {:k pubkey, :id 3}, rather than just 3
-          - Now (start-rendering ...) throws an npe
-          - Why does it fail to add the user in an actual
+          + Now (start-rendering ...) throws an npe
+            + Avatar's nodeid is 2382, with parent 2, which doesn't
+              exist
+              > Previously-added avatars are still under node 1
+              + reparent should die if the new parent doesn't exist
+              + Wipe out everything and recreate
+                + dm/list-tables => seq of strings, suitable for
+                  dm/get-map or bk/get-map
+                + Drop all of them, including the bks
+                  + Need a way to look up the schema of map
+                + Re-init! bk
+                + Put all this in setup-data, wrapped in (when false)
+                x Re-add everything from setup-data
+                  + bk/create-map! key-to-id throws an NPE
+                    + dm/insert is being called with nil for the first
+                      [dmap-c] argument
+                      + That means bk/*maps* is a nil atom
+                        > That means I shouldn't have called
+                          bk/startup! before calling bk/init!
+                  + concretize-descendants tries to call a string
+                    + (get-node 1) tries to call a string
+                      x Because the table was previously invalidated,
+                        and apparently didn't get replaced with
+                        something valid when I recreated the table
+                        x This didn't fail before because I didn't
+                          request only-if-new
+                        > No, that's not it
+                      > Because I'm calling *id-to-node*, which was
+                        set to the old table, now nonexistent and
+                        therefore invalid; when I wipe out everything,
+                        I need to close the session before recreating
+                        > :(
+                + Try again; drop all tables, including the bks
+                + Re-init! bk
+                + Recreate data structures, but no contents
+                  > I.e., do all the create-map!s, but none of the
+                    inserts
+                + Quit Clojure session (could reload all, but this is
+                  easier) and restart
+                + Redo the inserts from setup-data
+                  + Still get an NPE from the first insert (the vars)
+                    + Actually from the get-map
+                      + *db* is still nil
+                        > Just had forgotten to startup dm
+                + skel user gets added with pos of node 2, which
+                  doesn't actually exist after initializing everything
+                + Think about something that causes an
+                  easier-to-identify failure when called than "fail"
+                  + Simple: a fn that throws an informative exception!
+                  x Rather than dissocing the table from *tables*, why
+                    not keep it and change it to something valid if it
+                    gets recreated?
+                    x Check for an existing table in *tables* in
+                      create-map!
+                    > This would have only been possible if the table
+                      itself had been a ref, not just :read
+                      and :write; I intended the table itself to be
+                      unchanging once created
+                    > Once tables are dropped, the session simply has
+                      to be restarted
+              + Try an init session again
+                > Same thing
+            + It fails to add the user
+              > That's because start-rendering is throwing an
+                exception, rolling back the surrounding transaction in
+                which the user was added
+              + Move start-rendering outside the transaction
+            + Still throwing an exception
+              > userid is 3
+              > nodeid is 1099; child of 1, consistent
+              > Maybe I should learn to read; this is not an NPE, it
+                is a missing dmsync
+            + After wrapping it in another transaction, it again
+              throws an NPE; (get-node nil) is being called
+              + (key (ref hash)) doesn't work, even though ((ref hash)
+                key) does -- deref att before looking up :id in it
+          x Why does it fail to add the user in an actual
             conversation?
+            > Not a problem anymore, apparently
         - Successive connections using test_client should use the same
           avatar
         - NPE in EnvoyControllerPipeline.dispatchObject()?  How is that

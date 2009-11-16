@@ -98,7 +98,7 @@
   ([x form & more]
      `(+> (+> ~x ~form) ~@more)))
 
-(defmacro ->>
+(defmacro -->>
   "Rotates the first argument two forward to become the third argument.
   Useful with -> and various functions that operate on seqs."
   ([a b c & more]
@@ -244,3 +244,30 @@
        [& ~'args]
        (throw (Exception. notice#)))))
 
+
+(defmacro let-when
+  "When the given condition is true, shadows existing bindings using
+  the given bindings vector, and in any case evaluates body in an
+  implicit do.  Symbols in the bindings vector beginning with = are
+  created rather than shadowed.  Vector destructuring is supported,
+  but not hash destructuring."
+  [cond bindings & body]
+  (when (odd? (count bindings))
+    (throw (IllegalArgumentException.
+            "Binding vector must have an even number of elements.")))
+  (when (vector? cond)
+    (throw (IllegalArgumentException.
+            "First argument to let-when may not be a literal vector.")))
+  (let [crsym `cond-result#]
+    `(let [~crsym ~cond
+           ~@(let [bind-pairs (partition 2 bindings)]
+               (mapcat (fn [[n v]]
+                         (when (map? n)
+                           (throw (IllegalArgumentException.
+                                   (str "Hash destructuring is not"
+                                        " supported by let-when."))))
+                         [n (if (= \= (first (str n)))
+                              `(when ~crsym ~v)
+                              `(if ~crsym ~v ~n))])
+                       bind-pairs))]
+       ~@body)))

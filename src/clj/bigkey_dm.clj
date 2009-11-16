@@ -73,8 +73,10 @@
 
 (defn select
   [bk k]
-  (let [munged-key ((get-key-munger bk) (pr-str k))]
-    (if-let [dm-row ((get-dmap bk) munged-key)]
+  (let [munged-key ( (get-key-munger bk)
+                     (pr-str k) )]
+    (if-let [dm-row ( (get-dmap bk)
+                      munged-key )]
         (let [valcol (dm-row :val_hash)]
           (valcol k)))))
 
@@ -96,7 +98,8 @@
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
         k (row abstract-keycol)
-        munged-key ((get-key-munger bk) (pr-str k))]
+        munged-key ( (get-key-munger bk)
+                     (pr-str k) )]
     (if-let [dm-row (dmap munged-key)]
         (let [dm-row-val (dm-row :val_hash)]
           (if (dm-row-val k)
@@ -112,11 +115,13 @@
   (let [bk (bkc)
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
-        munged-key ((get-key-munger bk) (pr-str keyval))
+        munged-key ( (get-key-munger bk)
+                     (pr-str keyval) )
         ; Ultimate GOTO:
         nonexist-err #(throw (Exception. "Update on non-existent row"))]
     (if-let [dm-row (dmap munged-key)]
-        (if-let [bk-row ((dm-row :val_hash) keyval)]
+        (if-let [bk-row ( (dm-row :val_hash)
+                          keyval )]
             (let [new-bk-row (apply f bk-row args)]
               (dm/update dmap munged-key
                          assoc-in [:val_hash keyval] new-bk-row)
@@ -176,9 +181,11 @@
   (let [bk (bkc)
         dmap (get-dmap bk)
         abstract-keycol (get-abstract-keycol bk)
-        munged-key ((get-key-munger bk) (pr-str keyval))]
+        munged-key ( (get-key-munger bk)
+                     (pr-str keyval) )]
     (if-let [dm-row (dmap munged-key)]
-        (if ((dm-row :val_hash) keyval)
+        (if ( (dm-row :val_hash)
+              keyval )
           (if (= 1 (count (dm-row :val_hash)))
             (dm/delete dmap munged-key)
             (dm/update dmap munged-key dissoc-in :val_hash keyval))
@@ -196,7 +203,8 @@
   [bkc keyval]
   ; Note: This ensures the whole dm row.
   (let [bk (bkc)
-        munged-key ((get-key-munger bk) (pr-str keyval))]
+        munged-key ( (get-key-munger bk)
+                     (pr-str keyval) )]
     (or (if-let [dm-row (dm/selock (get-dmap bk) munged-key)]
             (let [valcol (dm-row :val_hash)]
               (valcol keyval)))

@@ -32,27 +32,33 @@
 (ns setup-data
   (:require :reload-all [durable-maps :as dm])
   (:require :reload-all [bigkey-dm    :as bk])
-  (:use [server-lib])
-  (:use [clojure.contrib.def]))
+  (:use server-lib
+        dvtp-lib
+        clojure.contrib.def))
 
 ; (require :reload-all 'server-lib)
 
 (dm/startup! :sql "dm" "dm" "nZe3a5dL")
-
-; This always needs to be run:
-(bk/startup!)
 
 ; Harmless to run these if they have already been run:
 (dm/init!)
 
 (bk/init!)
 
+; This always needs to be run:
+(bk/startup!)
+
 (dm/create-map! (str ws-ns "node-tree/vars")
                 {:cols {:k ["VARCHAR(32)" :keyword]
                         :v ["MEDIUMTEXT"  :obj]}
                  :key :k})
 
-;; (dm/drop-map! (str ws-ns "node-tree/id-to-node")  :nodeid)
+;;; (dm/drop-map! (str ws-ns "node-tree/id-to-node")  :nodeid)
+
+;;; Drop all:
+;;; (when false
+;;;   (map #(dm/drop-map! % (:key (dm/spec %))) (dm/dmsync (dm/list-tables))))
+;;; (bk/init!)
 
 (dm/create-map! (str ws-ns "node-tree/id-to-node")
                 {:cols {:nodeid    ["VARCHAR(255)" :num]
@@ -105,7 +111,7 @@
              :k      nil
              :nodeid nil
              :extra  {:avatarshape (sphere {})
-                      :lastpos {:node 2
+                      :lastpos {:node 1
                                 :move (pos-to-moveseq [0 0 0])}}}))
 
 (dm/dmsync
@@ -118,26 +124,26 @@
                                         0 0 1 1 1)
              :radius #=(eval (Math/exp 40.0))}))
 
-;; Convert all descendents of the given nodeid to concrete:
+;; Convert all descendants of the given nodeid to concrete:
 
-(defn concretize-descendents
+(defn concretize-descendants
   ([nodeid]
      (dm/dmsync
       (if (:echildren (selock-node nodeid))
         (concretize-children nodeid)))
      (doseq [c (:children (dm/dmsync (get-node nodeid)))]
-       (concretize-descendents c))))
+       (concretize-descendants c))))
 
-(time (concretize-descendents 1))
+(time (concretize-descendants 1))
 
-(concretize-descendents 148)
+(concretize-descendants 148)
 
-(concretize-descendents 156)
+(concretize-descendants 156)
 
-(concretize-descendents 157)
+(concretize-descendants 157)
 
 (dm/dmsync
- (concretize-descendents 158)
- (concretize-descendents 159))
+ (concretize-descendants 158)
+ (concretize-descendants 159))
 
-(dm/dmsync (get-node 1))
+(dm/dmsync (get-node 5))

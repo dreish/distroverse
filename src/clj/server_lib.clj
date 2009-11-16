@@ -435,6 +435,9 @@
     (let [np (and new-parent (get-node new-parent))
           nd (if np (-> np :depth inc)
                     1)]
+      (when (and new-parent (not np))
+        (throw (Exception. (str "reparent: new parent node " new-parent
+                                " does not exist"))))
       (when np
         (dm/update *id-to-node* new-parent assoc
                    :children (conj (np :children)
