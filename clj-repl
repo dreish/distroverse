@@ -1,0 +1,8 @@
+#!/bin/zsh
+
+TOP_DIR=/Users/dreish/src/distroverse
+LIB_JARS=`echo $TOP_DIR/lib/*.jar | tr ' ' :`
+export CLASSPATH=$LIB_JARS:$TOP_DIR/src/
+
+# java -server clojure.lang.Repl
+/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java -server clojure.main
