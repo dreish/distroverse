@@ -43,7 +43,9 @@ Get Distroverse:
 Build it:
 
     $ lein deps
-    [various download messages omitted]
+    [various download messages omitted; grab a beverage, there are a lot of them]
+    $ lein native-deps
+    [just a few more download messages]
     $ lein uberjar
 
 Run it:
