@@ -3,4 +3,5 @@
   :dependencies [[org.clojure/clojure "1.2.0-master-SNAPSHOT"]
                  [org.clojure/clojure-contrib "1.2.0-SNAPSHOT"]]
   :repositories {"clojure-releases"
-                 "http://build.clojure.org/releases"})
+                 "http://build.clojure.org/releases"}
+  :main distroverse.core)
