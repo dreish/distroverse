@@ -18,13 +18,21 @@ Make sure you have java installed.  1.6 is good:
     Java(TM) SE Runtime Environment (build 1.6.0_20-b02-279-10M3065)
     Java HotSpot(TM) 64-Bit Server VM (build 16.3-b01-279, mixed mode)
 
-Install Leiningen if you don't already have it.  You don't need to
-install Clojure yourself or any other libraries; Leiningen takes care
-of it all for you:
+Install Leiningen if you don't already have it.  Java (in the unlikely
+event you don't already have it), Leiningen, and Distroverse itself
+are the only things you need to download.  You don't need to install
+Clojure yourself or any libraries; Leiningen takes care of it all for
+you:
 
     $ wget -nv http://github.com/technomancy/leiningen/raw/stable/bin/lein
     2010-07-05 16:32:34 URL:http://..../lein [4061/4061] -> "lein" [1]
     $ mv lein ~/bin
+    $ lein self-install
+    Downloading Leiningen now...
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                     Dload  Upload   Total   Spent    Left  Speed
+    100 8076k  100 8076k    0     0   963k      0  0:00:08  0:00:08 --:--:-- 1040k
+
 
 Get Distroverse:
 
@@ -34,6 +42,8 @@ Get Distroverse:
 
 Build it:
 
+    $ lein deps
+    [various download messages omitted]
     $ lein uberjar
 
 Run it:
