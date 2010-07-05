@@ -1,5 +1,0 @@
-org.distroverse.core includes utility classes that may be used in both
-the Distroverse Viewer client and the Distroplane reference server,
-but that are not part of either the DVTP or DVOP protocols.  (Util is
-used in the implementation of some of the protocol classes, and is
-therefore licensed under the LGPL.)
