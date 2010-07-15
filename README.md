@@ -71,4 +71,4 @@ Clojure.  You can find various GPL'd and LGPL'd files in the earlier
 incarnation of the project in git, and that code may still, of course,
 be distributed under those licenses.  If you need me to relicense some
 of the older code under the EPL, send me an email at
-dreish@distroverse.org.
+<dreish@distroverse.org>.

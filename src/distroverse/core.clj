@@ -1,5 +1,6 @@
 (ns distroverse.core
-  (:require (clojure.contrib [command-line :as cmd-line]))
+  (:require (clojure.contrib [command-line :as cmd-line])
+            (distroverse [client :as client]))
   (:gen-class))
 
 (defn -main [& args]
@@ -8,5 +9,7 @@
     [[serve? "Starts a DVTP server"]
      [port   "Port for the DVTP server" 1808]
      extra-args]
-    (println args serve? port extra-args)))
-
+    (println args serve? port extra-args)
+    (if serve?
+      (throw (Exception. "Server not implemented yet"))
+      (client/run-client))))
