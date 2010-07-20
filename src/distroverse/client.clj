@@ -9,10 +9,13 @@
 ;; terms of this license.  You must not remove this notice, or any
 ;; other, from this software.
 
-
 (ns distroverse.client
   (:use [penumbra opengl])
   (:require [penumbra.app :as app]))
+
+(defn run-client []
+  "XXX - stub, still just playing around with penumbra at the moment"
+  nil)
 
 (defn draw-pyramid []
   (material :front-and-back
