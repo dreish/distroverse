@@ -62,4 +62,30 @@
 (defmessage ulong
   "Nonnegative arbitrarily large integer packed 7 bits per byte"
   :class 0
-  :tobytes ulong-to-bytes)
+  :encode ulong-to-bytes
+  :decode bytes-to-ulong)
+
+(defn string-to-bytes
+  "Given a string, return a seq of bytes"
+  ([s]
+     (lazy-seq
+      (let [ba (.getBytes s "UTF-8")
+            l  (alength ba)]
+        (lazy-cat (ulong-to-bytes l)
+                  (seq ba))))))
+
+(defn bytes-to-string
+  ([bs]
+     (let [len-pair (bytes-to-ulong bs)
+           len (pair-first len-pair)
+           bs (pair-second len-pair)]
+       (return-pair (String. (byte-array (take len bs))
+                             "UTF-8")
+                    (drop len bs)))))
+
+(defmessage string
+  "Length-prefixed UTF-8 encoded string"
+  :class 1
+  :encode string-to-bytes
+  :decode bytes-to-string)
+
