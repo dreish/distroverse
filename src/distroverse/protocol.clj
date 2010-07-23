@@ -43,16 +43,17 @@
   "Given a seq of bytes, return a nonnegative integer and the remaining
   unconsumed bytes (using return-pair)"
   ([bs]
-     (bytes-to-ulong 0 0 bs))
-  ([n order bs]
-     (let [byte (first bs)]
-       (if (< byte 128)
-         (return-pair (+ n (bit-shift-left byte order))
-                      (rest bs))
-         (recur (+ n (bit-shift-left (bit-and byte 127)
-                                     order))
-                (+ order 7)
-                (rest bs))))))
+     (loop [n     0
+            order 0
+            bs    bs]
+       (let [byte (first bs)]
+         (if (< byte 128)
+           (return-pair (+ n (bit-shift-left byte order))
+                        (rest bs))
+           (recur (+ n (bit-shift-left (bit-and byte 127)
+                                       order))
+                  (+ order 7)
+                  (rest bs)))))))
 
 (defmacro defmessage
   "XXX would be nice to have a stub defmacro-XXX like defn-XXX"
@@ -74,8 +75,20 @@
         (lazy-cat (ulong-to-bytes l)
                   (seq ba))))))
 
+(defmacro consume-from
+  "Take bytes from byte sequence bs, setting x to the value consumed
+  using function f, and evaluate body in that environment"
+  ([bs x f & body]
+     `(let [pair# (~f ~bs)
+            ~x (pair-first pair#)
+            ~bs (pair-second pair#)]
+        ~@body)))
+
 (defn bytes-to-string
+  "Given a seq of bytes, return a string and the remaining unconsumed
+  bytes (using return-pair)"
   ([bs]
+     ;; XXX use consume-from here
      (let [len-pair (bytes-to-ulong bs)
            len (pair-first len-pair)
            bs (pair-second len-pair)]
@@ -88,4 +101,61 @@
   :class 1
   :encode string-to-bytes
   :decode bytes-to-string)
+
+(defn fixnum-to-bytes
+  "Given a signed integer and a number of bytes to split it into,
+  return a seq of bytes"
+  ([i n]
+     (lazy-seq
+      (if (zero? n)
+        (do
+          (assert (or (zero? i)
+                      (= -1 i)))
+          ())
+        (cons (.byteValue i)
+              (fixnum-to-bytes (bit-shift-right i 8)
+                               (dec n)))))))
+
+(defn byte-to-ubyte
+  "Takes a signed byte (-128 to 127) and returns an unsigned byte (0
+  to 255), folding negative numbers to the range 128-255"
+  ([b]
+     (if (neg? b)
+       (+ b 256)
+       b)))
+
+(defn bytes-to-fixnum
+  "Given a seq of bytes and a number of bytes to parse, return a
+  signed integer and the remaining unconsumed bytes (using
+  return-pair)"
+  ([bs n]
+     (if (zero? n)
+       (return-pair 0 bs))
+     (loop [bs   bs
+            n    n
+            mult 1
+            i    0]
+       (let [byte (first bs)]
+         (if (= n 1)
+           (return-pair (+ i (* mult byte))
+                        (rest bs))
+           (recur (rest bs)
+                  (dec n)
+                  (* mult 256)
+                  (+ i (* mult (byte-to-ubyte byte)))))))))
+
+(defn float-to-bytes
+  "Given a float, return a seq of bytes"
+  ([f]
+     (lazy-seq
+      (let [i (Float/floatToIntBits f)]
+        (fixnum-to-bytes i 4)))))
+
+(defn bytes-to-float
+  "Given a seq of bytes, return a float and the remaining unconsumed
+  bytes (using return-pair)"
+  ([bs]
+     (consume-from bs i #(bytes-to-fixnum % 4)
+                   (return-pair (Float/intBitsToFloat i)
+                                bs))))
 
