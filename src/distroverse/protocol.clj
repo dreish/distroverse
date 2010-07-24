@@ -12,7 +12,7 @@
 (ns distroverse.protocol)
 
 (defn ulong-to-bytes
-  "Given a nonnegative integer, return a seq of bytes"
+  "Given a nonnegative integer, returns a seq of bytes"
   ([n]
      (lazy-seq
       (if (neg? n)
@@ -23,24 +23,25 @@
               (ulong-to-bytes (bit-shift-right n 7)))))))
 
 (defn return-pair
-  "Object returnable from a function containing two return values"
+  "Returns an object returnable from a function containing two return
+  values"
   ;; This looks stupid, and might actually be stupid, but I want to
   ;; keep open the possibility of someday doing something faster here.
   ([x y]
      [x y]))
 
 (defn pair-first
-  "First item of a pair returned by return-pair"
+  "Returns the first item of a pair returned by return-pair"
   ([p]
      (p 0)))
 
 (defn pair-second
-  "Second item of a pair returned by return-pair"
+  "Returns the second item of a pair returned by return-pair"
   ([p]
      (p 1)))
 
 (defn bytes-to-ulong
-  "Given a seq of bytes, return a nonnegative integer and the remaining
+  "Given a seq of bytes, returns a nonnegative integer and the remaining
   unconsumed bytes (using return-pair)"
   ([bs]
      (loop [n     0
@@ -55,10 +56,30 @@
                   (+ order 7)
                   (rest bs)))))))
 
+(def *class-to-message* {})
+
+(def *message-data* {})
+
 (defmacro defmessage
-  "XXX would be nice to have a stub defmacro-XXX like defn-XXX"
-  ([& forms]
-     nil))
+  ; XXX would be nice to have a stub defmacro-XXX like defn-XXX
+  "Defines a message class"
+  ([mname & forms]
+     (let [has-docstring? (string? (first forms))
+           docstring      (if has-docstring? (first forms) nil)
+           forms          (if has-docstring? (rest forms) forms)
+           options        (apply hash-map forms)
+           mname-keyword  (keyword mname)]
+       (when-not (options :class)
+         (throw (Exception. "defmessage requires at least a :class")))
+       `(do
+          (def *class-to-message*
+               (assoc *class-to-message*
+                 ~(options :class)
+                 ~mname-keyword))
+          (def *message-data*
+               (assoc *message-data*
+                 ~mname-keyword
+                 ~options))))))
 
 (defmessage ulong
   "Nonnegative arbitrarily large integer packed 7 bits per byte"
@@ -67,7 +88,7 @@
   :decode bytes-to-ulong)
 
 (defn string-to-bytes
-  "Given a string, return a seq of bytes"
+  "Given a string, returns a seq of bytes"
   ([s]
      (lazy-seq
       (let [ba (.getBytes s "UTF-8")
@@ -76,8 +97,8 @@
                   (seq ba))))))
 
 (defmacro consume-from
-  "Take bytes from byte sequence bs, setting x to the value consumed
-  using function f, and evaluate body in that environment"
+  "Takes bytes from byte sequence bs, setting x to the value consumed
+  using function f, and evaluates body in that environment"
   ([bs x f & body]
      `(let [pair# (~f ~bs)
             ~x (pair-first pair#)
@@ -85,13 +106,10 @@
         ~@body)))
 
 (defn bytes-to-string
-  "Given a seq of bytes, return a string and the remaining unconsumed
+  "Given a seq of bytes, returns a string and the remaining unconsumed
   bytes (using return-pair)"
   ([bs]
-     ;; XXX use consume-from here
-     (let [len-pair (bytes-to-ulong bs)
-           len (pair-first len-pair)
-           bs (pair-second len-pair)]
+     (consume-from bs len bytes-to-ulong
        (return-pair (String. (byte-array (take len bs))
                              "UTF-8")
                     (drop len bs)))))
@@ -104,7 +122,7 @@
 
 (defn fixnum-to-bytes
   "Given a signed integer and a number of bytes to split it into,
-  return a seq of bytes"
+  returns a seq of bytes"
   ([n i]
      (lazy-seq
       (if (zero? n)
@@ -112,7 +130,7 @@
           (assert (or (zero? i)
                       (= -1 i)))
           ())
-        (cons (.byteValue i)
+        (cons (.byteValue i)           ; (cast without overflow check)
               (fixnum-to-bytes (dec n)
                                (bit-shift-right i 8)))))))
 
@@ -125,7 +143,7 @@
        b)))
 
 (defn bytes-to-fixnum
-  "Given a seq of bytes and a number of bytes to parse, return a
+  "Given a seq of bytes and a number of bytes to parse, returns a
   signed integer and the remaining unconsumed bytes (using
   return-pair)"
   ([n bs]
@@ -145,14 +163,14 @@
                   (+ i (* mult (byte-to-ubyte byte)))))))))
 
 (defn float-to-bytes
-  "Given a float, return a seq of bytes"
+  "Given a float, returns a seq of bytes"
   ([f]
      (lazy-seq
       (let [i (Float/floatToIntBits f)]
         (fixnum-to-bytes 4 i)))))
 
 (defn bytes-to-float
-  "Given a seq of bytes, return a float and the remaining unconsumed
+  "Given a seq of bytes, returns a float and the remaining unconsumed
   bytes (using return-pair)"
   ([bs]
      (consume-from bs i (partial bytes-to-fixnum 4)
@@ -160,14 +178,14 @@
                     bs))))
 
 (defn double-to-bytes
-  "Given a double, return a seq of bytes"
+  "Given a double, returns a seq of bytes"
   ([d]
      (lazy-seq
       (let [l (Double/doubleToLongBits d)]
         (fixnum-to-bytes 8 l)))))
 
 (defn bytes-to-double
-  "Given a seq of bytes, return a double and the remaining unconsumed
+  "Given a seq of bytes, returns a double and the remaining unconsumed
   bytes (using return-pair)"
   ([bs]
      (consume-from bs l (partial bytes-to-fixnum 8)
