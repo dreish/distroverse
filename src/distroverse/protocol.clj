@@ -19,7 +19,7 @@
         (throw (Exception. (str "ulong-to-bytes arg < 0: " n))))
       (if (< n 128)
         (list n)
-        (cons (bit-or 128 (bit-and n 127))
+        (cons (.byteValue (bit-or 128 (bit-and n 127)))
               (ulong-to-bytes (bit-shift-right n 7)))))))
 
 (defn return-pair
@@ -48,7 +48,7 @@
             order 0
             bs    bs]
        (let [byte (first bs)]
-         (if (< byte 128)
+         (if (>= byte 0)
            (return-pair (+ n (bit-shift-left byte order))
                         (rest bs))
            (recur (+ n (bit-shift-left (bit-and byte 127)
