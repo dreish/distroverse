@@ -105,7 +105,7 @@
 (defn fixnum-to-bytes
   "Given a signed integer and a number of bytes to split it into,
   return a seq of bytes"
-  ([i n]
+  ([n i]
      (lazy-seq
       (if (zero? n)
         (do
@@ -113,8 +113,8 @@
                       (= -1 i)))
           ())
         (cons (.byteValue i)
-              (fixnum-to-bytes (bit-shift-right i 8)
-                               (dec n)))))))
+              (fixnum-to-bytes (dec n)
+                               (bit-shift-right i 8)))))))
 
 (defn byte-to-ubyte
   "Takes a signed byte (-128 to 127) and returns an unsigned byte (0
@@ -128,19 +128,19 @@
   "Given a seq of bytes and a number of bytes to parse, return a
   signed integer and the remaining unconsumed bytes (using
   return-pair)"
-  ([bs n]
+  ([n bs]
      (if (zero? n)
        (return-pair 0 bs))
-     (loop [bs   bs
-            n    n
+     (loop [n    n
+            bs   bs
             mult 1
             i    0]
        (let [byte (first bs)]
          (if (= n 1)
            (return-pair (+ i (* mult byte))
                         (rest bs))
-           (recur (rest bs)
-                  (dec n)
+           (recur (dec n)
+                  (rest bs)
                   (* mult 256)
                   (+ i (* mult (byte-to-ubyte byte)))))))))
 
@@ -149,13 +149,27 @@
   ([f]
      (lazy-seq
       (let [i (Float/floatToIntBits f)]
-        (fixnum-to-bytes i 4)))))
+        (fixnum-to-bytes 4 i)))))
 
 (defn bytes-to-float
   "Given a seq of bytes, return a float and the remaining unconsumed
   bytes (using return-pair)"
   ([bs]
-     (consume-from bs i #(bytes-to-fixnum % 4)
-                   (return-pair (Float/intBitsToFloat i)
-                                bs))))
+     (consume-from bs i (partial bytes-to-fixnum 4)
+       (return-pair (Float/intBitsToFloat i)
+                    bs))))
 
+(defn double-to-bytes
+  "Given a double, return a seq of bytes"
+  ([d]
+     (lazy-seq
+      (let [l (Double/doubleToLongBits d)]
+        (fixnum-to-bytes 8 l)))))
+
+(defn bytes-to-double
+  "Given a seq of bytes, return a double and the remaining unconsumed
+  bytes (using return-pair)"
+  ([bs]
+     (consume-from bs l (partial bytes-to-fixnum 8)
+       (return-pair (Double/longBitsToDouble l)
+                    bs))))
