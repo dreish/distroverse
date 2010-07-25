@@ -34,7 +34,7 @@
 
 (defn subdivide [display-list]
   (push-matrix
-    (scale 0.5 0.5 0.5)
+    (scale 4/9 4/9 4/9)
     (push-matrix
       (translate 0 1 0)
       (display-list))
@@ -53,6 +53,7 @@
 
 (defn init [state]
   (app/title! "Sierpinski Pyramid")
+  (app/periodic-update! 2 identity)
   (enable :normalize)
   (enable :depth-test)
   (enable :cull-face)
@@ -84,7 +85,7 @@
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
-  ((:pyramid state)))
+  ((nth (sierpinski) 5)))
 
 (defn start []
   (app/start {:display display
