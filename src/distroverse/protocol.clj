@@ -233,12 +233,17 @@
 
 (defn bytes-to-array
   "Given a message class (e.g., :float), a number of objects to read,
-  and a seq of bytes, returns a seq of objects of that type and the
+  and a seq of bytes, returns a vector of objects of that type and the
   remaining unconsumed bytes"
   ([c n bs]
-     (if (zero? n)
-       nil
-       (lazy-seq
-        (consume-from bs o (bytes-to-class-fn c)
-          (cons o (bytes-to-array c (dec n) bs)))))))
+     (let [decoder (bytes-to-class-fn c)]
+       (loop [n   n
+              ret []
+              bs  bs]
+         (if (zero? n)
+           (return-pair ret bs)
+           (consume-from bs o decoder
+             (recur (dec n)
+                    (conj ret o)
+                    bs)))))))
 
