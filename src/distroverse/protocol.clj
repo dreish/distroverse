@@ -9,7 +9,9 @@
 ;; other, from this software.
 
 
-(ns distroverse.protocol)
+(ns distroverse.protocol
+  (:use (distroverse util)
+        (clojure.contrib def)))
 
 (defn ulong-to-bytes
   "Given a nonnegative integer, returns a seq of bytes"
@@ -19,7 +21,7 @@
         (throw (Exception. (str "ulong-to-bytes arg < 0: " n))))
       (if (< n 128)
         (list n)
-        (cons (.byteValue (bit-or 128 (bit-and n 127)))
+        (cons (unchecked-byte (bit-or 128 (bit-and n 127)))
               (ulong-to-bytes (bit-shift-right n 7)))))))
 
 (defn return-pair
@@ -56,9 +58,11 @@
                   (+ order 7)
                   (rest bs)))))))
 
-(def *class-to-message* {})
+(defvar *class-to-message* {}
+  "Maps a numeric class to a message class keyword (e.g., :float)")
 
-(def *message-data* {})
+(defvar *message-data* {}
+  "Maps a message class (e.g., :float) to a hash defining that class")
 
 (defmacro defmessage
   ; XXX would be nice to have a stub defmacro-XXX like defn-XXX
@@ -130,7 +134,7 @@
           (assert (or (zero? i)
                       (= -1 i)))
           ())
-        (cons (.byteValue i)           ; (cast without overflow check)
+        (cons (unchecked-byte i)
               (fixnum-to-bytes (dec n)
                                (bit-shift-right i 8)))))))
 
@@ -177,6 +181,12 @@
        (return-pair (Float/intBitsToFloat i)
                     bs))))
 
+(defmessage float
+  "Java Float"
+  :class 2
+  :encode float-to-bytes
+  :decode bytes-to-float)
+
 (defn double-to-bytes
   "Given a double, returns a seq of bytes"
   ([d]
@@ -191,3 +201,44 @@
      (consume-from bs l (partial bytes-to-fixnum 8)
        (return-pair (Double/longBitsToDouble l)
                     bs))))
+
+(defmessage double
+  "Java Double"
+  :class 3
+  :encode double-to-bytes
+  :decode bytes-to-double)
+
+(defn class-to-bytes-fn
+  "Given a message class (e.g., :float), returns the function that
+  takes an object of that type and returns a seq of bytes encoding
+  that object"
+  ([c]
+     (let [c-data (*message-data* c)]
+       (c-data :encode))))
+
+(defn bytes-to-class-fn
+  "Given a message class (e.g., :float), returns the function that
+  takes a seq of bytes and returns an object of that type and the
+  remaining unconsumed bytes"
+  ([c]
+     (let [c-data (*message-data* c)]
+       (c-data :decode))))
+
+(defn array-to-bytes
+  "Given a message class (e.g., :float) and a seq of objects, returns
+  a seq of bytes *without* a class tag or count prefix"
+  ([c os]
+     (let [converter (class-to-bytes-fn c)]
+       (mapcat converter os))))
+
+(defn bytes-to-array
+  "Given a message class (e.g., :float), a number of objects to read,
+  and a seq of bytes, returns a seq of objects of that type and the
+  remaining unconsumed bytes"
+  ([c n bs]
+     (if (zero? n)
+       nil
+       (lazy-seq
+        (consume-from bs o (bytes-to-class-fn c)
+          (cons o (bytes-to-array c (dec n) bs)))))))
+
