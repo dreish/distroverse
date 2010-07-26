@@ -10,8 +10,31 @@
 ;; other, from this software.
 
 (ns distroverse.client
-  (:use [penumbra opengl])
+  (:use [penumbra opengl]
+        [clojure.contrib def])
   (:require [penumbra.app :as app]))
+
+(defvar *scene-graph*
+  (ref {:pos [0 0 0]
+        :children [(ref {:pos [0 0 0]
+                         :shape :triangle-fan
+                         :verts [0 1/2 0
+                                 1/2 -1/2 1/2
+                                 -1/2 -1/2 1/2
+                                 -1/2 -1/2 -1/2
+                                 1/2 -1/2 -1/2
+                                 1/2 -1/2 1/2]
+                         :color [1/4 1 1/4]})
+                   (ref {:pos [0 1 0]
+                         :shape :triangle-fan
+                         :verts [0 1/2 0
+                                 1/2 -1/2 1/2
+                                 -1/2 -1/2 1/2
+                                 -1/2 -1/2 -1/2
+                                 1/2 -1/2 -1/2
+                                 1/2 -1/2 1/2]
+                         :color [1 1/4 1/4]})]})
+  "Tree of nodes")
 
 (defn run-client []
   "XXX - stub, still just playing around with penumbra at the moment"
