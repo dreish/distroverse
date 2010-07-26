@@ -41,8 +41,6 @@
   nil)
 
 (defn draw-pyramid []
-  (material :front-and-back
-    :ambient-and-diffuse [1 0.25 0.25 1])
   (draw-triangle-fan
     (vertex 0 1 0)
     (dotimes [_ 5]
@@ -57,14 +55,18 @@
 
 (defn subdivide [display-list]
   (push-matrix
-    (scale 4/9 4/9 4/9)
+    (scale 1/2 1/2 1/2)
     (push-matrix
       (translate 0 1 0)
+      (material :front-and-back
+                :ambient-and-diffuse [(rand) (rand) (rand) 1])
       (display-list))
     (dotimes [_ 4]
       (rotate 90 0 1 0)
       (push-matrix
         (translate 0.5 0 0.5)
+        (material :front-and-back
+                  :ambient-and-diffuse [(rand) (rand) (rand) 1])
         (display-list)))))
 
 (defn sierpinski []
