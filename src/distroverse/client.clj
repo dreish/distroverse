@@ -11,30 +11,57 @@
 
 (ns distroverse.client
   (:use [penumbra opengl]
-        [clojure.contrib def])
+        [clojure.contrib def]
+        [cantor])
   (:require [penumbra.app :as app]))
 
 (defvar *scene-graph*
-  (ref {:pos [0 0 0]
-        :children [(ref {:pos [0 0 0]
-                         :shape :triangle-fan
-                         :verts [0 1/2 0
-                                 1/2 -1/2 1/2
-                                 -1/2 -1/2 1/2
-                                 -1/2 -1/2 -1/2
-                                 1/2 -1/2 -1/2
-                                 1/2 -1/2 1/2]
-                         :color [1/4 1 1/4]})
-                   (ref {:pos [0 1 0]
-                         :shape :triangle-fan
-                         :verts [0 1/2 0
-                                 1/2 -1/2 1/2
-                                 -1/2 -1/2 1/2
-                                 -1/2 -1/2 -1/2
-                                 1/2 -1/2 -1/2
-                                 1/2 -1/2 1/2]
-                         :color [1 1/4 1/4]})]})
+  (let [cone-verts [0 1/2 0
+                    1/2 -1/2 1/2
+                    1/2 -1/2 -1/2
+                    -1/2 -1/2 -1/2
+                    -1/2 -1/2 1/2
+                    1/2 -1/2 1/2]]
+    (ref {:pos [0 0 0]
+          :children [(ref {:pos [0 0 0]
+                           :shape :triangle-fan
+                           :verts cone-verts
+                           :color [1/4 1 1/4]})
+                     (ref {:pos [0 1 0]
+                           :shape :triangle-fan
+                           :verts cone-verts
+                           :color [1 1/4 1/4]})]}))
   "Tree of nodes")
+
+(defn find-normal
+  "Returns a non-normalized normal vector for a plane defined by three
+  points, or two vectors.  Points of the triangle should be given
+  clockwise when the triangle is viewed from the front surface, so the
+  normal vector will be pointing at the viewer.  Vectors given should
+  be in order such that a hand of a clock would sweep from the first
+  to the second."
+  ([a b c]
+     (find-normal (sub b a)
+                  (sub c a)))
+  ([u v]
+     (cross u v)))
+
+(defn expand-triangle-fan
+  "Takes a seq of numbers which, in groups of three, are the vertices
+  of a triangle fan, and draws a triangle fan."
+  ([verts]
+     (let [vs (map #(apply vec3 %)
+                   (partition 3 verts))
+           center (first vs)]
+       (draw-triangle-fan
+        (vertex center)
+        (vertex (second vs))
+        (dorun
+         (mapcat (fn [v1 v2]
+                   (normal (find-normal center v1 v2))
+                   (vertex v2))
+                 (next vs)
+                 (nnext vs)))))))
 
 (defn run-client []
   "XXX - stub, still just playing around with penumbra at the moment"
@@ -45,8 +72,8 @@
     (vertex 0 1 0)
     (dotimes [_ 5]
       (rotate 90 0 1 0)
-      (normal 1 0.5 1)
-      (vertex 0.5 0 0.5)))
+      (normal (vec3 1 0.5 1))
+      (vertex (vec3 0.5 0 0.5))))
   (draw-quads
     (normal 0 -1 0)
     (dotimes [_ 4]
@@ -107,10 +134,31 @@
     :rot-x (+ (:rot-x state) dy)
     :rot-y (+ (:rot-y state) dx)))
 
+(defn render-graph
+  "Renders the scene graph under the given ref.  Best used inside a
+  dosync with no write operations.  It is promised that render-graph
+  will not perform any writes to refs."
+  [graph]
+  (let [[x y z] (@graph :pos)
+        [r g b] (@graph :color)
+        shape (@graph :shape)
+        verts (@graph :verts)
+        children (@graph :children)]
+    (push-matrix
+     (translate x y z)
+     (material :front-and-back
+               :ambient-and-diffuse [r g b 1])
+     (case shape
+       :triangle-fan (expand-triangle-fan verts)
+       nil)
+     (dorun (map render-graph children)))))
+
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
-  ((nth (sierpinski) 5)))
+  ;((nth (sierpinski) 5))
+  ((dosync (create-display-list (render-graph *scene-graph*))))
+  )
 
 (defn start []
   (app/start {:display display
