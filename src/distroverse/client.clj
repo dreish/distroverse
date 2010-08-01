@@ -153,11 +153,30 @@
        nil)
      (dorun (map render-graph children)))))
 
+(defn simple-render
+  "Just trying to get something displaying"
+  []
+  (create-display-list
+   (material :front-and-back
+             :ambient-and-diffuse [1 1 0 1])
+   (draw-triangle-fan
+    (vertex (vec3 1/2 1 1/2))
+    (vertex (vec3 1 0 1))
+    (normal (vec3 1 1 0))
+    (vertex (vec3 0 0 1))
+    (normal (vec3 0 1 1))
+    (vertex (vec3 0 0 0))
+    (normal (vec3 1 0 1))
+    (vertex (vec3 1 0 0))
+    (normal (vec3 1 1 0))
+    (vertex (vec3 1 0 1)))))
+
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
   ;((nth (sierpinski) 5))
-  ((dosync (create-display-list (render-graph *scene-graph*))))
+  ;((dosync (create-display-list (render-graph *scene-graph*))))
+  ((dosync (simple-render)))
   )
 
 (defn start []
