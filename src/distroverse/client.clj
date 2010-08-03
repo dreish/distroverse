@@ -97,6 +97,7 @@
         (display-list)))))
 
 (defn sierpinski []
+  (println "How did I get here?")
   (iterate
    #(create-display-list (subdivide %))
    (create-display-list (draw-pyramid))))
@@ -113,7 +114,8 @@
   (enable :light0)
   (enable :fog)
   (shade-model :flat)
-  (assoc state :pyramid (nth (sierpinski) 5)))
+  ;(assoc state :pyramid (nth (sierpinski) 5))
+  )
 
 (defn reshape [[x y width height] state]
   (frustum-view 50 (/ (double width) height) 0.1 100)
@@ -145,9 +147,12 @@
         verts (@graph :verts)
         children (@graph :children)]
     (push-matrix
+     (when-not (and x y z)
+       (throw (Exception. "Node missing a :pos")))
      (translate x y z)
-     (material :front-and-back
-               :ambient-and-diffuse [r g b 1])
+     (when (and r g b)
+       (material :front-and-back
+                 :ambient-and-diffuse [r g b 1]))
      (case shape
        :triangle-fan (expand-triangle-fan verts)
        nil)
@@ -159,24 +164,20 @@
   (create-display-list
    (material :front-and-back
              :ambient-and-diffuse [1 1 0 1])
-   (draw-triangle-fan
-    (vertex (vec3 1/2 1 1/2))
-    (vertex (vec3 1 0 1))
-    (normal (vec3 1 1 0))
-    (vertex (vec3 0 0 1))
-    (normal (vec3 0 1 1))
-    (vertex (vec3 0 0 0))
-    (normal (vec3 1 0 1))
-    (vertex (vec3 1 0 0))
-    (normal (vec3 1 1 0))
-    (vertex (vec3 1 0 1)))))
+   (expand-triangle-fan
+    [1/2 1 1/2
+     1 0 1
+     1 0 0
+     0 0 0
+     0 0 1
+     1 0 1])))
 
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
   ;((nth (sierpinski) 5))
-  ;((dosync (create-display-list (render-graph *scene-graph*))))
-  ((dosync (simple-render)))
+  ((dosync (create-display-list (render-graph *scene-graph*))))
+  ;((dosync (simple-render)))
   )
 
 (defn start []
