@@ -9,9 +9,26 @@
 ;; other, from this software.
 
 
-(ns distroverse.util)
+(ns distroverse.util
+  (:import [java.net URL]))
 
 (defn unchecked-byte
   "Coerce to byte without checking for numeric overflow"
   ([x]
      (.byteValue x)))
+
+(defn get-host
+  "Returns the host portion of the given URL"
+  ([url]
+     (.getHost (URL. url))))
+
+(defn get-port
+  "Returns the port for the given URL, looking up the default port for
+  the protocol associated with the URL if it does not specify a port"
+  ([url]
+     (let [u (URL. url)
+           p (.getPort u)]
+       (if (= -1 p)
+         (.getDefaultPort u)
+         p))))
+

@@ -247,3 +247,12 @@
                     (conj ret o)
                     bs)))))))
 
+(defmessage url
+  "Length-prefixed UTF-8 encoded string containing a URL.  Sent from
+  client to envoy, it is a command to go to this URL.  Sent from envoy
+  to client, it is informational, indicating that the user has
+  navigated to the given URL."
+  :class 4
+  :encode string-to-bytes
+  :decode bytes-to-string)
+

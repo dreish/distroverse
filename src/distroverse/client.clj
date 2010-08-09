@@ -12,7 +12,8 @@
 (ns distroverse.client
   (:use [penumbra opengl]
         [clojure.contrib def]
-        [cantor])
+        [cantor]
+        [distroverse protocol])
   (:require [penumbra.app :as app]))
 
 (defvar *scene-graph*
@@ -48,7 +49,8 @@
 
 (defn expand-triangle-fan
   "Takes a seq of numbers which, in groups of three, are the vertices
-  of a triangle fan, and draws a triangle fan."
+  of a triangle fan, and draws a triangle fan.  Points after the first
+  should be given in clockwise order."
   ([verts]
      (let [vs (map #(apply vec3 %)
                    (partition 3 verts))
