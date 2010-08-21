@@ -10,7 +10,7 @@
 
 
 (ns distroverse.util
-  (:import [java.net URL]))
+  (:import [java.net URL URI]))
 
 (defn unchecked-byte
   "Coerce to byte without checking for numeric overflow"
@@ -18,17 +18,26 @@
      (.byteValue x)))
 
 (defn get-host
-  "Returns the host portion of the given URL"
-  ([url]
-     (.getHost (URL. url))))
+  "Returns the host portion of the given URI"
+  ([uri]
+     (.getHost (URI. uri))))
+
+(defn default-port-for-scheme
+  "Returns the default port for schemes defined by Distroverse"
+  ([scheme]
+     ( {"dvtp" 1808}
+       scheme )))
 
 (defn get-port
-  "Returns the port for the given URL, looking up the default port for
-  the protocol associated with the URL if it does not specify a port"
-  ([url]
-     (let [u (URL. url)
-           p (.getPort u)]
+  "Returns the port for the given URI, looking up the default port for
+  the protocol associated with the URI if it does not specify a port"
+  ([uri-str]
+     (let [uri (URI. uri-str)
+           p (.getPort uri)
+           scheme (.getScheme uri)]
        (if (= -1 p)
-         (.getDefaultPort u)
+         (if-let [p (default-port-for-scheme scheme)]
+           p
+           (.getDefaultPort (URL. uri-str)))
          p))))
 

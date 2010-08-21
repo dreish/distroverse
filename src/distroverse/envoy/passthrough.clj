@@ -36,7 +36,13 @@
      (send-msg (session :client)
                ob)))
 
-(simple-envoy
- :from-client pass-to-server
- :from-server pass-to-client)
+(defn -main
+  ([& args]
+     (cmd-line/with-command-line args
+       "passthrough - a simple distroverse envoy"
+       [remote-url]
+       (simple-envoy
+        :remote-url remote-url
+        :from-client pass-to-server
+        :from-server pass-to-client))))
 
