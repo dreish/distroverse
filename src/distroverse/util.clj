@@ -41,3 +41,11 @@
            (.getDefaultPort (URL. uri-str)))
          p))))
 
+(defn get-and-set!
+  "Atomically sets the value of the given atom and returns its
+  previous value."
+  ([atom newval]
+     (let [oldval @atom]
+       (if (compare-and-set! atom oldval newval)
+         oldval
+         (recur atom newval)))))

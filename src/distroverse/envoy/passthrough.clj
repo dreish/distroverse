@@ -9,6 +9,7 @@
 ;; other, from this software.
 
 (ns distroverse.envoy.passthrough
+  (:require (clojure.contrib [command-line :as cmd-line]))
   (:use [distroverse envoy util]))
 
 (defn pass-to-server
@@ -22,6 +23,9 @@
                ob)))
 
 (defn -main
+  "The passthrough envoy does nothing more than pass unchanged to the
+  client anything it receives from the server, and pass unchanged to
+  the server anything it receives from the client."
   ([& args]
      (cmd-line/with-command-line args
        "passthrough - a simple distroverse envoy"
