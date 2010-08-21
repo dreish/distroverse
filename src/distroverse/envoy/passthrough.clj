@@ -11,25 +11,10 @@
 (ns distroverse.envoy.passthrough
   (:use [distroverse envoy util]))
 
-(defn new-server?
-  "Do the two given URLs (given as strings rather than URL objects)
-  refer to two different servers, or two different ports on the same
-  server?"
-  ([new-url cur-url]
-     (not (and (= (get-host new-url)
-                  (get-host cur-url))
-               (= (get-port new-url)
-                  (get-port cur-url))))))
-
 (defn pass-to-server
   ([ob session]
-     (let [server (session :server)]
-       (if (and (= :url (ob :class))
-                (new-server? (ob :data)
-                             (session :server-url)))
-         (switch-server session (ob :data))
-         (when server
-           (send-msg server ob))))))
+     (send-msg (session :server)
+               ob)))
 
 (defn pass-to-client
   ([ob session]

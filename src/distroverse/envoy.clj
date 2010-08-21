@@ -9,13 +9,23 @@
 ;; other, from this software.
 
 (ns distroverse.envoy
-  (:use [distroverse util]))
+  (:use [distroverse util protocol]))
+
+(defn connection-outstream
+  ""
+  ([]
+     ))
+
+(defn write-to-connection
+  "Writes bytes to a connection"
+  ([conn bytes]
+     (let [outstream (connection-outstream conn)]
+       ())))
 
 (defn send-msg
-  "Sends a message through a socket connection."
+  "Sends a message through a connection's OutputStream."
   ([conn msg]
-
-     ))
+     (write-to-connection conn (msg-to-bytes msg))))
 
 (defn listener
   "Reads from"
