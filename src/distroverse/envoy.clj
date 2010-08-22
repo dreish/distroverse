@@ -23,12 +23,15 @@
        ())))
 
 (defn send-msg
-  "Sends a message through a connection's OutputStream."
+  "Sends a message through the server OutputStream."
   ([conn msg]
-     (write-to-connection conn (msg-to-bytes msg))))
+     (write-to-connection (:server conn)
+                          ; xxx
+                          )))
 
 (defn listener
-  "Reads from"
+  "Reads from (session :server), using (session :parser) on bytes that
+  are read to convert them to a seq of objects."
   ([f session]
      ))
 
@@ -40,9 +43,10 @@
              remote-url (args :remote-url)
              server-host (get-host remote-url)
              server-port (get-port remote-url)
-             server-conn (open-connection server-host server-port)
-             client-listener #(listener (args :from-client)
-                                        session)
+             server-conn nil ;(open-connection server-host server-port)
+             args (assoc args :server server-conn)
+             client-listener nil ; #(stdin-reader (args :from-client)
+                                 ;               session)
              server-listener (Thread. #(listener (args :from-server)
                                                  session))]
          (dosync (alter session assoc
