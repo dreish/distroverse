@@ -24,7 +24,7 @@
                                       (String. buf))]
        (.write out-stream (.getBytes prev-message)))))
 
-(defn main-
+(defn -main
   "simpletest reads eight bytes from whatever connects to it, stores
   whatever it receives in a global atom, and after receiving that,
   sends back the previous eight bytes received (or \"first!!\\n\")."

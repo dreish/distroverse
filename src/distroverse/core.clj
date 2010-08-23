@@ -9,18 +9,23 @@
 ;; other, from this software.
 
 (ns distroverse.core
-  (:require (clojure.contrib [command-line :as cmd-line])
+  (:require (distroverse.server [simpletest :as simpletest])
+            (distroverse.envoy [passthrough :as passthrough])
             (distroverse [client :as client]))
   (:gen-class))
 
+(def dv-help
+  "Usage: dv command [options] [arguments].  Available commands:
+
+   simpletest      Run a simple test server
+   passthrough     Run a passthrough envoy
+   client          Run the client
+
+Subcommands have their own --help options.")
+
 (defn -main
-  ([& args]
-     (cmd-line/with-command-line args
-       "distroverse -- virtual reality client and server"
-       [[serve? "Starts a DVTP server"]
-        [port   "Port for the DVTP server" 1808]
-        extra-args]
-       (println args serve? port extra-args)
-       (if serve?
-         (throw (Exception. "Server not implemented yet"))
-         (client/run-client)))))
+  ([subcommand & args]
+     (case subcommand
+        "simpletest"   (simpletest/-main args)
+        "passthrough"  (passthrough/-main args)
+        "client"       (client/-main args))))

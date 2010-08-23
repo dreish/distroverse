@@ -191,3 +191,7 @@
               :rot-y 0
               :pyramid nil}))
 
+(defn -main
+  ([& args]
+     (start)))
+

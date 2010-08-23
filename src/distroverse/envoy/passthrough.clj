@@ -23,10 +23,8 @@
   ([^Socket chan]
      (let [os (.getOutputStream chan)]
        (loop []
-         (prn "about to read from stdin")
          (let [c (char-array 1024)
                nread (.read *in* c)]
-           (prn "from stdin: " nread)
            (when (pos? nread)
              (let [b (.getBytes (String. c 0 nread))]
                (.write os b 0 (count b))
@@ -37,10 +35,8 @@
   ([^Socket chan]
      (let [is (.getInputStream chan)]
        (loop []
-         (prn "about to read from socket")
          (let [b (byte-array 1024)
                nread (.read is b)]
-           (prn "from server: " nread)
            (when (pos? nread)
              (print (String. b 0 nread))
              (recur)))))))
@@ -58,11 +54,12 @@
              remote-host (get-host remote-uri)
              remote-port (get-port remote-uri)
              chan (open-channel remote-host remote-port)
-             outbound-thread #(stdin-to-server chan)
+             outbound-thread (Thread. #(stdin-to-server chan))
              inbound-thread (Thread. #(server-to-stdout chan))]
          (.start inbound-thread)
-         (.run outbound-thread)
-         ;;;#(do (.stop outbound-thread)
-         ;;;     (.stop inbound-thread))
-         ))))
+         (.start outbound-thread)
+         (.start (Thread. #(do (.join outbound-thread)
+                               (.stop inbound-thread))))
+         (.join inbound-thread)
+         (.stop outbound-thread)))))
 
