@@ -256,3 +256,10 @@
   :encode string-to-bytes
   :decode bytes-to-string)
 
+
+
+(defn message-type
+  "Returns the type of the given message"
+  ([m]
+     (:type m)))
+

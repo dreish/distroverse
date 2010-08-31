@@ -191,9 +191,30 @@
   "XXX - stub, still just playing around with penumbra at the moment"
   nil)
 
+(def envoy-listener-thread (atom nil))
+
+(def output-to-envoy (atom nil))
+
+(def messages-to-envoy (agent nil))
+
+(defmulti handle-message
+  "Act on the given message from the envoy"
+  message-type)
+
+(defmethod handle-message :add-object
+  ([m]
+     ))
+
+(defn handle-messages
+  "Reads messages from the given InputStream until the stream closes,
+  and acts on those messages"
+  ([is]
+     (doseq [m (bytes-to-messages (is-to-byteseq is))]
+       (handle-message m))))
+
 (let [jar "distroverse-0.1.0-SNAPSHOT-standalone.jar"
       uri "dvtp://localhost/"]
-  (defn run-envoy
+  (defn run-envoy!
     "Runs the passthrough envoy (hardcoded for the moment), starts a
   thread to listen for messages from the envoy, and initializes the
   agent for sending messages to the envoy"
@@ -202,10 +223,12 @@
                                      uri))
              is (.getInputStream proc)
              os (.getOutputStream proc)]
-         ))))
+         (reset! envoy-listener-thread
+                 (Thread. handle-messages is))
+         (reset! output-to-envoy os)))))
 
 (defn -main
   ([& args]
-     (run-envoy)
+     (run-envoy!)
      (start)))
 
