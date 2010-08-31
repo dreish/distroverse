@@ -65,10 +65,6 @@
                  (next vs)
                  (nnext vs)))))))
 
-(defn run-client []
-  "XXX - stub, still just playing around with penumbra at the moment"
-  nil)
-
 (defn draw-pyramid []
   (draw-triangle-fan
     (vertex 0 1 0)
@@ -108,7 +104,7 @@
 
 (defn init [state]
   (app/title! "Sierpinski Pyramid")
-  (app/periodic-update! 2 identity)
+  (app/periodic-update! 30 identity)
   (enable :normalize)
   (enable :depth-test)
   (enable :cull-face)
@@ -191,7 +187,25 @@
               :rot-y 0
               :pyramid nil}))
 
+(defn run-client []
+  "XXX - stub, still just playing around with penumbra at the moment"
+  nil)
+
+(let [jar "distroverse-0.1.0-SNAPSHOT-standalone.jar"
+      uri "dvtp://localhost/"]
+  (defn run-envoy
+    "Runs the passthrough envoy (hardcoded for the moment), starts a
+  thread to listen for messages from the envoy, and initializes the
+  agent for sending messages to the envoy"
+    ([]
+       (let [proc (Runtime/exec (str "java -jar " jar " passthrough "
+                                     uri))
+             is (.getInputStream proc)
+             os (.getOutputStream proc)]
+         ))))
+
 (defn -main
   ([& args]
+     (run-envoy)
      (start)))
 
