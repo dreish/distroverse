@@ -43,9 +43,25 @@
 
 (defn get-and-set!
   "Atomically sets the value of the given atom and returns its
-  previous value."
+  previous value"
   ([atom newval]
-     (let [oldval @atom]
-       (if (compare-and-set! atom oldval newval)
-         oldval
-         (recur atom newval)))))
+     (loop []
+       (let [oldval @atom]
+         (if (compare-and-set! atom oldval newval)
+           oldval
+           (recur))))))
+
+(defn is-to-byteseq
+  "Takes ownership of an InputStream and returns a seq of bytes"
+  ([is]
+     (lazy-seq
+      (let [b (.read is)]
+        (when (not= b -1)
+          (cons b (is-to-byteseq is)))))))
+
+(defn forkexec
+  "Runs the given command line in a subprocess and returns that
+  Process object"
+  ([cmd]
+     (.exec (Runtime/getRuntime)
+            cmd)))

@@ -13,7 +13,7 @@
   (:use [penumbra opengl]
         [clojure.contrib def]
         [cantor]
-        [distroverse protocol])
+        [distroverse protocol util])
   (:require [penumbra.app :as app]))
 
 (defvar *scene-graph*
@@ -203,7 +203,8 @@
 
 (defmethod handle-message :add-object
   ([m]
-     ))
+     (println "I'm the client!  And I got an add-object message!  Here:"
+              m)))
 
 (defn handle-messages
   "Reads messages from the given InputStream until the stream closes,
@@ -219,8 +220,8 @@
   thread to listen for messages from the envoy, and initializes the
   agent for sending messages to the envoy"
     ([]
-       (let [proc (Runtime/exec (str "java -jar " jar " passthrough "
-                                     uri))
+       (let [proc (forkexec (str "java -jar " jar " passthrough "
+                                 uri))
              is (.getInputStream proc)
              os (.getOutputStream proc)]
          (reset! envoy-listener-thread

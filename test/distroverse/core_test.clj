@@ -25,9 +25,9 @@
   (fact (bytes-to-string (string-to-bytes s))
         => (return-pair s ())))
 
-(doseq [ [bs s] [ [[0] ""]
+(doseq [ [bs s] [ [[0        ] ""  ]
                   [[2 104 105] "hi"]
-                  [[1 0] "\0"]
+                  [[1 0      ] "\0"]
                   [[20 48 49 50 51 52 53 54 55 56 57 48
                     97 98 99 100 101 102 103 104 105]
                    "01234567890abcdefghi"]
@@ -46,11 +46,11 @@
   (fact (bytes-to-float (float-to-bytes (float n)))
         => (return-pair (float n) ())))
 
-(doseq [ [bs f] [ [[0 0 0 0] 0]
-                  [[0 0 -128 63] 1]
-                  [[0 0 -128 -65] -1]
-                  [[-85 -86 -86 62] 1/3]
-                  [[40 107 110 78] 1.0e9]
+(doseq [ [bs f] [ [[0 0 0 0       ]      0]
+                  [[0 0 -128 63   ]      1]
+                  [[0 0 -128 -65  ]     -1]
+                  [[-85 -86 -86 62]    1/3]
+                  [[40 107 110 78 ]  1.0e9]
                   [[95 112 -119 48] 1.0e-9] ]]
   (fact (bytes-to-float (map byte bs))
         => (return-pair (float f) ()))
@@ -66,12 +66,12 @@
   (fact (bytes-to-double (double-to-bytes (double n)))
         => (return-pair (double n) ())))
 
-(doseq [ [bs d] [ [[0 0 0 0 0 0 0 0] 0]
-                  [[0 0 0 0 0 0 -16 63] 1]
-                  [[0 0 0 0 0 0 -16 -65] -1]
-                  [[85 85 85 85 85 85 -43 63] 1/3]
-                  [[46 -97 -121 -94 -82 66 125 84] 1.0e99]
-                  [[62 -61 -40 78 125 127 97 43] 1.0e-99] ] ]
+(doseq [ [bs d] [ [[0 0 0 0 0 0 0 0              ]       0]
+                  [[0 0 0 0 0 0 -16 63           ]       1]
+                  [[0 0 0 0 0 0 -16 -65          ]      -1]
+                  [[85 85 85 85 85 85 -43 63     ]     1/3]
+                  [[46 -97 -121 -94 -82 66 125 84]  1.0e99]
+                  [[62 -61 -40 78 125 127 97 43  ] 1.0e-99] ] ]
   (fact (bytes-to-double (map byte bs))
         => (return-pair (double d) ()))
   (fact (double-to-bytes (double d))
@@ -80,6 +80,10 @@
 (fact (bytes-to-double (map byte [105 87 20 -117 10
                                   -65 5 64 0 -63 -5 62]))
       => (return-pair 2.718281828459045 '(0 -63 -5 62)))
+
+(fact (bytes-to-messages (map byte [0 1 0 1]))
+      => '({:type :ulong, :value 1}
+           {:type :ulong, :value 1}))
 
 (defn server-running?
   ([]

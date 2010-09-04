@@ -65,7 +65,6 @@
   "Maps a message class (e.g., :float) to a hash defining that class")
 
 (defmacro defmessage
-  ; XXX would be nice to have a stub defmacro-XXX like defn-XXX
   "Defines a message class"
   ([mname & forms]
      (let [has-docstring? (string? (first forms))
@@ -262,4 +261,33 @@
   "Returns the type of the given message"
   ([m]
      (:type m)))
+
+(defn message
+  "Returns a new message of type t, with value v"
+  ([t v]
+     {:type t
+      :value v}))
+
+(defn bytes-to-message
+  "Takes a seq of bytes and returns a message and the remaining
+  unconsumed bytes (using return-pair)"
+  ([bs]
+     (consume-from bs mclass-num bytes-to-ulong
+       (let [mclass (*class-to-message* mclass-num)
+             mdata (*message-data* mclass)
+             decoder (mdata :decode)]
+         (consume-from bs msg decoder
+           (return-pair (message mclass msg)
+                        bs))))))
+
+(defn bytes-to-messages
+  "Takes a seq of bytes and returns a seq of messages.  Throws an
+  exception if the byte seq ends in the middle of a message."
+  ([bs]
+     (lazy-seq
+      (when (seq bs)
+        (consume-from bs message bytes-to-message
+          (cons message
+                (bytes-to-messages bs)))))))
+
 
