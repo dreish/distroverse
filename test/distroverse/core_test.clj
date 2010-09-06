@@ -85,6 +85,10 @@
       => '({:type :ulong, :value 1}
            {:type :ulong, :value 1}))
 
+(fact (bytes-to-messages (map byte [0 -19 -65 -111 4 1 4 69 108 108 111]))
+      => '({:type :ulong, :value 8675309}
+           {:type :string, :value "Ello"}))
+
 (defn server-running?
   ([]
      false))

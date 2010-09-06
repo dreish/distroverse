@@ -193,8 +193,10 @@
 
 (def envoy-listener-thread (atom nil))
 
+;;; OutputStream to the envoy
 (def output-to-envoy (atom nil))
 
+;;; Agent for serializing function calls writing to output-to-envoy
 (def messages-to-envoy (agent nil))
 
 (defmulti handle-message

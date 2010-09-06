@@ -11,7 +11,8 @@
 
 (ns distroverse.protocol
   (:use (distroverse util)
-        (clojure.contrib def)))
+        (clojure.contrib def)
+        (clojure set)))
 
 (defn ulong-to-bytes
   "Given a nonnegative integer, returns a seq of bytes"
@@ -58,10 +59,10 @@
                   (+ order 7)
                   (rest bs)))))))
 
-(defvar *class-to-message* {}
+(defvar class-to-message {}
   "Maps a numeric class to a message class keyword (e.g., :float)")
 
-(defvar *message-data* {}
+(defvar message-data {}
   "Maps a message class (e.g., :float) to a hash defining that class")
 
 (defmacro defmessage
@@ -75,12 +76,12 @@
        (when-not (options :class)
          (throw (Exception. "defmessage requires at least a :class")))
        `(do
-          (def *class-to-message*
-               (assoc *class-to-message*
+          (def class-to-message
+               (assoc class-to-message
                  ~(options :class)
                  ~mname-keyword))
-          (def *message-data*
-               (assoc *message-data*
+          (def message-data
+               (assoc message-data
                  ~mname-keyword
                  ~options))))))
 
@@ -212,7 +213,7 @@
   takes an object of that type and returns a seq of bytes encoding
   that object"
   ([c]
-     (let [c-data (*message-data* c)]
+     (let [c-data (message-data c)]
        (c-data :encode))))
 
 (defn bytes-to-class-fn
@@ -220,7 +221,7 @@
   takes a seq of bytes and returns an object of that type and the
   remaining unconsumed bytes"
   ([c]
-     (let [c-data (*message-data* c)]
+     (let [c-data (message-data c)]
        (c-data :decode))))
 
 (defn array-to-bytes
@@ -255,6 +256,108 @@
   :encode string-to-bytes
   :decode bytes-to-string)
 
+(defmessage dvertex
+  "Three doubles representing x-, y-, and z-coordinates"
+  :class 5
+  :encode (partial array-to-bytes :double)
+  :decode (partial bytes-to-array :double 3))
+
+(defn bool-to-bytes
+  "Given a boolean, returns a seq of one byte"
+  ([b]
+     (if b
+       (list (byte 1))
+       (list (byte 0)))))
+
+(defn bytes-to-bool
+  "Given a seq of bytes, returns a boolean and the remaining
+  unconsumed bytes (using return-pair)"
+  ([bs]
+     (let [bcode (first bs)
+           b (cond (= 0 bcode) false
+                   (= 1 bcode) true
+                   :else (throw (Exception. "bool not 0 or 1")))]
+       (return-pair b (rest bs)))))
+
+(let [tripatterns
+        {0 :triangle-fan}
+      tripattern-codes
+        (map-invert tripatterns)]
+  (defn tripattern-to-bytes
+    ([st]
+       (ulong-to-bytes (tripattern-codes st))))
+  (defn bytes-to-tripattern
+    ([bs]
+       (consume-from bs tripattern-code bytes-to-ulong
+         (return-pair (tripatterns tripattern-code)
+                      bs)))))
+
+(defmessage tripattern
+  "Code identifying .  Does not have a class number."
+  :class nil
+  :encode tripattern-to-bytes
+  :decode bytes-to-tripattern)
+
+(defn shape-to-bytes
+  "Given a shape with a :tripat, :color, and :verts, returns a seq of
+  bytes"
+  ([s]
+     (lazy-cat (tripattern-to-bytes (s :tripat))
+               (array-to-bytes :double (s :color))
+               (ulong-to-bytes (count (s :verts)))
+               (array-to-bytes :vertex (s :verts)))))
+
+(defn bytes-to-shape
+  "Given a seq of bytes, returns a shape with a :tripat, :color,
+  and :verts and the remaining unconsumed bytes (using return-pair)"
+  ([bs]
+     (consume-from bs tripattern bytes-to-tripattern
+       (consume-from bs color (partial bytes-to-array
+                                       :double 3)
+         (consume-from bs nvertices bytes-to-ulong
+           (consume-from bs vertices (partial bytes-to-array
+                                              :vertex nvertices)
+             (return-pair {:tripat tripattern
+                           :color color
+                           :verts vertices}
+                          bs)))))))
+
+(defmessage shape
+  "Shape type, array of vertices, and color"
+  :class 6
+  :encode shape-to-bytes
+  :decode bytes-to-shape)
+
+(defn add-object-to-bytes
+  ""
+  ([ao]
+     (lazy-cat (ulong-to-bytes (ao :id))
+               (ulong-to-bytes (ao :pid))
+               (array-to-bytes :double (ao :pos))
+               (ulong-to-bytes (count (ao :shapes)))
+               (array-to-bytes :shape (ao :shapes)))))
+
+(defn bytes-to-add-object
+  ""
+  ([bs]
+     (consume-from bs id bytes-to-ulong
+       (consume-from bs pid bytes-to-ulong
+         (consume-from bs pos (partial bytes-to-array :double 3)
+           (consume-from bs nshapes bytes-to-ulong
+             (consume-from bs shapes (partial bytes-to-array
+                                              :shape nshapes)
+               (return-pair {:id id
+                             :pid pid
+                             :pos pos
+                             :shapes shapes}
+                            bs))))))))
+
+(defmessage add-object
+  "Numeric ID, numeric ID of parent, position, and optional shapes"
+  :class 7
+  :encode add-object-to-bytes
+  :decode bytes-to-add-object
+  )
 
 
 (defn message-type
@@ -273,8 +376,8 @@
   unconsumed bytes (using return-pair)"
   ([bs]
      (consume-from bs mclass-num bytes-to-ulong
-       (let [mclass (*class-to-message* mclass-num)
-             mdata (*message-data* mclass)
+       (let [mclass (class-to-message mclass-num)
+             mdata (message-data mclass)
              decoder (mdata :decode)]
          (consume-from bs msg decoder
            (return-pair (message mclass msg)
