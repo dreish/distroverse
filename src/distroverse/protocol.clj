@@ -73,7 +73,7 @@
            forms          (if has-docstring? (rest forms) forms)
            options        (apply hash-map forms)
            mname-keyword  (keyword mname)]
-       (when-not (options :class)
+       (when-not (contains? options :class)
          (throw (Exception. "defmessage requires at least a :class")))
        `(do
           (def class-to-message
@@ -298,32 +298,75 @@
   :encode tripattern-to-bytes
   :decode bytes-to-tripattern)
 
-(defn shape-to-bytes
-  "Given a shape with a :tripat, :color, and :verts, returns a seq of
-  bytes"
-  ([s]
-     (lazy-cat (tripattern-to-bytes (s :tripat))
-               (array-to-bytes :double (s :color))
-               (ulong-to-bytes (count (s :verts)))
-               (array-to-bytes :vertex (s :verts)))))
+(defn map-encoders
+  "Given a symbol name and a defcodec spec, returns a seq of the
+  encoder calls needed to encode a variable with the given symbol as
+  its name, and of the specified message type"
+  ([sym spec]
+     (lazy-seq
+      (when (seq spec)
+        (let [nam (first spec)
+              typ (second spec)]
+          (if (vector? typ)
+            (list* `(ulong-to-bytes (count (~sym ~nam)))
+                   `(array-to-bytes ~(first typ)
+                                    (~sym ~nam))
+                   (map-encoders sym (rest (rest spec))))
+            (cons `( (class-to-bytes-fn ~typ)
+                     (~sym ~nam) )
+                  (map-encoders sym (rest (rest spec))))))))))
 
-(defn bytes-to-shape
-  "Given a seq of bytes, returns a shape with a :tripat, :color,
-  and :verts and the remaining unconsumed bytes (using return-pair)"
-  ([bs]
-     (consume-from bs tripattern bytes-to-tripattern
-       (consume-from bs color (partial bytes-to-array
-                                       :double 3)
-         (consume-from bs nvertices bytes-to-ulong
-           (consume-from bs vertices (partial bytes-to-array
-                                              :vertex nvertices)
-             (return-pair {:tripat tripattern
-                           :color color
-                           :verts vertices}
-                          bs)))))))
+(defn chain-consumers
+  "Returns code to consume-from 'bs the fields defined in spec, and
+  then return-pair a map containing those fields and the remaining
+  unconsumed 'bs"
+  ([spec]
+     (chain-consumers spec spec))
+  ([spec rem]
+     (lazy-seq
+      (if (seq rem)
+        (let [nam (first rem)
+              typ (second rem)]
+          (if (vector? typ)
+            (let [num-items-sym (gensym "__num_items")
+                  typ (first typ)]
+              (list `consume-from 'bs num-items-sym `bytes-to-ulong
+                    (list `consume-from 'bs (symbol (name nam))
+                          `(partial bytes-to-array ~typ ~num-items-sym)
+                          (chain-consumers spec (rest (rest rem))))))
+            (list `consume-from 'bs (symbol (name nam))
+                  `(bytes-to-class-fn ~typ)
+                  (chain-consumers spec (rest (rest rem))))))
+        `(return-pair ~(apply hash-map
+                              (mapcat #(list % (symbol (name %)))
+                                      (take-nth 2 spec)))
+                      ~'bs)))))
+
+(defmacro defcodec
+  "Defines an x-to-bytes function and a bytes-to-x function for a
+  message type that is strictly a composition of other message types"
+  ([t desc spec]
+     (let [encoder-name (symbol (str t "-to-bytes"))
+           decoder-name (symbol (str "bytes-to-" t))]
+       `(do
+          (defn ~encoder-name
+            ~(str "Given " desc ", returns a seq of bytes")
+            ([~'msg]
+               (lazy-cat ~@(map-encoders 'msg spec))))
+          (defn ~decoder-name
+            ~(str "Given a seq of bytes, returns " desc " and the"
+                  " remaining unconsumed bytes (using return-pair)")
+            ([~'bs]
+               ~(chain-consumers spec)))))))
+
+(defcodec shape
+  "a shape with a :tripat, :color, and :verts"
+  [:tripat :tripattern
+   :color :dvertex
+   :verts [:dvertex]])
 
 (defmessage shape
-  "Shape type, array of vertices, and color"
+  "Triangle pattern, array of vertices, and color"
   :class 6
   :encode shape-to-bytes
   :decode bytes-to-shape)
