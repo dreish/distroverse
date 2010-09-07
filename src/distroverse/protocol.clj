@@ -214,7 +214,8 @@
   that object"
   ([c]
      (let [c-data (message-data c)]
-       (c-data :encode))))
+       (or (c-data :encode)
+           (throw (Exception. (str "No such type " c)))))))
 
 (defn bytes-to-class-fn
   "Given a message class (e.g., :float), returns the function that
@@ -222,7 +223,8 @@
   remaining unconsumed bytes"
   ([c]
      (let [c-data (message-data c)]
-       (c-data :decode))))
+       (or (c-data :decode)
+           (throw (Exception. (str "No such type " c)))))))
 
 (defn array-to-bytes
   "Given a message class (e.g., :float) and a seq of objects, returns
@@ -298,7 +300,7 @@
   :encode tripattern-to-bytes
   :decode bytes-to-tripattern)
 
-(defn map-encoders
+(defn- map-encoders
   "Given a symbol name and a defcodec spec, returns a seq of the
   encoder calls needed to encode a variable with the given symbol as
   its name, and of the specified message type"
@@ -316,7 +318,7 @@
                      (~sym ~nam) )
                   (map-encoders sym (rest (rest spec))))))))))
 
-(defn chain-consumers
+(defn- chain-consumers
   "Returns code to consume-from 'bs the fields defined in spec, and
   then return-pair a map containing those fields and the remaining
   unconsumed 'bs"
@@ -342,8 +344,8 @@
                                       (take-nth 2 spec)))
                       ~'bs)))))
 
-(defmacro defcodec
-  "Defines an x-to-bytes function and a bytes-to-x function for a
+(defmacro- defcodec
+  "Defines a t-to-bytes function and a bytes-to-t function for a
   message type that is strictly a composition of other message types"
   ([t desc spec]
      (let [encoder-name (symbol (str t "-to-bytes"))
@@ -376,7 +378,7 @@
   zero or more shapes"
   [:id :ulong
    :pid :ulong
-   :pos :vertex
+   :pos :dvertex
    :shapes [:shape]])
 
 (defmessage add-object
