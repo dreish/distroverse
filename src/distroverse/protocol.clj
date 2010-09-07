@@ -371,37 +371,19 @@
   :encode shape-to-bytes
   :decode bytes-to-shape)
 
-(defn add-object-to-bytes
-  ""
-  ([ao]
-     (lazy-cat (ulong-to-bytes (ao :id))
-               (ulong-to-bytes (ao :pid))
-               (array-to-bytes :double (ao :pos))
-               (ulong-to-bytes (count (ao :shapes)))
-               (array-to-bytes :shape (ao :shapes)))))
-
-(defn bytes-to-add-object
-  ""
-  ([bs]
-     (consume-from bs id bytes-to-ulong
-       (consume-from bs pid bytes-to-ulong
-         (consume-from bs pos (partial bytes-to-array :double 3)
-           (consume-from bs nshapes bytes-to-ulong
-             (consume-from bs shapes (partial bytes-to-array
-                                              :shape nshapes)
-               (return-pair {:id id
-                             :pid pid
-                             :pos pos
-                             :shapes shapes}
-                            bs))))))))
+(defcodec add-object
+  "an add-object command with a numeric ID, parent ID, position, and
+  zero or more shapes"
+  [:id :ulong
+   :pid :ulong
+   :pos :vertex
+   :shapes [:shape]])
 
 (defmessage add-object
   "Numeric ID, numeric ID of parent, position, and optional shapes"
   :class 7
   :encode add-object-to-bytes
-  :decode bytes-to-add-object
-  )
-
+  :decode bytes-to-add-object)
 
 (defn message-type
   "Returns the type of the given message"
