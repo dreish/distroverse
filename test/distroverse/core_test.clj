@@ -1,3 +1,5 @@
+;;; This file is in the public domain.
+
 (ns distroverse.core-test
   (:use [distroverse core util protocol] :reload-all)
   (:use [clojure.test])
@@ -19,7 +21,7 @@
         => (seq bs)))
 
 (fact (bytes-to-ulong (map byte [-10 -20 -30 40 50 60]))
-      => [85505654 '(50 60)])
+      => (return-pair 85505654 '(50 60)))
 
 (doseq [s ["" "hi" "\0" "Who's done some FORTRAN?"]]
   (fact (bytes-to-string (string-to-bytes s))
