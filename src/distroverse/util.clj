@@ -14,7 +14,7 @@
 
 (defn unchecked-byte
   "Coerce to byte without checking for numeric overflow"
-  ([x]
+  ([^Number x]
      (.byteValue x)))
 
 (defn get-host
@@ -65,3 +65,13 @@
   ([cmd]
      (.exec (Runtime/getRuntime)
             cmd)))
+
+(defrecord Pair [a b])
+
+(defn pair-first
+  ([^Pair p]
+     (.a p)))
+
+(defn pair-second
+  ([^Pair p]
+     (.b p)))

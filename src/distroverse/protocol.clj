@@ -28,20 +28,8 @@
 (defn return-pair
   "Returns an object returnable from a function containing two return
   values"
-  ;; This looks stupid, and might actually be stupid, but I want to
-  ;; keep open the possibility of someday doing something faster here.
   ([x y]
-     [x y]))
-
-(defn pair-first
-  "Returns the first item of a pair returned by return-pair"
-  ([p]
-     (p 0)))
-
-(defn pair-second
-  "Returns the second item of a pair returned by return-pair"
-  ([p]
-     (p 1)))
+     (distroverse.util.Pair. x y)))
 
 (defn bytes-to-ulong
   "Given a seq of bytes, returns a nonnegative integer and the remaining
@@ -391,6 +379,11 @@
   "Returns the type of the given message"
   ([m]
      (:type m)))
+
+(defn message-value
+  "Returns the value of the given message"
+  ([m]
+     (:value m)))
 
 (defn message
   "Returns a new message of type t, with value v"
