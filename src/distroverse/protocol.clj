@@ -349,31 +349,34 @@
             ([~'bs]
                ~(chain-consumers spec)))))))
 
-(defcodec shape
-  "a shape with a :tripat, :color, and :verts"
+(defmacro- defmessage-compound
+  "Defines a compound message class and its encoders and decoders,
+  given a simple specification"
+  ([t class-num short-name desc spec]
+     `(do
+        (defcodec ~t
+          ~(str short-name " with " desc)
+          ~spec)
+        (defmessage ~t
+          ~desc
+          :class ~class-num
+          :encode ~(symbol (str t "-to-bytes"))
+          :decode ~(symbol (str "bytes-to-" t))))))
+
+(defmessage-compound shape 6
+  "a shape"
+  "a tripattern, color, and an array of vertices"
   [:tripat :tripattern
    :color :dvertex
    :verts [:dvertex]])
 
-(defmessage shape
-  "Triangle pattern, array of vertices, and color"
-  :class 6
-  :encode shape-to-bytes
-  :decode bytes-to-shape)
-
-(defcodec add-object
-  "an add-object command with a numeric ID, parent ID, position, and
-  zero or more shapes"
+(defmessage-compound add-object 7
+  "an add-object command"
+  "a numeric ID, parent ID, position vector, and an array of shapes"
   [:id :ulong
    :pid :ulong
    :pos :dvertex
    :shapes [:shape]])
-
-(defmessage add-object
-  "Numeric ID, numeric ID of parent, position, and optional shapes"
-  :class 7
-  :encode add-object-to-bytes
-  :decode bytes-to-add-object)
 
 (defn message-type
   "Returns the type of the given message"
