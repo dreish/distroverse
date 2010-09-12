@@ -112,19 +112,45 @@
   :encode string-to-bytes
   :decode bytes-to-string)
 
+(defn fixnum-to-bytes-8
+  ([l]
+     (let [l (long l)
+           a8 (int-array 8)]
+       (loop [n (int 0)]
+         (if (= n 8)
+           (seq a8)
+           (do
+             (aset a8 n (raw-int (raw-byte (raw-shift-right
+                                            l (unchecked-multiply 8 n)))))
+             (recur (inc n))))))))
+
+(defn fixnum-to-bytes-4
+  ([i]
+     (let [i (int i)
+           a4 (int-array 4)]
+       (loop [n (int 0)]
+         (if (= n 4)
+           (seq a4)
+           (do
+             (aset a4 n (raw-int (raw-byte (raw-shift-right
+                                            i (unchecked-multiply 8 n)))))
+             (recur (inc n))))))))
+
 (defn fixnum-to-bytes
   "Given a signed integer and a number of bytes to split it into,
   returns a seq of bytes"
   ([n i]
-     (lazy-seq
-      (if (zero? n)
-        (do
-          (assert (or (zero? i)
-                      (= -1 i)))
-          ())
-        (cons (unchecked-byte i)
-              (fixnum-to-bytes (dec n)
-                               (bit-shift-right i 8)))))))
+     (cond (= n 8)  (fixnum-to-bytes-8 i)
+           (= n 4)  (fixnum-to-bytes-4 i)
+           :else (lazy-seq
+                  (if (zero? n)
+                    (do
+                      (assert (or (zero? i)
+                                  (= -1 i)))
+                      ())
+                    (cons (unchecked-byte i)
+                          (fixnum-to-bytes (dec n)
+                                           (bit-shift-right i 8))))))))
 
 (defn byte-to-ubyte
   "Takes a signed byte (-128 to 127) and returns an unsigned byte (0
@@ -134,25 +160,58 @@
        (+ b 256)
        b)))
 
+(defn bytes-to-fixnum-8
+  ([bs]
+     (loop [n    (int 8)
+            bs   bs
+            shft (int 0)
+            ret  (long 0)]
+       (let [byte (long (first bs))]
+         (if (= n 1)
+           (return-pair (raw-or ret (raw-shift-left byte #=(* 8 7)))
+                        (rest bs))
+           (let [ubyte (raw-and (long 255) byte)]
+             (recur (dec n)
+                    (rest bs)
+                    (unchecked-add shft (int 8))
+                    (raw-or ret (raw-shift-left ubyte shft)))))))))
+
+(defn bytes-to-fixnum-4
+  ([bs]
+     (loop [n    (int 4)
+            bs   bs
+            shft (int 0)
+            ret  (int 0)]
+       (let [byte (raw-int (long (first bs)))]
+         (if (= n 1)
+           (return-pair (raw-or ret (raw-shift-left byte #=(* 8 3)))
+                        (rest bs))
+           (let [ubyte (raw-and 255 byte)]
+             (recur (dec n)
+                    (rest bs)
+                    (unchecked-add shft (int 8))
+                    (raw-or ret (raw-shift-left ubyte shft)))))))))
+
 (defn bytes-to-fixnum
   "Given a seq of bytes and a number of bytes to parse, returns a
   signed integer and the remaining unconsumed bytes (using
   return-pair)"
   ([n bs]
-     (if (zero? n)
-       (return-pair 0 bs))
-     (loop [n    n
-            bs   bs
-            mult 1
-            i    0]
-       (let [byte (first bs)]
-         (if (= n 1)
-           (return-pair (+ i (* mult byte))
-                        (rest bs))
-           (recur (dec n)
-                  (rest bs)
-                  (* mult 256)
-                  (+ i (* mult (byte-to-ubyte byte)))))))))
+     (cond (zero? n)  (return-pair 0 bs)
+           (= 8 n)    (bytes-to-fixnum-8 bs)
+           (= 4 n)    (bytes-to-fixnum-4 bs)
+           :else (loop [n    n
+                        bs   bs
+                        mult 1
+                        i    0]
+                   (let [byte (first bs)]
+                     (if (= n 1)
+                       (return-pair (+ i (* mult byte))
+                                    (rest bs))
+                       (recur (dec n)
+                              (rest bs)
+                              (* mult 256)
+                              (+ i (* mult (byte-to-ubyte byte))))))))))
 
 (defn float-to-bytes
   "Given a float, returns a seq of bytes"
