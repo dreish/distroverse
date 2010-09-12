@@ -132,6 +132,23 @@
 (doseq [t ["byte" "short" "int" "long"]]
   (eval `(defmacro-raw-cast ~t)))
 
+(defmacro defmacro-raw-op
+  "Defines a macro for performing an unchecked numeric primitive
+  operation using RawOps"
+  ([article op mname]
+     `(defmacro ~(symbol (str "raw-" op))
+        ~(str "Performas " article " " op " on numeric primitives")
+        ([~'a ~'b]
+           `(. distroverse.util.RawOps ~'~mname
+               ~~'a ~~'b)))))
+
+(doseq [ [article op mname] [ ["an" "xor" 'xor]
+                              ["an" "and" 'and]
+                              ["an" "or"  'or]
+                              ["a" "shift-left" 'shiftLeft]
+                              ["a" "shift-right" 'shiftRight] ] ]
+  (eval `(defmacro-raw-op ~article ~op ~mname)))
+
 (defn get-host
   "Returns the host portion of the given URI"
   ([uri]
