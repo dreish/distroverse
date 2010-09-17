@@ -138,7 +138,7 @@
   operation using RawOps"
   ([article op mname]
      `(defmacro ~(symbol (str "raw-" op))
-        ~(str "Performas " article " " op " on numeric primitives")
+        ~(str "Performs " article " " op " on numeric primitives")
         ([~'a ~'b]
            `(. distroverse.util.RawOps ~'~mname
                ~~'a ~~'b)))))

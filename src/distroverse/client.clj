@@ -155,9 +155,9 @@
        (throw (Exception. "Node missing a :pos")))
      (translate x y z)
      (doseq [shape shapes]
-       (let [tripat (shape :tripat)
-             verts  (shape :verts)
-            [r g b] (shape :color)]
+       (let [tripat  (shape :tripat)
+             verts   (shape :verts)
+             [r g b] (shape :color)]
          (when (and r g b)
            (material :front-and-back
                      :ambient-and-diffuse [r g b 1]))
