@@ -16,22 +16,31 @@
         [distroverse protocol util])
   (:require [penumbra.app :as app]))
 
-(defvar *scene-graph*
-  (let [cone-verts [0 1/2 0
-                    1/2 -1/2 1/2
-                    1/2 -1/2 -1/2
-                    -1/2 -1/2 -1/2
-                    -1/2 -1/2 1/2
-                    1/2 -1/2 1/2]]
-    (ref {:pos [0 0 0]
-          :children [(ref {:pos [0 0 0]
-                           :shape :triangle-fan
-                           :verts cone-verts
-                           :color [1/4 1 1/4]})
-                     (ref {:pos [0 1 0]
-                           :shape :triangle-fan
-                           :verts cone-verts
-                           :color [1 1/4 1/4]})]}))
+(defvar scene-graph
+  (let [cone-verts [ [0 1/2 0]
+                     [1/2 -1/2 1/2]
+                     [1/2 -1/2 -1/2]
+                     [-1/2 -1/2 -1/2]
+                     [-1/2 -1/2 1/2]
+                     [1/2 -1/2 1/2] ]]
+    (ref {:id 0
+          :pid nil
+          :pos [0 0 0]
+          :shapes []
+          :children [(ref {:id 1
+                           :pid 0
+                           :pos [0 0 0]
+                           :children []
+                           :shapes [{:tripat :triangle-fan
+                                     :color [1/4 1 1/4]
+                                     :verts cone-verts}]})
+                     (ref {:id 2
+                           :pid 0
+                           :pos [0 1 0]
+                           :children []
+                           :shapes [{:tripat :triangle-fan
+                                     :color [1 1/4 1/4]
+                                     :verts cone-verts}]})]}))
   "Tree of nodes")
 
 (defn find-normal
@@ -48,12 +57,11 @@
      (cross u v)))
 
 (defn expand-triangle-fan
-  "Takes a seq of numbers which, in groups of three, are the vertices
-  of a triangle fan, and draws a triangle fan.  Points after the first
-  should be given in clockwise order."
+  "Takes a seq of groups of three numbers numbers which are the
+  vertices of a triangle fan, and draws a triangle fan.  Points after
+  the first should be given in clockwise order."
   ([verts]
-     (let [vs (map #(apply vec3 %)
-                   (partition 3 verts))
+     (let [vs (map (partial apply vec3) verts)
            center (first vs)]
        (draw-triangle-fan
         (vertex center)
@@ -140,20 +148,22 @@
   will not perform any writes to refs."
   [graph]
   (let [[x y z] (@graph :pos)
-        [r g b] (@graph :color)
-        shape (@graph :shape)
-        verts (@graph :verts)
+        shapes (@graph :shapes)
         children (@graph :children)]
     (push-matrix
      (when-not (and x y z)
        (throw (Exception. "Node missing a :pos")))
      (translate x y z)
-     (when (and r g b)
-       (material :front-and-back
-                 :ambient-and-diffuse [r g b 1]))
-     (case shape
-       :triangle-fan (expand-triangle-fan verts)
-       nil)
+     (doseq [shape shapes]
+       (let [tripat (shape :tripat)
+             verts  (shape :verts)
+            [r g b] (shape :color)]
+         (when (and r g b)
+           (material :front-and-back
+                     :ambient-and-diffuse [r g b 1]))
+         (case tripat
+            :triangle-fan (expand-triangle-fan verts)
+            nil)))
      (dorun (map render-graph children)))))
 
 (defn simple-render
@@ -163,18 +173,18 @@
    (material :front-and-back
              :ambient-and-diffuse [1 1 0 1])
    (expand-triangle-fan
-    [1/2 1 1/2
-     1 0 1
-     1 0 0
-     0 0 0
-     0 0 1
-     1 0 1])))
+    [ [1/2 1 1/2]
+      [1 0 1]
+      [1 0 0]
+      [0 0 0]
+      [0 0 1]
+      [1 0 1] ])))
 
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
   ;((nth (sierpinski) 5))
-  ((dosync (create-display-list (render-graph *scene-graph*))))
+  ((dosync (create-display-list (render-graph scene-graph))))
   ;((dosync (simple-render)))
   )
 
@@ -193,6 +203,8 @@
 
 (def envoy-listener-thread (atom nil))
 
+(def envoy-process (atom nil))
+
 ;;; OutputStream to the envoy
 (def output-to-envoy (atom nil))
 
@@ -206,7 +218,9 @@
 (defmethod handle-message :add-object
   ([m]
      (println "I'm the client!  And I got an add-object message!  Here:"
-              m)))
+              m)
+     (let [mv (message-value m)]
+       )))
 
 (defn handle-messages
   "Reads messages from the given InputStream until the stream closes,
@@ -226,6 +240,7 @@
                                  uri))
              is (.getInputStream proc)
              os (.getOutputStream proc)]
+         (reset! envoy-process proc)
          (reset! envoy-listener-thread
                  (Thread. handle-messages is))
          (reset! output-to-envoy os)))))
