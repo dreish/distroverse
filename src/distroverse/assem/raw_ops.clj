@@ -9,7 +9,8 @@
 ;; other, from this software.
 
 (ns distroverse.assem.raw-ops
-  (:use [clojure.contrib.duck-streams :only (make-parents copy)])
+  (:use [clojure.contrib.duck-streams :only [make-parents copy
+                                             to-byte-array]])
   (:import [clojure.asm ClassWriter Opcodes]
            [java.io File FileOutputStream]))
 
@@ -117,7 +118,12 @@
 
 (make-parents (File. rawops-filename))
 
-(with-open [classfile (FileOutputStream. rawops-filename)]
-  (copy rawops-bytecode classfile))
+(let [existing-class (File. rawops-filename)]
+  (when-not (and (.exists existing-class)
+                 (= (seq (to-byte-array existing-class))
+                    (seq rawops-bytecode)))
+    (println "Compiling RawOps to" rawops-filename)
+    (with-open [classfile (FileOutputStream. rawops-filename)]
+      (copy rawops-bytecode classfile))))
 
 
