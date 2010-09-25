@@ -229,20 +229,21 @@
      (doseq [m (bytes-to-messages (is-to-byteseq is))]
        (handle-message m))))
 
-(let [jar "distroverse-0.1.0-SNAPSHOT-standalone.jar"
-      uri "dvtp://localhost/"]
+;;; uri would, in the finished product, come to the client by way of a
+;;; location: bar.
+(let [uri "dvtp://localhost/"]
   (defn run-envoy!
     "Runs the passthrough envoy (hardcoded for the moment), starts a
   thread to listen for messages from the envoy, and initializes the
   agent for sending messages to the envoy"
     ([]
-       (let [proc (forkexec (str "java -jar " jar " passthrough "
-                                 uri))
+       (let [proc (forkexec (str "./dv passthrough " uri))
              is (.getInputStream proc)
              os (.getOutputStream proc)]
          (reset! envoy-process proc)
          (reset! envoy-listener-thread
-                 (Thread. handle-messages is))
+                 (Thread. #(handle-messages is)))
+         (.start @envoy-listener-thread)
          (reset! output-to-envoy os)))))
 
 (defn -main
