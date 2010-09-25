@@ -20,12 +20,27 @@
    simpletest      Run a simple test server
    passthrough     Run a passthrough envoy
    client          Run the client
+   help or --help  Print this message
 
 Subcommands have their own --help options.")
+
+(defn print-help
+  ([]
+     (println dv-help)))
 
 (defn -main
   ([subcommand & args]
      (case subcommand
         "simpletest"   (simpletest/-main args)
         "passthrough"  (passthrough/-main args)
-        "client"       (client/-main args))))
+        "client"       (client/-main args)
+        "help"         (print-help)
+        "--help"       (print-help))))
+
+(defn -main-cmdlineargs
+  ([]
+     (let [clarg *command-line-args*]
+       (if (nil? clarg)
+         (print-help)
+         (apply -main *command-line-args*)))))
+
