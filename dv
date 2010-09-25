@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# NOTE: This script will not work if it is moved out of the directory
+# that contains the "native" subdirectory.
+
+SCRIPT_DIR=`echo $0 | sed -e 's!/dv!!'`
+cd $SCRIPT_DIR
+
+CLASSPATH=`lein classpath`
+UNAME=`uname -s`.`uname -m`
+
+# There must be a right way to do this.  This is surely not it.
+if [ x"$UNAME" = x"Darwin.i386" ]
+  then
+    ARCHDIR=macosx/x86_64
+  # Add new architecture to archdir mappings here. :(
+  else
+    echo "Don't know what native architecture dir to use for $UNAME -- edit dv"
+    exit 1
+  fi
+
+java -cp $CLASSPATH -Djava.library.path=`pwd`/native/$ARCHDIR/ clojure.main -e "(use 'distroverse.core)(-main-cmdlineargs)" /dev/null "$@"
