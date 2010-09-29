@@ -8,11 +8,13 @@
 ;; terms of this license.  You must not remove this notice, or any
 ;; other, from this software.
 
-(ns distroverse.server
-  (:use [distroverse util protocol]))
+;;; Contrasted with test_spec.clj, this is a dumping ground for tests
+;;; of non-protocol code, or of parts of the protocol that are not yet
+;;; permanently set.  There are no particular rules for what may go
+;;; here or how it may be changed.
 
-(defn stream-send!
-  "Sends to the given stream the given seq of bytes."
-  ([os bs]
-     ))
+(ns distroverse.test-working
+  (:use [distroverse protocol] :reload-all)
+  (:use [clojure.test])
+  (:use [midje.sweet]))
 

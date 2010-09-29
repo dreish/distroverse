@@ -23,25 +23,30 @@
                      [-1/2 -1/2 -1/2]
                      [-1/2 -1/2 1/2]
                      [1/2 -1/2 1/2] ]]
-    (ref {:id 0
+    (ref {:id 1
           :pid nil
           :pos [0 0 0]
           :shapes []
-          :children [(ref {:id 1
-                           :pid 0
+          :children [(ref {:id 2
+                           :pid 1
                            :pos [0 0 0]
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1/4 1 1/4]
                                      :verts cone-verts}]})
-                     (ref {:id 2
-                           :pid 0
+                     (ref {:id 3
+                           :pid 1
                            :pos [0 1 0]
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1 1/4 1/4]
                                      :verts cone-verts}]})]}))
   "Tree of nodes")
+
+(defvar id-to-object
+  (ref {1 scene-graph
+        2 (-> scene-graph :children first)
+        3 (-> scene-graph :children second)}))
 
 (defn find-normal
   "Returns a non-normalized normal vector for a plane defined by three
@@ -219,8 +224,17 @@
   ([m]
      (println "I'm the client!  And I got an add-object message!  Here:"
               m)
-     (let [mv (message-value m)]
-       )))
+     (let [mv (message-value m)
+           id (mv :id)
+           pid (mv :pid)
+           newnode (ref (assoc mv :children []))]
+       (dosync
+        (let [parent (id-to-object pid)]
+          (when parent
+            (alter parent assoc :children
+                   (conj (parent :children)
+                         newnode)))
+          (alter id-to-object assoc id newnode))))))
 
 (defn handle-messages
   "Reads messages from the given InputStream until the stream closes,

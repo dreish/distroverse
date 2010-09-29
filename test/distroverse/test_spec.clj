@@ -1,7 +1,23 @@
 ;;; This file is in the public domain.
 
-(ns distroverse.core-test
-  (:use [distroverse core util protocol] :reload-all)
+;;; This set of tests constitutes the standard for DVTP, the protocol
+;;; spoken between envoy and client.  It may be used for clean-room
+;;; reimplementations of the protocol code where the EPL is
+;;; undesireable.
+
+;;; No test may be removed from this script or substantially changed
+;;; without incrementing the first nonzero version number of
+;;; Distroverse.  (E.g., 0.5.5 -> 0.6.0, or 1.3.5 -> 2.0.0.)  Consider
+;;; that fact carefully before adding a new test to this script; once
+;;; it is added, that part of the protocol is etched in stone until
+;;; breaking changes are allowed with the next major revision.
+;;; Consider also that it is hoped Distroverse will never require a
+;;; version 2.0.0.
+
+;;; Most tests should go in test_working.clj.
+
+(ns distroverse.test-spec
+  (:use [distroverse protocol] :reload-all)
   (:use [clojure.test])
   (:use [midje.sweet]))
 
@@ -91,15 +107,17 @@
       => '({:type :ulong, :value 8675309}
            {:type :string, :value "Ello"}))
 
-(defn server-running?
-  ([]
-     false))
+;;; Not sure how this is even supposed to work:
 
-(defn server-tests
-  ([]
-     (fact )))
+;; (defn server-running?
+;;   ([]
+;;      false))
 
-(if (server-running?)
-  (server-tests)
-  (println "WARNING: skipping server tests, server is not running"))
+;; (defn server-tests
+;;   ([]
+;;      (fact )))
+
+;; (if (server-running?)
+;;   (server-tests)
+;;   (println "WARNING: skipping server tests, server is not running"))
 

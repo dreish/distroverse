@@ -475,4 +475,16 @@
           (cons message
                 (bytes-to-messages bs)))))))
 
+(defn message-to-bytes
+  "Takes a message and returns a seq of bytes."
+  ([msg]
+     (let [md (message-data (message-type msg))
+           mnum (md :class)
+           encoder (md :encode)]
+       (concat (ulong-to-bytes mnum)
+               (encoder (message-value msg))))))
 
+(defn messages-to-bytes
+  "Takes a seq of messages and returns a seq of bytes."
+  ([msgs]
+     (mapcat message-to-bytes msgs)))
