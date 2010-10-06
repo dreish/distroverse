@@ -14,13 +14,35 @@
         [clojure.contrib server-socket]))
 
 (def static-scene
-     [])
+     (let [cone-verts [ [0 1/2 0]
+                        [1/2 -1/2 1/2]
+                        [1/2 -1/2 -1/2]
+                        [-1/2 -1/2 -1/2]
+                        [-1/2 -1/2 1/2]
+                        [1/2 -1/2 1/2] ]]
+       [{:id 12
+         :pid 1
+         :pos [0 0 0]
+         :shapes []}
+        {:id 13
+         :pid 12
+         :pos [1 0 0]
+         :shapes [{:tripat :triangle-fan
+                   :color [1/4 1 3/4]
+                   :verts cone-verts}]}
+        {:id 14
+         :pid 12
+         :pos [1 1 0]
+         :shapes [{:tripat :triangle-fan
+                   :color [1 1/4 3/4]
+                   :verts cone-verts}]}]))
 
 (defn server-session
   "Static content dumping server session."
   ([in-stream out-stream]
      (stream-send! out-stream
-                   (messages-to-bytes static-scene))))
+        (messages-to-bytes (map #(message :add-object %)
+                                static-scene)))))
 
 (defn -main
   "static dumps a static scene to the passthrough envoy and then

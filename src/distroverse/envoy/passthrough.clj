@@ -46,7 +46,7 @@
   client anything it receives from the server, and pass unchanged to
   the server anything it receives from the client.  For use at the
   repl, returns a function that will stop the reader/writer threads."
-  ([& args]
+  ([args]
      (cmd-line/with-command-line args
        "passthrough - a simple distroverse envoy"
        [rem-args]

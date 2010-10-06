@@ -109,3 +109,10 @@
   ([^Pair p]
      (.b p)))
 
+
+(defn stream-send!
+  "Sends to the given stream the given seq of bytes."
+  ([os bs]
+     (doseq [b bs]
+       (.write os (int b)))))
+

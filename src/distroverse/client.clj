@@ -116,7 +116,7 @@
 ;;;;;;;;;;;;;;;;;
 
 (defn init [state]
-  (app/title! "Sierpinski Pyramid")
+  (app/title! "Distroverse Viewer")
   (app/periodic-update! 30 identity)
   (enable :normalize)
   (enable :depth-test)
@@ -261,7 +261,7 @@
          (reset! output-to-envoy os)))))
 
 (defn -main
-  ([& args]
+  ([args]
      (run-envoy!)
      (start)))
 

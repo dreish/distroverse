@@ -11,8 +11,3 @@
 (ns distroverse.server
   (:use [distroverse util protocol]))
 
-(defn stream-send!
-  "Sends to the given stream the given seq of bytes."
-  ([os bs]
-     ))
-
