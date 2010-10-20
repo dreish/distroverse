@@ -188,9 +188,9 @@
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
-  ;((nth (sierpinski) 5))
-  ((dosync (create-display-list (render-graph scene-graph))))
-  ;((dosync (simple-render)))
+  ;;;((nth (sierpinski) 5))
+  (dosync ((create-display-list (render-graph scene-graph))))
+  ;;;((dosync (simple-render)))
   )
 
 (defn start []
