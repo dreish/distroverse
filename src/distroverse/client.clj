@@ -147,14 +147,19 @@
     :rot-x (+ (:rot-x state) dy)
     :rot-y (+ (:rot-y state) dx)))
 
+(defn deref-scene-graph
+  ([graph]
+     (if (:children @graph)
+       (assoc @graph
+         :children (doall (map deref-scene-graph (:children @graph))))
+       @graph)))
+
 (defn render-graph
-  "Renders the scene graph under the given ref.  Best used inside a
-  dosync with no write operations.  It is promised that render-graph
-  will not perform any writes to refs."
+  "Renders the given scene graph."
   [graph]
-  (let [[x y z] (@graph :pos)
-        shapes (@graph :shapes)
-        children (@graph :children)]
+  (let [[x y z] (graph :pos)
+        shapes (graph :shapes)
+        children (graph :children)]
     (push-matrix
      (when-not (and x y z)
        (throw (Exception. "Node missing a :pos")))
@@ -188,10 +193,8 @@
 (defn display [[delta time] state]
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
-  ;;;((nth (sierpinski) 5))
-  (dosync ((create-display-list (render-graph scene-graph))))
-  ;;;((dosync (simple-render)))
-  )
+  (let [dereffed-scene-graph (dosync (deref-scene-graph scene-graph))]
+    ( (create-display-list (render-graph dereffed-scene-graph)) )))
 
 (defn start []
   (app/start {:display display
@@ -222,8 +225,6 @@
 
 (defmethod handle-message :add-object
   ([m]
-     (println "I'm the client!  And I got an add-object message!  Here:"
-              m)
      (let [mv (message-value m)
            id (mv :id)
            pid (mv :pid)
@@ -263,5 +264,7 @@
 (defn -main
   ([args]
      (run-envoy!)
-     (start)))
+     (start)
+     (shutdown-agents)
+     (.destroy ^Process @envoy-process)))
 
