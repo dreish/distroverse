@@ -25,18 +25,18 @@
                      [1/2 -1/2 1/2] ]]
     (ref {:id 1
           :pid nil
-          :pos [0 0 0]
+          :moves (pos-to-moveseq 0 0 0)
           :shapes []
           :children [(ref {:id 2
                            :pid 1
-                           :pos [0 0 0]
+                           :moves (pos-to-moveseq 0 0 0)
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1/4 1 1/4]
                                      :verts cone-verts}]})
                      (ref {:id 3
                            :pid 1
-                           :pos [0 1 0]
+                           :moves (pos-to-moveseq 0 1 0)
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1 1/4 1/4]

@@ -116,3 +116,18 @@
      (doseq [b bs]
        (.write os (int b)))))
 
+(def Infinity Double/POSITIVE_INFINITY)
+
+(def -Infinity Double/NEGATIVE_INFINITY)
+
+(def zero-quat {:w 0.0, :x 0.0, :y 0.0, :z 0.0})
+
+
+(defn pos-to-moveseq
+  "Returns a sequence of one move that is stationary at the given
+coordinates."
+  ([x y z]
+     [{:poly [{:move [x y z]
+               :rot zero-quat}]
+       :sines []
+       :dur Infinity}]))

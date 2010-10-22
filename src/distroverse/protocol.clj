@@ -429,13 +429,58 @@
    :color :dvertex
    :verts [:dvertex]])
 
+;;; Use a real quaternion class here (via cantor)?
+(defmessage-compound quaternion 128
+  "a quaternion"
+  "four doubles"
+  [:w :double
+   :x :double
+   :y :double
+   :z :double])
+
+(defmessage-compound move-element 129
+  "a linear rate of movement and rotation"
+  "a vector and a quaternion"
+  [:move :dvertex
+   :rot :quaternion])
+
+(defmessage-compound sine-move 130
+  "a sinusoidal movement element"
+  "a move element, a period (in seconds), and an offset (in radians)"
+  [:mel :move-element
+   :period :double
+   :offset :double])
+
+(defmessage-compound move 131
+  "a move"
+  "any number of polynomial move terms, any number of sine move terms,
+  and a duration in seconds"
+  [:poly [:move-element]
+   :sines [:sine-move]
+   :dur :double])
+
 (defmessage-compound add-object 7
   "an add-object command"
   "a numeric ID, parent ID, position vector, and an array of shapes"
   [:id :ulong
    :pid :ulong
-   :pos :dvertex
-   :shapes [:shape]])
+   :shapes [:shape]
+   :moves [:move]])
+
+(defmessage-compound move-object 8
+  "a move-object command"
+  "an object ID and an array of moves"
+  [:id :ulong
+   :moves [:move]])
+
+(defmessage timebase
+  "Time synchronizer; at the receipt of this message, the time is n
+seconds from the epoch"
+  :class 132
+  :encode double-to-bytes
+  :decode bytes-to-double)
+
+
 
 (defn message-type
   "Returns the type of the given message"
