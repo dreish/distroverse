@@ -22,16 +22,19 @@
                         [1/2 -1/2 1/2] ]]
        [{:id 12
          :pid 1
+         :begin 0
          :moves (pos-to-moveseq 0 0 0)
          :shapes []}
         {:id 13
          :pid 12
+         :begin 0
          :moves (pos-to-moveseq 1 0 0)
          :shapes [{:tripat :triangle-fan
                    :color [1/4 1 3/4]
                    :verts cone-verts}]}
         {:id 14
          :pid 12
+         :begin 0
          :moves (pos-to-moveseq 1 1 0)
          :shapes [{:tripat :triangle-fan
                    :color [1 1/4 3/4]

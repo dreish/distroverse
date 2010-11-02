@@ -29,6 +29,7 @@
           :shapes []
           :children [(ref {:id 2
                            :pid 1
+                           :begin 0
                            :moves (pos-to-moveseq 0 0 0)
                            :children []
                            :shapes [{:tripat :triangle-fan
@@ -36,12 +37,19 @@
                                      :verts cone-verts}]})
                      (ref {:id 3
                            :pid 1
+                           :begin 0
                            :moves (pos-to-moveseq 0 1 0)
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1 1/4 1/4]
                                      :verts cone-verts}]})]}))
   "Tree of nodes")
+
+(defvar render-time nil
+  "Bind the current time to this var while rendering")
+
+(defvar timebase (atom 0)
+  "Offset to apply to the system time, in milliseconds")
 
 (defvar id-to-object
   (ref {1 scene-graph
@@ -157,13 +165,13 @@
 (defn render-graph
   "Renders the given scene graph."
   [graph]
-  (let [[x y z] (graph :pos)
+  (let [ { [x y z] :move
+           rotquat :rot } (current-pos render-time (:moves graph))
         shapes (graph :shapes)
         children (graph :children)]
     (push-matrix
-     (when-not (and x y z)
-       (throw (Exception. "Node missing a :pos")))
      (translate x y z)
+     (apply rotate (quat-to-angle-axis rotquat))
      (doseq [shape shapes]
        (let [tripat  (shape :tripat)
              verts   (shape :verts)
@@ -194,7 +202,10 @@
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
   (let [dereffed-scene-graph (dosync (deref-scene-graph scene-graph))]
-    ( (create-display-list (render-graph dereffed-scene-graph)) )))
+    ( (create-display-list
+       (binding [render-time (- (System/currentTimeMillis)
+                                @timebase)]
+         (render-graph dereffed-scene-graph))) )))
 
 (defn start []
   (app/start {:display display
@@ -236,6 +247,12 @@
                    (conj (parent :children)
                          newnode)))
           (alter id-to-object assoc id newnode))))))
+
+(defmethod handle-message :timebase
+  ([m]
+     (let [mv (message-value m)]
+       (reset! timebase (- (System/currentTimeMillis)
+                           mv)))))
 
 (defn handle-messages
   "Reads messages from the given InputStream until the stream closes,
