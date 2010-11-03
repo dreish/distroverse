@@ -442,6 +442,7 @@
   "a measure of movement and rotation, per second^N, N>=0"
   "a vector and a quaternion"
   [:move :dvertex
+   ;; XXX add number of rotations per second here
    :rot :quaternion])
 
 (defmessage-compound sine-move 130
