@@ -152,6 +152,13 @@
           (/ y scale)
           (/ z scale)]))))
 
+(defn quat-to-degrees-axis
+  "Same as quat-to-angle-axis, but returning degrees instead of radians"
+  ([q]
+     (let [ [a x y z] (quat-to-angle-axis q) ]
+       [(* 180.0 (/ a Math/PI))
+        x y z])))
+
 (defn angle-axis-to-quat
   "Returns a quaternion for the given angle-axis rotation arguments"
   ([theta x y z]

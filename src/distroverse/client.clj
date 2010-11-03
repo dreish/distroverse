@@ -30,7 +30,19 @@
           :children [(ref {:id 2
                            :pid 1
                            :begin 0
-                           :moves (pos-to-moveseq 0 0 0)
+                           :moves [{:poly [{:move [0 0 0],
+                                            :rot {:w 1.0,
+                                                  :x 0.0,
+                                                  :y 0.0,
+                                                  :z 0.0}}
+                                           {:move [0 0 0],
+                                            :rot {:w 0.0
+                                                  :x 1.0
+                                                  :y 0.0
+                                                  :z 0.0}}],
+                                    :timebase 0.0,
+                                    :sines [],
+                                    :dur Infinity}]
                            :children []
                            :shapes [{:tripat :triangle-fan
                                      :color [1/4 1 1/4]
@@ -171,7 +183,7 @@
         children (graph :children)]
     (push-matrix
      (translate x y z)
-     (apply rotate (quat-to-angle-axis rotquat))
+     (apply rotate (quat-to-degrees-axis rotquat))
      (doseq [shape shapes]
        (let [tripat  (shape :tripat)
              verts   (shape :verts)
@@ -203,8 +215,9 @@
   (rotate (:rot-y state) 0 1 0)
   (let [dereffed-scene-graph (dosync (deref-scene-graph scene-graph))]
     ( (create-display-list
-       (binding [render-time (- (System/currentTimeMillis)
-                                @timebase)]
+       (binding [render-time (/ (- (System/currentTimeMillis)
+                                   @timebase)
+                                1000.0)]
          (render-graph dereffed-scene-graph))) )))
 
 (defn start []

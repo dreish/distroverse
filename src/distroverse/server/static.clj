@@ -35,7 +35,19 @@
         {:id 14
          :pid 12
          :begin 0
-         :moves (pos-to-moveseq 1 1 0)
+         :moves [{:poly [{:move [1 1 0],
+                          :rot {:w 1.0,
+                                :x 0.0,
+                                :y 0.0,
+                                :z 0.0}}
+                         {:move [0 0 0],
+                          :rot {:w 0.0
+                                :x 0.0
+                                :y 1.0
+                                :z 0.0}}],
+                  :timebase 0.0,
+                  :sines [],
+                  :dur Infinity}]
          :shapes [{:tripat :triangle-fan
                    :color [1 1/4 3/4]
                    :verts cone-verts}]}]))
