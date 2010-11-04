@@ -183,6 +183,7 @@
   coordinates."
   ([x y z]
      [{:poly [{:move [x y z]
+               :rps 1.0
                :rot ident-quat}]
        :sines []
        :timebase 0
@@ -190,6 +191,7 @@
 
 (def zero-move-element
      {:move [0.0 0.0 0.0]
+      :rps 1.0
       :rot ident-quat})
 
 
@@ -224,17 +226,31 @@
   "Returns the given move-element multiplied by the given scalar"
   ([mel n]
      (let [move (:move mel)
-           rot (:rot mel)]
+           rot (:rot mel)
+           rps (:rps mel)]
        {:move (vec-mul move n)
-        :rot (quat-pow rot n)}
-       ;; XXX
-       )))
+        :rot rot
+        :rps (* rps n)})))
 
 (defn add-move-element
   "Returns the sum of the two given movements"
   ([a b]
-     {:move (vec-add (:move a) (:move b))
-      :rot (quat-mul (:rot a) (:rot b))}))
+     (if (> (:rps a)
+            (:rps b))
+       {:move (vec-add (:move a)
+                       (:move b))
+        :rps (:rps a)
+        :rot (quat-mul (:rot a)
+                       (quat-pow (:rot b)
+                                 (/ (:rps b)
+                                    (:rps a))))}
+       {:move (vec-add (:move a)
+                       (:move b))
+        :rps (:rps b)
+        :rot (quat-mul (quat-pow (:rot a)
+                                 (/ (:rps a)
+                                    (:rps b)))
+                       (:rot b))})))
 
 (defn eval-move-poly
   "Returns the move-element value of the given move polynomial at the
@@ -268,17 +284,29 @@
                       (add-move-element ret))))
          ret))))
 
+(defn normalize-move-element
+  "Converts the given move element to one that represents the same
+  position and orientation, but has :rps 1.0."
+  ([mel]
+     (if (= 1.0 (:rps mel))
+       mel
+       (assoc mel
+         :rps 1.0
+         :rot (quat-pow (:rot mel)
+                        (:rps mel))))))
+
 (defn eval-move
-  "Returns the move-element value of the given move function at the
-  given time"
+  "Returns the normalized (:rps 1.0) move-element value of the given
+  move function at the given time"
   ([t m]
-     (let [t (- t (:timebase m))]
-       (add-move-element (eval-move-poly t (:poly m))
-                         (eval-move-sines t (:sines m))))))
+     (normalize-move-element
+      (let [t (- t (:timebase m))]
+        (add-move-element (eval-move-poly t (:poly m))
+                          (eval-move-sines t (:sines m)))))))
 
 (defn current-pos
   "Takes an elapsed time and a seq of moves and returns the current
-  position."
+  position as a normalized move element (with :rps 1.0)."
   ([t ms]
      (loop [t t
             ms (cycle ms)

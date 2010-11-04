@@ -36,11 +36,13 @@
          :pid 12
          :begin 0
          :moves [{:poly [{:move [1 1 0],
+                          :rps 1.0
                           :rot {:w 1.0,
                                 :x 0.0,
                                 :y 0.0,
                                 :z 0.0}}
                          {:move [0 0 0],
+                          :rps 1.0
                           :rot {:w 0.0
                                 :x 0.0
                                 :y 1.0

@@ -440,9 +440,9 @@
 
 (defmessage-compound move-element 129
   "a measure of movement and rotation, per second^N, N>=0"
-  "a vector and a quaternion"
+  "a vector, a double, and a quaternion"
   [:move :dvertex
-   ;; XXX add number of rotations per second here
+   :rps :double
    :rot :quaternion])
 
 (defmessage-compound sine-move 130
