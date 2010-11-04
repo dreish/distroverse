@@ -23,11 +23,12 @@
   ([^Socket chan]
      (let [os (.getOutputStream chan)]
        (loop []
-         (let [c (char-array 1024)
+         (let [c (char-array 1)
                nread (.read *in* c)]
            (when (pos? nread)
              (let [b (.getBytes (String. c 0 nread))]
                (.write os b 0 (count b))
+               (.flush os)
                (recur))))))))
 
 (defn server-to-stdout
@@ -35,10 +36,11 @@
   ([^Socket chan]
      (let [is (.getInputStream chan)]
        (loop []
-         (let [b (byte-array 1024)
+         (let [b (byte-array 1)
                nread (.read is b)]
            (when (pos? nread)
              (print (String. b 0 nread))
+             (.flush *out*)
              (recur)))))))
 
 (defn -main

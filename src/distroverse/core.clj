@@ -10,7 +10,8 @@
 
 (ns distroverse.core
   (:require (distroverse.server [simpletest :as simpletest]
-                                [static :as static])
+                                [static :as static]
+                                [jerky :as jerky])
             (distroverse.envoy [passthrough :as passthrough])
             (distroverse [client :as client]))
   (:gen-class))
@@ -48,6 +49,7 @@ Subcommands have their own --help options.")
     (case subcommand
        "simpletest"  (simpletest/-main args)
        "static"      (static/-main args)
+       "jerky"       (jerky/-main args)
        "--help"      (print-server-help)) ))
 
 (defn -main

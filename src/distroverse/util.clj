@@ -117,6 +117,13 @@
      (doseq [b bs]
        (.write os (int b)))))
 
+(defmacro trans-io
+  "Transaction-safe wrapper for forms with side-effects.  Nothing
+  inside the trans-io should block."
+  ([& forms]
+     `(send (agent nil)
+            (fn [_#] ~@forms))))
+
 (def Infinity Double/POSITIVE_INFINITY)
 
 (def -Infinity Double/NEGATIVE_INFINITY)

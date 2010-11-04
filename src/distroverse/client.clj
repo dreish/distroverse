@@ -261,6 +261,18 @@
                          newnode)))
           (alter id-to-object assoc id newnode))))))
 
+(defmethod handle-message :move-object
+  ([m]
+     (let [mv (message-value m)
+           id (mv :id)
+           begin (mv :begin)
+           moves (mv :moves)]
+       (dosync
+        (let [ob (id-to-object id)]
+          (alter ob assoc
+                 :begin begin
+                 :moves moves))))))
+
 (defmethod handle-message :timebase
   ([m]
      (let [mv (message-value m)]
